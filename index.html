@@ -5743,6 +5743,54 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(f.type==='timeinc') dlSetTimeIncrement(f.row, f.timeInput, f.incInput, params.get(f.param), params.get(f.param2));
     });
   }
+  // The other direction: read whatever's CURRENTLY selected in a drill's
+  // own settings rows back into URL params, so the address bar is always
+  // a live, grab-able link for however the screen is actually configured
+  // right now -- not just something a link could apply. Settings picked
+  // by hand, with no link involved at all, still produce a real link.
+  function dlCurrentParamsForRoute(route){
+    const params = new URLSearchParams();
+    (route.fields||[]).forEach(f=>{
+      const row = document.getElementById(f.row);
+      if(!row) return;
+      if(f.type==='toggle'){
+        const active = row.querySelector('[data-val].active');
+        if(active) params.set(f.param, active.dataset.val);
+      } else if(f.type==='multi'){
+        const actives = [...row.querySelectorAll('[data-val].active')].map(b=>b.dataset.val);
+        if(actives.length) params.set(f.param, actives.join(','));
+      } else if(f.type==='clock'){
+        const active = row.querySelector('.active');
+        if(!active) return;
+        if(active.dataset.val==='custom'){
+          const input = document.getElementById(f.input);
+          if(input) params.set(f.param, input.value);
+        } else {
+          params.set(f.param, active.dataset.val);
+        }
+      } else if(f.type==='timeinc'){
+        const active = row.querySelector('.active');
+        if(!active) return;
+        if(active.dataset.val==='custom'){
+          const t = document.getElementById(f.timeInput), i = document.getElementById(f.incInput);
+          if(t) params.set(f.param, t.value);
+          if(i) params.set(f.param2, i.value);
+        } else if(active.dataset.time!=null){
+          params.set(f.param, active.dataset.time);
+          params.set(f.param2, active.dataset.inc);
+        }
+      }
+    });
+    return params;
+  }
+  function dlSyncHash(slug, withStart){
+    if(!slug){ history.replaceState(null, '', location.pathname+location.search); return; }
+    const route = DEEP_LINKS[slug];
+    const params = route ? dlCurrentParamsForRoute(route) : new URLSearchParams();
+    if(withStart) params.set('start','1');
+    const str = params.toString();
+    history.replaceState(null, '', '#'+slug+(str?'?'+str:''));
+  }
   // showView('menu') below immediately rewrites the address bar, wiping any
   // incoming #hash before the page-bottom deep-link handler ever runs -- so
   // grab it now, while it's still there.
@@ -5765,14 +5813,38 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // Keep the address bar pointed at whatever's on screen -- but only for
     // "entry" views. A play-* sub-state isn't something you'd want to land
     // back on directly (mid-drill state isn't reconstructed from a link).
-    if(!isPlay){
-      const slug = VIEW_TO_SLUG[name];
-      history.replaceState(null, '', slug ? '#'+slug : location.pathname+location.search);
-    }
+    if(!isPlay) dlSyncHash(VIEW_TO_SLUG[name]);
   }
   showView('menu');
   document.querySelectorAll('[data-nav]').forEach(btn=>{
     btn.addEventListener('click', ()=> showView(btn.dataset.nav));
+  });
+  // Live-update the address bar as settings change by hand on a setup
+  // screen, and stamp &start=1 on when a run actually begins -- so
+  // "grab the link" works whether or not it started from a link at all.
+  // Delegated on document because the field rows above are wired by many
+  // different functions across the file; this way nothing needs a second,
+  // separate listener bolted onto every single one of them. Looked up by
+  // scanning DEEP_LINKS for whichever route owns the clicked element,
+  // rather than by `currentView` -- a Start click's own listener has
+  // already moved currentView to the play-* view by the time this
+  // delegated handler runs (it fires on the bubble phase, after), so
+  // reading currentView here would miss the click entirely.
+  document.addEventListener('click', (e)=>{
+    for(const [slug, route] of Object.entries(DEEP_LINKS)){
+      const inField = (route.fields||[]).some(f=>{
+        const row = document.getElementById(f.row);
+        return row && row.contains(e.target);
+      });
+      const isStart = route.startBtn && e.target.id===route.startBtn;
+      if(inField || isStart){ dlSyncHash(slug, isStart); return; }
+    }
+  });
+  document.addEventListener('input', (e)=>{
+    for(const [slug, route] of Object.entries(DEEP_LINKS)){
+      const hit = (route.fields||[]).some(f=> e.target.id===f.input || e.target.id===f.timeInput || e.target.id===f.incInput);
+      if(hit){ dlSyncHash(slug); return; }
+    }
   });
 
   document.getElementById('card-loose').addEventListener('click', ()=> showView('setup'));
@@ -14839,12 +14911,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const startBtn = document.getElementById(route.startBtn);
       if(startBtn) startBtn.click();
     }
-    // The clicks above ran through showView's own hash-sync (see above),
-    // which only knows about plain slugs and drops params, and skips
-    // syncing at all once Start moves into a play-* view. Put the full,
-    // original link back so the address bar still matches what was
-    // actually opened -- reloading it must reproduce the same result.
-    history.replaceState(null, '', location.pathname+location.search+'#'+hash);
+    // No explicit hash restore needed here: every click above (the card,
+    // each applied field, Start) is a real click on a real control, and
+    // the delegated listeners near showView re-sync the address bar off
+    // the actual resulting DOM state after each one -- so by now it
+    // already reflects reality, including any field this link left
+    // unspecified (shown at its real current value, not just omitted).
   }
   openDeepLink(initialHash);
   window.addEventListener('hashchange', ()=> openDeepLink(decodeURIComponent(location.hash.slice(1))));
