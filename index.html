@@ -14810,17 +14810,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghRender();
   });
 
-  // Land on whatever section a shared link pointed at. Runs last, after
-  // every card's own click listener above is wired up, so clicking the
-  // card here fires the exact same side effects (token warnings, history
-  // auto-load, etc.) a real click would -- not a shortcut around them.
-  // A `?param=value&...start=1` suffix pre-fills that drill's own settings
+  // Land on whatever section a shared link pointed at. Runs on the very
+  // first load AND on every later hashchange -- a hash-only navigation
+  // (clicking a second, different deep link while this same tab is still
+  // open on this page) never reloads the document or re-runs this script,
+  // it just fires 'hashchange', so without this listener a link clicked
+  // into an already-open tab would silently do nothing at all. A
+  // `?param=value&...start=1` suffix pre-fills that drill's own settings
   // rows the same way (see the DEEP_LINKS/dlApply* block near showView)
   // and, for drills that allow it, clicks the real Start button too.
-  (function openDeepLink(){
-    const hashIdx = initialHash.indexOf('?');
-    const slug = hashIdx===-1 ? initialHash : initialHash.slice(0, hashIdx);
-    const params = new URLSearchParams(hashIdx===-1 ? '' : initialHash.slice(hashIdx+1));
+  function openDeepLink(hash){
+    const hashIdx = hash.indexOf('?');
+    const slug = hashIdx===-1 ? hash : hash.slice(0, hashIdx);
+    const params = new URLSearchParams(hashIdx===-1 ? '' : hash.slice(hashIdx+1));
     if(!slug) return;
     if(slug === 'settings'){
       const overlay = document.getElementById('settings-overlay');
@@ -14842,8 +14844,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // syncing at all once Start moves into a play-* view. Put the full,
     // original link back so the address bar still matches what was
     // actually opened -- reloading it must reproduce the same result.
-    history.replaceState(null, '', location.pathname+location.search+'#'+initialHash);
-  })();
+    history.replaceState(null, '', location.pathname+location.search+'#'+hash);
+  }
+  openDeepLink(initialHash);
+  window.addEventListener('hashchange', ()=> openDeepLink(decodeURIComponent(location.hash.slice(1))));
 
 })();
 </script>
