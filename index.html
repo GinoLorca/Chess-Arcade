@@ -5615,6 +5615,32 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   let currentView = 'menu';
   const homeFabEl = document.getElementById('home-fab');
 
+  // Deep-linking: one table covers both directions. On load, a `#slug` in
+  // the address bar clicks the real card button (not showView directly) so
+  // side effects like a card's own token-warning check still fire. Once a
+  // mapped view becomes active, the address bar is rewritten to match, so
+  // whatever's on screen always has a shareable link.
+  const DEEP_LINKS = {
+    kiss:         { view:'setup-kiss',       card:'card-kiss' },
+    ghosts:       { view:'setup-ghosts',     card:'card-ghosts' },
+    ground:       { view:'setup-ground',     card:'card-ground' },
+    checkstorm:   { view:'setup-checkstorm', card:'card-checkstorm' },
+    knight:       { view:'setup-knight',     card:'card-knight' },
+    checks:       { view:'setup-checks',     card:'card-checks' },
+    endgame:      { view:'setup-endgame',    card:'card-endgame' },
+    loose:        { view:'setup',            card:'card-loose' },
+    coord:        { view:'setup-coord',      card:'card-coord' },
+    puzzle:       { view:'setup-puzzle',     card:'card-puzzle' },
+    'play-bot':   { view:'setup-bot',        card:'card-play-bot' },
+    'play-online':{ view:'setup-online',     card:'card-play-online' },
+    history:      { view:'history',          card:'card-history' }
+  };
+  const VIEW_TO_SLUG = Object.fromEntries(Object.entries(DEEP_LINKS).map(([slug,r])=>[r.view,slug]));
+  // showView('menu') below immediately rewrites the address bar, wiping any
+  // incoming #hash before the page-bottom deep-link handler ever runs -- so
+  // grab it now, while it's still there.
+  const initialHash = decodeURIComponent(location.hash.slice(1));
+
   function showView(name){
     if(currentView !== name && currentView.indexOf('play')===0){
       leaveHooks.forEach(fn=>{ try{ fn(); }catch(e){} });
@@ -5629,6 +5655,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     wrapEl.classList.toggle('play-mode', isPlay);
     homeFabEl.style.display = name==='menu' ? 'none' : '';
     window.scrollTo({top:0, behavior:'smooth'});
+    // Keep the address bar pointed at whatever's on screen -- but only for
+    // "entry" views. A play-* sub-state isn't something you'd want to land
+    // back on directly (mid-drill state isn't reconstructed from a link).
+    if(!isPlay){
+      const slug = VIEW_TO_SLUG[name];
+      history.replaceState(null, '', slug ? '#'+slug : location.pathname+location.search);
+    }
   }
   showView('menu');
   document.querySelectorAll('[data-nav]').forEach(btn=>{
@@ -14669,6 +14702,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GH_STATE.resultFilter = e.target.value;
     ghRender();
   });
+
+  // Land on whatever section a shared link pointed at. Runs last, after
+  // every card's own click listener above is wired up, so clicking the
+  // card here fires the exact same side effects (token warnings, history
+  // auto-load, etc.) a real click would -- not a shortcut around them.
+  (function openDeepLink(){
+    const hash = initialHash;
+    if(!hash) return;
+    if(hash === 'settings'){
+      const overlay = document.getElementById('settings-overlay');
+      if(overlay) overlay.classList.add('active');
+      return;
+    }
+    const route = DEEP_LINKS[hash];
+    if(route){
+      const btn = document.getElementById(route.card);
+      if(btn) btn.click();
+    }
+  })();
 
 })();
 </script>
