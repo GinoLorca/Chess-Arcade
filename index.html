@@ -5620,22 +5620,129 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // side effects like a card's own token-warning check still fire. Once a
   // mapped view becomes active, the address bar is rewritten to match, so
   // whatever's on screen always has a shareable link.
+  //
+  // A link can also carry `?param=value&...` to pre-fill that drill's own
+  // settings, since every settings row in this file (whether wired through
+  // wireToggleRow/wireMultiToggleRow/wireCustomClock or by hand) shares the
+  // same DOM contract: a container element whose children carry a
+  // `data-val` (or, for a combined time+increment row, `data-time`/
+  // `data-inc`). Applying a param means finding and clicking the real
+  // button for it -- same "trigger the real control" philosophy as the
+  // card buttons above -- so every listener's own side effects (updating
+  // its settings object, toggling a hint, revealing a custom-time input)
+  // fire exactly as a manual click would, with nothing to keep in sync by
+  // hand as those listeners change. `startBtn: null` means "pre-fill only,
+  // never auto-start": Play Bot/Play Online's start buttons kick off a
+  // real Lichess challenge or seek, a real-world action a shared link
+  // shouldn't trigger without an explicit click.
   const DEEP_LINKS = {
-    kiss:         { view:'setup-kiss',       card:'card-kiss' },
-    ghosts:       { view:'setup-ghosts',     card:'card-ghosts' },
-    ground:       { view:'setup-ground',     card:'card-ground' },
-    checkstorm:   { view:'setup-checkstorm', card:'card-checkstorm' },
-    knight:       { view:'setup-knight',     card:'card-knight' },
-    checks:       { view:'setup-checks',     card:'card-checks' },
-    endgame:      { view:'setup-endgame',    card:'card-endgame' },
-    loose:        { view:'setup',            card:'card-loose' },
-    coord:        { view:'setup-coord',      card:'card-coord' },
-    puzzle:       { view:'setup-puzzle',     card:'card-puzzle' },
-    'play-bot':   { view:'setup-bot',        card:'card-play-bot' },
-    'play-online':{ view:'setup-online',     card:'card-play-online' },
-    history:      { view:'history',          card:'card-history' }
+    kiss:         { view:'setup-kiss',       card:'card-kiss',        startBtn:'start-kiss-drill',
+                    fields:[ {param:'time', type:'clock', row:'kiss-time-row', input:'kiss-time-custom'} ] },
+    ghosts:       { view:'setup-ghosts',     card:'card-ghosts',      startBtn:'start-ghosts-drill',
+                    fields:[ {param:'packs', type:'multi', row:'ghosts-pack-row'},
+                             {param:'time', type:'clock', row:'ghosts-pace-row', input:'ghosts-pace-custom'} ] },
+    ground:       { view:'setup-ground',     card:'card-ground',      startBtn:'start-ground-drill',
+                    fields:[ {param:'mode', type:'toggle', row:'ground-mode-row'},
+                             {param:'time', type:'clock', row:'ground-pace-row', input:'ground-pace-custom'} ] },
+    checkstorm:   { view:'setup-checkstorm', card:'card-checkstorm',  startBtn:'start-checkstorm-drill',
+                    fields:[ {param:'time', type:'clock', row:'checkstorm-pace-row', input:'checkstorm-pace-custom'} ] },
+    knight:       { view:'setup-knight',     card:'card-knight',      startBtn:'start-knight-drill',
+                    fields:[ {param:'mode', type:'toggle', row:'knight-mode-row'},
+                             {param:'difficulty', type:'toggle', row:'knight-diff-row'} ] },
+    checks:       { view:'setup-checks',     card:'card-checks',      startBtn:'start-checks-drill',
+                    fields:[ {param:'difficulty', type:'toggle', row:'checks-diff-row'},
+                             {param:'countHint', type:'toggle', row:'checks-hint-row'},
+                             {param:'time', type:'clock', row:'checks-time-row', input:'checks-time-custom'} ] },
+    endgame:      { view:'setup-endgame',    card:'card-endgame',     startBtn:'start-endgame-drill',
+                    fields:[ {param:'difficulty', type:'toggle', row:'endgame-diff-row'},
+                             {param:'time', type:'clock', row:'endgame-time-row', input:'endgame-time-custom'} ] },
+    loose:        { view:'setup',            card:'card-loose',       startBtn:'start-drill',
+                    fields:[ {param:'side', type:'toggle', row:'side-row'},
+                             {param:'difficulty', type:'toggle', row:'diff-row'},
+                             {param:'time', type:'toggle', row:'time-row'},
+                             {param:'reveal', type:'toggle', row:'reveal-row'} ] },
+    coord:        { view:'setup-coord',      card:'card-coord',       startBtn:'start-coord-drill',
+                    fields:[ {param:'orient', type:'toggle', row:'coord-orient-row'},
+                             {param:'labels', type:'toggle', row:'coord-labels-row'},
+                             {param:'time', type:'clock', row:'coord-time-row', input:'coord-time-custom'} ] },
+    puzzle:       { view:'setup-puzzle',     card:'card-puzzle',      startBtn:'start-puzzle-drill',
+                    fields:[ {param:'theme', type:'toggle', row:'puzzle-theme-grid'},
+                             {param:'difficulty', type:'toggle', row:'puzzle-diff-row'},
+                             {param:'color', type:'toggle', row:'puzzle-color-row'} ] },
+    'play-bot':   { view:'setup-bot',        card:'card-play-bot',    startBtn:null,
+                    fields:[ {param:'level', type:'toggle', row:'bot-level-row'},
+                             {param:'color', type:'toggle', row:'bot-color-row'},
+                             {param:'time', param2:'increment', type:'timeinc', row:'bot-time-row', timeInput:'bot-time-custom', incInput:'bot-inc-custom'} ] },
+    'play-online':{ view:'setup-online',     card:'card-play-online', startBtn:null,
+                    fields:[ {param:'color', type:'toggle', row:'online-color-row'},
+                             {param:'rated', type:'toggle', row:'online-rated-row'},
+                             {param:'showRatings', type:'toggle', row:'online-ratings-row'},
+                             {param:'time', param2:'increment', type:'timeinc', row:'online-time-row', timeInput:'online-time-custom', incInput:'online-inc-custom'} ] },
+    history:      { view:'history',          card:'card-history',     startBtn:null, fields:[] }
   };
   const VIEW_TO_SLUG = Object.fromEntries(Object.entries(DEEP_LINKS).map(([slug,r])=>[r.view,slug]));
+
+  // Generic param appliers -- one per settings-row shape in this file (see
+  // the DEEP_LINKS comment above). Each returns whether it found a real
+  // control to act on, so a bad/typo'd param in a shared link degrades to
+  // "left at default" instead of a thrown error.
+  function dlFindRow(rowId){ return document.getElementById(rowId); }
+  function dlClickValue(rowId, value){
+    const row = dlFindRow(rowId);
+    if(!row || value==null) return false;
+    const btn = row.querySelector('[data-val="'+CSS.escape(String(value))+'"]');
+    if(!btn) return false;
+    btn.click();
+    return true;
+  }
+  function dlClickMulti(rowId, valuesCsv){
+    const row = dlFindRow(rowId);
+    if(!row || valuesCsv==null) return false;
+    const wanted = new Set(String(valuesCsv).split(',').map(s=>s.trim()).filter(Boolean));
+    row.querySelectorAll('[data-val]').forEach(btn=>{
+      const shouldBeActive = wanted.has(btn.dataset.val);
+      if(btn.classList.contains('active') !== shouldBeActive) btn.click();
+    });
+    return true;
+  }
+  function dlSetClock(rowId, inputId, value){
+    if(value==null) return false;
+    if(dlClickValue(rowId, value)) return true; // exact preset match, e.g. time=4
+    const row = dlFindRow(rowId);
+    const input = document.getElementById(inputId);
+    const customBtn = row && row.querySelector('[data-val="custom"]');
+    if(!customBtn || !input || isNaN(parseFloat(value))) return false;
+    customBtn.click();
+    input.value = value;
+    input.dispatchEvent(new Event('input', {bubbles:true}));
+    input.dispatchEvent(new Event('change', {bubbles:true}));
+    return true;
+  }
+  function dlSetTimeIncrement(rowId, timeInputId, incInputId, timeVal, incVal){
+    const row = dlFindRow(rowId);
+    if(!row || (timeVal==null && incVal==null)) return false;
+    if(timeVal!=null && incVal!=null){
+      const preset = [...row.querySelectorAll('[data-time]')]
+        .find(b=> b.dataset.time===String(timeVal) && b.dataset.inc===String(incVal));
+      if(preset){ preset.click(); return true; }
+    }
+    const customBtn = row.querySelector('[data-val="custom"]');
+    const timeInput = document.getElementById(timeInputId);
+    const incInput = document.getElementById(incInputId);
+    if(!customBtn || !timeInput || !incInput) return false;
+    customBtn.click();
+    if(timeVal!=null){ timeInput.value = timeVal; timeInput.dispatchEvent(new Event('input', {bubbles:true})); }
+    if(incVal!=null){ incInput.value = incVal; incInput.dispatchEvent(new Event('input', {bubbles:true})); }
+    return true;
+  }
+  function dlApplyFields(route, params){
+    (route.fields||[]).forEach(f=>{
+      if(f.type==='toggle') dlClickValue(f.row, params.get(f.param));
+      else if(f.type==='multi') dlClickMulti(f.row, params.get(f.param));
+      else if(f.type==='clock') dlSetClock(f.row, f.input, params.get(f.param));
+      else if(f.type==='timeinc') dlSetTimeIncrement(f.row, f.timeInput, f.incInput, params.get(f.param), params.get(f.param2));
+    });
+  }
   // showView('menu') below immediately rewrites the address bar, wiping any
   // incoming #hash before the page-bottom deep-link handler ever runs -- so
   // grab it now, while it's still there.
@@ -14707,19 +14814,35 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // every card's own click listener above is wired up, so clicking the
   // card here fires the exact same side effects (token warnings, history
   // auto-load, etc.) a real click would -- not a shortcut around them.
+  // A `?param=value&...start=1` suffix pre-fills that drill's own settings
+  // rows the same way (see the DEEP_LINKS/dlApply* block near showView)
+  // and, for drills that allow it, clicks the real Start button too.
   (function openDeepLink(){
-    const hash = initialHash;
-    if(!hash) return;
-    if(hash === 'settings'){
+    const hashIdx = initialHash.indexOf('?');
+    const slug = hashIdx===-1 ? initialHash : initialHash.slice(0, hashIdx);
+    const params = new URLSearchParams(hashIdx===-1 ? '' : initialHash.slice(hashIdx+1));
+    if(!slug) return;
+    if(slug === 'settings'){
       const overlay = document.getElementById('settings-overlay');
       if(overlay) overlay.classList.add('active');
       return;
     }
-    const route = DEEP_LINKS[hash];
-    if(route){
-      const btn = document.getElementById(route.card);
-      if(btn) btn.click();
+    const route = DEEP_LINKS[slug];
+    if(!route) return;
+    const btn = document.getElementById(route.card);
+    if(!btn) return;
+    btn.click();
+    dlApplyFields(route, params);
+    if(route.startBtn && params.get('start')==='1'){
+      const startBtn = document.getElementById(route.startBtn);
+      if(startBtn) startBtn.click();
     }
+    // The clicks above ran through showView's own hash-sync (see above),
+    // which only knows about plain slugs and drops params, and skips
+    // syncing at all once Start moves into a play-* view. Put the full,
+    // original link back so the address bar still matches what was
+    // actually opened -- reloading it must reproduce the same result.
+    history.replaceState(null, '', location.pathname+location.search+'#'+initialHash);
   })();
 
 })();
