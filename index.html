@@ -2144,6 +2144,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     flex-wrap:wrap;
     align-items:center;
   }
+  .anno-toggle{
+    background:none; border:none; padding:0; margin:0;
+    cursor:pointer; color:var(--ink-soft); font-size:9px;
+    line-height:1; display:inline-flex; align-items:center;
+  }
+  .anno-toggle:hover{ color:var(--ink); }
+  .anno-hint.collapsed .anno-hint-text{ display:none; }
   .pen-dot{
     display:inline-block; width:8px; height:8px; border-radius:50%;
     vertical-align:middle; margin:0 1px;
@@ -3947,7 +3954,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
     </div>
 
-    <div class="anno-hint">
+    <div class="anno-hint" data-dynamic="true">
       <span id="pz-prompt-hint">Drag a piece to make your move.</span>
       <span>&#183; Right-click-drag: arrow</span>
       <span>&#183; plain right-click: highlight</span>
@@ -4179,7 +4186,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
     </div>
 
-    <div class="anno-hint">
+    <div class="anno-hint" data-dynamic="true">
       <span id="ol-prompt-hint">Waiting for a game to start&#8230;</span>
       <span>&#183; Right-click-drag: arrow</span>
       <span>&#183; plain right-click: highlight</span>
@@ -14881,6 +14888,46 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GH_STATE.resultFilter = e.target.value;
     ghRender();
   });
+
+  // Every drill's "how to annotate this board" hint row (.anno-hint) gets a
+  // small collapse toggle -- one shared, persisted preference across all of
+  // them, since they're all the same control (right-click-drag/hold-key
+  // legend) repeated per drill, not independent settings. A couple of these
+  // rows (Puzzles, Play Online) lead with a LIVE status span (current move
+  // prompt, updated during play) rather than pure instructions -- data-dynamic
+  // on those marks that first span to stay visible even when collapsed.
+  (function wireAnnoHintCollapse(){
+    const KEY = 'annoHintCollapsed';
+    let collapsed = localStorage.getItem(KEY) === '1';
+    const hints = [...document.querySelectorAll('.anno-hint')];
+    hints.forEach(hint=>{
+      const keepFirst = hint.dataset.dynamic === 'true';
+      const kids = [...hint.childNodes];
+      const restKids = keepFirst ? kids.slice(1) : kids;
+      const textWrap = document.createElement('span');
+      textWrap.className = 'anno-hint-text';
+      restKids.forEach(k=> textWrap.appendChild(k));
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'anno-toggle';
+      toggle.setAttribute('aria-label','Toggle controls hint');
+      hint.insertBefore(toggle, hint.firstChild);
+      hint.appendChild(textWrap);
+      toggle.addEventListener('click', ()=>{
+        collapsed = !collapsed;
+        localStorage.setItem(KEY, collapsed?'1':'0');
+        applyState();
+      });
+    });
+    function applyState(){
+      hints.forEach(hint=>{
+        hint.classList.toggle('collapsed', collapsed);
+        const btn = hint.querySelector('.anno-toggle');
+        if(btn) btn.textContent = collapsed ? '\u25B8' : '\u25BE';
+      });
+    }
+    applyState();
+  })();
 
   // Land on whatever section a shared link pointed at. Runs on the very
   // first load AND on every later hashchange -- a hash-only navigation
