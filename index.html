@@ -1910,6 +1910,30 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   @media (max-width:620px){ .drill-grid{grid-template-columns:1fr;} }
 
+  /* Shown on the menu only when /api/account/playing (checked whenever the
+     menu comes on screen, see checkNowPlaying) reports a real game still
+     ongoing -- the recovery path for accidentally closing the tab or
+     tapping home mid-game, since the game itself keeps running on
+     Lichess's own servers with or without this app open. */
+  .resume-game-banner{
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:12px;
+    background:var(--surface); border:1px solid var(--good); border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:14px 18px; margin-bottom:16px;
+  }
+  .resume-game-info{ display:flex; align-items:center; gap:12px; min-width:0; }
+  .live-dot{
+    width:10px; height:10px; border-radius:50%; background:var(--good);
+    flex-shrink:0; animation:live-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes live-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+  .resume-game-title{ font-weight:700; font-size:14px; color:var(--ink); }
+  .resume-game-detail{
+    font-size:12px; color:var(--ink-soft); margin-top:2px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+
   .drill-card{
     text-align:left;
     background:var(--surface);
@@ -2841,6 +2865,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   <!-- ============ MENU ============ -->
   <section class="view active" id="view-menu">
+    <div class="resume-game-banner" id="resume-game-banner" style="display:none;">
+      <div class="resume-game-info">
+        <span class="live-dot"></span>
+        <div>
+          <div class="resume-game-title">Game in progress</div>
+          <div class="resume-game-detail" id="resume-game-detail">&#8212;</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="resume-game-btn">Return to game</button>
+    </div>
     <div class="drill-grid">
 
       <button class="drill-card arcade" id="card-kiss">
@@ -5649,6 +5683,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function onLeavePlay(fn){ leaveHooks.push(fn); }
   let currentView = 'menu';
   const homeFabEl = document.getElementById('home-fab');
+  // showView('menu') fires immediately below, long before getLichessToken/
+  // checkNowPlaying exist (those come from the Play Online section much
+  // further down the script) -- calling either from that first boot-time
+  // call would hit a "used before initialization" error on a still-unset
+  // const. This flips true only once that section finishes defining
+  // itself, so the menu-check inside showView() is a no-op until then; a
+  // separate, explicit checkNowPlaying() call at the very end of the
+  // script (once everything really is ready) covers the boot case.
+  let lichessResumeReady = false;
 
   // Deep-linking: one table covers both directions. On load, a `#slug` in
   // the address bar clicks the real card button (not showView directly) so
@@ -5849,6 +5892,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // "entry" views. A play-* sub-state isn't something you'd want to land
     // back on directly (mid-drill state isn't reconstructed from a link).
     if(!isPlay) dlSyncHash(VIEW_TO_SLUG[name]);
+    // Refresh whether there's a live Lichess game to offer "Return to
+    // game" for every time the menu comes on screen -- covers both
+    // landing here mid-game (home button, a back-link) and a game having
+    // just ended while it was showing. See lichessResumeReady's own
+    // comment above for why this can't just run unconditionally.
+    if(name==='menu' && lichessResumeReady) checkNowPlaying();
   }
   showView('menu');
   document.querySelectorAll('[data-nav]').forEach(btn=>{
@@ -13666,7 +13715,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       wtime:0, btime:0, winc:0, binc:0, status:'created', winner:null,
       wdraw:false, bdraw:false, lastMoveCount:0, whiteName:'White', blackName:'Black',
       clockTimer:null, eventStreamHandle:null, seekHandle:null, gameStreamHandle:null,
-      manualFlip:false, viewPly:null };
+      manualFlip:false, viewPly:null, isResume:false };
     clearMarksObj(marksOl);
 
     showView('play-online');
@@ -14414,13 +14463,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     roundOl.blackTitle = full.black.title || null;
     olSetPhaseLive();
     olApplyState(full.state);
-    const myWhite = roundOl.color==='white';
-    showVsIntro(
-      myWhite ? roundOl.whiteName : roundOl.blackName, roundOl.color,
-      myWhite ? roundOl.blackName : roundOl.whiteName, myWhite ? 'black' : 'white',
-      myWhite ? roundOl.whiteTitle : roundOl.blackTitle,
-      myWhite ? roundOl.blackTitle : roundOl.whiteTitle
-    );
+    // Every game stream connection -- a brand-new game or reconnecting to
+    // one already running -- sends this same gameFull event first, so
+    // there's no other way to tell those two apart here. Skip the splash
+    // for a resume: it is a real "match starting" cue, and repeating it
+    // just for tapping back into a game already in progress would be
+    // exactly the kind of friction this feature exists to remove.
+    if(!roundOl.isResume){
+      const myWhite = roundOl.color==='white';
+      showVsIntro(
+        myWhite ? roundOl.whiteName : roundOl.blackName, roundOl.color,
+        myWhite ? roundOl.blackName : roundOl.whiteName, myWhite ? 'black' : 'white',
+        myWhite ? roundOl.whiteTitle : roundOl.blackTitle,
+        myWhite ? roundOl.blackTitle : roundOl.whiteTitle
+      );
+    }
   }
 
   function olOpenGameStream(gen){
@@ -14460,7 +14517,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       wtime:0, btime:0, winc:0, binc:0, status:'created', winner:null,
       wdraw:false, bdraw:false, lastMoveCount:0, whiteName:'White', blackName:'Black',
       clockTimer:null, eventStreamHandle:null, seekHandle:null, gameStreamHandle:null,
-      manualFlip:false, viewPly:null };
+      manualFlip:false, viewPly:null, isResume:false };
     clearMarksObj(marksOl);
 
     showView('play-online');
@@ -14510,6 +14567,68 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olSelected = null;
   }
   onLeavePlay(()=> olTeardown());
+
+  // "Return to game" on the menu, for accidentally closing the tab or
+  // tapping home mid-game -- the game itself keeps running on Lichess's
+  // own servers regardless of whether this app is open, so on its own
+  // this app would just silently lose track of it. /api/account/playing
+  // is Lichess's own list of the token's currently-ongoing games; only
+  // ever the first one is shown, since this app can only ever be playing
+  // one game through it at a time.
+  let nowPlayingGame = null;
+  async function checkNowPlaying(){
+    const token = getLichessToken();
+    if(!token) return;
+    try{
+      const res = await fetch('https://lichess.org/api/account/playing', { headers:{ Authorization:'Bearer '+token } });
+      if(!res.ok) return;
+      const data = await res.json();
+      const games = (data && data.nowPlaying) || [];
+      nowPlayingGame = games.length ? games[0] : null;
+    }catch(e){
+      // Leave nowPlayingGame at whatever it last was -- a network hiccup
+      // here shouldn't flip a real banner off, and there's nothing better
+      // to show in its place anyway.
+      return;
+    }
+    renderResumeBanner();
+  }
+  function renderResumeBanner(){
+    const banner = document.getElementById('resume-game-banner');
+    if(!banner) return;
+    if(!nowPlayingGame){ banner.style.display = 'none'; return; }
+    const g = nowPlayingGame;
+    const oppName = (g.opponent && g.opponent.username) || 'Opponent';
+    const color = g.color === 'black' ? 'Black' : 'White';
+    const speed = g.speed ? (g.speed.charAt(0).toUpperCase()+g.speed.slice(1)) : '';
+    document.getElementById('resume-game-detail').textContent =
+      'vs. '+oppName+' \u00b7 '+color+(speed ? ' \u00b7 '+speed : '');
+    banner.style.display = 'flex';
+  }
+  function olResumeGame(gameId, color){
+    const gen = ++olGeneration;
+    roundOl = { phase:'connecting', gameId, color, state:null,
+      wtime:0, btime:0, winc:0, binc:0, status:'created', winner:null,
+      wdraw:false, bdraw:false, lastMoveCount:0, whiteName:'White', blackName:'Black',
+      clockTimer:null, eventStreamHandle:null, seekHandle:null, gameStreamHandle:null,
+      manualFlip:false, viewPly:null, isResume:true };
+    clearMarksObj(marksOl);
+    showView('play-online');
+    // Reuses the seeking phase's own DOM resets (clears the board, hides
+    // the live/result/error panels) then overwrites its "looking for an
+    // opponent" copy -- accurate for a fresh seek, not for reconnecting to
+    // a game that's already running.
+    olSetPhaseSeeking();
+    document.getElementById('ol-hud-mode-text').textContent = 'RECONNECTING';
+    document.getElementById('ol-hud-round').textContent = 'Reconnecting to your game\u2026';
+    document.getElementById('ol-prompt-hint').textContent = 'Reconnecting to your game\u2026';
+    olStatusEl.textContent = 'Reconnecting to your game\u2026';
+    olOpenGameStream(gen);
+  }
+  document.getElementById('resume-game-btn').addEventListener('click', ()=>{
+    if(nowPlayingGame) olResumeGame(nowPlayingGame.gameId, nowPlayingGame.color);
+  });
+  lichessResumeReady = true;
 
   document.getElementById('start-online-seek').addEventListener('click', ()=>{
     if(!getLichessToken()){
@@ -15071,6 +15190,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   openDeepLink(initialHash);
   window.addEventListener('hashchange', ()=> openDeepLink(decodeURIComponent(location.hash.slice(1))));
+
+  // Covers the one case the menu-check inside showView() structurally
+  // can't: the very first, boot-time call to showView('menu') runs long
+  // before this point in the script, so it could never have shown the
+  // "Return to game" banner for a game left running from a closed tab or
+  // a quit app -- exactly the scenario this whole feature is for.
+  checkNowPlaying();
 
 })();
 </script>
