@@ -1098,6 +1098,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   .settings-fab:hover{ color:var(--brass); border-color:var(--brass-soft); }
 
+  /* Installed (standalone/home-screen) mode has no browser chrome, so the
+     OS's own pull-to-refresh -- tied to dragging past the address bar --
+     never fires once the app is added to the home screen. This recreates
+     the gesture by hand (see initPullToRefresh near the end of the script,
+     armed only in standalone mode so it never doubles up with a real
+     browser tab's own native gesture): pull down past a threshold while
+     already scrolled to the top, release, and the app reloads. The badge
+     follows the pull the whole way and its arrow flips 180deg crossing the
+     release threshold -- the same "now let go" cue as the native gesture --
+     then switches to a continuous spin once a reload is actually underway. */
+  #pull-refresh-indicator{
+    position:fixed; top:-46px; left:50%; z-index:300;
+    width:36px; height:36px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow);
+    color:var(--brass);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+    transition:opacity .15s ease;
+  }
+  #pull-refresh-indicator.visible{ opacity:1; }
+  #pull-refresh-icon{ display:flex; width:20px; height:20px; }
+  #pull-refresh-icon svg{ width:100%; height:100%; }
+  #pull-refresh-icon.spinning{ animation:pull-refresh-spin .7s linear infinite; }
+  @keyframes pull-refresh-spin{ to{ transform:rotate(360deg); } }
+
   /* One global now-playing widget rather than a copy embedded in every
      view that might want one -- bottom-center, per the user's own request,
      rather than the two bottom corners (already claimed by the friends and
@@ -2492,6 +2517,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
 <button class="home-fab" id="home-fab" data-nav="menu" title="All drills" aria-label="All drills">&#8962;</button>
 <button class="settings-fab" id="settings-fab" title="Settings" aria-label="Settings">&#9881;</button>
+<div id="pull-refresh-indicator" aria-hidden="true">
+  <span id="pull-refresh-icon"><svg viewBox="0 0 24 24"><path d="M12 5v13M6 12l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+</div>
 
 <div class="lichess-activity-widget open is-empty" id="lichess-activity-widget">
   <div class="activity-panel" id="activity-panel">
@@ -14927,6 +14955,82 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       });
     }
     applyState();
+  })();
+
+  // Installed (standalone/home-screen) mode has no browser chrome, so the
+  // OS's own pull-to-refresh -- tied to dragging past the address bar --
+  // never fires once the app is added to the home screen. This recreates
+  // the gesture by hand: pull down past a threshold while scrolled to the
+  // very top, release, and the page reloads, with the badge above
+  // following the pull and flipping into a spin on release. Only armed in
+  // standalone/installed mode (matchMedia, plus the older iOS-specific
+  // navigator.standalone) so it never doubles up with a real browser
+  // tab's own native gesture. Also never armed inside a play-* view --
+  // every drill's own board fills the top of the page in play mode, so a
+  // downward drag to move a piece would otherwise be indistinguishable
+  // from this gesture and could misfire mid-game.
+  (function initPullToRefresh(){
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if(!isStandalone) return;
+
+    const indicator = document.getElementById('pull-refresh-indicator');
+    const icon = document.getElementById('pull-refresh-icon');
+    if(!indicator || !icon) return;
+
+    const THRESHOLD = 70; // px of visual pull before release triggers a refresh
+    const MAX_PULL = 110;
+    let startY = null;
+    let pulling = false;
+    let refreshing = false;
+    let lastPull = 0;
+
+    function atTop(){
+      return (document.scrollingElement || document.documentElement).scrollTop <= 0;
+    }
+    function reset(){
+      pulling = false;
+      startY = null;
+      lastPull = 0;
+      indicator.classList.remove('visible');
+      indicator.style.transform = '';
+      icon.style.transform = '';
+    }
+
+    document.addEventListener('touchstart', (e)=>{
+      if(refreshing || currentView.indexOf('play')===0) return;
+      if(e.touches.length !== 1 || !atTop()){ startY = null; return; }
+      startY = e.touches[0].clientY;
+      pulling = false;
+    }, { passive:true });
+
+    document.addEventListener('touchmove', (e)=>{
+      if(startY === null || refreshing) return;
+      const dy = e.touches[0].clientY - startY;
+      if(dy <= 0 || !atTop()){
+        if(pulling) reset();
+        return;
+      }
+      pulling = true;
+      lastPull = Math.min(dy * 0.5, MAX_PULL); // damped, like the native gesture
+      indicator.classList.add('visible');
+      indicator.style.transform = `translateX(-50%) translateY(${lastPull}px)`;
+      icon.style.transform = `rotate(${Math.min(lastPull / THRESHOLD, 1) * 180}deg)`;
+    }, { passive:true });
+
+    document.addEventListener('touchend', ()=>{
+      if(!pulling){ startY = null; return; }
+      if(lastPull >= THRESHOLD){
+        refreshing = true;
+        indicator.style.transform = `translateX(-50%) translateY(${THRESHOLD}px)`;
+        icon.style.transform = '';
+        icon.classList.add('spinning');
+        location.reload();
+      } else {
+        reset();
+      }
+    });
+
+    document.addEventListener('touchcancel', reset);
   })();
 
   // Land on whatever section a shared link pointed at. Runs on the very
