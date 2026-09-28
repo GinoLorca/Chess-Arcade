@@ -856,11 +856,27 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .wrap.play-mode > .view.active{ margin-top:auto; margin-bottom:auto; }
   .wrap.play-mode .view.active{ gap:6px; }
   .wrap.play-mode .back-link{ padding:0; }
+  /* The home button is fixed in the top-left corner, 16-56px from the
+     left edge, and sat on top of the HUD's side dot and the start of its
+     round line whenever the page's own gutter was too narrow to clear it
+     -- every phone, and 1180-1330px windows once the wrap widens to
+     1240px for the side panel. --fab-clear pads the left by just what the
+     gutter (the 880/1240 term) doesn't already cover; the arcade drills'
+     stat bar uses it too. From 1330px the gutter clears the button on its
+     own, and Puzzles and Rush move their HUD into the middle of three
+     columns. */
+  .wrap.play-mode{ --fab-clear:max(12px, calc(50px - max(0px, (100vw - 880px) / 2))); }
+  @media (min-width:1180px) and (max-width:1329.98px){
+    .wrap.play-mode{ --fab-clear:max(12px, calc(50px - max(0px, (100vw - 1240px) / 2))); }
+    /* Game History's side panel is on the LEFT from here, so nothing of
+       the view's main column is at the page edge. */
+    .wrap.play-mode .has-side-left{ --fab-clear:12px; }
+  }
   /* Both floating buttons are fixed to the viewport's right edge, together
      occupying its last 104px. The HUD is in flow and its clock sits flush
      right, so it must yield that strip -- until the centred 880px wrap has
      a wide enough gutter to clear the buttons on its own. */
-  .wrap.play-mode .hud{ padding:6px 108px 6px 12px; }
+  .wrap.play-mode .hud{ padding:6px 108px 6px var(--fab-clear); }
   @media (min-width:1048px){ .wrap.play-mode .hud{ padding-right:18px; } }
   .wrap.play-mode .clock{ font-size:20px; padding:1px 8px; min-width:72px; }
   .wrap.play-mode .hud-mode{ font-size:10px; }
@@ -1887,7 +1903,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     align-content:start;
   }
   .arcade-view .board-frame{ align-items:flex-start; }
-  .wrap.play-mode .arcade-view .arcade-bar{ padding:6px 12px; }
+  .wrap.play-mode .arcade-view .arcade-bar{ padding:6px 12px 6px var(--fab-clear); }
   .wrap.play-mode .arcade-view .arcade-stat .val{ font-size:19px; }
   .wrap.play-mode .arcade-view .verdict-btn{ padding:10px 8px; font-size:21px; }
   a{color:inherit;}
