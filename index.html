@@ -884,16 +884,41 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      round line whenever the page's own gutter was too narrow to clear it
      -- every phone, and 1180-1330px windows once the wrap widens to
      1240px for the side panel. --fab-clear pads the left by just what the
-     gutter (the 880/1240 term) doesn't already cover; the arcade drills'
-     stat bar uses it too. From 1330px the gutter clears the button on its
-     own, and Puzzles and Rush move their HUD into the middle of three
-     columns. */
-  .wrap.play-mode{ --fab-clear:max(12px, calc(50px - max(0px, (100vw - 880px) / 2))); }
-  @media (min-width:1180px) and (max-width:1329.98px){
-    .wrap.play-mode{ --fab-clear:max(12px, calc(50px - max(0px, (100vw - 1240px) / 2))); }
+     gutter (--fab-gutter) doesn't already cover; the arcade drills' stat
+     bar uses it too, on both ends. From about 1330px the gutter clears
+     the button on its own and --fab-clear bottoms out at the 12px the
+     boxes have anyway; Puzzles and Rush widen again there, but move their
+     HUD and back link into the middle of three columns. */
+  .wrap.play-mode{
+    --fab-gutter:max(0px, (100vw - 880px) / 2);
+    --fab-clear:max(12px, calc(50px - var(--fab-gutter)));
+    /* The view's back link sits right above the HUD or stat bar and was
+       just as covered (a phone showed "ange settings"), but it is bare
+       text, with no 12px padding or 1px border of its own. So it moves
+       one pixel further than --fab-clear, which lines its arrow up with
+       the bar's text while the button is in the way, and bottoms out at
+       0 instead of 12px, which leaves it where it always was once the
+       gutter is wide enough. */
+    --fab-clear-link:max(0px, calc(51px - var(--fab-gutter)));
+  }
+  @media (min-width:1180px){
+    .wrap.play-mode{ --fab-gutter:max(0px, (100vw - 1240px) / 2); }
     /* Game History's side panel is on the LEFT from here, so nothing of
-       the view's main column is at the page edge. */
-    .wrap.play-mode .has-side-left{ --fab-clear:12px; }
+       the view's main column is at the page's left edge. The panel is. */
+    .wrap.play-mode .has-side-left > :not(.side-panel){ --fab-clear:12px; --fab-clear-link:0px; }
+  }
+  .wrap.play-mode .view > .back-link{ padding-left:var(--fab-clear-link); }
+  /* Game History has no HUD or stat bar, but two things of its own sat
+     under the corner buttons. Its side panel opens with a bare heading
+     ("Chess Arcade" over the game's title) at the page's left edge at
+     every width -- straight under the back link below 1180px, at the top
+     of the left column above that -- so it clears the home button the
+     same way the link does. And from 1180px the main column runs to the
+     page's RIGHT edge, which put the top player's clock under the
+     settings button; that row's end gets the room the stat bar's does. */
+  #view-play-history > .side-panel > :first-child{ padding-left:var(--fab-clear-link); }
+  @media (min-width:1180px){
+    #view-play-history > #hv-row-top{ padding-right:max(12px, calc(50px - var(--fab-gutter))); }
   }
   /* Both floating buttons are fixed to the viewport's right edge, together
      occupying its last 104px. The HUD is in flow and its clock sits flush
@@ -2007,7 +2032,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     align-content:start;
   }
   .arcade-view .board-frame{ align-items:flex-start; }
-  .wrap.play-mode .arcade-view .arcade-bar{ padding:6px 12px 6px var(--fab-clear); }
+  /* The settings button is the home button's mirror image, 16-56px from
+     the right, and it sat on the bar's Lives on a phone. An arcade drill
+     is one column at every width, so the bar's right end is always as
+     close to the page edge as its left end and takes the same clearance.
+     That leaves a 360-375px phone 218-233px for five stats that take up
+     to 200px with a five-digit score, and with the usual 12px between
+     them Lives wrapped onto a second row, pushing the board down by
+     40px. A 4px minimum keeps them on one row; space-between still
+     spreads them out wherever there's room, so wider screens see no
+     difference. */
+  .wrap.play-mode .arcade-view .arcade-bar{ padding:6px var(--fab-clear); column-gap:4px; }
   .wrap.play-mode .arcade-view .arcade-stat .val{ font-size:19px; }
   .wrap.play-mode .arcade-view .verdict-btn{ padding:10px 8px; font-size:21px; }
   a{color:inherit;}
