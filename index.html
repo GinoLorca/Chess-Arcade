@@ -37,6 +37,10 @@
     --brass:#8a6a16;
     --brass-soft:#c19a1e;
     --brass-ink:#3c2f08;
+    /* Brass used as TEXT colour. Same as --brass everywhere except
+       Bauhaus light, where its yellow on the off-white palette is ~1.6:1
+       (see the Bauhaus block); backgrounds and borders keep --brass. */
+    --brass-text:var(--brass);
     --line:#c9ba90;
     --board-light:#ecdfc0;
     --board-dark:#55684f;
@@ -311,6 +315,7 @@
     --brass:#f2c200;
     --brass-soft:#ffd633;
     --brass-ink:#141414;
+    --brass-text:var(--ink);
     --line:#141414;
     --board-light:#f2ede1;
     --board-dark:#1a4fa0;
@@ -342,6 +347,7 @@
       --brass:#f2c200;
       --brass-soft:#ffd633;
       --brass-ink:#141414;
+      --brass-text:var(--brass);
       --line:#4a4a4a;
       --board-light:#e8e2d5;
       --board-dark:#1a4fa0;
@@ -373,6 +379,7 @@
     --brass:#f2c200;
     --brass-soft:#ffd633;
     --brass-ink:#141414;
+    --brass-text:var(--brass);
     --line:#4a4a4a;
     --board-light:#e8e2d5;
     --board-dark:#1a4fa0;
@@ -412,6 +419,22 @@
   :root[data-skin="bauhaus"] .announce span{ transform:skewX(0deg); }
   :root[data-skin="bauhaus"] .announce span,
   :root[data-skin="bauhaus"] .combo-pop{ -webkit-text-stroke:0; }
+  /* Yellow text is ~1.6:1 on this skin's light palette, so --brass-text is
+     its ink there. Three spots can't simply go ink. A hot combo and the
+     answer's emphasised square would then match the plain ink text beside
+     them, so they become printed yellow blocks instead (ink on yellow,
+     ~11:1; box-shadow pads the block without moving the digits when the
+     state flips). And the round call-out sits on the dimmed board, where
+     ink would vanish into the blue squares, so it keeps its yellow and
+     gets a flat ink shadow in place of the outline removed just above. */
+  :root[data-skin="bauhaus"] .arcade-stat .val.combo-hot,
+  :root[data-skin="bauhaus"] .result-answer b{
+    background:var(--brass); color:var(--brass-ink); box-shadow:0 0 0 3px var(--brass);
+  }
+  :root[data-skin="bauhaus"] .arcade-stat .val.combo-hot{ align-self:flex-start; }
+  :root[data-skin="bauhaus"] .announce span{ text-shadow:3px 3px 0 #141414; }
+  /* Ink at rest and ink on hover would leave no hover state at all. */
+  :root[data-skin="bauhaus"] .btn-link:hover{ text-decoration-color:var(--brass); text-decoration-thickness:3px; }
   /* Flat geometry over gradients: the plaque's brass sweep reads as ornament
      the Bauhaus skin has no use for. */
   :root[data-skin="bauhaus"] .plaque::before{ display:none; }
@@ -900,7 +923,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     background:var(--surface-2); border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center; font-size:10px;
   }
-  .phase-step.is-live{ opacity:1; color:var(--brass); }
+  .phase-step.is-live{ opacity:1; color:var(--brass-text); }
   .phase-step.is-live i{ background:var(--brass); border-color:var(--brass); color:var(--brass-ink); }
   .phase-step.is-done{ opacity:1; color:var(--good); }
   .phase-step.is-done i{ background:var(--good); border-color:var(--good); color:#fff; }
@@ -952,7 +975,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   .pz-rating-value{
     font-family:"Big Shoulders Display",sans-serif; font-weight:700;
-    font-size:48px; line-height:1; color:var(--brass);
+    font-size:48px; line-height:1; color:var(--brass-text);
   }
   .pz-turn-card{
     display:flex; align-items:center; gap:12px;
@@ -969,13 +992,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      exact same artwork used on the board. */
   .pz-turn-icon{ width:30px; height:30px; flex:0 0 auto; }
   .pz-turn-icon svg{ width:100%; height:100%; display:block; }
-  .pz-turn-title{ font-family:"Big Shoulders Display",sans-serif; font-weight:700; font-size:18px; text-transform:uppercase; color:var(--brass); }
+  .pz-turn-title{ font-family:"Big Shoulders Display",sans-serif; font-weight:700; font-size:18px; text-transform:uppercase; color:var(--brass-text); }
   .pz-turn-sub{ font-size:12.5px; color:var(--ink-soft); }
   .pz-help-row{ justify-content:center; gap:18px; }
   .btn-link{
     background:none; border:none; padding:0; cursor:pointer;
     font-size:12.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
-    color:var(--brass); text-decoration:underline; text-underline-offset:3px;
+    color:var(--brass-text); text-decoration:underline; text-underline-offset:3px;
   }
   .btn-link:hover{ color:var(--ink); }
   .btn-link:disabled{ opacity:.4; cursor:not-allowed; text-decoration:none; }
@@ -1107,6 +1130,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
        had -- the badge is an ADDITION, not something the board pays for. */
     .wrap.play-mode:has(#view-play-puzzle.active){ max-width:1472px; }
   }
+  /* The fixed settings button (16-56px from the top and from the right)
+     sat over the side panel's first card wherever the page's right gutter
+     was too narrow to clear it: every side-panel view from 1180px, where
+     the panel moves beside the board and the page widens to 1240px, until
+     about 1312px plus a scrollbar; and Puzzles and Rush, which widen again
+     to 1472px from 1330px, until about 1544px plus a scrollbar. Padding
+     inside the sticky panel drops its first card below the button,
+     scrolled or not. Game History's panel is on the left, clear of it. */
+  @media (min-width:1180px) and (max-width:1329.98px){
+    .wrap.play-mode .view.active.has-side > .side-panel{ padding-top:56px; }
+  }
+  @media (min-width:1330px) and (max-width:1559.98px){
+    #view-play-puzzle.has-side > .side-panel,
+    #view-play-rush.has-side > .side-panel{ padding-top:56px; }
+  }
 
   .home-fab{
     position:fixed; top:16px; left:16px; z-index:40;
@@ -1115,7 +1153,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     color:var(--ink-soft); font-size:19px; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
   }
-  .home-fab:hover{ color:var(--brass); border-color:var(--brass-soft); }
+  .home-fab:hover{ color:var(--brass-text); border-color:var(--brass-soft); }
   :root[data-skin="bauhaus"] .home-fab{ border-radius:0; border-width:2px; }
   .settings-fab{
     position:fixed; top:16px; right:16px; z-index:40;
@@ -1124,7 +1162,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     color:var(--ink-soft); font-size:18px; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
   }
-  .settings-fab:hover{ color:var(--brass); border-color:var(--brass-soft); }
+  .settings-fab:hover{ color:var(--brass-text); border-color:var(--brass-soft); }
 
   /* Installed (standalone/home-screen) mode has no browser chrome, so the
      OS's own pull-to-refresh -- tied to dragging past the address bar --
@@ -1140,7 +1178,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     position:fixed; top:-46px; left:50%; z-index:300;
     width:36px; height:36px; border-radius:50%;
     background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow);
-    color:var(--brass);
+    color:var(--brass-text);
     display:flex; align-items:center; justify-content:center;
     opacity:0; pointer-events:none;
     transition:opacity .15s ease;
@@ -1265,7 +1303,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     box-shadow:var(--shadow); margin-bottom:6px; padding:6px;
   }
   .friends-empty{ font-size:12px; color:var(--ink-soft); padding:8px; line-height:1.5; }
-  .friends-empty b{ color:var(--brass); }
+  .friends-empty b{ color:var(--brass-text); }
   .friend-row{
     display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px;
     font-size:13px; color:var(--ink);
@@ -1353,7 +1391,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     flex:0 0 auto; background:none; border:none; cursor:pointer; color:var(--ink-soft);
     font-size:19px; font-weight:700; padding:2px 6px; line-height:1; transition:transform .15s ease;
   }
-  .spotify-playlist-expand:hover{ color:var(--brass); }
+  .spotify-playlist-expand:hover{ color:var(--brass-text); }
   .spotify-playlist-row.expanded .spotify-playlist-expand{ transform:rotate(90deg); }
   .spotify-track-row{
     display:flex; align-items:center; gap:8px; padding:5px 4px 5px 18px;
@@ -1482,7 +1520,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .modal-head{ display:flex; align-items:center; justify-content:space-between; }
   .modal-title{ font-family:"Big Shoulders Display",sans-serif; font-size:20px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.03em; }
   .modal-close{ background:none; border:none; color:var(--ink-soft); font-size:22px; cursor:pointer; line-height:1; padding:2px 4px; }
-  .modal-close:hover{ color:var(--brass); }
+  .modal-close:hover{ color:var(--brass-text); }
   .sound-volume-row{ display:flex; align-items:center; gap:8px; margin-top:10px; }
   .sound-vol-label{ font-size:11px; color:var(--ink-soft); flex:0 0 auto; }
   .sound-volume-row input[type="range"]{ flex:1 1 auto; }
@@ -1557,7 +1595,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .rush-score-card{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .rush-score{
     font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:50px;
-    line-height:1; color:var(--brass); font-variant-numeric:tabular-nums;
+    line-height:1; color:var(--brass-text); font-variant-numeric:tabular-nums;
   }
   .rush-strikes{ display:flex; gap:6px; }
   .rush-strike{
@@ -1612,7 +1650,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .rush-hud-score{
     display:flex; align-items:center; gap:4px;
     font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:26px;
-    line-height:1; color:var(--brass); font-variant-numeric:tabular-nums;
+    line-height:1; color:var(--brass-text); font-variant-numeric:tabular-nums;
   }
   .rush-hud-score-ico{ color:var(--good); display:flex; }
   .rush-hud-score-ico svg{ width:15px; height:15px; display:block; }
@@ -1645,13 +1683,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .rush-turn-king:empty{ visibility:hidden; }
   .rush-turn-side{
     font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:58px;
-    line-height:.95; text-transform:uppercase; color:var(--brass);
+    line-height:.95; text-transform:uppercase; color:var(--brass-text);
   }
-  /* Bauhaus's yellow on its off-white card is about 1.6:1 -- too faint for
-     the one word this card exists to show. Its ink is ~17:1 light, and
-     near-white on the dark theme's card. (Its Jost face is too wide for
-     "WHITE" at this size, so the font stays.) */
-  :root[data-skin="bauhaus"] .rush-turn-side{ color:var(--ink); }
   .rush-turn-label{
     font-family:"JetBrains Mono",monospace; font-size:13.5px; letter-spacing:.08em;
     text-transform:uppercase; color:var(--ink-soft);
@@ -1694,13 +1727,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       padding:20px 19px; box-shadow:var(--shadow); text-align:center;
     }
     .wrap.play-mode:has(#view-play-rush.active){ max-width:1472px; }
-  }
-  /* That wider page puts the side panel's right edge under the fixed
-     settings button (16-56px from the top, 16-56px from the right) until
-     the window is roughly 1544px plus a scrollbar wide. Padding inside the
-     sticky panel drops the clock card below it, scrolled or not. */
-  @media (min-width:1330px) and (max-width:1559.98px){
-    #view-play-rush.has-side > .side-panel{ padding-top:56px; }
   }
 
   .verdict-row{ display:flex; gap:12px; }
@@ -1749,7 +1775,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     text-align:center; font-family:"JetBrains Mono",monospace;
     font-size:12.5px; color:var(--ink-soft); min-height:18px;
   }
-  .arcade-prompt b{ color:var(--brass); }
+  .arcade-prompt b{ color:var(--brass-text); }
 
   /* Feedback: a quick tint + shake instead of a modal, so the run never stalls */
   .flash-good{ animation:flashGood .45s ease-out; }
@@ -2077,7 +2103,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     font-weight:700;
     letter-spacing:.14em;
     text-transform:uppercase;
-    color:var(--brass);
+    color:var(--brass-text);
   }
   h1.title{
     font-family:"Big Shoulders Display",system-ui,sans-serif;
@@ -2153,7 +2179,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .plaque-cta{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; gap:10px; justify-content:center; min-width:140px; }
   .history-cta{
     padding:6px 18px; border-radius:6px; border:1.5px solid var(--brass);
-    background:none; color:var(--brass); font-family:"JetBrains Mono",monospace;
+    background:none; color:var(--brass-text); font-family:"JetBrains Mono",monospace;
     font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase;
     cursor:pointer;
   }
@@ -2353,7 +2379,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     background:none; border:none; color:var(--ink-soft); font-size:13px;
     cursor:pointer; display:flex; align-items:center; gap:6px; padding:4px 0; width:fit-content;
   }
-  .back-link:hover{ color:var(--brass); }
+  .back-link:hover{ color:var(--brass-text); }
 
   .hotkey-grid{ display:flex; flex-direction:column; gap:10px; }
   .hotkey-item{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; }
@@ -2417,7 +2443,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hud-left{ display:flex; flex-direction:column; gap:2px; }
   .hud-mode{
     font-family:"JetBrains Mono",monospace;
-    font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--brass);
+    font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--brass-text);
     display:flex; align-items:center; gap:7px;
   }
   .side-dot{
@@ -2728,7 +2754,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     font-weight:700;
     font-size:20px;
     font-variant-numeric:tabular-nums;
-    color:var(--brass);
+    color:var(--brass-text);
   }
   .stat-label{
     font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-top:2px;
@@ -6382,9 +6408,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      `render` must be the function that redraws the board; this measures the
      piece before and after, then plays the difference backwards so the new
      element appears to travel from the old square. */
+  // Where a dragged piece was let go, recorded by wireDrag just before it
+  // calls onDrop and cleared at the end of that same task. A move made by
+  // dragging then snaps in from under the finger instead of replaying the
+  // whole trip from its start square: the piece used to vanish at the
+  // drop point, reappear back where it was picked up and slide over again,
+  // which on a touch screen read as the move landing late every time.
+  let dragDropOrigin = null;
   function animatePieceMove(boardEl, fromIdx, toIdx, render){
+    const drop = dragDropOrigin && dragDropOrigin.boardEl===boardEl && dragDropOrigin.to===toIdx ? dragDropOrigin : null;
+    dragDropOrigin = null;
     const fromEl = boardEl.querySelector('[data-idx="'+fromIdx+'"] .piece-wrap');
-    const before = fromEl ? fromEl.getBoundingClientRect() : null;
+    const before = drop ? drop.rect : (fromEl ? fromEl.getBoundingClientRect() : null);
     render();
     const toEl = boardEl.querySelector('[data-idx="'+toIdx+'"] .piece-wrap');
     if(!before || !toEl) return;
@@ -6405,12 +6440,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // most pronounced at the start (matching cubic-bezier(.22,1,.36,1)'s
     // fast-out shape) and has fully resolved by the time the piece
     // decelerates into place, rather than lingering after arrival.
+    // A drop only travels the few pixels from the finger to the square's
+    // centre, so it gets a short plain snap: no stretch, which reads as
+    // fast travel and would look wrong over that distance.
     const angleDeg = Math.atan2(dy, dx) * 180/Math.PI;
-    const stretch = 'rotate('+angleDeg+'deg) scaleX(1.28) scaleY(.82) rotate('+(-angleDeg)+'deg)';
+    const stretch = drop ? '' : 'rotate('+angleDeg+'deg) scaleX(1.28) scaleY(.82) rotate('+(-angleDeg)+'deg)';
     toEl.style.transition = 'none';
     toEl.style.transform = 'translate('+dx+'px,'+dy+'px) '+stretch;
     void toEl.offsetWidth;                       // commit the start frame
-    toEl.style.transition = 'transform .19s cubic-bezier(.22,1,.36,1)';
+    toEl.style.transition = drop ? 'transform .09s ease-out' : 'transform .19s cubic-bezier(.22,1,.36,1)';
     toEl.style.transform = 'translate(0,0) scale(1)';
     const done = ()=>{
       toEl.removeEventListener('transitionend', done);
@@ -6539,6 +6577,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const to = over ? Number(over.dataset.idx) : null;
       if(to!=null && drag.targets.has(to)){
         const from = drag.from;
+        // The ghost's own box, measured before teardown removes it -- see
+        // dragDropOrigin above animatePieceMove. Only good for this task:
+        // a move applied later (a promotion pick) slides normally, since
+        // the piece is back on its start square by then.
+        dragDropOrigin = { boardEl, to, rect: drag.ghost.getBoundingClientRect() };
+        setTimeout(()=>{ dragDropOrigin = null; }, 0);
         teardown();
         opts.onDrop(from, to);
         return;
@@ -6926,6 +6970,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!soundPrefs.bySkin[skin]) soundPrefs.bySkin[skin] = { custom:{} };
     return soundPrefs.bySkin[skin];
   }
+  // One loaded <audio> per sound, reused, instead of a new element (and a
+  // fresh decode of its whole data: URL) for every single move. iOS in
+  // particular is slow to spin up a media element, so a brand-new one per
+  // sound made every move's click start noticeably late there. A second
+  // copy only gets made when the same sound has to overlap itself.
+  const soundPool = new Map();
+  function pooledAudio(src){
+    let list = soundPool.get(src);
+    if(!list){
+      if(soundPool.size > 40) soundPool.clear();   // old uploads, replaced since
+      list = [];
+      soundPool.set(src, list);
+    }
+    let a = list.find(el => el.paused || el.ended);
+    if(!a){
+      if(list.length >= 3) a = list[0];
+      else { a = new Audio(src); a.preload = 'auto'; list.push(a); }
+    }
+    return a;
+  }
   function playSound(key){
     if(!soundPrefs.enabled) return;
     const skin = (lookPrefs && lookPrefs.skin) || 'felt';
@@ -6934,8 +6998,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const src = (custom && custom.data) || skinDefault || SOUND_DATA[key];
     if(!src) return;
     try{
-      const a = new Audio(src);
+      const a = pooledAudio(src);
+      a.muted = false;
       a.volume = soundPrefs.volume==null ? 1 : soundPrefs.volume;
+      try{ a.currentTime = 0; }catch(e){}
       a.play().catch(()=>{});
     }catch(e){}
   }
@@ -6963,8 +7029,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(unlocked) return;
       unlocked = true;
       try{
-        const a = new Audio(SOUND_DATA.move);
+        // From the pool, so this same unlocked, already-loaded element is
+        // the one the first real move sound plays through.
+        const a = pooledAudio(SOUND_DATA.move);
         a.volume = 0;
+        a.muted = true;     // iOS ignores volume on media elements; muted it honours
         a.play().then(()=>{ a.pause(); a.currentTime = 0; }).catch(()=>{});
       }catch(e){}
     }
@@ -14395,7 +14464,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function rushPaintClock(ms){
     const total = runRush.cfg.seconds*1000;
-    rushClockEl.textContent = rushHudClockEl.textContent = rushFormatClock(ms);
+    // Called every frame, but the digits change once a second: rewriting the
+    // same text 60 times a second still makes the browser re-lay-out the
+    // HUD and side panel each frame, which a slower iPad feels.
+    const txt = rushFormatClock(ms);
+    if(rushClockEl.textContent !== txt) rushClockEl.textContent = rushHudClockEl.textContent = txt;
     rushClockEl.classList.toggle('low', ms <= 10000);
     rushHudClockEl.classList.toggle('low', ms <= 10000);
     rushTimerEl.style.transform = 'scaleX(' + (total ? Math.max(0, Math.min(1, ms/total)) : 0) + ')';
