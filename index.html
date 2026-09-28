@@ -1519,6 +1519,96 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .timer-fill.warn{ background:var(--partial); }
   .timer-fill.danger{ background:var(--bad); }
 
+  /* ---- Puzzle Rush (chess.com style) ----
+     Built from the arcade drills' own surfaces and type. The side panel is
+     a clock card, a score + strikes card, and the grid of attempted-puzzle
+     tiles chess.com shows next to the board (green = solved, red = missed,
+     each labelled with that puzzle's rating). */
+  .rush-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    box-shadow:var(--shadow); padding:12px 14px;
+  }
+  .rush-lab{
+    font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+  .rush-clock-card{ display:flex; flex-direction:column; gap:8px; }
+  .rush-clock{
+    font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:46px;
+    line-height:1; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  .rush-clock.low{ color:var(--bad); }
+  .rush-score-card{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .rush-score{
+    font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:50px;
+    line-height:1; color:var(--brass); font-variant-numeric:tabular-nums;
+  }
+  .rush-strikes{ display:flex; gap:6px; }
+  .rush-strike{
+    width:28px; height:28px; border-radius:7px; border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center; color:var(--line);
+    transition:background .18s ease, border-color .18s ease, color .18s ease;
+  }
+  .rush-strike svg{ width:14px; height:14px; display:block; }
+  .rush-strike.on{ background:var(--bad); border-color:var(--bad); color:#fff; }
+  .rush-tiles-card{ display:flex; flex-direction:column; gap:8px; }
+  .rush-tiles{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(50px, 1fr)); gap:6px;
+    max-height:264px; overflow-y:auto;
+  }
+  .rush-tiles:empty{ display:none; }
+  .rush-tile{
+    display:flex; align-items:center; justify-content:center; gap:3px;
+    padding:6px 2px; border-radius:6px; border:1px solid transparent;
+    font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700;
+    font-variant-numeric:tabular-nums; text-decoration:none;
+  }
+  .rush-tile svg{ width:11px; height:11px; flex-shrink:0; display:block; }
+  .rush-tile.solved{ background:var(--good-soft); border-color:var(--good); color:var(--good); }
+  .rush-tile.missed{ background:var(--bad-soft); border-color:var(--bad); color:var(--bad); }
+  a.rush-tile:hover{ filter:brightness(.94); }
+  a.rush-tile:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .rush-bests{ display:flex; gap:10px; flex-wrap:wrap; }
+  .rush-best{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:8px;
+    padding:8px 14px; min-width:92px; display:flex; flex-direction:column; gap:3px;
+  }
+  .rush-best .val{
+    font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:26px;
+    line-height:1; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+  /* The opponent's setup move stays tinted, so a fresh position reads at a
+     glance -- chess.com's own "last move" highlight. A wrong answer's
+     landing square is marked red instead, the way chess.com drops a red X
+     on the piece before moving on. */
+  .sq.last-move{
+    box-shadow:inset 0 0 0 999px var(--brass-soft);   /* no color-mix(): Safari before 16.2 */
+    box-shadow:inset 0 0 0 999px color-mix(in srgb, var(--brass-soft) 45%, transparent);
+  }
+  .sq.rush-miss{ box-shadow:inset 0 0 0 999px var(--bad-soft); }
+  /* The side panel only sits beside the board from 1180px up; below that
+     it stacks under the board, out of sight for the whole rush on a laptop,
+     an iPad or a phone. So the HUD carries its own compact score, strikes
+     and clock there, the way every other timed drill keeps its clock up
+     top -- and the board is sized to the window's height as well as its
+     width (like the arcade drills), so HUD and board fit on one screen. */
+  .rush-hud-stats{ display:flex; align-items:center; gap:10px; }
+  .rush-hud-score{
+    display:flex; align-items:center; gap:4px;
+    font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:26px;
+    line-height:1; color:var(--brass); font-variant-numeric:tabular-nums;
+  }
+  .rush-hud-score-ico{ color:var(--good); display:flex; }
+  .rush-hud-score-ico svg{ width:15px; height:15px; display:block; }
+  .rush-hud-strikes{ gap:4px; }
+  .rush-hud-strikes .rush-strike{ width:20px; height:20px; border-radius:5px; }
+  .rush-hud-strikes .rush-strike svg{ width:10px; height:10px; }
+  @media (min-width:1180px){ .rush-hud-stats{ display:none; } }
+  #view-play-rush{
+    --sq: clamp(30px, min(calc((100vh - 140px) / 8), calc((100vw - 100px) / 8)), 85px);
+    --sq: clamp(30px, min(calc((100dvh - 140px) / 8), calc((100vw - 100px) / 8)), 85px);
+  }
+
   .verdict-row{ display:flex; gap:12px; }
   .verdict-btn{
     flex:1; padding:15px 10px; border-radius:12px; cursor:pointer;
@@ -2972,6 +3062,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="drill-name">Puzzles</div>
         <div class="drill-desc">Real Lichess puzzles, filtered by theme, on your own board and pieces. Drag the solving move; a wrong try just flashes and resets, no penalty. Needs a connection and your own free Lichess API token.</div>
       </button>
+      <button class="drill-card arcade" id="card-rush">
+        <div class="drill-head">
+          <span class="drill-num">DRILL 11</span>
+          <span class="chip arcade-chip">Arcade</span>
+        </div>
+        <div class="drill-name">Puzzle Rush</div>
+        <div class="drill-desc">Chess.com-style. Real puzzles that start easy and get harder with every one you solve &#8212; how many can you get before the clock runs out? One wrong move is a strike; three strikes and the rush is over. 3 Minute, 5 Minute, or Survival. No Lichess account needed.</div>
+      </button>
 
 </div>
   </section>
@@ -4113,6 +4211,117 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="ol-movelist-wrap">
         <div class="ol-movelist-title">Moves</div>
         <div class="ol-movelist" id="pz-movelist"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SETUP: PUZZLE RUSH ============ -->
+  <section class="view" id="view-setup-rush">
+    <button class="back-link" data-nav="menu">&larr; All drills</button>
+    <div class="panel">
+      <div>
+        <div class="eyebrow">Drill 11 &#183; Arcade</div>
+        <h1 class="title" style="font-size:26px;">Puzzle Rush</h1>
+      </div>
+
+      <div class="field-hint" style="margin-top:-6px;">Solve as many puzzles as you can. They start easy and get harder with every one you finish &#8212; from under 1000 up past 2000. One wrong move is a strike and sends you straight on to the next puzzle, no retries; three strikes ends the rush. Puzzles come live from Lichess and never touch your Lichess puzzle rating.</div>
+
+      <div class="field">
+        <div class="field-label">Mode</div>
+        <div class="toggle-row" id="rush-mode-row">
+          <button class="toggle" data-val="3">3 Minute</button>
+          <button class="toggle active" data-val="5">5 Minute</button>
+          <button class="toggle" data-val="survival">Survival</button>
+        </div>
+        <div class="field-hint" id="rush-mode-hint">Five minutes on the clock. Three strikes and you're out.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Personal bests</div>
+        <div class="rush-bests" id="rush-bests"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="start-rush-drill">Start rush</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PLAY: PUZZLE RUSH ============ -->
+  <section class="view has-side" id="view-play-rush">
+    <div class="hud">
+      <div class="hud-left">
+        <div class="hud-mode"><span class="side-dot w" id="rush-side-dot"></span><span id="rush-hud-mode-text">GET READY</span></div>
+        <div class="hud-round" id="rush-hud-round">Loading puzzles&#8230;</div>
+      </div>
+      <div class="rush-hud-stats">
+        <span class="rush-hud-score"><span class="rush-hud-score-ico" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span id="rush-hud-score">0</span></span>
+        <span class="rush-strikes rush-hud-strikes" id="rush-hud-strikes"></span>
+        <div class="clock" id="rush-hud-clock">5:00</div>
+      </div>
+    </div>
+
+    <div class="anno-hint">
+      <span>Right-click-drag: arrow</span>
+      <span>&#183; plain right-click: highlight</span>
+      <span>&#183; hold <span class="kbd">Z</span><span class="pen-dot" style="background:#2ecc71;"></span><span class="kbd">R</span><span class="pen-dot" style="background:#e5534b;"></span><span class="kbd">F</span><span class="pen-dot" style="background:#3b9cff;"></span><span class="kbd">C</span><span class="pen-dot" style="background:#e8b339;"></span> for color</span>
+    </div>
+
+    <div class="board-frame" style="position:relative;">
+      <div class="board-col">
+        <div class="board-inner">
+          <div class="rank-labels" id="rush-rank-labels"></div>
+          <div class="board" id="rush-board"></div>
+        </div>
+        <div class="file-labels" id="rush-file-labels"></div>
+      </div>
+      <div class="announce" id="rush-announce"><span id="rush-announce-text"></span></div>
+    </div>
+
+    <button class="back-link" data-nav="setup-rush" id="rush-end-link">&larr; End rush</button>
+
+    <div class="side-panel">
+      <div class="rush-card rush-clock-card" id="rush-clock-card">
+        <div class="rush-lab" id="rush-mode-label">5 Minute</div>
+        <div class="rush-clock" id="rush-clock">5:00</div>
+        <div class="timer-track" id="rush-timer-track"><div class="timer-fill" id="rush-timer"></div></div>
+      </div>
+
+      <div class="rush-card rush-score-card" id="rush-score-card">
+        <div>
+          <div class="rush-lab">Score</div>
+          <div class="rush-score" id="rush-score">0</div>
+        </div>
+        <div>
+          <div class="rush-lab" style="text-align:right;">Strikes</div>
+          <div class="rush-strikes" id="rush-strikes" style="margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <div class="arcade-prompt" id="rush-status">&nbsp;</div>
+
+      <div class="result-banner" id="rush-result-banner" style="display:none;">
+        <div class="result-line" id="rush-result-line">Rush over</div>
+        <div class="result-sub" id="rush-result-sub"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="rush-again">Play again</button>
+          <button class="btn btn-ghost" data-nav="setup-rush">Change mode</button>
+        </div>
+      </div>
+
+      <div class="result-banner" id="rush-error-banner" style="display:none;">
+        <div class="result-line" id="rush-error-line">Couldn't load puzzles</div>
+        <div class="result-sub" id="rush-error-sub"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="rush-retry">Try again</button>
+          <button class="btn btn-ghost" data-nav="setup-rush">Change mode</button>
+        </div>
+      </div>
+
+      <div class="rush-card rush-tiles-card">
+        <div class="rush-lab">Puzzles</div>
+        <div class="rush-tiles" id="rush-tiles"></div>
+        <div class="field-hint" id="rush-tiles-hint">Every puzzle you attempt lands here. Once the rush is over, tap any of them to open it on Lichess and see the answer.</div>
       </div>
     </div>
   </section>
@@ -5759,6 +5968,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                     fields:[ {param:'theme', type:'toggle', row:'puzzle-theme-grid'},
                              {param:'difficulty', type:'toggle', row:'puzzle-diff-row'},
                              {param:'color', type:'toggle', row:'puzzle-color-row'} ] },
+    rush:         { view:'setup-rush',       card:'card-rush',        startBtn:'start-rush-drill',
+                    fields:[ {param:'mode', type:'toggle', row:'rush-mode-row'} ] },
     'play-bot':   { view:'setup-bot',        card:'card-play-bot',    startBtn:null,
                     fields:[ {param:'level', type:'toggle', row:'bot-level-row'},
                              {param:'color', type:'toggle', row:'bot-color-row'},
@@ -13578,7 +13789,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       });
     }catch(err){
       if(myFetch!==pzFetchToken) return;
-      pzShowError('Couldn\u2019t reach Lichess.', 'Puzzles need an internet connection \u2014 the other nine drills still work offline.');
+      pzShowError('Couldn\u2019t reach Lichess.', 'Puzzles need an internet connection \u2014 every drill except Puzzle Rush still works offline.');
     }
   }
 
@@ -13610,6 +13821,884 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     refreshStatsPz();
     fetchNewPuzzle();
   });
+
+  /* ================= PUZZLE RUSH =================
+     Chess.com's Puzzle Rush on Lichess's puzzle pool: puzzles start easy
+     and climb steadily, a wrong move is a strike that moves straight on to
+     the next puzzle (no retry), three strikes or the clock running out ends
+     the rush, and nothing is ever reported back -- a rush never touches a
+     puzzle rating, same as chess.com's.
+
+     Puzzles come from GET /api/puzzle/batch/mix deliberately WITHOUT the
+     saved Lichess token, even when one exists. Anonymous requests are
+     banded by absolute rating (the spec's "1500 if anonymous" baseline:
+     measured live: easiest ~650-1100, easier/normal ~1270-1470, harder
+     ~1700-2000, hardest ~2000-2350) -- the same fixed easy-to-hard climb
+     for everyone, like chess.com's. Sending a token would re-centre every band on the
+     user's own puzzle rating instead. It also means Rush needs no Lichess
+     account at all.
+
+     Anonymous calls spend more of Lichess's per-IP fetch budget (roughly
+     300 puzzles an hour), so fetched puzzles go into a local pool that
+     survives across rushes and reloads, and each band is only refilled
+     when it runs low: "Play again" usually starts with no network wait at
+     all, and one rush costs a handful of puzzles of budget rather than a
+     fresh hundred. Ids already played are remembered so the same puzzle
+     doesn't come round again soon. */
+  views['setup-rush'] = document.getElementById('view-setup-rush');
+  views['play-rush'] = document.getElementById('view-play-rush');
+
+  const RUSH_MODES = {
+    '3':        { label:'3 Minute', seconds:180, hint:"Three minutes on the clock. Three strikes and you're out." },
+    '5':        { label:'5 Minute', seconds:300, hint:"Five minutes on the clock. Three strikes and you're out." },
+    'survival': { label:'Survival', seconds:0,   hint:'No clock at all. The rush only ends on your third strike.' }
+  };
+  const RUSH_TIERS = ['easiest','easier','normal','harder','hardest'];
+  // Six puzzles from each of Lichess's five anonymous difficulty bands in
+  // turn -- from under 1000 up past 2000 over the first two dozen puzzles, a
+  // steeper climb than chess.com's own +50 a puzzle but starting far higher
+  // than its 100, since Lichess serves nothing that easy. The top band has
+  // no end, so it's drawn in blocks instead.
+  const RUSH_TIER_LEN = 6;
+  const RUSH_LAST_BLOCK = 10;
+  const RUSH_FETCH_NB = 30;
+  const RUSH_LOW_WATER = 10;
+  const RUSH_MAX_STRIKES = 3;
+  const RUSH_BEST_KEY = 'wavyChessPrepRushBest';
+  const RUSH_POOL_KEY = 'wavyChessPrepRushPool';
+  const RUSH_SEEN_MAX = 1500;
+  const RUSH_TILES_HINT_LIVE = 'Every puzzle you attempt lands here. Once the rush is over, tap any of them to open it on Lichess and see the answer.';
+  const RUSH_CHECK_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const RUSH_X_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+
+  const rushBoardEl = document.getElementById('rush-board');
+  const rushRankLabelsEl = document.getElementById('rush-rank-labels');
+  const rushFileLabelsEl = document.getElementById('rush-file-labels');
+  const rushAnnounceEl = document.getElementById('rush-announce');
+  const rushAnnounceTextEl = document.getElementById('rush-announce-text');
+  const rushStatusEl = document.getElementById('rush-status');
+  const rushSideDotEl = document.getElementById('rush-side-dot');
+  const rushHudModeTextEl = document.getElementById('rush-hud-mode-text');
+  const rushHudRoundEl = document.getElementById('rush-hud-round');
+  const rushModeLabelEl = document.getElementById('rush-mode-label');
+  const rushClockEl = document.getElementById('rush-clock');
+  const rushTimerTrackEl = document.getElementById('rush-timer-track');
+  const rushTimerEl = document.getElementById('rush-timer');
+  const rushScoreEl = document.getElementById('rush-score');
+  const rushScoreCardEl = document.getElementById('rush-score-card');
+  const rushStrikesEl = document.getElementById('rush-strikes');
+  const rushHudScoreEl = document.getElementById('rush-hud-score');
+  const rushHudStrikesEl = document.getElementById('rush-hud-strikes');
+  const rushHudClockEl = document.getElementById('rush-hud-clock');
+  const rushEndLinkEl = document.getElementById('rush-end-link');
+  const rushTilesEl = document.getElementById('rush-tiles');
+  const rushTilesHintEl = document.getElementById('rush-tiles-hint');
+  const rushResultBanner = document.getElementById('rush-result-banner');
+  const rushResultLineEl = document.getElementById('rush-result-line');
+  const rushResultSubEl = document.getElementById('rush-result-sub');
+  const rushErrorBanner = document.getElementById('rush-error-banner');
+  const rushModeHintEl = document.getElementById('rush-mode-hint');
+
+  // runRush = the whole rush (score, strikes, queued puzzles, attempts);
+  // roundRush = the one puzzle currently on the board. rushToken is bumped
+  // on every new puzzle, run end, restart and view change, so any timer or
+  // await that outlives the thing it was for can tell and bail.
+  let runRush = null;
+  let roundRush = null;
+  let rushSelected = null;
+  let rushPreClickSelected = null;
+  let rushToken = 0;
+  let rushReplyTimer = null, rushNextTimer = null, rushRevealTimer = null;
+  let rushClockTimeout = null, rushRaf = null, rushAnnounceTimer = null;
+  const marksRush = newMarks();
+  const arrowSvgRush = makeArrowOverlay();
+
+  const settingsRush = { mode:5 };
+  wireToggleRow('rush-mode-row','mode',settingsRush);
+  document.getElementById('rush-mode-row').addEventListener('click', ()=>{
+    const m = RUSH_MODES[String(settingsRush.mode)];
+    if(m) rushModeHintEl.textContent = m.hint;
+  });
+
+  function rushLoadBests(){
+    try{
+      const b = JSON.parse(localStorage.getItem(RUSH_BEST_KEY));
+      return (b && typeof b==='object') ? b : {};
+    }catch(e){ return {}; }
+  }
+  function rushRenderBests(){
+    const bests = rushLoadBests();
+    const el = document.getElementById('rush-bests');
+    el.innerHTML = '';
+    Object.keys(RUSH_MODES).forEach(key=>{
+      const card = document.createElement('div');
+      card.className = 'rush-best';
+      const lab = document.createElement('div');
+      lab.className = 'rush-lab';
+      lab.textContent = RUSH_MODES[key].label;
+      const val = document.createElement('div');
+      val.className = 'val';
+      val.textContent = Number.isFinite(bests[key]) ? String(bests[key]) : '\u2014';
+      card.appendChild(lab);
+      card.appendChild(val);
+      el.appendChild(card);
+    });
+  }
+  rushRenderBests();
+
+  function rushLoadPool(){
+    let saved = null;
+    try{ saved = JSON.parse(localStorage.getItem(RUSH_POOL_KEY)); }catch(e){}
+    const tiers = {};
+    RUSH_TIERS.forEach(t=>{
+      const arr = (saved && saved.tiers && Array.isArray(saved.tiers[t])) ? saved.tiers[t] : [];
+      tiers[t] = arr.filter(e=> e && e.id && Array.isArray(e.tokens) && e.tokens.length && Array.isArray(e.solution) && e.solution.length);
+    });
+    return { tiers, seen: (saved && Array.isArray(saved.seen)) ? saved.seen.slice(-RUSH_SEEN_MAX) : [] };
+  }
+  const rushPool = rushLoadPool();
+  function rushSavePool(){
+    try{ localStorage.setItem(RUSH_POOL_KEY, JSON.stringify(rushPool)); }catch(e){}
+  }
+
+  // Only the fields a rush needs, with the PGN already cut to the puzzle's
+  // starting position (initialPly+1 plies: the last one is the opponent's
+  // setup move that gets animated in, same convention as fetchNewPuzzle).
+  // Split on anything that isn't a SAN character rather than just spaces,
+  // so a stray newline in the PGN can't glue two moves together.
+  function rushEntryFrom(item){
+    const pz = item && item.puzzle, g = item && item.game;
+    if(!pz || !g || typeof g.pgn!=='string' || !pz.id) return null;
+    if(!Array.isArray(pz.solution) || !pz.solution.length || !Number.isInteger(pz.initialPly)) return null;
+    const tokens = g.pgn.split(/[^a-zA-Z0-9+#=-]+/).filter(Boolean).slice(0, pz.initialPly+1);
+    if(!tokens.length) return null;
+    return { id:String(pz.id), rating:Number(pz.rating)||0, tokens, solution:pz.solution.map(String) };
+  }
+
+  // Lichess asks API clients to make one request at a time, so every Rush
+  // fetch runs through one chain, and a band that's already being fetched
+  // hands back the same promise instead of asking twice.
+  let rushFetchChain = Promise.resolve();
+  const rushInflight = {};
+  function rushRefillTier(tier){
+    if(rushInflight[tier]) return rushInflight[tier];
+    const run = rushFetchChain.then(()=> rushFetchTierNow(tier));
+    rushFetchChain = run.catch(()=>{});
+    const tracked = run.finally(()=>{ if(rushInflight[tier]===tracked) delete rushInflight[tier]; });
+    rushInflight[tier] = tracked;
+    return tracked;
+  }
+  // Every fetch shares the one chain above, so a request that never
+  // settles (Wi-Fi dropping mid-request, an iPad sleeping) would stall all
+  // later ones for good. Give up after a while so it fails like any other
+  // network error and Try again gets a fresh request.
+  const RUSH_FETCH_TIMEOUT_MS = 15000;
+  async function rushFetchTierNow(tier){
+    const ctrl = typeof AbortController==='function' ? new AbortController() : null;
+    const killer = ctrl ? setTimeout(()=> ctrl.abort(), RUSH_FETCH_TIMEOUT_MS) : null;
+    let data;
+    try{
+      const res = await fetch('https://lichess.org/api/puzzle/batch/mix?nb='+RUSH_FETCH_NB+'&difficulty='+tier,
+        ctrl ? { signal:ctrl.signal } : undefined);
+      if(!res.ok){
+        const err = new Error('HTTP '+res.status);
+        err.status = res.status;
+        throw err;
+      }
+      data = await res.json();
+    } finally {
+      clearTimeout(killer);
+    }
+    const pooled = new Set();
+    RUSH_TIERS.forEach(t=> rushPool.tiers[t].forEach(e=> pooled.add(e.id)));
+    const inRun = new Set(runRush ? runRush.queue.map(e=>e.id) : []);
+    const seen = new Set(rushPool.seen);
+    const fresh = [], repeats = [];
+    ((data && data.puzzles) || []).forEach(item=>{
+      const e = rushEntryFrom(item);
+      if(!e || pooled.has(e.id) || inRun.has(e.id)) return;
+      pooled.add(e.id);
+      (seen.has(e.id) ? repeats : fresh).push(e);
+    });
+    // Lichess caches its anonymous pool for about a minute per band, so a
+    // quick refill can come back with only puzzles already played. A
+    // repeat beats stalling the rush with nothing to show.
+    const add = fresh.length ? fresh : repeats;
+    rushPool.tiers[tier] = rushPool.tiers[tier].concat(add);
+    rushSavePool();
+    return add.length;
+  }
+
+  function rushTierIndexFor(k){ return Math.min(RUSH_TIERS.length-1, Math.floor(k / RUSH_TIER_LEN)); }
+
+  // Pulls a random block out of a band's pool into the run's queue, sorted
+  // easiest-first so difficulty climbs inside the band too. Lichess's own
+  // anonymous bands overlap rather than stack (measured live: "easier" and
+  // "normal" both sit mostly around 1270-1340, and nothing lands between
+  // roughly 1470 and 1690), so a band on its own can easily start BELOW
+  // where the previous one ended. Preferring puzzles at least as hard as
+  // the last one already queued keeps the climb from stepping backwards --
+  // and it pulls "normal"'s few 1430-1470 puzzles forward to bridge most of
+  // the gap up to "harder" -- falling back to the band's hardest remaining
+  // puzzles only once nothing at that level is left.
+  function rushDrawBlock(run, tier, want){
+    const pool = rushPool.tiers[tier];
+    const floor = run.queue.length ? run.queue[run.queue.length-1].rating : 0;
+    const above = pool.filter(e=> e.rating >= floor);
+    const below = pool.filter(e=> e.rating < floor).sort((a,b)=> b.rating - a.rating);
+    const picked = [];
+    while(picked.length < want && above.length){
+      picked.push(above.splice(Math.floor(Math.random()*above.length), 1)[0]);
+    }
+    while(picked.length < want && below.length) picked.push(below.shift());
+    const pickedIds = new Set(picked.map(e=>e.id));
+    rushPool.tiers[tier] = pool.filter(e=> !pickedIds.has(e.id));
+    picked.sort((a,b)=> a.rating - b.rating);
+    picked.forEach(e=> run.queue.push(e));
+    rushPool.seen = rushPool.seen.concat(picked.map(e=>e.id)).slice(-RUSH_SEEN_MAX);
+    rushSavePool();
+  }
+
+  // Makes sure run.queue has a puzzle at index n, drawing from the local
+  // pool and only touching the network when a band's pool is empty. Takes
+  // the run explicitly (not the global) so an await that outlives a
+  // restart can never draw puzzles into the NEXT run's queue -- and stops
+  // once the run is over, so a refill landing after the clock runs out
+  // (or after leaving) leaves its puzzles in the pool for the next rush.
+  async function rushEnsureQueued(run, n){
+    let refills = 0;
+    while(runRush===run && !run.over && run.queue.length <= n){
+      const k = run.queue.length;
+      const tierIdx = rushTierIndexFor(k);
+      const tier = RUSH_TIERS[tierIdx];
+      if(!rushPool.tiers[tier].length){
+        if(refills++ >= 2) return;
+        const added = await rushRefillTier(tier);
+        if(!added) return;
+        continue;
+      }
+      const isLast = tierIdx === RUSH_TIERS.length-1;
+      rushDrawBlock(run, tier, isLast ? RUSH_LAST_BLOCK : (tierIdx+1)*RUSH_TIER_LEN - k);
+    }
+  }
+
+  // Keeps the bands the next several puzzles will come from stocked, in
+  // the background, so crossing into a harder band never has to wait on
+  // Lichess mid-rush.
+  function rushPrefetch(run){
+    const tiers = new Set();
+    for(let k = run.queue.length; k <= run.idx + RUSH_TIER_LEN + 2; k++){
+      tiers.add(RUSH_TIERS[rushTierIndexFor(k)]);
+    }
+    tiers.forEach(t=>{
+      if(rushPool.tiers[t].length < RUSH_LOW_WATER) rushRefillTier(t).catch(()=>{});
+    });
+  }
+  function rushWarmPool(){
+    ['easiest','easier'].forEach(t=>{
+      if(rushPool.tiers[t].length < RUSH_TIER_LEN) rushRefillTier(t).catch(()=>{});
+    });
+  }
+
+  function buildLabelsRush(flipped){
+    rushRankLabelsEl.innerHTML = '';
+    (flipped?[0,1,2,3,4,5,6,7]:[7,6,5,4,3,2,1,0]).forEach(r=>{
+      const d = document.createElement('div'); d.className = 'rlabel'; d.textContent = r+1;
+      rushRankLabelsEl.appendChild(d);
+    });
+    rushFileLabelsEl.innerHTML = '';
+    (flipped?[7,6,5,4,3,2,1,0]:[0,1,2,3,4,5,6,7]).forEach(c=>{
+      const d = document.createElement('div'); d.className = 'flabel'; d.textContent = 'abcdefgh'[c];
+      rushFileLabelsEl.appendChild(d);
+    });
+  }
+
+  function rushCanMove(){
+    return !!(runRush && runRush.live && roundRush && !roundRush.done && !roundRush.locked);
+  }
+
+  function renderBoardRush(){
+    rushBoardEl.innerHTML = '';
+    const r = roundRush;
+    if(!r) return;
+    const st = r.state;
+    const flipped = r.flipped;
+    const ranks = flipped?[0,1,2,3,4,5,6,7]:[7,6,5,4,3,2,1,0];
+    const files = flipped?[7,6,5,4,3,2,1,0]:[0,1,2,3,4,5,6,7];
+    const canMove = rushCanMove();
+    const activeFrom = canMove ? rushSelected : null;
+    const targets = activeFrom!=null ? new Set(pzLegalMovesFrom(st, activeFrom).map(m=>m.to)) : null;
+    const lm = r.lastMove;
+    const checkedKing = pzIsInCheck(st, st.turn) ? findKing(st.board, st.turn) : -1;
+    ranks.forEach(rank=>{
+      files.forEach(file=>{
+        const idx = rcIdx(rank,file);
+        const sq = document.createElement('div');
+        sq.className = 'sq ' + (((rank+file)%2===0)?'dark':'light');
+        sq.dataset.idx = idx;
+        if(lm && (idx===lm.from || idx===lm.to)) sq.classList.add('last-move');
+        if(idx===checkedKing) sq.classList.add('in-check');
+        if(idx===r.missSq){ sq.classList.add('rush-miss'); sq.classList.add('ring-wrong'); }
+        const piece = st.board[idx];
+        if(piece){
+          const wrap = document.createElement('span');
+          wrap.className = 'piece-wrap';
+          wrap.innerHTML = PIECE_SVG[piece.color+piece.type.toUpperCase()];
+          sq.appendChild(wrap);
+          if(canMove && piece.color===st.turn) sq.classList.add('draggable');
+        }
+        if(activeFrom===idx) sq.classList.add('picked');
+        if(targets && targets.has(idx)){ sq.classList.add('move-dot'); sq.classList.add('movable'); }
+        rushBoardEl.appendChild(sq);
+      });
+    });
+    rushBoardEl.appendChild(arrowSvgRush);
+    renderMarks(rushBoardEl, arrowSvgRush, marksRush, st.board);
+  }
+
+  wireAnnotations(
+    rushBoardEl,
+    ()=>marksRush,
+    ()=>renderMarks(rushBoardEl, arrowSvgRush, marksRush, roundRush ? roundRush.state.board : []),
+    null, null
+  );
+
+  function rushSetStatus(text, tone){
+    rushStatusEl.textContent = text || '\u00a0';
+    rushStatusEl.style.color = tone==='bad' ? 'var(--bad)' : tone==='good' ? 'var(--good)' : '';
+  }
+  function rushRenderHud(){
+    const r = roundRush;
+    if(!r || !runRush){
+      rushSideDotEl.className = 'side-dot w';
+      rushHudModeTextEl.textContent = 'GET READY';
+      return;
+    }
+    rushSideDotEl.className = 'side-dot ' + r.solverColor;
+    rushHudModeTextEl.textContent = (r.solverColor==='w' ? 'WHITE' : 'BLACK') + ' TO MOVE';
+    rushHudRoundEl.textContent = 'Puzzle ' + (runRush.idx+1) + ' \u00b7 rating ' + r.entry.rating;
+  }
+  function rushRenderScore(){
+    rushScoreEl.textContent = rushHudScoreEl.textContent = runRush ? String(runRush.score) : '0';
+  }
+  function rushRenderStrikes(){
+    [rushStrikesEl, rushHudStrikesEl].forEach(box=>{
+      box.innerHTML = '';
+      for(let i=0; i<RUSH_MAX_STRIKES; i++){
+        const s = document.createElement('span');
+        s.className = 'rush-strike' + (runRush && i < runRush.strikes ? ' on' : '');
+        s.innerHTML = RUSH_X_SVG;
+        box.appendChild(s);
+      }
+    });
+  }
+  // During a rush the tiles are just a record; once it's over each one
+  // becomes a link to that puzzle on Lichess -- chess.com also keeps the
+  // answers hidden until the rush ends, then lets you open any of them.
+  function rushRenderTiles(final){
+    rushTilesEl.innerHTML = '';
+    if(!runRush) return;
+    runRush.attempts.forEach((a, i)=>{
+      const tile = document.createElement(final ? 'a' : 'div');
+      tile.className = 'rush-tile ' + (a.ok ? 'solved' : 'missed');
+      tile.title = 'Puzzle ' + (i+1) + (a.ok ? ', solved' : ', missed') + (final ? ' - open on Lichess' : '');
+      if(final){
+        tile.href = 'https://lichess.org/training/' + encodeURIComponent(a.id);
+        tile.target = '_blank';
+        tile.rel = 'noopener';
+      }
+      tile.innerHTML = a.ok ? RUSH_CHECK_SVG : RUSH_X_SVG;
+      const num = document.createElement('span');
+      num.textContent = String(a.rating);
+      tile.appendChild(num);
+      rushTilesEl.appendChild(tile);
+    });
+    rushTilesEl.scrollTop = rushTilesEl.scrollHeight;
+  }
+
+  function rushFormatClock(ms){
+    const s = Math.max(0, Math.ceil(ms/1000));
+    return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+  }
+  function rushPaintClock(ms){
+    const total = runRush.cfg.seconds*1000;
+    rushClockEl.textContent = rushHudClockEl.textContent = rushFormatClock(ms);
+    rushClockEl.classList.toggle('low', ms <= 10000);
+    rushHudClockEl.classList.toggle('low', ms <= 10000);
+    rushTimerEl.style.transform = 'scaleX(' + (total ? Math.max(0, Math.min(1, ms/total)) : 0) + ')';
+    rushTimerEl.classList.toggle('warn', ms <= 30000 && ms > 10000);
+    rushTimerEl.classList.toggle('danger', ms <= 10000);
+  }
+  function rushResetClockUi(){
+    const cfg = runRush.cfg;
+    rushModeLabelEl.textContent = cfg.label;
+    if(cfg.seconds){
+      rushTimerTrackEl.style.display = '';
+      rushPaintClock(cfg.seconds*1000);
+    } else {
+      rushTimerTrackEl.style.display = 'none';
+      rushClockEl.classList.remove('low');
+      rushHudClockEl.classList.remove('low');
+      rushClockEl.innerHTML = rushHudClockEl.innerHTML = '&#8734;';
+    }
+  }
+  // Wall-clock deadline, not a countdown of ticks: requestAnimationFrame
+  // pauses in a background tab, so it only ever PAINTS the clock; the
+  // timeout (and a check inside every frame, in case a throttled
+  // background timeout fires late) is what actually ends the rush.
+  function rushBeginClock(){
+    const run = runRush;
+    if(!run || !run.cfg.seconds) return;
+    run.endsAt = performance.now() + run.cfg.seconds*1000;
+    clearTimeout(rushClockTimeout);
+    rushClockTimeout = setTimeout(()=>{ if(runRush===run && run.live) rushEndRun('time'); }, run.cfg.seconds*1000 + 30);
+    const tick = ()=>{
+      if(runRush!==run || !run.live){ rushRaf = null; return; }
+      const left = run.endsAt - performance.now();
+      if(left <= 0){ rushRaf = null; rushEndRun('time'); return; }
+      rushPaintClock(left);
+      rushRaf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
+  function rushStopAll(){
+    rushToken++;
+    clearTimeout(rushReplyTimer); clearTimeout(rushNextTimer); clearTimeout(rushRevealTimer); clearTimeout(rushClockTimeout);
+    rushReplyTimer = rushNextTimer = rushRevealTimer = rushClockTimeout = null;
+    if(rushRaf) cancelAnimationFrame(rushRaf);
+    rushRaf = null;
+    clearAnnounce(rushAnnounceEl, rushBoardEl, rushAnnounceTimer);
+    rushAnnounceTimer = null;
+    removePromoPickerRush();
+  }
+
+  function removePromoPickerRush(){
+    const el = document.getElementById('rush-promo-picker');
+    if(el) el.remove();
+  }
+  function showPromoPickerRush(sqEl, color, candidates){
+    removePromoPickerRush();
+    const myRound = roundRush;
+    myRound.locked = true;
+    const frame = rushBoardEl.closest('.board-frame');
+    const frameRect = frame.getBoundingClientRect();
+    const sqRect = sqEl.getBoundingClientRect();
+    const picker = document.createElement('div');
+    picker.className = 'promo-picker';
+    picker.id = 'rush-promo-picker';
+    picker.style.left = (sqRect.left - frameRect.left) + 'px';
+    picker.style.top = (sqRect.top - frameRect.top) + 'px';
+    function cleanup(){
+      picker.remove();
+      document.removeEventListener('pointerdown', onOutside, true);
+      if(roundRush===myRound && !myRound.done) myRound.locked = false;
+      renderBoardRush();
+    }
+    function onOutside(e){ if(!picker.contains(e.target)) cleanup(); }
+    ['q','n','r','b'].forEach(pt=>{
+      const m = candidates.find(c=>c.promotion===pt);
+      if(!m) return;
+      const btn = document.createElement('button');
+      btn.style.width = sqRect.width+'px';
+      btn.style.height = sqRect.width+'px';
+      btn.innerHTML = PIECE_SVG[color+pt.toUpperCase()];
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        picker.remove();
+        document.removeEventListener('pointerdown', onOutside, true);
+        if(roundRush!==myRound || myRound.done) return;
+        myRound.locked = false;
+        rushTryMove(m);
+      });
+      picker.appendChild(btn);
+    });
+    frame.appendChild(picker);
+    setTimeout(()=> document.addEventListener('pointerdown', onOutside, true), 0);
+  }
+
+  function rushResolveDrop(from, to){
+    if(!rushCanMove()) return;
+    rushSelected = null;
+    const candidates = pzLegalMovesFrom(roundRush.state, from).filter(m=>m.to===to);
+    if(!candidates.length){ renderBoardRush(); return; }
+    if(candidates.length===1){ rushTryMove(candidates[0]); return; }
+    showPromoPickerRush(rushBoardEl.querySelector('[data-idx="'+to+'"]'), roundRush.state.turn, candidates);
+  }
+
+  // Any move that delivers mate counts, even if it isn't the listed one --
+  // mate ends the game, so there's nothing left to be "wrong" about (the
+  // same rule lichess.org applies to its own puzzles).
+  function rushTryMove(move){
+    if(!rushCanMove()) return;
+    const uci = idxToAlg(move.from) + idxToAlg(move.to) + (move.promotion||'');
+    const after = pzApplyMoveRaw(roundRush.state, move);
+    const mates = pzIsInCheck(after, after.turn) && pzAllLegalMoves(after).length===0;
+    if(uci===roundRush.solution[roundRush.solIndex] || mates) rushApplySolverMove(move, after, mates);
+    else rushMiss(move, after);
+  }
+
+  // Lock before animating, never re-render after: animatePieceMove renders
+  // the new position synchronously and then runs its slide on that DOM, so
+  // a second render straight afterward would wipe the animation out.
+  function rushApplySolverMove(move, after, mates){
+    const r = roundRush;
+    r.state = after;
+    r.lastMove = { from:move.from, to:move.to };
+    r.solIndex++;
+    r.locked = true;
+    rushSelected = null;
+    animatePieceMove(rushBoardEl, move.from, move.to, renderBoardRush);
+    playSoundSequence(pzMoveSoundKeys(after, move, !!move.captured || !!move.isEP));
+    if(mates || r.solIndex >= r.solution.length){ rushSolved(); return; }
+    const myTok = rushToken;
+    rushReplyTimer = setTimeout(()=> rushApplyReply(myTok), 320);
+  }
+  function rushApplyReply(myTok){
+    const r = roundRush;
+    if(myTok!==rushToken || !r || r.done || !runRush || !runRush.live) return;
+    let res = null;
+    try{ res = pzApplyUCI(r.state, r.solution[r.solIndex]); }catch(e){}
+    if(!res){ rushSolved(); return; }
+    r.state = res.next;
+    r.lastMove = { from:res.move.from, to:res.move.to };
+    r.solIndex++;
+    const last = r.solIndex >= r.solution.length;
+    r.locked = last;
+    animatePieceMove(rushBoardEl, res.move.from, res.move.to, renderBoardRush);
+    playSoundSequence(pzMoveSoundKeys(r.state, res.move, !!res.move.captured || !!res.move.isEP));
+    if(last){ rushSolved(); return; }
+    rushSetStatus('Keep going.');
+  }
+
+  function rushSolved(){
+    const r = roundRush, run = runRush;
+    if(!r || !run || r.done) return;
+    r.done = true;
+    r.locked = true;
+    run.score++;
+    run.highest = Math.max(run.highest, r.entry.rating);
+    run.attempts.push({ id:r.entry.id, rating:r.entry.rating, ok:true });
+    rushRenderScore();
+    rushRenderTiles(false);
+    rushScoreCardEl.classList.remove('flash-good'); void rushScoreCardEl.offsetWidth; rushScoreCardEl.classList.add('flash-good');
+    rushSetStatus('Correct!', 'good');
+    const myTok = rushToken;
+    rushNextTimer = setTimeout(()=>{
+      if(myTok!==rushToken || runRush!==run || !run.live) return;
+      run.idx++;
+      rushLoadPuzzle();
+    }, 420);
+  }
+
+  // Chess.com's rule: a wrong move ends that puzzle on the spot (a strike,
+  // a red X on the piece) and the rush moves straight on -- no retry, and
+  // the answer stays hidden until the rush is over.
+  function rushMiss(move, after){
+    const r = roundRush, run = runRush;
+    r.done = true;
+    r.locked = true;
+    run.strikes++;
+    run.attempts.push({ id:r.entry.id, rating:r.entry.rating, ok:false });
+    r.state = after;
+    r.lastMove = null;
+    r.missSq = move.to;
+    rushSelected = null;
+    animatePieceMove(rushBoardEl, move.from, move.to, renderBoardRush);
+    playSound('check');
+    const frame = rushBoardEl.closest('.board-frame');
+    frame.classList.remove('flash-bad'); void frame.offsetWidth; frame.classList.add('flash-bad');
+    rushRenderStrikes();
+    rushRenderTiles(false);
+    if(run.strikes >= RUSH_MAX_STRIKES){ rushEndRun('strikes'); return; }
+    rushSetStatus('Strike ' + run.strikes + ' of ' + RUSH_MAX_STRIKES + '.', 'bad');
+    const myTok = rushToken;
+    rushNextTimer = setTimeout(()=>{
+      if(myTok!==rushToken || runRush!==run || !run.live) return;
+      run.idx++;
+      rushLoadPuzzle();
+    }, 800);
+  }
+
+  // A quick version of Puzzles' reveal: show the position one move early,
+  // slide the opponent's setup move in, then hand over -- under half a
+  // second, since the clock is running the whole time.
+  function rushRevealAndUnlock(myTok){
+    const r = roundRush;
+    const unlock = ()=>{
+      if(myTok!==rushToken || roundRush!==r || !runRush || !runRush.live) return;
+      r.locked = false;
+      rushSetStatus('Your move.');
+      renderBoardRush();
+    };
+    if(!r.setupMove){ unlock(); return; }
+    rushRevealTimer = setTimeout(()=>{
+      if(myTok!==rushToken || roundRush!==r) return;
+      const mv = r.setupMove;
+      r.state = r.setupState;
+      r.lastMove = { from:mv.from, to:mv.to };
+      animatePieceMove(rushBoardEl, mv.from, mv.to, renderBoardRush);
+      playSoundSequence(pzMoveSoundKeys(r.state, mv, !!mv.captured || !!mv.isEP));
+      rushRevealTimer = setTimeout(unlock, 230);
+    }, 240);
+  }
+
+  async function rushLoadPuzzle(){
+    const run = runRush;
+    if(!run || !run.live) return;
+    const myTok = ++rushToken;
+    clearTimeout(rushReplyTimer); clearTimeout(rushNextTimer); clearTimeout(rushRevealTimer);
+    removePromoPickerRush();
+    rushSelected = null;
+    rushPreClickSelected = null;
+    clearMarksObj(marksRush);
+    if(run.queue.length <= run.idx){
+      if(roundRush) roundRush.locked = true;
+      rushSetStatus('Loading more puzzles\u2026');
+      try{
+        await rushEnsureQueued(run, run.idx);
+      }catch(err){
+        if(myTok===rushToken && runRush===run && run.live) rushEndRun('error', err);
+        return;
+      }
+      if(myTok!==rushToken || runRush!==run || !run.live) return;
+      if(run.queue.length <= run.idx){ rushEndRun('empty'); return; }
+    }
+    const entry = run.queue[run.idx];
+    let replay = null;
+    try{ replay = pzReplayPGNWithStates(entry.tokens); }catch(e){}
+    if(!replay || !replay.plyStates || !replay.plyStates.length){
+      // A PGN this engine can't replay -- drop it and quietly move on,
+      // rather than handing the user a broken board or a strike.
+      run.queue.splice(run.idx, 1);
+      rushLoadPuzzle();
+      return;
+    }
+    const { state, plyStates, moves } = replay;
+    const hasReveal = plyStates.length >= 2 && moves.length >= 1;
+    roundRush = {
+      entry, solution:entry.solution, solIndex:0,
+      state: hasReveal ? plyStates[plyStates.length-2] : state,
+      setupState: state,
+      setupMove: hasReveal ? moves[moves.length-1] : null,
+      solverColor: state.turn, flipped: state.turn==='b',
+      lastMove:null, missSq:null, locked:true, done:false
+    };
+    buildLabelsRush(roundRush.flipped);
+    rushRenderHud();
+    rushSetStatus('');
+    renderBoardRush();
+    if(!run.started){
+      clearAnnounce(rushAnnounceEl, rushBoardEl, rushAnnounceTimer);
+      rushAnnounceTimer = showAnnounce(rushAnnounceEl, rushAnnounceTextEl, rushBoardEl, 'Go!', ()=>{
+        rushAnnounceTimer = null;
+        if(myTok!==rushToken || runRush!==run || !run.live) return;
+        run.started = true;
+        playSound('matchStart');
+        rushBeginClock();
+        rushRevealAndUnlock(myTok);
+      });
+    } else {
+      rushRevealAndUnlock(myTok);
+    }
+    rushPrefetch(run);
+  }
+
+  function rushShowError(err){
+    rushSetStatus('');
+    rushHudRoundEl.textContent = '\u2014';
+    let line = "Couldn't reach Lichess";
+    let sub = 'Puzzle Rush pulls its puzzles live from lichess.org, so it needs an internet connection.';
+    if(err && err.status===429){
+      line = 'Lichess needs a breather';
+      sub = 'Too many puzzle requests in a short time. Wait about a minute, then try again.';
+    } else if(err && err.status){
+      line = 'Lichess API error (' + err.status + ')';
+      sub = 'Try again in a moment.';
+    } else if(!err){
+      line = 'No puzzles came back';
+      sub = 'Lichess sent an empty batch. Try again in a moment.';
+    }
+    document.getElementById('rush-error-line').textContent = line;
+    document.getElementById('rush-error-sub').textContent = sub;
+    rushErrorBanner.style.display = 'flex';
+  }
+
+  async function rushStartRun(){
+    rushStopAll();
+    const key = RUSH_MODES[String(settingsRush.mode)] ? String(settingsRush.mode) : '5';
+    const run = {
+      mode:key, cfg:RUSH_MODES[key], score:0, strikes:0, idx:0, queue:[], attempts:[],
+      live:false, over:false, started:false, highest:0, endsAt:null
+    };
+    runRush = run;
+    roundRush = null;
+    rushSelected = null;
+    rushPreClickSelected = null;
+    clearMarksObj(marksRush);
+    rushResultBanner.style.display = 'none';
+    rushErrorBanner.style.display = 'none';
+    rushEndLinkEl.innerHTML = '&larr; End rush';
+    rushTilesHintEl.textContent = RUSH_TILES_HINT_LIVE;
+    rushResetClockUi();
+    rushRenderScore();
+    rushRenderStrikes();
+    rushRenderTiles(false);
+    renderBoardRush();
+    buildLabelsRush(false);
+    rushRenderHud();
+    rushHudRoundEl.textContent = 'Loading puzzles\u2026';
+    rushSetStatus('Loading puzzles\u2026');
+    const startTok = rushToken;
+    try{
+      await rushEnsureQueued(run, 0);
+    }catch(err){
+      if(startTok===rushToken && runRush===run) rushShowError(err);
+      return;
+    }
+    if(startTok!==rushToken || runRush!==run) return;
+    if(!run.queue.length){ rushShowError(null); return; }
+    run.live = true;
+    rushLoadPuzzle();
+  }
+
+  function rushEndRun(reason, err){
+    const run = runRush;
+    if(!run || !run.live) return;
+    run.live = false;
+    run.over = true;
+    rushStopAll();
+    const r = roundRush;
+    if(r && !r.locked){ r.locked = true; rushSelected = null; renderBoardRush(); }
+    if(run.cfg.seconds && run.started) rushPaintClock(reason==='time' ? 0 : Math.max(0, run.endsAt - performance.now()));
+    const bests = rushLoadBests();
+    const prev = Number.isFinite(bests[run.mode]) ? bests[run.mode] : null;
+    const isBest = run.score > 0 && (prev===null || run.score > prev);
+    if(isBest){
+      bests[run.mode] = run.score;
+      try{ localStorage.setItem(RUSH_BEST_KEY, JSON.stringify(bests)); }catch(e){}
+    }
+    rushRenderBests();
+    // A rush Lichess cut short still keeps a best it earned (the score can
+    // only be lower than a full run's), but its title says why it stopped
+    // rather than letting "New personal best!" hide a lost connection.
+    const cutShort = reason==='error' || reason==='empty';
+    const status = err && err.status;
+    const title = isBest && !cutShort ? 'New personal best!'
+      : reason==='time' ? "Time's up"
+      : reason==='strikes' ? 'Three strikes'
+      : reason==='error' ? (status===429 ? 'Lichess needs a breather' : status ? 'Lichess API error' : 'Lost connection')
+      : reason==='quit' ? 'Rush ended'
+      : 'Out of puzzles';
+    const bits = ['Score ' + run.score];
+    if(isBest && cutShort) bits.push('still a new personal best');
+    else if(isBest) bits.push(prev===null ? 'your first ' + run.cfg.label + ' rush' : 'previous best ' + prev);
+    else if(prev!==null) bits.push('best ' + prev);
+    if(run.highest) bits.push('hardest solved ' + run.highest);
+    let sub = bits.join(' \u00b7 ');
+    if(reason==='error'){
+      sub += status===429 ? '. Too many puzzle requests in a short time, so wait about a minute before the next rush.'
+        : status ? '. Lichess returned an error (' + status + ') for the next puzzle.'
+        : ". Couldn't reach Lichess for the next puzzle.";
+    }
+    if(reason==='empty') sub += ". Lichess didn't send any more puzzles.";
+    rushResultLineEl.textContent = title;
+    rushResultSubEl.textContent = sub;
+    rushResultBanner.style.display = 'flex';
+    rushEndLinkEl.innerHTML = '&larr; Change mode';
+    rushSetStatus('');
+    rushTilesHintEl.textContent = run.attempts.length
+      ? 'Tap any puzzle to open it on Lichess and see the answer.'
+      : 'No puzzles attempted this time.';
+    rushRenderTiles(true);
+    if(isBest) playWinSound(); else playLoseSound();
+  }
+
+  wireDrag(rushBoardEl, {
+    canDragFrom: (idx)=>{
+      if(!rushCanMove()) return false;
+      const p = roundRush.state.board[idx];
+      return !!p && p.color===roundRush.state.turn;
+    },
+    targetsFor: (from)=> pzLegalMovesFrom(roundRush.state, from).map(m=>m.to),
+    onDrop: (from,to)=> rushResolveDrop(from,to)
+  });
+  // Same press-to-select / click-to-move / press-elsewhere-to-deselect
+  // trio as Puzzles (see there for why selection happens on pointerdown
+  // and why the click reads elementFromPoint rather than e.target).
+  rushBoardEl.addEventListener('pointerdown', (e)=>{
+    if(!rushCanMove() || e.button!==0) return;
+    const sqEl = e.target.closest('.sq');
+    if(!sqEl || !rushBoardEl.contains(sqEl)) return;
+    const idx = Number(sqEl.dataset.idx);
+    rushPreClickSelected = rushSelected;
+    const piece = roundRush.state.board[idx];
+    if(piece && piece.color===roundRush.state.turn && rushSelected!==idx){
+      rushSelected = idx;
+      renderBoardRush();
+    }
+  });
+  rushBoardEl.addEventListener('click', (e)=>{
+    if(!rushCanMove()) return;
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const sqEl = under && under.closest ? under.closest('.sq') : null;
+    if(!sqEl || !rushBoardEl.contains(sqEl)) return;
+    const idx = Number(sqEl.dataset.idx);
+    if(rushPreClickSelected!=null){
+      const targets = pzLegalMovesFrom(roundRush.state, rushPreClickSelected).map(m=>m.to);
+      if(targets.includes(idx) && idx!==rushPreClickSelected){
+        rushResolveDrop(rushPreClickSelected, idx);
+        return;
+      }
+    }
+    if(rushPreClickSelected===idx){
+      rushSelected = null;
+      renderBoardRush();
+      return;
+    }
+    const piece = roundRush.state.board[idx];
+    if(!(piece && piece.color===roundRush.state.turn)){
+      rushSelected = null;
+      renderBoardRush();
+    }
+  });
+  document.addEventListener('pointerdown', (e)=>{
+    if(rushSelected!=null && !rushBoardEl.contains(e.target)){
+      rushSelected = null;
+      renderBoardRush();
+    }
+  }, true);
+
+  // Leaving mid-rush (the home button, a menu link) just abandons it --
+  // only a rush that actually ends counts toward a best.
+  onLeavePlay(()=>{
+    if(runRush){ runRush.live = false; runRush.over = true; }
+    rushStopAll();
+  });
+  // "End rush" is how a Survival run finishes without taking three
+  // strikes on purpose, so while a rush is live it ends it right here --
+  // score, best and review tiles, like any other finish -- instead of
+  // navigating away and throwing the run out. Once the rush is over it's a
+  // plain back link again. Capture phase on document so this runs before
+  // the button's own data-nav listener, which it then stops.
+  document.addEventListener('click', (e)=>{
+    if(!rushEndLinkEl.contains(e.target) || !runRush || !runRush.live) return;
+    e.preventDefault();
+    e.stopPropagation();
+    rushEndRun('quit');
+  }, true);
+
+  document.getElementById('card-rush').addEventListener('click', ()=>{
+    rushRenderBests();
+    showView('setup-rush');
+    rushWarmPool();
+  });
+  document.getElementById('start-rush-drill').addEventListener('click', ()=>{
+    showView('play-rush');
+    rushStartRun();
+  });
+  document.getElementById('rush-again').addEventListener('click', rushStartRun);
+  document.getElementById('rush-retry').addEventListener('click', rushStartRun);
 
   /* ================= PLAY ONLINE =================
      A real Lichess game against a random opponent, via the Board API. Two
