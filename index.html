@@ -1624,6 +1624,84 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     --sq: clamp(30px, min(calc((100vh - 140px) / 8), calc((100vw - 100px) / 8)), 85px);
     --sq: clamp(30px, min(calc((100dvh - 140px) / 8), calc((100vw - 100px) / 8)), 85px);
   }
+  /* The side to move in big type on the board's left -- the slot Puzzles
+     gives its rating badge, placed the same way (see the 1330px rule for
+     Puzzles above for why it's absolutely positioned). Every rush puzzle
+     can flip the board, so which color you're playing needs to read at a
+     glance, the way chess.com's rush shows it. Only where there's room
+     for a third column; narrower than that, the HUD's own turn line is
+     set larger instead. */
+  .rush-turn-badge{ display:none; }
+  /* On a tile of the board's own light-square color: bare on the card, the
+     black king vanished into a dark theme's surface (and the white one
+     into a light theme's) -- a board square is what both are drawn for. */
+  /* The king itself sits in a real .piece-wrap, so it takes the same 80%
+     size, drop shadow and per-skin tint (Hustler, Game Boy, Outer Space)
+     as the pieces on the board. */
+  .rush-turn-king{
+    width:76px; height:76px; display:flex; align-items:center; justify-content:center;
+    background:var(--board-light); border:1px solid var(--board-border); border-radius:10px;
+  }
+  .rush-turn-king:empty{ visibility:hidden; }
+  .rush-turn-side{
+    font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:58px;
+    line-height:.95; text-transform:uppercase; color:var(--brass);
+  }
+  /* Bauhaus's yellow on its off-white card is about 1.6:1 -- too faint for
+     the one word this card exists to show. Its ink is ~17:1 light, and
+     near-white on the dark theme's card. (Its Jost face is too wide for
+     "WHITE" at this size, so the font stays.) */
+  :root[data-skin="bauhaus"] .rush-turn-side{ color:var(--ink); }
+  .rush-turn-label{
+    font-family:"JetBrains Mono",monospace; font-size:13.5px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-soft);
+  }
+  .rush-turn-badge.over{ opacity:.45; }
+  /* A short pop when the color changes from the last puzzle, so a flipped
+     board never goes unnoticed. */
+  .rush-turn-badge.flip{ animation:rushTurnPop .38s ease-out; }
+  @keyframes rushTurnPop{
+    0%{ transform:scale(.9); opacity:.35; }
+    60%{ transform:scale(1.05); opacity:1; }
+    100%{ transform:none; }
+  }
+  @media (prefers-reduced-motion:reduce){ .rush-turn-badge.flip{ animation:none; } }
+  @media (max-width:1329.98px){
+    #view-play-rush .hud-mode{ font-size:15px; }
+    #view-play-rush .hud-mode .side-dot{ width:13px; height:13px; }
+  }
+  @media (min-width:1330px){
+    #view-play-rush.has-side{
+      grid-template-columns:210px minmax(0,1fr) minmax(300px,320px);
+      position:relative;
+    }
+    /* The board's width budget has to shrink by the new column too: the
+       page's 40px padding + 210 + 22 + 22 + the 320px panel (614), plus
+       the frame's 16px padding, 16px rank labels and the board's 4px of
+       border (36), plus a 15px scrollbar and a little slack. Without it, a
+       window right at 1330px pushed the board into its frame's padding
+       (measured: a 701px column holding 16 + 684px of labels and board). */
+    #view-play-rush{
+      --sq: clamp(30px, min(calc((100vh - 140px) / 8), calc((100vw - 672px) / 8)), 85px);
+      --sq: clamp(30px, min(calc((100dvh - 140px) / 8), calc((100vw - 672px) / 8)), 85px);
+    }
+    #view-play-rush.has-side > *{ grid-column:2; }
+    #view-play-rush.has-side > .side-panel{ grid-column:3; }
+    #view-play-rush .rush-turn-badge{
+      grid-column:1; position:absolute; left:0; width:210px;
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      background:var(--surface); border:1px solid var(--line); border-radius:14px;
+      padding:20px 19px; box-shadow:var(--shadow); text-align:center;
+    }
+    .wrap.play-mode:has(#view-play-rush.active){ max-width:1472px; }
+  }
+  /* That wider page puts the side panel's right edge under the fixed
+     settings button (16-56px from the top, 16-56px from the right) until
+     the window is roughly 1544px plus a scrollbar wide. Padding inside the
+     sticky panel drops the clock card below it, scrolled or not. */
+  @media (min-width:1330px) and (max-width:1559.98px){
+    #view-play-rush.has-side > .side-panel{ padding-top:56px; }
+  }
 
   .verdict-row{ display:flex; gap:12px; }
   .verdict-btn{
@@ -4265,6 +4343,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   <!-- ============ PLAY: PUZZLE RUSH ============ -->
   <section class="view has-side" id="view-play-rush">
+    <div class="rush-turn-badge" id="rush-turn-badge">
+      <span class="rush-turn-king" id="rush-turn-king" aria-hidden="true"></span>
+      <div class="rush-turn-side" id="rush-turn-side">&#8212;</div>
+      <div class="rush-turn-label" id="rush-turn-label">Get ready</div>
+    </div>
+
     <div class="hud">
       <div class="hud-left">
         <div class="hud-mode"><span class="side-dot w" id="rush-side-dot"></span><span id="rush-hud-mode-text">GET READY</span></div>
@@ -13907,6 +13991,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const rushHudStrikesEl = document.getElementById('rush-hud-strikes');
   const rushHudClockEl = document.getElementById('rush-hud-clock');
   const rushEndLinkEl = document.getElementById('rush-end-link');
+  const rushTurnBadgeEl = document.getElementById('rush-turn-badge');
+  const rushTurnKingEl = document.getElementById('rush-turn-king');
+  const rushTurnSideEl = document.getElementById('rush-turn-side');
+  const rushTurnLabelEl = document.getElementById('rush-turn-label');
+  let rushTurnShown = null;
+  let rushTurnKingSrc = null;
   const rushTilesEl = document.getElementById('rush-tiles');
   const rushTilesHintEl = document.getElementById('rush-tiles-hint');
   const rushResultBanner = document.getElementById('rush-result-banner');
@@ -14137,6 +14227,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     rushBoardEl.innerHTML = '';
     const r = roundRush;
     if(!r) return;
+    rushDrawTurnKing(rushTurnShown);
     const st = r.state;
     const flipped = r.flipped;
     const ranks = flipped?[0,1,2,3,4,5,6,7]:[7,6,5,4,3,2,1,0];
@@ -14188,12 +14279,78 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!r || !runRush){
       rushSideDotEl.className = 'side-dot w';
       rushHudModeTextEl.textContent = 'GET READY';
+      rushRenderTurnBadge(null);
       return;
     }
     rushSideDotEl.className = 'side-dot ' + r.solverColor;
     rushHudModeTextEl.textContent = (r.solverColor==='w' ? 'WHITE' : 'BLACK') + ' TO MOVE';
+    rushRenderTurnBadge(r.solverColor);
     rushHudRoundEl.textContent = 'Puzzle ' + (runRush.idx+1) + ' \u00b7 rating ' + r.entry.rating;
   }
+  // The big side-to-move card left of the board (wide windows only; the
+  // CSS hides it otherwise). Drawn with the board's own king artwork, like
+  // Puzzles' turn card, so it follows the piece style and skin.
+  function rushRenderTurnBadge(color){
+    rushTurnBadgeEl.classList.remove('over');
+    if(!color){
+      rushTurnBadgeEl.classList.remove('flip');
+      rushDrawTurnKing(null);
+      rushTurnSideEl.innerHTML = '&#8212;';
+      rushTurnLabelEl.textContent = 'Get ready';
+    } else {
+      rushDrawTurnKing(color);
+      rushTurnSideEl.textContent = color==='w' ? 'White' : 'Black';
+      rushTurnLabelEl.textContent = 'to move';
+      if(rushTurnShown && rushTurnShown!==color){
+        rushTurnBadgeEl.classList.remove('flip');
+        // Only while the card is actually on screen: a pop queued on a
+        // hidden card (under 1330px) would sit there and play the moment
+        // the window widened or an iPad turned, long after the change.
+        if(rushTurnBadgeEl.getClientRects().length){
+          void rushTurnBadgeEl.offsetWidth;     // restart the pop if it's mid-play
+          rushTurnBadgeEl.classList.add('flip');
+        }
+      }
+    }
+    rushTurnShown = color;
+    rushPositionTurnBadge();
+  }
+  // Called from renderBoardRush too, so after a mid-rush piece-style or
+  // skin change the card's king switches artwork the moment the board's
+  // pieces do, not only at the next puzzle. Skips the DOM when unchanged.
+  function rushDrawTurnKing(color){
+    const src = color ? PIECE_SVG[color+'K'] : '';
+    if(src === rushTurnKingSrc) return;
+    rushTurnKingSrc = src;
+    rushTurnKingEl.innerHTML = src ? '<span class="piece-wrap">' + src + '</span>' : '';
+  }
+  // Same centring as pzPositionRatingBadge: line the card's middle up
+  // with the board's (the rank 4/5 boundary). offsetHeight, not the
+  // bounding box, so the pop's scale() mid-animation can't skew it.
+  function rushPositionTurnBadge(){
+    if(getComputedStyle(rushTurnBadgeEl).position !== 'absolute'){
+      rushTurnBadgeEl.style.top = '';
+      rushTurnBadgeEl.classList.remove('flip');     // shrunk below 1330px mid-pop
+      return;
+    }
+    const boardRect = rushBoardEl.getBoundingClientRect();
+    const viewRect = views['play-rush'].getBoundingClientRect();
+    if(!boardRect.height || !viewRect.height) return;
+    const top = (boardRect.top - viewRect.top) + boardRect.height/2 - rushTurnBadgeEl.offsetHeight/2;
+    rushTurnBadgeEl.style.top = Math.round(top) + 'px';
+  }
+  // Drop the class once the pop has played (or was cut off by leaving the
+  // view): a CSS animation restarts whenever its element comes back from
+  // display:none, so a leftover class would replay it on returning to Rush
+  // or on widening past 1330px.
+  ['animationend', 'animationcancel'].forEach(type=>
+    rushTurnBadgeEl.addEventListener(type, ()=> rushTurnBadgeEl.classList.remove('flip')));
+  window.addEventListener('resize', rushPositionTurnBadge);
+  // Also re-centre whenever the view's own layout changes -- becoming
+  // visible, the HUD wrapping onto a second line, the window crossing a
+  // breakpoint -- none of which fire a window resize by themselves.
+  if(typeof ResizeObserver==='function') new ResizeObserver(rushPositionTurnBadge).observe(views['play-rush']);
+
   function rushRenderScore(){
     rushScoreEl.textContent = rushHudScoreEl.textContent = runRush ? String(runRush.score) : '0';
   }
@@ -14622,6 +14779,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     rushResultSubEl.textContent = sub;
     rushResultBanner.style.display = 'flex';
     rushEndLinkEl.innerHTML = '&larr; Change mode';
+    rushTurnBadgeEl.classList.add('over');     // nobody is to move any more
     rushSetStatus('');
     rushTilesHintEl.textContent = run.attempts.length
       ? 'Tap any puzzle to open it on Lichess and see the answer.'
