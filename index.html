@@ -841,7 +841,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   /* Play views compete with the board for vertical space, so trim every
      margin above it rather than shrinking the board to make it fit. */
-  .wrap.play-mode{ padding-top:6px; justify-content:center; }
+  .wrap.play-mode{ padding-top:6px; }
+  /* Centre the board vertically when the window has room to spare, but
+     never at the cost of cutting it off. #wrap comes out exactly the
+     viewport's height (measured in play mode: 768px tall in a 1024x768
+     window, with an 1105px view inside it), so a taller play view
+     overflows it -- and justify-content:center splits that overflow half
+     ABOVE the top edge, where no amount of scrolling can reach it (the HUD
+     and the board's top ranks were simply gone on a shorter laptop screen
+     or a phone). Auto
+     margins only ever share out POSITIVE free space: with room to spare
+     they centre, and once the content is taller they collapse to zero and
+     it starts at the top like any page, scrolling down as normal. */
+  .wrap.play-mode > .view.active{ margin-top:auto; margin-bottom:auto; }
   .wrap.play-mode .view.active{ gap:6px; }
   .wrap.play-mode .back-link{ padding:0; }
   /* Both floating buttons are fixed to the viewport's right edge, together
