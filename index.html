@@ -229,7 +229,7 @@
      branches near the tile's own corners keep cracks reaching into every
      seam instead of just the tile's center. Soft cloud blotches and fine
      speckle underneath are the original surface grain. */
-  :root[data-skin="hustler"]:not([data-custom-bg]) body{
+  :root[data-skin="hustler"]:not([data-custom-bg]) body::before{
     background-image:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='700'%3E%3Cfilter id='pv'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.018' numOctaves='4' seed='11' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='90'/%3E%3C/filter%3E%3Cg filter='url(%23pv)' fill='none'%3E%3Cline x1='-100' y1='120' x2='1000' y2='420' stroke='%23302c26' stroke-width='2.4' opacity='.16'/%3E%3Cline x1='-100' y1='480' x2='1000' y2='90' stroke='%23302c26' stroke-width='1.6' opacity='.12'/%3E%3Cline x1='150' y1='-80' x2='620' y2='780' stroke='%23302c26' stroke-width='1.4' opacity='.13'/%3E%3Cline x1='500' y1='-80' x2='950' y2='780' stroke='%23ffffff' stroke-width='1.8' opacity='.28'/%3E%3Cline x1='-100' y1='650' x2='800' y2='200' stroke='%23ffffff' stroke-width='1.2' opacity='.22'/%3E%3Cline x1='-60' y1='-40' x2='340' y2='380' stroke='%23302c26' stroke-width='1' opacity='.10'/%3E%3Cline x1='560' y1='560' x2='980' y2='740' stroke='%23ffffff' stroke-width='1' opacity='.16'/%3E%3C/g%3E%3C/svg%3E"),
       linear-gradient(45deg, var(--stone-vein) 25%, transparent 25%, transparent 75%, var(--stone-vein) 75%),
@@ -255,7 +255,6 @@
       repeat, repeat,
       no-repeat, no-repeat, no-repeat,
       repeat, repeat, repeat;
-    background-attachment:fixed;
   }
   /* The board itself is quarried black-and-white marble, not painted
      squares: a procedural SVG vein texture (feTurbulence distorting a
@@ -732,7 +731,7 @@
      sizes (never identical twice, unlike a tiled dot -- each radial-
      gradient layer is hand-placed) plus two very faint nebula blooms in
      the accent and focus hues, so the void reads as colour, not just black. */
-  :root[data-skin="outerspace"]:not([data-custom-bg]) body{
+  :root[data-skin="outerspace"]:not([data-custom-bg]) body::before{
     background-image:
       radial-gradient(ellipse 480px 320px at 18% 20%, var(--nebula-a), transparent 70%),
       radial-gradient(ellipse 420px 300px at 82% 70%, var(--nebula-b), transparent 72%),
@@ -752,7 +751,6 @@
       radial-gradient(circle at 95% 94%, var(--star-bright) 0 1px, transparent 1.6px);
     background-size: auto;
     background-repeat: no-repeat;
-    background-attachment: fixed;
   }
   /* The board is the bounty computer's own screen, not a physical set: dark
      squares are the CRT's unlit glass (with faint horizontal scanlines),
@@ -853,6 +851,29 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
        bottom content, like a drill's Start button. */
     padding-bottom:var(--spotify-offset, 0px);
     transition:padding-bottom .2s ease;
+  }
+  /* Every skin's texture or wallpaper is drawn on this layer, pinned to the
+     screen, instead of as background-attachment:fixed on body. iPad Safari
+     (desktop-class) honours a fixed body background by repainting it on
+     every frame that anything on the page changes, and these textures are
+     thousands of tiny gradient dots -- in an iPad Pro simulator a tap took
+     up to 75ms to reach the screen and idle frames spiked to 82ms, against
+     16-27ms with the same texture not fixed. iPhone Safari ignores `fixed`,
+     which is why only the iPad crawled. A fixed layer of its own is painted
+     once and then just composited, so it looks the same (it still stays
+     put while the page scrolls) without any of the repainting. 100vh is
+     the large viewport on iOS, so it still covers the screen when Safari's
+     toolbars collapse. The skins fill in background-image and friends. */
+  body::before{
+    content:"";
+    position:fixed;
+    left:0; top:0;
+    width:100%;
+    height:100vh;
+    height:100lvh;
+    z-index:-1;
+    pointer-events:none;
+    will-change:transform;
   }
   .wrap{
     width:100%;
@@ -2333,7 +2354,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      concrete but tuned fine and green so it reads as fabric, not asphalt.
      Skipped when a photo background is set, and absent under Bauhaus, which
      is deliberately flat. */
-  :root:not([data-skin]):not([data-custom-bg]) body{
+  :root:not([data-skin]):not([data-custom-bg]) body::before{
     background-image:
       repeating-linear-gradient(45deg,  var(--felt-weave) 0 2px, transparent 2px 5px),
       repeating-linear-gradient(-45deg, var(--felt-weave) 0 2px, transparent 2px 5px),
@@ -2341,15 +2362,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       radial-gradient(circle at 66% 70%, var(--felt-nap) 0 .6px, transparent 1.3px),
       radial-gradient(circle at 42% 85%, var(--felt-fleck) 0 1px, transparent 1.6px);
     background-size:auto, auto, 8px 8px, 13px 13px, 17px 17px;
-    background-attachment:fixed;
   }
-  :root[data-custom-bg] body{
+  :root[data-custom-bg] body::before{
     background-image:
       linear-gradient(var(--bg-scrim), var(--bg-scrim)),
       var(--custom-bg);
     background-size:cover;
     background-position:center center;
-    background-attachment:fixed;
     background-repeat:no-repeat;
   }
 
