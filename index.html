@@ -1825,20 +1825,37 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   /* Feedback: a quick tint + shake instead of a modal, so the run never stalls */
   .flash-good{ animation:flashGood .45s ease-out; }
-  .flash-bad{ animation:flashBad .45s ease-out; }
   @keyframes flashGood{
     0%{ box-shadow:0 0 0 0 var(--good); } 30%{ box-shadow:0 0 0 7px var(--good-soft); }
     100%{ box-shadow:0 0 0 0 rgba(0,0,0,0); }
   }
-  @keyframes flashBad{
-    0%{ box-shadow:0 0 0 0 var(--bad); transform:translateX(0); }
-    20%{ transform:translateX(-7px); } 40%{ transform:translateX(7px); }
-    60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); }
-    30%{ box-shadow:0 0 0 7px var(--bad-soft); }
-    100%{ box-shadow:0 0 0 0 rgba(0,0,0,0); transform:translateX(0); }
+  /* The miss flash lands on a whole board (or its frame), so it must stay
+     off the main thread. It used to animate box-shadow together with the
+     shake, and Safari can't run a box-shadow animation on the GPU: for the
+     whole 450ms it repainted the entire board, every square and every
+     drop-shadowed piece, on every frame -- 50-90ms frames in the iPhone
+     simulator, the stutter right after each miss. Now the shake is
+     transform-only and the red ring is its own ::after layer that only
+     fades, both composited. A .board clips its overflow, so its ring sits
+     just inside the edge; a frame's ring stays outside like before. (The
+     good flash stays as it was: it lands on small bars and cards, where a
+     repaint costs next to nothing.) Every flash-bad target is already
+     position:relative, which the ::after needs. */
+  .flash-bad{ animation:flashBadShake .45s ease-out; }
+  .flash-bad::after{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    box-shadow:0 0 0 7px var(--bad-soft);
+    opacity:0; animation:flashBadRing .45s ease-out;
   }
+  .board.flash-bad::after{ box-shadow:inset 0 0 0 5px var(--bad-soft); z-index:5; }
+  @keyframes flashBadShake{
+    0%{ transform:translateX(0); } 20%{ transform:translateX(-7px); } 40%{ transform:translateX(7px); }
+    60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); } 100%{ transform:translateX(0); }
+  }
+  @keyframes flashBadRing{ 0%{ opacity:0; } 30%{ opacity:1; } 100%{ opacity:0; } }
   @media (prefers-reduced-motion:reduce){
     .flash-good,.flash-bad{ animation:none; }
+    .flash-bad::after{ display:none; }
     .timer-fill{ transition:none; }
   }
 
@@ -6684,6 +6701,47 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(drag && drag.started){ e.stopImmediatePropagation(); e.preventDefault(); }
     }, true);
   }
+
+  // Fast taps on every board. iOS Safari only fires `click` 50-80ms after
+  // the finger lifts (measured in the iPhone simulator; touch-action:
+  // manipulation didn't shorten it), and every tap-to-move, and every
+  // tap drill like Coordinates, runs on that click. For a touch or pencil
+  // TAP on a .board -- moved less than wireDrag's 4px slop, so it can
+  // never also be a drag -- the click is fired right at pointerup instead,
+  // and the browser's own late one is swallowed when it arrives near the
+  // same spot. Mouse and trackpad clicks are untouched.
+  (function fastBoardTaps(){
+    const TAP_SLOP = 4, TAP_MAX_MS = 600, SWALLOW_MS = 700, SWALLOW_PX = 30;
+    let down = null, sentAt = -Infinity, sentX = 0, sentY = 0;
+    document.addEventListener('pointerdown', (e)=>{
+      down = null;
+      if((e.pointerType!=='touch' && e.pointerType!=='pen') || !e.isPrimary || e.button!==0) return;
+      const board = e.target && e.target.closest ? e.target.closest('.board') : null;
+      if(board) down = { x:e.clientX, y:e.clientY, t:e.timeStamp };
+    }, true);
+    document.addEventListener('pointercancel', ()=>{ down = null; }, true);
+    // Bubble phase on document: runs after the board's own pointerup
+    // handlers (wireDrag's included), exactly where the native click would
+    // otherwise come later.
+    document.addEventListener('pointerup', (e)=>{
+      const d = down; down = null;
+      if(!d || (e.pointerType!=='touch' && e.pointerType!=='pen')) return;
+      if(Math.hypot(e.clientX-d.x, e.clientY-d.y) >= TAP_SLOP || e.timeStamp-d.t > TAP_MAX_MS) return;
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      if(!target || !target.closest || !target.closest('.board')) return;
+      sentAt = performance.now(); sentX = e.clientX; sentY = e.clientY;
+      target.dispatchEvent(new MouseEvent('click', {
+        bubbles:true, cancelable:true, view:window, clientX:e.clientX, clientY:e.clientY, button:0
+      }));
+    });
+    window.addEventListener('click', (e)=>{
+      if(!e.isTrusted || performance.now()-sentAt > SWALLOW_MS) return;
+      if(Math.hypot(e.clientX-sentX, e.clientY-sentY) > SWALLOW_PX) return;
+      sentAt = -Infinity;                  // one native click per synthetic one
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    }, true);
+  })();
 
   const ANNOUNCE_MS = 850;
   function showAnnounce(announceEl, textEl, boardEl, text, onStart){
