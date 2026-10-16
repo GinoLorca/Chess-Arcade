@@ -3545,6 +3545,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .swatch.missed-hanging{ border:2px dashed var(--hanging); background:transparent; }
   .swatch.missed{ border:2px dashed var(--brass); background:transparent; }
 
+  /* The "solved it" box. The backdrop is light, so the finished board still
+     shows around it; the card takes each theme's modal-card look. It comes
+     in with opacity and transform only (cheap on iPad). */
+  .next-overlay{
+    display:none; position:fixed; inset:0; z-index:55;
+    align-items:center; justify-content:center; padding:20px;
+    background:rgba(0,0,0,.28);
+  }
+  .next-overlay.active{ display:flex; }
+  .next-card{
+    max-width:440px; padding:26px 28px; gap:14px; text-align:center; align-items:stretch;
+    animation:nextIn .22s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @keyframes nextIn{ from{ opacity:0; transform:translateY(10px) scale(.97); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ .next-card{ animation:none; } }
+  .next-title{ font-size:28px; line-height:1.1; }
+  .next-sub{ font-size:15px; color:var(--ink-soft); line-height:1.45; }
+  .next-sub:empty, .next-answer:empty{ display:none; }
+  .next-answer{ text-align:left; }
+  .next-go{ font-size:17px; padding:15px 20px; width:100%; }
+  /* Side by side where there's room, one above the other on a narrow phone. */
+  .next-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .next-row .btn{ flex:1 1 150px; }
+  .next-keys{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-soft); letter-spacing:.02em; }
+  @media (hover:none){ .next-keys{ display:none; } }
   .result-banner{
     background:var(--surface);
     border:1px solid var(--line);
@@ -3649,6 +3674,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   </div>
 </div>
 
+<!-- The "solved it" box: shown in the middle of the screen when a round ends
+     in a drill that goes position by position, so the next one is a click
+     (or Enter) away instead of a trip to the side panel. It mirrors that
+     drill's own result banner, which stays where it was. -->
+<div class="next-overlay" id="next-overlay" role="dialog" aria-modal="true" aria-labelledby="next-title" aria-describedby="next-sub">
+  <div class="modal-card next-card">
+    <div class="modal-title next-title" id="next-title">Round complete</div>
+    <div class="next-sub" id="next-sub"></div>
+    <div class="result-answer next-answer" id="next-answer"></div>
+    <button class="btn btn-primary next-go" id="next-go">Next position</button>
+    <div class="next-row">
+      <button class="btn btn-ghost" id="next-review">Look at the board</button>
+      <button class="btn btn-ghost" id="next-settings">Change settings</button>
+    </div>
+    <div class="next-keys">Enter: next &#183; Esc: look at the board</div>
+  </div>
+</div>
 <div class="modal-overlay" id="settings-overlay">
   <div class="modal-card">
     <div class="modal-head">
@@ -17528,6 +17570,90 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // "Return to game" banner for a game left running from a closed tab or
   // a quit app -- exactly the scenario this whole feature is for.
   checkNowPlaying();
+
+  // The "solved it" box. It watches the result banners of the drills that
+  // go position by position, and when one appears it opens over the middle
+  // of the screen with the same words and the same next step. Every button
+  // here just clicks the banner's own button, so each drill's logic stays
+  // exactly where it was.
+  (function wireNextBox(){
+    const overlay = document.getElementById('next-overlay');
+    const titleEl = document.getElementById('next-title');
+    const subEl = document.getElementById('next-sub');
+    const answerEl = document.getElementById('next-answer');
+    const goBtn = document.getElementById('next-go');
+    const reviewBtn = document.getElementById('next-review');
+    const settingsBtn = document.getElementById('next-settings');
+    const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner']
+      .map(id => document.getElementById(id)).filter(Boolean);
+    // dismissed: the banner whose box was closed to look at the board, so it
+    // stays closed until that round is over.
+    let current = null, dismissed = null, openTimer = 0, returnFocus = null;
+    const shown = el => el.style.display !== 'none' && el.offsetParent !== null;
+    const bannerButtons = b => {
+      const btns = b.querySelectorAll('.btn-row button');
+      return { next: btns[0] || null, settings: btns[1] || null };
+    };
+    function open(banner){
+      const line = banner.querySelector('.result-line');
+      const sub = banner.querySelector('.result-sub');
+      const ans = banner.querySelector('.result-answer');
+      titleEl.textContent = line ? line.textContent : 'Round complete';
+      subEl.innerHTML = sub ? sub.innerHTML : '';
+      answerEl.innerHTML = ans ? ans.innerHTML : '';
+      const { next, settings } = bannerButtons(banner);
+      goBtn.textContent = next ? next.textContent : 'Next position';
+      settingsBtn.style.display = settings ? '' : 'none';
+      current = banner;
+      returnFocus = document.activeElement;
+      overlay.classList.add('active');
+      goBtn.focus({ preventScroll:true });
+    }
+    function close(){
+      clearTimeout(openTimer);
+      if(!overlay.classList.contains('active')) return;
+      overlay.classList.remove('active');
+      if(returnFocus && document.contains(returnFocus)) returnFocus.focus({ preventScroll:true });
+      returnFocus = null;
+    }
+    function act(which){
+      const banner = current;
+      close();
+      if(!banner) return;
+      const btn = bannerButtons(banner)[which];
+      if(btn) btn.click();
+    }
+    goBtn.addEventListener('click', () => act('next'));
+    settingsBtn.addEventListener('click', () => act('settings'));
+    const review = () => { dismissed = current; close(); };
+    reviewBtn.addEventListener('click', review);
+    overlay.addEventListener('click', e => { if(e.target === overlay) review(); });
+    document.addEventListener('keydown', e => {
+      if(!overlay.classList.contains('active')) return;
+      if(e.key === 'Escape'){ e.preventDefault(); review(); }
+      else if(e.key === 'Enter' && document.activeElement !== reviewBtn && document.activeElement !== settingsBtn){
+        e.preventDefault(); act('next');
+      }
+    }, true);
+    // A short pause first, so the move that finished the round is seen
+    // landing before the box covers the middle of the board.
+    const watch = new MutationObserver(() => {
+      for(const b of BANNERS){
+        if(shown(b)){
+          const isOpen = overlay.classList.contains('active') && current === b;
+          if(!isOpen && dismissed !== b){
+            clearTimeout(openTimer);
+            openTimer = setTimeout(() => { if(shown(b) && dismissed !== b) open(b); }, 450);
+          }
+          return;
+        }
+      }
+      close();
+      current = null;
+      dismissed = null;
+    });
+    BANNERS.forEach(b => watch.observe(b, { attributes:true, attributeFilter:['style'] }));
+  })();
 
 })();
 </script>
