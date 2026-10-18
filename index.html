@@ -1419,11 +1419,18 @@
     background:#141517; color:var(--ink); border-color:var(--ux-sign-edge);
     box-shadow:inset 0 6px 0 #141517, inset 0 7.5px 0 #f4f4f0, var(--shadow);
   }
-  :root[data-skin="uptown"] .plaque::before{                 /* strip map: five lines, white stops */
-    height:10px; bottom:7px; border-radius:0;
+  /* A strip map like the one over a car's doors: one line in a single
+     colour (never a run of colours, which reads as a flag), white ticks for
+     the local stops, ringed circles for the express stops and bigger ones for
+     the two terminals. */
+  :root[data-skin="uptown"] .plaque::before{
+    height:14px; bottom:5px; border-radius:0;
     background:
-      radial-gradient(circle, #fff 0 2.4px, #141517 2.9px 4.2px, transparent 4.6px) 0 50% / 48px 10px repeat-x,
-      linear-gradient(90deg,#b933ad 0 20%,#0039a6 0 40%,#00933c 0 60%,#fccc0a 0 80%,#ee352e 0) 0 50% / 100% 4px no-repeat;
+      radial-gradient(circle at 7px 50%, #fff 0 3.6px, #141517 4.1px 6px, transparent 6.4px) 0 0 / 100% 100% no-repeat,
+      radial-gradient(circle at calc(100% - 7px) 50%, #fff 0 3.6px, #141517 4.1px 6px, transparent 6.4px) 0 0 / 100% 100% no-repeat,
+      radial-gradient(circle, #fff 0 2.6px, #141517 3.1px 4.4px, transparent 4.8px) 12px 50% / 96px 14px repeat-x,
+      linear-gradient(90deg, transparent 0 11px, #fff 11px 13px, transparent 13px) 0 50% / 24px 10px repeat-x,
+      linear-gradient(#00933c, #00933c) 7px 50% / calc(100% - 14px) 5px no-repeat;
   }
   :root[data-skin="uptown"] .history-cta{ font-size:13px; letter-spacing:.01em; }
   :root[data-skin="uptown"] .neon-sign{                       /* amber LED destination board */
