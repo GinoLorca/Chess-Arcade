@@ -2314,6 +2314,66 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .vs-overlay.leaving{ display:none !important; }
   }
 
+  /* ---- Uptown Express: subway doors open on the board ----
+     Brushed stainless panels with a black rubber seal where they meet,
+     dark glass windows, a ribbed kick plate and the amber door lamp. The
+     car rumbles to a stop, then the doors slide apart. Only transform and
+     opacity animate, so it stays smooth on iPad. */
+  .doors-overlay{ display:none; position:fixed; inset:0; z-index:210; cursor:pointer; overflow:hidden; }
+  .doors-overlay.active{ display:block; }
+  .doors-car{ position:absolute; inset:0; animation:doorsRumble .85s cubic-bezier(.25,.6,.3,1) both; }
+  @keyframes doorsRumble{
+    0%{ transform:translate(10px,1px); } 10%{ transform:translate(-8px,-1px); }
+    22%{ transform:translate(6px,1px); } 36%{ transform:translate(-4px,0); }
+    52%{ transform:translate(2.5px,0); } 70%{ transform:translate(-1px,0); } 100%{ transform:none; }
+  }
+  .door{
+    position:absolute; top:0; bottom:0; width:50%; overflow:hidden;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,.04) 1px 2px, transparent 2px 4px),
+      linear-gradient(90deg, #7c848b 0%, #c4cbd1 18%, #a6aeb5 40%, #dce1e5 58%, #b3bac0 78%, #8b939a 100%);
+    transition:transform .8s cubic-bezier(.55,0,.2,1);
+    will-change:transform;
+  }
+  .door-l{ left:0; border-right:10px solid #121315; box-shadow:inset -2px 0 0 #3a3f45, 6px 0 18px rgba(0,0,0,.35); }
+  .door-r{ right:0; border-left:10px solid #121315; box-shadow:inset 2px 0 0 #3a3f45, -6px 0 18px rgba(0,0,0,.35); }
+  .doors-overlay.open .door-l{ transform:translateX(-102%); }
+  .doors-overlay.open .door-r{ transform:translateX(102%); }
+  .door-window{
+    position:absolute; top:11%; height:40%; width:46%; border-radius:16px;
+    display:flex; align-items:flex-start; justify-content:center; padding-top:14px; box-sizing:border-box;
+    background:
+      linear-gradient(155deg, rgba(255,255,255,.16) 0 16%, transparent 16% 38%, rgba(255,255,255,.07) 38% 44%, transparent 44%),
+      linear-gradient(180deg, #1c242a, #0c1013);
+    box-shadow:0 0 0 7px #24282d, 0 0 0 9px #6e757c, inset 0 3px 14px rgba(0,0,0,.65);
+  }
+  .door-l .door-window{ right:15%; }
+  .door-r .door-window{ left:15%; }
+  .door-sign{
+    display:none; max-width:86%; padding:5px 10px 4px; border-radius:3px; background:#050505;
+    font:700 clamp(12px,1.9vw,17px)/1.2 "JetBrains Mono",monospace; color:#ffb020; letter-spacing:.04em;
+    text-shadow:0 0 6px rgba(255,176,32,.45); box-shadow:inset 0 0 0 1px #2a2e32;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .doors-overlay.signed .door-sign:not(:empty){ display:block; }
+  .door-kick{
+    position:absolute; bottom:5%; height:15%; left:10%; right:10%; border-radius:6px; opacity:.75;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.14) 0 2px, rgba(255,255,255,.16) 2px 4px, transparent 4px 10px);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
+  }
+  .door-lamp{
+    position:absolute; top:14px; left:50%; width:18px; height:18px; margin-left:-9px; border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #ffe6a3, #ffb020 55%, #b06a00);
+    box-shadow:0 0 0 3px #121315, 0 0 18px 4px rgba(255,176,32,.55);
+    transition:opacity .2s;
+  }
+  .doors-overlay.open .door-lamp{ opacity:0; }
+  @media (prefers-reduced-motion:reduce){
+    .doors-car{ animation:none; }
+    .door, .doors-overlay.open .door-l, .doors-overlay.open .door-r{ transform:none; transition:opacity .25s; }
+    .doors-overlay.open .door{ opacity:0; }
+  }
+
   .modal-card{
     background:var(--surface); border:1px solid var(--line); border-radius:12px;
     box-shadow:var(--shadow); padding:22px 24px; width:100%; max-width:380px;
@@ -3870,6 +3930,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
 
 
+<!-- Uptown Express's opening: the train's doors, closed, rumbling to a stop
+     and sliding open on the board. Shown instead of the VS screen when a game
+     begins, and when a Puzzles session or a Puzzle Rush starts. -->
+<div class="doors-overlay" id="doors-overlay" aria-hidden="true">
+  <div class="doors-car">
+    <div class="door door-l">
+      <div class="door-window"><span class="door-sign" id="door-sign-l"></span></div>
+      <div class="door-kick"></div>
+    </div>
+    <div class="door door-r">
+      <div class="door-window"><span class="door-sign" id="door-sign-r"></span></div>
+      <div class="door-kick"></div>
+    </div>
+    <div class="door-lamp"></div>
+  </div>
+</div>
 <div class="vs-overlay" id="vs-overlay">
   <div class="vs-half vs-half-left" id="vs-half-me">
     <div class="vs-title" id="vs-title-me" style="display:none;"></div>
@@ -15045,6 +15121,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.getElementById('start-puzzle-drill').addEventListener('click', ()=>{
     if(!getLichessToken()){ refreshTokenStatus(); return; }
     playSound('puzzleStart');
+    if(uptownDoors()) showDoorsIntro({ isReady: ()=> pzBoardEl.children.length>0 || pzErrorBanner.style.display!=='none' });
     roundNumPz = 0;
     statsPz.rounds=0; statsPz.solved=0; statsPz.streak=0; statsPz.best=0;
     refreshStatsPz();
@@ -15805,15 +15882,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     rushSetStatus('');
     renderBoardRush();
     if(!run.started){
-      clearAnnounce(rushAnnounceEl, rushBoardEl, rushAnnounceTimer);
-      rushAnnounceTimer = showAnnounce(rushAnnounceEl, rushAnnounceTextEl, rushBoardEl, 'Go!', ()=>{
-        rushAnnounceTimer = null;
+      const go = ()=>{
         if(myTok!==rushToken || runRush!==run || !run.live) return;
-        run.started = true;
-        playSound('matchStart');
-        rushBeginClock();
-        rushRevealAndUnlock(myTok);
-      });
+        clearAnnounce(rushAnnounceEl, rushBoardEl, rushAnnounceTimer);
+        rushAnnounceTimer = showAnnounce(rushAnnounceEl, rushAnnounceTextEl, rushBoardEl, 'Go!', ()=>{
+          rushAnnounceTimer = null;
+          if(myTok!==rushToken || runRush!==run || !run.live) return;
+          run.started = true;
+          if(!run.doorsSounded) playSound('matchStart');
+          rushBeginClock();
+          rushRevealAndUnlock(myTok);
+        });
+      };
+      // Uptown: the doors open on the first puzzle, then "Go!" and the clock.
+      if(uptownDoors()){ run.doorsSounded = true; playSound('matchStart'); showDoorsIntro({ onOpen: go }); }
+      else go();
     } else {
       rushRevealAndUnlock(myTok);
     }
@@ -16817,6 +16900,55 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // only ever sent once, as the first event on a freshly-opened game
   // stream, so there's no risk of this re-firing mid-game.
   let vsIntroTimer = null;
+
+  // Uptown Express opens a game, a Puzzles session or a Puzzle Rush with the
+  // train's doors instead. They rumble to a stop, then open; with isReady
+  // they hold until that's true (the first puzzle still loading), at most a
+  // few seconds. onOpen runs as they start to part. A tap, Enter, Space or
+  // Esc opens them at once.
+  let doorsTimer = 0, doorsPoll = 0, doorsOnOpen = null;
+  function uptownDoors(){ return !!(lookPrefs && lookPrefs.skin==='uptown'); }
+  function openDoors(){
+    clearTimeout(doorsTimer); clearInterval(doorsPoll);
+    const ov = document.getElementById('doors-overlay');
+    const cb = doorsOnOpen; doorsOnOpen = null;
+    if(ov && ov.classList.contains('active') && !ov.classList.contains('open')){
+      ov.classList.add('open');
+      doorsTimer = setTimeout(()=> ov.classList.remove('active','open'), 850);
+    }
+    if(cb) cb();
+  }
+  function showDoorsIntro(opts){
+    const o = opts || {};
+    const ov = document.getElementById('doors-overlay');
+    if(!ov){ if(o.onOpen) o.onOpen(); return; }
+    clearTimeout(doorsTimer); clearInterval(doorsPoll);
+    if(doorsOnOpen){ const prev = doorsOnOpen; doorsOnOpen = null; prev(); }
+    doorsOnOpen = o.onOpen || null;
+    document.getElementById('door-sign-l').textContent = o.left || '';
+    document.getElementById('door-sign-r').textContent = o.right || '';
+    ov.classList.toggle('signed', !!(o.left || o.right));
+    ov.classList.remove('open');
+    const car = ov.querySelector('.doors-car');
+    car.style.animation = 'none';
+    ov.classList.add('active');
+    void car.offsetWidth;           // restart the rumble
+    car.style.animation = '';
+    const began = Date.now();
+    doorsTimer = setTimeout(()=>{
+      if(!o.isReady || o.isReady()) return openDoors();
+      doorsPoll = setInterval(()=>{ if(o.isReady() || Date.now()-began > 6000) openDoors(); }, 100);
+    }, 950);
+  }
+  (function wireDoors(){
+    const ov = document.getElementById('doors-overlay');
+    if(!ov) return;
+    ov.addEventListener('click', openDoors);
+    document.addEventListener('keydown', e=>{
+      if(!ov.classList.contains('active') || ov.classList.contains('open')) return;
+      if(e.key==='Enter' || e.key===' ' || e.key==='Escape'){ e.preventDefault(); openDoors(); }
+    }, true);
+  })();
   // Lichess usernames can run to 30 chars -- keep each side well clear of
   // the center VS badge regardless of length, on top of the CSS wrapping.
   function vsShortenName(name){
@@ -16832,6 +16964,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the closest real per-player visual it does have, so that's what shows
   // here instead, when the player has one.
   function showVsIntro(meName, meColor, oppName, oppColor, meTitle, oppTitle){
+    if(uptownDoors()){
+      playSound('matchStart');
+      showDoorsIntro({ left: vsShortenName(meName), right: vsShortenName(oppName) });
+      return;
+    }
     const overlay = document.getElementById('vs-overlay');
     if(!overlay) return;
     clearTimeout(vsIntroTimer);
