@@ -2319,7 +2319,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      dark glass windows, a ribbed kick plate and the amber door lamp. The
      car rumbles to a stop, then the doors slide apart. Only transform and
      opacity animate, so it stays smooth on iPad. */
-  .doors-overlay{ display:none; position:fixed; inset:0; z-index:210; cursor:pointer; overflow:hidden; }
+  /* Sized and placed over the board's frame (mosaic and all) by JS, in page
+     coordinates so it scrolls with the board; full screen only if there's
+     no board to cover. */
+  .doors-overlay{ display:none; position:absolute; z-index:210; cursor:pointer; overflow:hidden; }
+  .doors-overlay.full{ position:fixed; inset:0; }
   .doors-overlay.active{ display:block; }
   .doors-car{ position:absolute; inset:0; animation:doorsRumble .85s cubic-bezier(.25,.6,.3,1) both; }
   @keyframes doorsRumble{
@@ -16929,11 +16933,30 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('door-sign-r').textContent = o.right || '';
     ov.classList.toggle('signed', !!(o.left || o.right));
     ov.classList.remove('open');
+    // Over the board and its frame, not the whole page. Measured a frame
+    // later, so a view switched to in the same click has laid out first.
+    const place = ()=>{
+      const frame = o.target || document.querySelector('.view.active .board-frame');
+      const r = frame && frame.getBoundingClientRect();
+      if(r && r.width > 40 && r.height > 40){
+        ov.classList.remove('full');
+        ov.style.left = (r.left + window.scrollX) + 'px';
+        ov.style.top = (r.top + window.scrollY) + 'px';
+        ov.style.width = r.width + 'px';
+        ov.style.height = r.height + 'px';
+      } else {
+        ov.classList.add('full');
+        ov.style.left = ov.style.top = ov.style.width = ov.style.height = '';
+      }
+    };
     const car = ov.querySelector('.doors-car');
     car.style.animation = 'none';
-    ov.classList.add('active');
-    void car.offsetWidth;           // restart the rumble
-    car.style.animation = '';
+    requestAnimationFrame(()=>{
+      place();
+      ov.classList.add('active');
+      void car.offsetWidth;         // restart the rumble
+      car.style.animation = '';
+    });
     const began = Date.now();
     doorsTimer = setTimeout(()=>{
       if(!o.isReady || o.isReady()) return openDoors();
