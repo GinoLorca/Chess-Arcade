@@ -1520,6 +1520,21 @@
     box-shadow:0 0 0 2px #1f3a8f, 0 0 0 3px #efe6c8;
   }
   :root[data-skin="uptown"] :is(.rlabel,.flabel){ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; font-weight:700; font-size:11.5px; color:#f4f4f0; opacity:1; }
+  /* Line signs (Settings, on by default): each rank and file as a subway
+     line sign, a white number or letter in a disc of its line's colour.
+     1-3 red, 4-6 green, 7-8 purple; A C E blue, B D F orange, G H light
+     green. Labels carry their own text as data-l (tagCoordLabels). */
+  :root[data-skin="uptown"]:not([data-ux-lines="off"]) :is(.rlabel,.flabel)[data-l]{
+    --ux-l:#5b6168; color:#fff; font-size:10px; line-height:1; text-transform:uppercase;
+    background:radial-gradient(circle closest-side, var(--ux-l) calc(100% - .8px), transparent 100%) center / 15px 15px no-repeat;
+    text-shadow:0 0 1px rgba(0,0,0,.35);
+  }
+  :root[data-skin="uptown"]:not([data-ux-lines="off"]) :is(.rlabel,.flabel):is([data-l="1"],[data-l="2"],[data-l="3"]){ --ux-l:#ee352e; }
+  :root[data-skin="uptown"]:not([data-ux-lines="off"]) :is(.rlabel,.flabel):is([data-l="4"],[data-l="5"],[data-l="6"]){ --ux-l:#00933c; }
+  :root[data-skin="uptown"]:not([data-ux-lines="off"]) :is(.rlabel,.flabel):is([data-l="7"],[data-l="8"]){ --ux-l:#b933ad; }
+  :root[data-skin="uptown"]:not([data-ux-lines="off"]) :is(.rlabel,.flabel):is([data-l="a"],[data-l="c"],[data-l="e"]){ --ux-l:#0039a6; }
+  :root[data-skin="uptown"]:not([data-ux-lines="off"]) :is(.rlabel,.flabel):is([data-l="b"],[data-l="d"],[data-l="f"]){ --ux-l:#ff6319; }
+  :root[data-skin="uptown"]:not([data-ux-lines="off"]) :is(.rlabel,.flabel):is([data-l="g"],[data-l="h"]){ --ux-l:#6cbe45; }
 
   /* Highlights. All static and all specificity (0,4,0); ORDER MATTERS (later wins). */
   :root[data-skin="uptown"] .sq.last-move{ box-shadow:inset 0 4px 0 #fccc0a, inset 0 5.5px 0 #141517, inset 0 0 0 999px var(--ux-lm-wash); }
@@ -2379,16 +2394,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   /* ---- Uptown Express: subway doors open on the board ----
-     Brushed stainless panels with a black rubber seal where they meet,
-     dark glass windows, a ribbed kick plate and the amber door lamp. The
-     car rumbles to a stop, then the doors slide apart. Only transform and
-     opacity animate, so it stays smooth on iPad. */
+     Modelled on a real subway car's doors, seen from inside the car: two
+     brushed stainless leaves, each with a tall rounded window (the board
+     shows through the glass, like the platform outside), a polished rim with
+     screws and a black rubber gasket, the two safety stickers, and rubber
+     seals where the leaves meet. A satin pole stands in front of the seam;
+     the doorway has dark side channels with a door-number plate and a kick
+     plate, a light header with the LED signs and red indicator lamps, and a
+     grooved sill. The car rumbles to a stop, the leaves
+     slide away into the posts, then the doorway fades. Only transform and
+     opacity animate, so it stays smooth on iPad. The leaves are SVG drawn by
+     layoutDoors() at the board's real size, so the windows keep their shape. */
   /* Sized and placed over the board's frame (mosaic and all) by JS, in page
      coordinates so it scrolls with the board; full screen only if there's
      no board to cover. */
-  .doors-overlay{ display:none; position:absolute; z-index:210; cursor:pointer; overflow:hidden; }
+  .doors-overlay{
+    display:none; position:absolute; z-index:210; cursor:pointer; overflow:hidden;
+    --dh-post:24px; --dh-head:30px; --dh-sill:14px; --dh-pole:10px;
+    --dh-lamp:clamp(5px,calc(var(--dh-head) * .2),9px);
+  }
   .doors-overlay.full{ position:fixed; inset:0; }
   .doors-overlay.active{ display:block; }
+  .doors-overlay.open{ pointer-events:none; }  /* taps reach the board as they part */
   .doors-car{ position:absolute; inset:0; animation:doorsRumble .85s cubic-bezier(.25,.6,.3,1) both; }
   @keyframes doorsRumble{
     0%{ transform:translate(10px,1px); } 10%{ transform:translate(-8px,-1px); }
@@ -2396,50 +2423,92 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     52%{ transform:translate(2.5px,0); } 70%{ transform:translate(-1px,0); } 100%{ transform:none; }
   }
   .door{
-    position:absolute; top:0; bottom:0; width:50%; overflow:hidden;
-    background:
-      repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, rgba(0,0,0,.04) 1px 2px, transparent 2px 4px),
-      linear-gradient(90deg, #7c848b 0%, #c4cbd1 18%, #a6aeb5 40%, #dce1e5 58%, #b3bac0 78%, #8b939a 100%);
+    position:absolute; top:var(--dh-head); bottom:var(--dh-sill); width:calc(50% - var(--dh-post));
+    overflow:hidden; z-index:1;
     transition:transform .8s cubic-bezier(.55,0,.2,1);
     will-change:transform;
   }
-  .door-l{ left:0; border-right:10px solid #121315; box-shadow:inset -2px 0 0 #3a3f45, 6px 0 18px rgba(0,0,0,.35); }
-  .door-r{ right:0; border-left:10px solid #121315; box-shadow:inset 2px 0 0 #3a3f45, -6px 0 18px rgba(0,0,0,.35); }
-  .doors-overlay.open .door-l{ transform:translateX(-102%); }
-  .doors-overlay.open .door-r{ transform:translateX(102%); }
-  .door-window{
-    position:absolute; top:11%; height:40%; width:46%; border-radius:16px;
-    display:flex; align-items:flex-start; justify-content:center; padding-top:14px; box-sizing:border-box;
+  .door-l{ left:var(--dh-post); }
+  .door-r{ right:var(--dh-post); }
+  .door-art{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  /* Into the pockets behind the posts, and clear of them, before the
+     doorway fades. */
+  .doors-overlay.open .door-l{ transform:translateX(calc(-100% - var(--dh-post) - 2px)); }
+  .doors-overlay.open .door-r{ transform:translateX(calc(100% + var(--dh-post) + 2px)); }
+  .door-frame{ position:absolute; inset:0; z-index:2; pointer-events:none; }
+  .doors-overlay.open .door-frame{ opacity:0; transition:opacity .3s ease .55s; }
+  .door-post{
+    position:absolute; top:0; bottom:0; width:var(--dh-post);
     background:
-      linear-gradient(155deg, rgba(255,255,255,.16) 0 16%, transparent 16% 38%, rgba(255,255,255,.07) 38% 44%, transparent 44%),
-      linear-gradient(180deg, #1c242a, #0c1013);
-    box-shadow:0 0 0 7px #24282d, 0 0 0 9px #6e757c, inset 0 3px 14px rgba(0,0,0,.65);
+      repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px),
+      linear-gradient(90deg, #2c2b29 0%, #43413d 35%, #504d48 75%, #6a6761 92%, #8f8c85 100%);
   }
-  .door-l .door-window{ right:15%; }
-  .door-r .door-window{ left:15%; }
+  .door-post::after{
+    content:""; position:absolute; left:0; right:0; bottom:var(--dh-sill); height:calc(var(--dh-sill) * 1.1);
+    background:linear-gradient(90deg, #6f706d, #b9bab6 45%, #8a8b88); box-shadow:0 -1px 0 #121212;
+  }
+  /* Past the overlay's edge, so the rumble never shows the board beside it. */
+  .door-post::before{ content:""; position:absolute; top:-2px; bottom:-2px; right:100%; width:12px; background:#2c2b29; }
+  .door-post-l{ left:0; box-shadow:inset -2px 0 0 #0c0d0e, 4px 0 7px rgba(0,0,0,.42); }
+  .door-post-r{ right:0; transform:scaleX(-1); box-shadow:inset -2px 0 0 #0c0d0e, 4px 0 7px rgba(0,0,0,.42); }
+  .door-plate{
+    position:absolute; top:calc(var(--dh-head) + 6%); left:50%; transform:translateX(-50%);
+    padding:1px 2px 0; border-radius:1px; background:#0b0c0d; color:#ececea;
+    font:700 clamp(6px,calc(var(--dh-post) * .38),12px)/1 "Helvetica Neue",Arial,sans-serif; letter-spacing:.02em;
+    box-shadow:0 0 0 1px rgba(255,255,255,.12);
+  }
+  .door-post-r .door-plate{ transform:translateX(-50%) scaleX(-1); }
+  .door-head{
+    position:absolute; left:0; right:0; top:-2px; height:calc(var(--dh-head) + 2px); padding-top:2px; box-sizing:border-box;
+    display:flex; align-items:center; padding:0 var(--dh-post);
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px),
+      linear-gradient(180deg, #e2e0da 0%, #d7d5ce 55%, #bfbdb6 80%, #6d6c68 93%, #1a1a1a 100%);
+    box-shadow:inset 0 -2px 0 #0c0d0e, 0 3px 6px rgba(0,0,0,.35);
+  }
+  .door-head-half{ flex:1 1 0; min-width:0; display:flex; justify-content:center; align-items:center; position:relative; }
+  .door-sill{
+    position:absolute; left:0; right:0; bottom:-2px; height:calc(var(--dh-sill) + 2px);
+    background:
+      repeating-linear-gradient(180deg, #8d8f8d 0 1px, #c4c6c3 1px 2px, #a4a6a4 2px 3.5px),
+      #a4a6a4;
+    box-shadow:inset 0 2px 0 #0c0d0e, inset 0 3px 0 rgba(255,255,255,.35), 0 -3px 6px rgba(0,0,0,.35);
+  }
+  /* The pole in front of the seam, polished chrome, with its collars at the
+     ceiling and the floor. */
+  .door-pole{
+    position:absolute; top:0; bottom:0; left:50%; width:var(--dh-pole); margin-left:calc(var(--dh-pole) / -2);
+    background:linear-gradient(90deg, #2b2d2e 0%, #5f6466 18%, #b3b7b8 34%, #8e9394 50%, #5d6264 72%, #7f8486 86%, #2e3133 100%);
+    box-shadow:3px 0 6px rgba(0,0,0,.3), -1px 0 2px rgba(0,0,0,.2);
+  }
+  .door-pole::before, .door-pole::after{
+    content:""; position:absolute; left:-35%; right:-35%; height:calc(var(--dh-pole) * 1.3); border-radius:2px;
+    background:inherit; box-shadow:0 1px 2px rgba(0,0,0,.45);
+  }
+  .door-pole::before{ display:none; }
+  .door-pole::after{ bottom:0; height:var(--dh-sill); left:-30%; right:-30%; border-radius:2px 2px 0 0; }
+  /* The LED signs above each leaf: the players' names, for a game. */
   .door-sign{
-    display:none; max-width:86%; padding:5px 10px 4px; border-radius:3px; background:#050505;
-    font:700 clamp(12px,1.9vw,17px)/1.2 "JetBrains Mono",monospace; color:#ffb020; letter-spacing:.04em;
-    text-shadow:0 0 6px rgba(255,176,32,.45); box-shadow:inset 0 0 0 1px #2a2e32;
+    display:none; max-width:calc(100% - var(--dh-pole) - 6px); box-sizing:border-box; padding:3px 8px 2px; border-radius:2px; background:#050505;
+    font:700 clamp(10px,calc(var(--dh-head) * .46),17px)/1.15 "JetBrains Mono",monospace; color:#ffb020; letter-spacing:.04em;
+    text-shadow:0 0 6px rgba(255,176,32,.5); box-shadow:inset 0 0 0 1px #2a2e32, 0 1px 0 rgba(255,255,255,.18);
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .doors-overlay.signed .door-sign:not(:empty){ display:block; }
-  .door-kick{
-    position:absolute; bottom:5%; height:15%; left:10%; right:10%; border-radius:6px; opacity:.75;
-    background:repeating-linear-gradient(0deg, rgba(0,0,0,.14) 0 2px, rgba(255,255,255,.16) 2px 4px, transparent 4px 10px);
-    box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
-  }
+  /* The red door indicator lamps, one over each post, lit until the doors part. */
   .door-lamp{
-    position:absolute; top:14px; left:50%; width:18px; height:18px; margin-left:-9px; border-radius:50%;
-    background:radial-gradient(circle at 40% 35%, #ffe6a3, #ffb020 55%, #b06a00);
-    box-shadow:0 0 0 3px #121315, 0 0 18px 4px rgba(255,176,32,.55);
+    position:absolute; top:50%; width:var(--dh-lamp); aspect-ratio:1; margin-top:calc(var(--dh-lamp) / -2); border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #ff9a8c, #d3261c 55%, #7a0d08);
+    box-shadow:0 0 0 1px rgba(0,0,0,.35), 0 0 6px 1px rgba(230,40,30,.45);
     transition:opacity .2s;
   }
+  .door-head-l .door-lamp{ left:calc((var(--dh-post) + var(--dh-lamp)) / -2); }
+  .door-head-r .door-lamp{ right:calc((var(--dh-post) + var(--dh-lamp)) / -2); }
   .doors-overlay.open .door-lamp{ opacity:0; }
   @media (prefers-reduced-motion:reduce){
     .doors-car{ animation:none; }
     .door, .doors-overlay.open .door-l, .doors-overlay.open .door-r{ transform:none; transition:opacity .25s; }
-    .doors-overlay.open .door{ opacity:0; }
+    .doors-overlay.open .door, .doors-overlay.open .door-frame{ opacity:0; transition:opacity .25s; }
   }
 
   .modal-card{
@@ -3935,6 +4004,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="field-hint">The opening over the board. Every theme shows the black-and-white VS screen, with &#8220;Round one, fight,&#8221; when an online game against another player begins. Uptown Express opens its subway doors instead, for any game and when a Puzzles session or a Puzzle Rush starts. Off skips the screen; the start sound still plays.</div>
     </div>
 
+    <div class="field" id="uxlines-field">
+      <div class="field-label">Line signs</div>
+      <div class="toggle-row" id="uxlines-row">
+        <button class="toggle active" data-val="on">On</button>
+        <button class="toggle" data-val="off">Off</button>
+      </div>
+      <div class="field-hint">Uptown Express: the board&#8217;s ranks and files as subway line signs, each in its line&#8217;s colour. Off keeps plain coordinates.</div>
+    </div>
+
     <div class="field">
       <div class="field-label">Background</div>
       <div class="bg-status" id="bg-status">Default</div>
@@ -4012,15 +4090,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      begins, and when a Puzzles session or a Puzzle Rush starts. -->
 <div class="doors-overlay" id="doors-overlay" aria-hidden="true">
   <div class="doors-car">
-    <div class="door door-l">
-      <div class="door-window"><span class="door-sign" id="door-sign-l"></span></div>
-      <div class="door-kick"></div>
+    <div class="door door-l"><svg class="door-art" id="door-art-l"></svg></div>
+    <div class="door door-r"><svg class="door-art" id="door-art-r"></svg></div>
+    <div class="door-frame">
+      <div class="door-post door-post-l"><span class="door-plate">L6</span></div>
+      <div class="door-post door-post-r"><span class="door-plate">L6</span></div>
+      <div class="door-head">
+        <div class="door-head-half door-head-l"><span class="door-lamp"></span><span class="door-sign" id="door-sign-l"></span></div>
+        <div class="door-head-half door-head-r"><span class="door-sign" id="door-sign-r"></span><span class="door-lamp"></span></div>
+      </div>
+      <div class="door-sill"></div>
+      <div class="door-pole"></div>
     </div>
-    <div class="door door-r">
-      <div class="door-window"><span class="door-sign" id="door-sign-r"></span></div>
-      <div class="door-kick"></div>
-    </div>
-    <div class="door-lamp"></div>
   </div>
 </div>
 <div class="vs-overlay" id="vs-overlay">
@@ -8374,6 +8455,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       return true;
     }catch(e){ return false; }
   }
+  // Every board's rank and file labels carry their own text as data-l, so a
+  // theme can style each one (Uptown's line signs). Tagged as the boards
+  // build them; labels are only ever rebuilt, never edited in place.
+  (function tagCoordLabels(){
+    const tag = box => { for(const el of box.children) el.dataset.l = el.textContent.trim().toLowerCase(); };
+    const mo = new MutationObserver(recs => recs.forEach(r => tag(r.target)));
+    document.querySelectorAll('.rank-labels, .file-labels').forEach(box => { tag(box); mo.observe(box, { childList:true }); });
+  })();
   function applyLookPrefs(){
     const root = document.documentElement;
     // Tournament Felt is the bare root; every other skin names itself.
@@ -8382,6 +8471,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(lookPrefs.sqStroke==='none') root.removeAttribute('data-sq-stroke');
     else root.setAttribute('data-sq-stroke', lookPrefs.sqStroke);
     root.setAttribute('data-glass', lookPrefs.glass==='off' ? 'off' : 'on');
+    root.setAttribute('data-ux-lines', lookPrefs.uxLines==='off' ? 'off' : 'on');
     root.style.setProperty('--glass-alpha', (Number(lookPrefs.glassAlpha)||0)/100);
     const bg = currentBg();
     if(bg && bg.data){
@@ -8462,6 +8552,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const strokeRow = document.getElementById('sq-stroke-row');
     const glassRow = document.getElementById('glass-row');
     const introRow = document.getElementById('intro-row');
+    const uxLinesRow = document.getElementById('uxlines-row');
+    const uxLinesField = document.getElementById('uxlines-field');
     const glassAlpha = document.getElementById('glass-alpha');
     const glassAlphaVal = document.getElementById('glass-alpha-val');
     const skinHint = document.getElementById('skin-hint');
@@ -8501,6 +8593,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       introRow.querySelectorAll('.toggle').forEach(b=>{
         b.classList.toggle('active', b.dataset.val===(lookPrefs.intro==='off' ? 'off' : 'on'));
       });
+      uxLinesRow.querySelectorAll('.toggle').forEach(b=>{
+        b.classList.toggle('active', b.dataset.val===(lookPrefs.uxLines==='off' ? 'off' : 'on'));
+      });
+      uxLinesField.style.display = lookPrefs.skin==='uptown' ? '' : 'none';
       glassRow.querySelectorAll('.toggle').forEach(b=>{
         b.classList.toggle('active', b.dataset.val===lookPrefs.glass);
       });
@@ -8628,6 +8724,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       btn.addEventListener('click', ()=>{
         lookPrefs.intro = btn.dataset.val;
         saveLookPrefs(); syncButtons();
+      });
+    });
+    uxLinesRow.querySelectorAll('.toggle').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        lookPrefs.uxLines = btn.dataset.val;
+        applyLookPrefs(); saveLookPrefs(); syncButtons();
       });
     });
     glassRow.querySelectorAll('.toggle').forEach(btn=>{
@@ -16996,7 +17098,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // they hold until that's true (the first puzzle still loading), at most a
   // few seconds. onOpen runs as they start to part. A tap, Enter, Space or
   // Esc opens them at once.
-  let doorsTimer = 0, doorsPoll = 0, doorsOnOpen = null;
+  let doorsTimer = 0, doorsPoll = 0, doorsOnOpen = null, doorsSeq = 0;
   // Settings, Game intro: off skips every opening screen.
   function introOn(){ return !(lookPrefs && lookPrefs.intro==='off'); }
   function uptownDoors(){ return introOn() && !!(lookPrefs && lookPrefs.skin==='uptown'); }
@@ -17022,14 +17124,146 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       el.classList.add('full');
       el.style.left = el.style.top = el.style.width = el.style.height = '';
     }
+    // Sized from the measurement, not the overlay: it may not be shown yet.
+    if(el.id === 'doors-overlay'){
+      const full = !(r && r.width > 40 && r.height > 40);
+      layoutDoors(el, full ? document.documentElement.clientWidth : r.width, full ? document.documentElement.clientHeight : r.height);
+    }
+  }
+  // Uptown's doors, drawn at the size they're shown: the doorway's posts,
+  // header, sill and pole scale with it, and each leaf is an SVG at its real
+  // pixel size, so the windows keep their rounded shape on any board. Redrawn
+  // only when the size changes.
+  let doorsDrawnFor = '', doorsTarget = null;
+  function layoutDoors(ov, W, H){
+    const clamp = (v, lo, hi)=> Math.max(lo, Math.min(hi, v));
+    const post = Math.round(clamp(W*0.05, 12, 40)), head = Math.round(clamp(Math.min(W, H)*0.07, 20, 46));
+    const sill = Math.round(clamp(Math.min(W, H)*0.032, 8, 20)), pole = Math.round(clamp(W*0.024, 6, 16));
+    ov.style.setProperty('--dh-post', post+'px');
+    ov.style.setProperty('--dh-head', head+'px');
+    ov.style.setProperty('--dh-sill', sill+'px');
+    ov.style.setProperty('--dh-pole', pole+'px');
+    const w = W/2 - post, h = H - head - sill;
+    const key = Math.round(w)+'x'+Math.round(h);
+    if(key === doorsDrawnFor || w < 30 || h < 60) return;
+    doorsDrawnFor = key;
+    ['l','r'].forEach(side=>{
+      const svg = document.getElementById('door-art-'+side);
+      if(!svg) return;
+      svg.setAttribute('viewBox', '0 0 '+w.toFixed(1)+' '+h.toFixed(1));
+      svg.setAttribute('preserveAspectRatio', 'none');
+      svg.innerHTML = doorLeafSVG(w, h, side);
+    });
+  }
+  function doorRR(x, y, w, h, r){
+    const f = n => Math.round(n*10)/10;
+    r = Math.min(r, w/2, h/2);
+    return 'M'+f(x+r)+' '+f(y)+'H'+f(x+w-r)+'A'+f(r)+' '+f(r)+' 0 0 1 '+f(x+w)+' '+f(y+r)
+      +'V'+f(y+h-r)+'A'+f(r)+' '+f(r)+' 0 0 1 '+f(x+w-r)+' '+f(y+h)
+      +'H'+f(x+r)+'A'+f(r)+' '+f(r)+' 0 0 1 '+f(x)+' '+f(y+h-r)
+      +'V'+f(y+r)+'A'+f(r)+' '+f(r)+' 0 0 1 '+f(x+r)+' '+f(y)+'Z';
+  }
+  // One leaf: brushed stainless with a little honest grime, the window (a
+  // hole, glazed with tinted glass, so the board shows through), its rim,
+  // screws and gasket, the two stickers, rivets along the foot, and the
+  // rubber seal on the edge that meets the other leaf.
+  function doorLeafSVG(w, h, side){
+    const f = n => Math.round(n*10)/10, id = 'dr'+side, L = side==='l';
+    const ww = Math.min(w*0.6, h*0.34), wh = Math.max(ww*1.2, Math.min(ww*1.95, h*0.54));
+    const wx = (w-ww)/2 + (L ? 1 : -1)*w*0.03, wy = Math.max(h*0.075, 14);
+    const r = ww*0.3, rim = Math.max(4, ww*0.07);
+    const inset = (k, rr)=> doorRR(wx+k, wy+k, ww-2*k, wh-2*k, Math.max(1, rr));
+    const outer = inset(0, r), inner = inset(rim, r-rim*0.8);
+    const leaf = 'M0 0H'+f(w)+'V'+f(h)+'H0Z';
+    // Screws, evenly round the middle of the rim.
+    const sr = Math.max(0.6, rim*0.07), cx = wx+rim/2, cy = wy+rim/2, cw = ww-rim, ch = wh-rim, cr = Math.max(1, r-rim/2);
+    const step = Math.max(14, wh*0.12);
+    let screws = '';
+    const dot = (x, y)=>{ screws += '<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(sr)+'"/>'; };
+    const run = (len)=> Math.max(1, Math.round(len/step));
+    const nx = run(cw-2*cr), ny = run(ch-2*cr);
+    for(let i=0; i<=ny; i++){ const y = cy+cr+i*(ch-2*cr)/ny; dot(cx, y); dot(cx+cw, y); }
+    dot(cx+cw*0.36, cy+ch); dot(cx+cw*0.64, cy+ch);
+    // Rivets along the foot of the leaf.
+    let rivets = '';
+    const rn = 8;
+    for(let i=0; i<=rn; i++) rivets += '<circle cx="'+f(w*0.05 + i*(w*0.9)/rn)+'" cy="'+f(h - Math.max(3, h*0.013))+'" r="'+f(Math.max(0.7, w*0.0045))+'"/>';
+    // A red-and-black safety sticker: a prohibition sign and the words.
+    const sticker = (y, text, sh)=>{
+      const fs = sh*0.62, tw = fs*0.55*text.length, tot = sh*1.15 + tw + sh*0.35, x = wx + ww/2 - tot/2;
+      const ir = sh*0.33, icx = sh*0.56, icy = sh/2;
+      return '<g transform="translate('+f(x)+' '+f(y)+')">'
+        + '<rect width="'+f(tot)+'" height="'+f(sh)+'" rx="'+f(sh*0.12)+'" fill="#0d0d0d" stroke="#e8e8e4" stroke-opacity=".55" stroke-width=".7"/>'
+        + '<circle cx="'+f(icx)+'" cy="'+f(icy)+'" r="'+f(ir)+'" fill="#d42a2a"/>'
+        + '<rect x="'+f(icx-ir*0.32)+'" y="'+f(icy-ir*0.5)+'" width="'+f(ir*0.64)+'" height="'+f(ir*0.95)+'" rx="'+f(ir*0.25)+'" fill="#fff"/>'
+        + '<path d="M'+f(icx-ir*0.68)+' '+f(icy-ir*0.68)+'L'+f(icx+ir*0.68)+' '+f(icy+ir*0.68)+'" stroke="#d42a2a" stroke-width="'+f(ir*0.32)+'"/>'
+        + '<text x="'+f(sh*1.15)+'" y="'+f(sh*0.71)+'" font-size="'+f(fs)+'" textLength="'+f(tw)+'" lengthAdjust="spacingAndGlyphs"'
+        + ' font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-weight="700" fill="#f2f2f0">'+text+'</text></g>';
+    };
+    const sh = Math.max(6, Math.min(22, ww*0.085, wy*0.62));
+    // Grime: wear and a few stains, heavier toward the foot.
+    const stains = (L ? [[.24,.70,.035,.016],[.31,.725,.018,.01],[.2,.9,.04,.012],[.55,.86,.028,.014],[.66,.64,.007,.03]]
+                      : [[.62,.565,.008,.03],[.70,.585,.006,.024],[.52,.63,.03,.011],[.35,.84,.03,.014],[.78,.9,.025,.01]])
+      .map(([x,y,rx,ry]) => '<ellipse cx="'+f(x*w)+'" cy="'+f(y*h)+'" rx="'+f(rx*w)+'" ry="'+f(ry*h)+'"/>').join('');
+    const g = (n, stops)=> '<linearGradient id="'+id+n+'" '+stops[0]+'>'+stops.slice(1).map(([o,c])=>'<stop offset="'+o+'" stop-color="'+c+'"/>').join('')+'</linearGradient>';
+    return '<defs>'
+      + g('s', [L ? 'x1="0" y1="0" x2="1" y2="0"' : 'x1="1" y1="0" x2="0" y2="0"', [0,'#a09b91'],[.6,'#bdb8ae'],[1,'#c9c4ba']])
+      + '<linearGradient id="'+id+'v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset=".3" stop-color="#fff" stop-opacity="0"/><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>'
+      + g('m', ['x1="0" y1="0" x2="0" y2="1"', [0,'#dcdcd7'],[.5,'#c2c2bd'],[1,'#cfcfca']])
+      + '<linearGradient id="'+id+'f" x1="0" y1="0" x2="1" y2="1"><stop offset=".28" stop-color="#fff" stop-opacity="0"/><stop offset=".36" stop-color="#fff" stop-opacity=".06"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset=".66" stop-color="#fff" stop-opacity=".03"/><stop offset=".72" stop-color="#fff" stop-opacity="0"/></linearGradient>'
+      + '<linearGradient id="'+id+'t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset=".3" stop-color="#000" stop-opacity="0"/></linearGradient>'
+      + g('u', ['x1="0" y1="0" x2="1" y2="0"', [0,'#050506'],[.5,'#2e3134'],[1,'#08090a']])
+      + '<linearGradient id="'+id+'gm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".6" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient>'
+      + '<mask id="'+id+'k" maskUnits="userSpaceOnUse" x="0" y="0" width="'+f(w)+'" height="'+f(h)+'"><rect width="'+f(w)+'" height="'+f(h)+'" fill="url(#'+id+'gm)"/></mask>'
+      + '<clipPath id="'+id+'c"><path clip-rule="evenodd" d="'+leaf+outer+'"/></clipPath>'
+      + '<clipPath id="'+id+'g"><path d="'+inner+'"/></clipPath>'
+      // Brushed grain: noise stretched down the leaf, laid on with overlay.
+      + '<filter id="'+id+'n" filterUnits="userSpaceOnUse" x="0" y="0" width="'+f(w)+'" height="'+f(h)+'" color-interpolation-filters="sRGB">'
+      + '<feTurbulence type="fractalNoise" baseFrequency="0.003 1.1" numOctaves="2" seed="'+(L?4:9)+'"/>'
+      + '<feColorMatrix values="1.6 0 0 0 -.3  1.6 0 0 0 -.3  1.6 0 0 0 -.3  0 0 0 0 .2"/></filter>'
+      // Wear: soft blotches where the noise runs high.
+      + '<filter id="'+id+'w" filterUnits="userSpaceOnUse" x="0" y="0" width="'+f(w)+'" height="'+f(h)+'" color-interpolation-filters="sRGB">'
+      + '<feTurbulence type="fractalNoise" baseFrequency="0.012 0.02" numOctaves="3" seed="'+(L?2:7)+'"/>'
+      + '<feColorMatrix values="0 0 0 0 .36  0 0 0 0 .31  0 0 0 0 .22  4 0 0 0 -2.3"/></filter>'
+      + '<filter id="'+id+'b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="'+f(Math.max(0.8, w*0.004))+'"/></filter>' + '<filter id="'+id+'d" filterUnits="userSpaceOnUse" x="0" y="0" width="'+f(w)+'" height="'+f(h)+'"><feTurbulence type="fractalNoise" baseFrequency="'+(6/w).toFixed(4)+'" numOctaves="3" seed="'+(L?5:11)+'"/><feDisplacementMap in="SourceGraphic" scale="'+f(w*0.05)+'" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation="'+f(Math.max(0.6, w*0.0025))+'"/></filter>' + '<filter id="'+id+'i" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="'+f(Math.max(1.5, rim*0.45))+'"/></filter>'
+      + '</defs>'
+      + '<g clip-path="url(#'+id+'c)">'
+      +   '<rect width="'+f(w)+'" height="'+f(h)+'" fill="url(#'+id+'s)"/>'
+      +   '<rect width="'+f(w)+'" height="'+f(h)+'" filter="url(#'+id+'n)" style="mix-blend-mode:overlay"/>'
+      +   '<rect width="'+f(w)+'" height="'+f(h)+'" filter="url(#'+id+'w)" mask="url(#'+id+'k)" opacity=".12"/>'
+      +   '<g fill="#4f3f27" opacity=".22" filter="url(#'+id+'d)">'+stains+'</g>'
+      +   '<rect width="'+f(w)+'" height="'+f(h)+'" fill="url(#'+id+'v)"/>'
+      +   (L ? '' : '<rect width="'+f(w)+'" height="'+f(h)+'" fill="#000" opacity=".06"/>')
+      +   '<rect x="'+(L ? 0 : f(w-1.5))+'" width="1.5" height="'+f(h)+'" fill="#000" opacity=".3"/>'
+      +   '<rect width="'+f(w)+'" height="1.5" fill="#000" opacity=".35"/>'
+      +   '<g fill="#4e5153" fill-opacity=".75">'+rivets+'</g>'
+      +   '<path d="'+outer+'" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="2.5"/>'
+      + '</g>'
+      // The glass: tinted, a little reflection, the rim's shadow at its top.
+      + '<path d="'+inner+'" fill="#17140e" fill-opacity=".5"/>'
+      + '<g clip-path="url(#'+id+'g)"><rect x="'+f(wx)+'" y="'+f(wy)+'" width="'+f(ww)+'" height="'+f(wh)+'" fill="url(#'+id+'f)"/>'
+      +   '<rect x="'+f(wx)+'" y="'+f(wy)+'" width="'+f(ww)+'" height="'+f(wh)+'" fill="url(#'+id+'t)"/>'
+      +   '<path d="'+inner+'" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="'+f(rim*1.1)+'" filter="url(#'+id+'i)"/></g>'
+      // The rim: polished metal, a highlight along its crown, a black gasket.
+      + '<path fill-rule="evenodd" d="'+outer+inner+'" fill="url(#'+id+'m)"/>'
+      + '<path d="'+inset(rim*0.3, r-rim*0.15)+'" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="'+f(Math.max(0.8, rim*0.16))+'"/>'
+      + '<path d="'+inset(rim*0.82, r-rim*0.7)+'" fill="none" stroke="#000" stroke-opacity=".3" stroke-width="'+f(Math.max(0.8, rim*0.28))+'"/>'
+      + '<path d="'+inner+'" fill="none" stroke="#1c1d1d" stroke-width="'+f(Math.max(1, rim*0.14))+'"/>'
+      + '<g fill="#4e5153" fill-opacity=".8">'+screws+'</g>'
+      + sticker(Math.max(2, wy*0.18), 'Do not hold doors', sh)
+      + sticker(wy + wh + Math.max(5, h*0.035), 'Do not lean on door', sh)
+      // The rubber seal where this leaf meets the other.
+      + '<rect x="'+(L ? f(w - Math.min(10, Math.max(3, w*0.024))) : 0)+'" width="'+f(Math.min(10, Math.max(3, w*0.024)))+'" height="'+f(h)+'" fill="url(#'+id+'u)"/>';
   }
   function openDoors(){
-    clearTimeout(doorsTimer); clearInterval(doorsPoll);
     const ov = document.getElementById('doors-overlay');
+    if(ov && ov.classList.contains('open')) return;  // already parting: keep its removal timer
+    clearTimeout(doorsTimer); clearInterval(doorsPoll);
     const cb = doorsOnOpen; doorsOnOpen = null;
-    if(ov && ov.classList.contains('active') && !ov.classList.contains('open')){
+    if(ov && ov.classList.contains('active')){
+      placeOverBoard(ov, doorsTarget);  // the board may have moved while they waited
       ov.classList.add('open');
-      doorsTimer = setTimeout(()=> ov.classList.remove('active','open'), 850);
+      doorsTimer = setTimeout(()=> ov.classList.remove('active','open'), 900);
     }
     if(cb) cb();
   }
@@ -17046,25 +17280,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ov.classList.remove('open');
     // Over the board and its frame, not the whole page. Measured a frame
     // later, so a view switched to in the same click has laid out first.
+    doorsTarget = o.target || null;
     const place = ()=> trackBoard(ov, o.target);
     const car = ov.querySelector('.doors-car');
     car.style.animation = 'none';
+    const seq = ++doorsSeq;
     requestAnimationFrame(()=>{
+      if(seq !== doorsSeq) return;  // replaced by a later call
       place();
       ov.classList.add('active');
       void car.offsetWidth;         // restart the rumble
       car.style.animation = '';
+      const began = Date.now();
+      // Timed from when they're on screen: a background tab gets no frames,
+      // so they wait (and so does onOpen) until it's looked at again.
+      doorsTimer = setTimeout(()=>{
+        if(!o.isReady || o.isReady()) return openDoors();
+        doorsPoll = setInterval(()=>{ if(o.isReady() || Date.now()-began > 6000) openDoors(); }, 100);
+      }, 950);
     });
-    const began = Date.now();
-    doorsTimer = setTimeout(()=>{
-      if(!o.isReady || o.isReady()) return openDoors();
-      doorsPoll = setInterval(()=>{ if(o.isReady() || Date.now()-began > 6000) openDoors(); }, 100);
-    }, 950);
   }
   (function wireDoors(){
     const ov = document.getElementById('doors-overlay');
     if(!ov) return;
     ov.addEventListener('click', openDoors);
+    window.addEventListener('resize', ()=>{ if(ov.classList.contains('active') && !ov.classList.contains('open')) requestAnimationFrame(()=> placeOverBoard(ov, doorsTarget)); });
     document.addEventListener('keydown', e=>{
       if(!ov.classList.contains('active') || ov.classList.contains('open')) return;
       if(e.key==='Enter' || e.key===' ' || e.key==='Escape'){ e.preventDefault(); openDoors(); }
