@@ -2255,15 +2255,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .modal-overlay.active{ display:flex; }
 
   /* ---- Street-Fighter-style split-screen VS intro, before an online game ---- */
+  /* Placed over the board's frame by JS (placeOverBoard), like Uptown's
+     doors; full screen only when there's no board. */
   .vs-overlay{
-    display:none; position:fixed; inset:0; z-index:200;
+    display:none; position:absolute; z-index:200;
     overflow:hidden; font-family:"JetBrains Mono",monospace;
   }
+  .vs-overlay.full{ position:fixed; inset:0; }
   .vs-overlay.active{ display:block; }
   .vs-half{
     position:absolute; top:0; bottom:0; width:50%;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:8px; padding:0 36px;
+    gap:8px; padding:0 clamp(10px,3vw,36px);
   }
   .vs-half-left{
     left:0;
@@ -3867,6 +3870,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <span class="slider-val" id="glass-alpha-val">50%</span>
       </div>
       <div class="field-hint">Frosted panel behind each drill title, with a specular sweep on hover. The Bauhaus theme prints them flat instead.</div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Game intro</div>
+      <div class="toggle-row" id="intro-row">
+        <button class="toggle active" data-val="on">On</button>
+        <button class="toggle" data-val="off">Off</button>
+      </div>
+      <div class="field-hint">The opening over the board. Every theme shows the black-and-white VS screen, with &#8220;Round one, fight,&#8221; when an online game against another player begins. Uptown Express opens its subway doors instead, for any game and when a Puzzles session or a Puzzle Rush starts. Off skips the screen; the start sound still plays.</div>
     </div>
 
     <div class="field">
@@ -8111,8 +8123,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function playSound(key){
     if(!soundPrefs.enabled) return;
     const skin = (lookPrefs && lookPrefs.skin) || 'felt';
-    const src = soundSourceFor(skin, key);
-    if(!src) return;
+    playSoundSrc(soundSourceFor(skin, key));
+  }
+  function playSoundSrc(src){
+    if(!soundPrefs.enabled || !src) return;
     try{
       const a = pooledAudio(src);
       a.muted = false;
@@ -8168,7 +8182,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // rest, and if it ever blows the storage quota the theme settings must not
   // go down with it.
   const BG_KEY = 'wavyChessPrepBackground';
-  let lookPrefs = { skin:'felt', sqStroke:'none', glass:'on', glassAlpha:50, bauhausBgCleared:false,
+  let lookPrefs = { skin:'felt', sqStroke:'none', glass:'on', glassAlpha:50, intro:'on', bauhausBgCleared:false,
     gameboyBgCleared:false,
     pieceStyleBySkin:{},
     // pieceStrokeEnabled is Custom-theme-only, same as customColors itself --
@@ -8392,6 +8406,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const skinRow = document.getElementById('skin-row');
     const strokeRow = document.getElementById('sq-stroke-row');
     const glassRow = document.getElementById('glass-row');
+    const introRow = document.getElementById('intro-row');
     const glassAlpha = document.getElementById('glass-alpha');
     const glassAlphaVal = document.getElementById('glass-alpha-val');
     const skinHint = document.getElementById('skin-hint');
@@ -8427,6 +8442,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       });
       strokeRow.querySelectorAll('.toggle').forEach(b=>{
         b.classList.toggle('active', b.dataset.val===lookPrefs.sqStroke);
+      });
+      introRow.querySelectorAll('.toggle').forEach(b=>{
+        b.classList.toggle('active', b.dataset.val===(lookPrefs.intro==='off' ? 'off' : 'on'));
       });
       glassRow.querySelectorAll('.toggle').forEach(b=>{
         b.classList.toggle('active', b.dataset.val===lookPrefs.glass);
@@ -8550,6 +8568,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       lookPrefs.customColors = { accent:null, bg:null, surface:null, boardLight:null, boardDark:null, pieceWhite:null, pieceBlack:null, pieceStroke:null };
       lookPrefs.pieceStrokeEnabled = true;
       applyLookPrefs(); saveLookPrefs(); syncCustomColorInputs(); syncPieceColorInputs(); syncButtons();
+    });
+    introRow.querySelectorAll('.toggle').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        lookPrefs.intro = btn.dataset.val;
+        saveLookPrefs(); syncButtons();
+      });
     });
     glassRow.querySelectorAll('.toggle').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -16918,7 +16942,32 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // few seconds. onOpen runs as they start to part. A tap, Enter, Space or
   // Esc opens them at once.
   let doorsTimer = 0, doorsPoll = 0, doorsOnOpen = null;
-  function uptownDoors(){ return !!(lookPrefs && lookPrefs.skin==='uptown'); }
+  // Settings, Game intro: off skips every opening screen.
+  function introOn(){ return !(lookPrefs && lookPrefs.intro==='off'); }
+  function uptownDoors(){ return introOn() && !!(lookPrefs && lookPrefs.skin==='uptown'); }
+  // Both openings cover the board and its frame, not the page. In page
+  // coordinates so they scroll with the board; full screen only when the
+  // view has no board.
+  // Measured again over the first second, in case the board is still
+  // settling (a banner, fonts, the coordinates) when the opening starts.
+  function trackBoard(el, target){
+    placeOverBoard(el, target);
+    [150, 450, 900].forEach(ms => setTimeout(()=>{ if(el.classList.contains('active')) placeOverBoard(el, target); }, ms));
+  }
+  function placeOverBoard(el, target){
+    const frame = target || document.querySelector('.view.active .board-frame');
+    const r = frame && frame.getBoundingClientRect();
+    if(r && r.width > 40 && r.height > 40){
+      el.classList.remove('full');
+      el.style.left = (r.left + window.scrollX) + 'px';
+      el.style.top = (r.top + window.scrollY) + 'px';
+      el.style.width = r.width + 'px';
+      el.style.height = r.height + 'px';
+    } else {
+      el.classList.add('full');
+      el.style.left = el.style.top = el.style.width = el.style.height = '';
+    }
+  }
   function openDoors(){
     clearTimeout(doorsTimer); clearInterval(doorsPoll);
     const ov = document.getElementById('doors-overlay');
@@ -16942,20 +16991,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ov.classList.remove('open');
     // Over the board and its frame, not the whole page. Measured a frame
     // later, so a view switched to in the same click has laid out first.
-    const place = ()=>{
-      const frame = o.target || document.querySelector('.view.active .board-frame');
-      const r = frame && frame.getBoundingClientRect();
-      if(r && r.width > 40 && r.height > 40){
-        ov.classList.remove('full');
-        ov.style.left = (r.left + window.scrollX) + 'px';
-        ov.style.top = (r.top + window.scrollY) + 'px';
-        ov.style.width = r.width + 'px';
-        ov.style.height = r.height + 'px';
-      } else {
-        ov.classList.add('full');
-        ov.style.left = ov.style.top = ov.style.width = ov.style.height = '';
-      }
-    };
+    const place = ()=> trackBoard(ov, o.target);
     const car = ov.querySelector('.doors-car');
     car.style.animation = 'none';
     requestAnimationFrame(()=>{
@@ -16993,12 +17029,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the API exposes at all) -- a FIDE-style title badge (GM/IM/FM/...) is
   // the closest real per-player visual it does have, so that's what shows
   // here instead, when the player has one.
-  function showVsIntro(meName, meColor, oppName, oppColor, meTitle, oppTitle){
+  function showVsIntro(meName, meColor, oppName, oppColor, meTitle, oppTitle, vsBot){
     if(uptownDoors()){
       playSound('matchStart');
       showDoorsIntro({ left: vsShortenName(meName), right: vsShortenName(oppName) });
       return;
     }
+    // The VS screen is for games against people. A bot game, or the intro
+    // switched off, still gets the theme's start sound, just no screen.
+    if(vsBot || !introOn()){ playSound('matchStart'); return; }
     const overlay = document.getElementById('vs-overlay');
     if(!overlay) return;
     clearTimeout(vsIntroTimer);
@@ -17017,8 +17056,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     meTitleEl.style.display = meTitle ? 'inline-block' : 'none';
     oppTitleEl.textContent = oppTitle || '';
     oppTitleEl.style.display = oppTitle ? 'inline-block' : 'none';
-    overlay.classList.add('active');
-    playSound('matchStart');
+    // Over the board, not the page (measured once the game view is laid out).
+    requestAnimationFrame(()=>{ overlay.classList.add('active'); trackBoard(overlay); });
+    // Always the built-in "Round one, fight", whatever the theme.
+    playSoundSrc(SOUND_DATA.matchStart);
     vsIntroTimer = setTimeout(()=>{
       overlay.classList.add('leaving');
       vsIntroTimer = setTimeout(()=>{
@@ -17060,7 +17101,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         myWhite ? roundOl.whiteName : roundOl.blackName, roundOl.color,
         myWhite ? roundOl.blackName : roundOl.whiteName, myWhite ? 'black' : 'white',
         myWhite ? roundOl.whiteTitle : roundOl.blackTitle,
-        myWhite ? roundOl.blackTitle : roundOl.whiteTitle
+        myWhite ? roundOl.blackTitle : roundOl.whiteTitle,
+        full.white.aiLevel!=null || full.black.aiLevel!=null
       );
     }
   }
