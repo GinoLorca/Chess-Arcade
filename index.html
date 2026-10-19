@@ -3302,28 +3302,57 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .save-cols:empty::before{ content:"No collections yet \2014  add one below."; font-size:12.5px; color:var(--ink-soft); }
   /* Above the Solved-it box (55), which waits for it to close. */
   #save-overlay{ z-index:56; }
-  /* The Save pill sits beside the title only, so "Rating \B7  Played N
+  /* The Link and Save pills sit beside the title only, so "Rating \B7  Played N
      times" keeps the card's full width. */
   .pz-meta-card{ position:relative; }
   .pz-meta-row .pz-save-btn{ position:absolute; top:10px; right:10px; margin:0; }
-  .pz-meta-card .pz-meta-title{ padding-right:86px; }
+  .pz-meta-card .pz-meta-title{ padding-right:160px; margin-bottom:3px; }   /* room for both pills at their widest ("Copied" + "Saved") */
   /* Long names wrap instead of pushing the page sideways. */
   .saved-cols .toggle, .save-cols .toggle{ max-width:100%; overflow-wrap:anywhere; text-align:left; }
-  #saved-empty{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; color:var(--ink-soft); box-shadow:var(--shadow); }
+  #saved-empty, #ph-empty{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; color:var(--ink-soft); box-shadow:var(--shadow); }
   #view-saved.active{ padding-bottom:64px; }   /* clear of the fixed Friends tab */
   #view-saved .btn:disabled{ opacity:.45; cursor:not-allowed; }
   .saved-sync{ align-items:flex-start; }
   .saved-sync-dot{ margin-top:5px; }
   .saved-card{ content-visibility:auto; contain-intrinsic-size:auto 170px; }
-  /* Each skin's own card corners, as its panels have them. */
-  :root[data-skin="hustler"] .saved-card{ border-radius:5px; }
-  :root[data-skin="bauhaus"] .saved-card{ border-radius:0; border-width:2px; }
+  /* Each skin's own card corners, as its panels have them (Puzzle History's
+     divider and "left unfinished" banner too). */
+  :root[data-skin="hustler"] .saved-card, :root[data-skin="hustler"] .ph-divider, :root[data-skin="hustler"] .ph-left{ border-radius:5px; }
+  :root[data-skin="bauhaus"] .saved-card, :root[data-skin="bauhaus"] .ph-divider, :root[data-skin="bauhaus"] .ph-left{ border-radius:0; border-width:2px; }
   :root[data-skin="bauhaus"] .pz-save-btn{ border-radius:0; }
-  :root[data-skin="outerspace"] .saved-card{ border-radius:6px; }
-  :root[data-skin="drivethru"] .saved-card{ border-radius:18px; }
-  :root[data-skin="rose"] .saved-card{ border-radius:14px; }
-  :root[data-skin="chessbook"] .saved-card{ border-radius:3px; }
-  :root[data-skin="uptown"] .saved-card{ border-radius:6px; }
+  :root[data-skin="outerspace"] .saved-card, :root[data-skin="outerspace"] .ph-divider, :root[data-skin="outerspace"] .ph-left{ border-radius:6px; }
+  :root[data-skin="drivethru"] .saved-card, :root[data-skin="drivethru"] .ph-divider, :root[data-skin="drivethru"] .ph-left{ border-radius:18px; }
+  :root[data-skin="rose"] .saved-card, :root[data-skin="rose"] .ph-divider, :root[data-skin="rose"] .ph-left{ border-radius:14px; }
+  :root[data-skin="chessbook"] .saved-card, :root[data-skin="chessbook"] .ph-divider, :root[data-skin="chessbook"] .ph-left{ border-radius:3px; }
+  :root[data-skin="uptown"] .saved-card, :root[data-skin="uptown"] .ph-divider, :root[data-skin="uptown"] .ph-left{ border-radius:6px; }
+  /* Puzzle History: the Saved library's cards and status line, plus the
+     "Puzzle left unfinished" banner on the menu and the Puzzles setup. */
+  #view-puzzle-history.active{ padding-bottom:64px; }   /* clear of the fixed Friends tab, like #view-saved */
+  #view-puzzle-history .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  /* Sits between cards on the page background, so it gets a card's surface
+     (as #saved-empty does): bare text there is unreadable on felt. */
+  .ph-divider{
+    grid-column:1/-1; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center;
+    background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 12px; box-shadow:var(--shadow);
+    font-size:12.5px; color:var(--ink-soft); text-align:center;
+  }
+  .resume-game-banner.ph-left{ border-color:var(--brass); }
+  .ph-left-dot{ width:10px; height:10px; border-radius:50%; background:var(--brass); flex-shrink:0; }   /* static: nothing is live */
+  /* Both lines wrap: the detail ("... 59 minutes ago") is wider than a 320-375px phone. */
+  .ph-left .ph-left-note, .ph-left .ph-left-detail{ white-space:normal; }
+  .ph-left-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .ph-left-actions .btn{ padding:7px 14px; font-size:13px; }
+  .pz-meta-pills{ position:absolute; top:10px; right:10px; display:flex; gap:6px; }
+  .pz-meta-pills .pz-save-btn{ position:static; }   /* beats .pz-meta-row .pz-save-btn: same specificity, later */
+  .ph-sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+  .ph-url{ width:100%; box-sizing:border-box; margin-top:8px; font-family:"JetBrains Mono",monospace; font-size:12px; }
+  /* The result pills keep the shared tints, with the text pulled toward --ink
+     so every skin reaches AA (Game History's own pills are unchanged). Without
+     color-mix the first rule stands. */
+  #ph-list .history-result-pill{ color:var(--ink); }
+  #ph-list .history-result-win{ color:color-mix(in srgb, var(--good) 60%, var(--ink)); }
+  #ph-list .history-result-loss{ color:color-mix(in srgb, var(--bad) 60%, var(--ink)); }
+  #ph-more{ background:var(--surface); }   /* on the page background, like the divider: bare ghost text is unreadable on felt */
   .history-main{ min-width:0; display:flex; flex-direction:column; gap:3px; }
   .history-line1{ display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
   .history-result-pill{
@@ -4115,6 +4144,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <button class="btn btn-ghost" id="next-review">Look at the board</button>
       <button class="btn btn-ghost" id="next-settings">Change settings</button>
       <button class="btn btn-ghost" id="next-save" style="display:none;">&#9734; Save puzzle</button>
+      <button class="btn btn-ghost" id="next-link" style="display:none;">Copy link</button>
     </div>
     <div class="next-keys">Enter: next &#183; Esc: look at the board</div>
   </div>
@@ -4146,6 +4176,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     </div>
   </div>
 </div>
+<!-- Puzzle History: "Link copied" for screen readers, outside the views so
+     it still announces in the play view. -->
+<div class="ph-sr" id="ph-live" role="status" aria-live="polite"></div>
 <div class="modal-overlay" id="settings-overlay">
   <div class="modal-card">
     <div class="modal-head">
@@ -4424,6 +4457,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="saved-head-actions">
           <button class="btn btn-primary" id="saved-play">Play these</button>
           <button class="btn btn-ghost" id="saved-shuffle">Shuffle</button>
+          <button class="btn btn-ghost" id="saved-ph-btn">History</button>
         </div>
       </div>
       <div class="saved-sync" id="saved-sync" data-state="idle">
@@ -4449,6 +4483,39 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     </div>
     <div class="saved-list" id="saved-list"></div>
     <div class="history-empty" id="saved-empty" style="display:none;"></div>
+  </section>
+
+  <!-- ============ PUZZLE HISTORY ============ -->
+  <!-- Every puzzle the Puzzles drill showed on this device (even ones left
+       before a move), plus the user's Lichess puzzle activity. -->
+  <section class="view" id="view-puzzle-history">
+    <button class="back-link" id="ph-back" data-nav="setup-puzzle">&larr; Puzzles</button>
+    <div class="panel">
+      <div class="history-head">
+        <div>
+          <div class="eyebrow">Puzzles</div>
+          <h1 class="title" style="font-size:26px;">Puzzle History</h1>
+          <div class="subtitle" id="ph-subtitle">&#8212;</div>
+        </div>
+        <div class="saved-head-actions"><button class="btn btn-ghost" id="ph-saved-btn">Saved puzzles</button></div>
+      </div>
+      <div class="field-hint" id="ph-notice" role="status" hidden></div>
+      <div class="saved-sync" id="ph-sync" data-state="off" aria-live="polite">
+        <span class="saved-sync-dot" aria-hidden="true"></span>
+        <span class="saved-sync-text" id="ph-sync-text"></span>
+      </div>
+      <div class="toggle-row" id="ph-show-row" role="group" aria-label="Show">
+        <button class="toggle active" data-val="all">All</button>
+        <button class="toggle" data-val="open">Not finished</button>
+        <button class="toggle" data-val="missed">Missed</button>
+        <button class="toggle" data-val="solved">Solved</button>
+      </div>
+    </div>
+    <div class="saved-list" id="ph-list"></div>
+    <div class="history-footer">
+      <div class="history-empty" id="ph-empty" style="display:none;"></div>
+      <button class="btn btn-ghost" id="ph-more" style="display:none;">Show more</button>
+    </div>
   </section>
 
   <section class="view has-side-left" id="view-play-history">
@@ -4515,6 +4582,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         </div>
       </div>
       <button class="btn btn-primary" id="resume-game-btn">Return to game</button>
+    </div>
+    <div class="resume-game-banner ph-left" id="ph-left-menu" style="display:none;">
+      <div class="resume-game-info">
+        <span class="ph-left-dot" aria-hidden="true"></span>
+        <div>
+          <div class="resume-game-title">Puzzle left unfinished</div>
+          <div class="resume-game-detail ph-left-detail">&#8212;</div>
+          <div class="resume-game-detail ph-left-note">Not counted on Lichess yet. Going back is practice, so your rating won&#8217;t change.</div>
+        </div>
+      </div>
+      <div class="ph-left-actions">
+        <button class="btn btn-primary ph-left-go" type="button">Back to puzzle</button>
+        <button class="btn btn-ghost ph-left-save" type="button">&#9734; Save</button>
+        <button class="btn-link ph-left-history" type="button">History</button>
+        <button class="btn-link ph-left-dismiss" type="button">Dismiss</button>
+      </div>
     </div>
     <div class="drill-grid">
 
@@ -5606,6 +5689,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   <!-- ============ SETUP: PUZZLES ============ -->
   <section class="view" id="view-setup-puzzle">
     <button class="back-link" data-nav="menu">&larr; All drills</button>
+    <div class="resume-game-banner ph-left" id="ph-left-setup" style="display:none;">
+      <div class="resume-game-info">
+        <span class="ph-left-dot" aria-hidden="true"></span>
+        <div>
+          <div class="resume-game-title">Puzzle left unfinished</div>
+          <div class="resume-game-detail ph-left-detail">&#8212;</div>
+          <div class="resume-game-detail ph-left-note">Not counted on Lichess yet. Going back is practice, so your rating won&#8217;t change.</div>
+        </div>
+      </div>
+      <div class="ph-left-actions">
+        <button class="btn btn-primary ph-left-go" type="button">Back to puzzle</button>
+        <button class="btn btn-ghost ph-left-save" type="button">&#9734; Save</button>
+        <button class="btn-link ph-left-history" type="button">History</button>
+        <button class="btn-link ph-left-dismiss" type="button">Dismiss</button>
+      </div>
+    </div>
     <div class="panel">
       <div>
         <div class="eyebrow">Drill 10</div>
@@ -5648,6 +5747,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="btn-row">
         <button class="btn btn-primary" id="start-puzzle-drill">Start drill</button>
         <button class="btn btn-ghost" id="setup-saved-btn">Saved puzzles</button>
+        <button class="btn btn-ghost" id="setup-ph-btn">History</button>
       </div>
     </div>
   </section>
@@ -5708,7 +5808,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
             <div class="pz-meta-title">Puzzle <span id="pz-meta-id">&#8212;</span></div>
             <div class="pz-meta-sub">Rating <span id="pz-meta-rating">&#8212;</span> &middot; Played <span id="pz-meta-plays">&#8212;</span> times</div>
           </div>
-          <button class="pz-save-btn" id="pz-save" type="button" title="Save this puzzle (S)">&#9734; Save</button>
+          <div class="pz-meta-pills">
+            <button class="pz-save-btn pz-link-btn" id="pz-link" type="button" title="Copy a link to this puzzle">Link</button>
+            <button class="pz-save-btn" id="pz-save" type="button" title="Save this puzzle (S)">&#9734; Save</button>
+          </div>
         </div>
         <div class="pz-meta-row" id="pz-meta-game-row" style="display:none;">
           <span class="pz-meta-icon">&#9889;</span>
@@ -7550,7 +7653,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                              {param:'showRatings', type:'toggle', row:'online-ratings-row'},
                              {param:'time', param2:'increment', type:'timeinc', row:'online-time-row', timeInput:'online-time-custom', incInput:'online-inc-custom'} ] },
     history:      { view:'history',          card:'card-history',     startBtn:null, fields:[] },
-    saved:        { view:'saved',            card:'card-saved',       startBtn:null, fields:[] }
+    saved:        { view:'saved',            card:'card-saved',       startBtn:null, fields:[] },
+    'puzzle-history': { view:'puzzle-history', card:'setup-ph-btn', startBtn:null,
+                    fields:[ {param:'show', type:'toggle', row:'ph-show-row'} ] }
   };
   const VIEW_TO_SLUG = Object.fromEntries(Object.entries(DEEP_LINKS).map(([slug,r])=>[r.view,slug]));
 
@@ -7687,6 +7792,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // back on directly (mid-drill state isn't reconstructed from a link).
     if(!isPlay) dlSyncHash(VIEW_TO_SLUG[name]);
     if(name==='saved') spLibraryShown();     // name first: never touches the library before it exists
+    // Puzzle History (all bail until its block has run: boot shows the menu first).
+    if(PH) phSaveGen++;                      // a history Save still fetching won't open over the new screen
+    if(name==='puzzle-history') phShown();
+    if(name==='menu' || name==='setup-puzzle') phRenderLeft();
     // Refresh whether there's a live Lichess game to offer "Return to
     // game" for every time the menu comes on screen -- covers both
     // landing here mid-game (home button, a back-link) and a game having
@@ -13606,6 +13715,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     pzAnnounceTimer = null;
     const myFetch = pzFetchToken;
     roundPz.locked = true;
+    roundPz.phRevealed = true;   // Puzzle History: "Solution viewed", not "Missed"
     // Force back to the live position regardless of whatever the user was
     // browsing when they clicked this -- "view the solution" is explicit
     // enough that it shouldn't matter what was on screen a moment ago.
@@ -15670,7 +15780,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       document.getElementById('pz-side-dot').className = 'side-dot ' + roundPz.solverColor;
       document.getElementById('pz-hud-mode-text').textContent = (roundPz.solverColor==='w'?'WHITE':'BLACK') + ' TO MOVE';
       document.getElementById('pz-hud-round').textContent = replay
-        ? 'Saved '+replay.pos+' of '+replay.total+' \u00b7 rating '+roundPz.rating+' \u00b7 '+replay.label
+        ? (replay.kind==='history' ? 'Practice' : 'Saved '+replay.pos+' of '+replay.total)+' \u00b7 rating '+roundPz.rating+' \u00b7 '+replay.label
         : 'Puzzle '+roundNumPz+' \u00b7 rating '+roundPz.rating+' \u00b7 '+pzThemeLabel(settingsPz.theme);
       pzRefreshMeta();
       pzRefreshTurnCard();
@@ -15680,6 +15790,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // earlier would use stale layout from before this puzzle's own HUD
       // text was in place.
       pzPositionRatingBadge();
+      // Puzzle History: logged the moment it's on screen, so a puzzle left
+      // before any move can be found again (Lichess never records those).
+      if(!replay) phSeen(roundPz, state);
 
       // Order is: the "White/Black to move" announce banner (the same
       // punch-in/skew fighting-game visual language the Play Online VS
@@ -18548,6 +18661,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     spLibDirty = true;
     if(views['saved'] && views['saved'].classList.contains('active')) spRenderLibrary();
     spRefreshPlaySave();
+    phSyncSaved();
     spRenderSync();
     if(sync) spScheduleSync(2000);
   }
@@ -18654,13 +18768,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     return rows.join('/')+' '+state.turn+' '+castle+' '+ep+' 0 '+(Math.floor(plies/2)+1);
   }
-  function spEntryFromRound(r){
-    let fen = '';
-    try{ fen = pzStateToFEN(pzReplayPGNWithStates(r.tokens).state, r.tokens.length); }catch(e){}
+  // knownFen: the solver-facing FEN when the caller already has it (Puzzle
+  // History logs a puzzle as its board is drawn), saving a second replay.
+  // A history practice run carries the puzzle's real first try in
+  // replay.firstTry; a Saved run's replay has none, so that stays null.
+  function spEntryFromRound(r, knownFen){
+    let fen = knownFen || '';
+    if(!fen) try{ fen = pzStateToFEN(pzReplayPGNWithStates(r.tokens).state, r.tokens.length); }catch(e){}
     return spCleanPuzzle({
       id:String(r.id), rating:r.rating, plays:r.plays, themes:r.themes || [], tokens:r.tokens, solution:r.solution,
       gameId:r.gameId, gamePerf:r.gamePerf, gameClock:r.gameClock, players:r.players, fen, solver:r.solverColor,
-      savedAt:Date.now(), note:'', firstTry: r.replay ? null : (r.failed ? 'missed' : (r.done ? 'solved' : null)),
+      savedAt:Date.now(), note:'', firstTry: r.replay ? (r.replay.firstTry || null) : (r.failed ? 'missed' : (r.done ? 'solved' : null)),
       practice:{}, collections:[], links:{}
     });
   }
@@ -18668,6 +18786,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // went; a practice run counts towards the puzzle's practice record.
   function spRoundEnded(clean){
     if(!roundPz) return;
+    phResult(clean);     // Puzzle History logs every result, saved or not
     const p = SP.puzzles[String(roundPz.id)];
     if(!p) return;
     if(roundPz.replay){
@@ -18689,19 +18808,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const next = document.getElementById('pz-next');
     const skip = document.getElementById('pz-skip');
     const back = document.querySelector('#view-play-puzzle > .back-link');
-    next.textContent = on ? (last ? 'Back to saved puzzles' : 'Next saved puzzle') : 'Next puzzle';
+    // Where the run goes back to: Saved puzzles, Puzzle history (a one-puzzle
+    // practice run from there), or the Puzzles setup for a live session.
+    const home = on ? (SP_PLAY.home||'saved') : 'setup-puzzle';
+    const name = home==='puzzle-history' ? 'Puzzle history' : home==='saved' ? 'Saved puzzles' : 'Change settings';
+    next.textContent = on ? (last ? 'Back to '+name.toLowerCase() : 'Next saved puzzle') : 'Next puzzle';
     skip.textContent = on ? (last ? 'Skip' : 'Skip to next') : 'Skip puzzle';
     [pzResultBanner, pzErrorBanner].forEach(b=>{
       const btn = b.querySelector('.btn-row button[data-nav]');
       if(!btn) return;
-      btn.dataset.nav = on ? 'saved' : 'setup-puzzle';
-      btn.textContent = on ? 'Saved puzzles' : 'Change settings';
+      btn.dataset.nav = home;
+      btn.textContent = name;
     });
-    if(back){ back.dataset.nav = on ? 'saved' : 'setup-puzzle'; back.innerHTML = on ? '&larr; Saved puzzles' : '&larr; Change settings'; }
+    if(back){ back.dataset.nav = home; back.innerHTML = '&larr; '+name; }
   }
-  function spPlayQueue(ids, index, label){
+  // extra: more fields for SP_PLAY, e.g. { home:'puzzle-history', firstTry }.
+  function spPlayQueue(ids, index, label, extra){
     if(!ids.length) return;
-    SP_PLAY = { queue:ids.slice(), index:index||0, label:label||'Saved' };
+    SP_PLAY = Object.assign({ queue:ids.slice(), index:index||0, label:label||'Saved' }, extra||{});
     roundNumPz = 0;
     statsPz.rounds=0; statsPz.solved=0; statsPz.streak=0; statsPz.best=0;
     refreshStatsPz();
@@ -18714,10 +18838,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function spAdvance(){
     if(!SP_PLAY) return;
     SP_PLAY.index++;
-    if(SP_PLAY.index >= SP_PLAY.queue.length){ SP_PLAY = null; spPlayUi(); spOpenLibrary(); return; }
+    if(SP_PLAY.index >= SP_PLAY.queue.length){ const home = SP_PLAY.home; SP_PLAY = null; spPlayUi(); if(home==='puzzle-history') phOpen(); else spOpenLibrary(); return; }
     spStartCurrent();
   }
+  // The literal pzStartRound takes ({game, puzzle}, the batch/by-id shape)
+  // for a stored puzzle entry.
+  function spRoundEntry(p){
+    return {
+      game:{ id:p.gameId, pgn:p.tokens.join(' '), perf:{ name:p.gamePerf }, clock:p.gameClock, players:p.players.map(x=> Object.assign({}, x)) },
+      puzzle:{ id:p.id, rating:p.rating, plays:p.plays, initialPly:p.tokens.length-1, solution:p.solution.slice(), themes:p.themes.slice() }
+    };
+  }
   function spStartCurrent(){
+    if(SP_PLAY && SP_PLAY.home==='puzzle-history') return phStartCurrent();
     if(!SP_PLAY) return;
     while(SP_PLAY.index < SP_PLAY.queue.length && !SP.puzzles[SP_PLAY.queue[SP_PLAY.index]]) SP_PLAY.index++;
     if(SP_PLAY.index >= SP_PLAY.queue.length){ SP_PLAY = null; spPlayUi(); spOpenLibrary(); return; }
@@ -18725,20 +18858,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const myFetch = pzResetForRound();
     spPlayUi();
     if(!p.tokens.length){
-      // Saved on another device: its moves come from Lichess the first time.
+      // Saved on another device, or saved from Puzzle History without its
+      // moves: they come from Lichess the first time.
       pzStatusEl.textContent = 'Fetching this puzzle from Lichess\u2026';
       spHydrateOne(p.id).then(ok=>{
         if(myFetch!==pzFetchToken) return;
         if(ok){ spPersist(); spStartCurrent(); }
-        else pzShowError('Couldn\u2019t load this puzzle yet.', 'It was saved on another device, and needs Lichess once to fill in its moves. Check the connection and retry.');
+        else pzShowError('Couldn\u2019t load this puzzle yet.', 'Its moves come from Lichess the first time. Check the connection and retry.');
       });
       return;
     }
-    const entry = {
-      game:{ id:p.gameId, pgn:p.tokens.join(' '), perf:{ name:p.gamePerf }, clock:p.gameClock, players:p.players.map(x=> Object.assign({}, x)) },
-      puzzle:{ id:p.id, rating:p.rating, plays:p.plays, initialPly:p.tokens.length-1, solution:p.solution.slice(), themes:p.themes.slice() }
-    };
-    try{ pzStartRound(entry, myFetch, { pos:SP_PLAY.index+1, total:SP_PLAY.queue.length, label:SP_PLAY.label }); }
+    try{ pzStartRound(spRoundEntry(p), myFetch, { pos:SP_PLAY.index+1, total:SP_PLAY.queue.length, label:SP_PLAY.label }); }
     catch(e){ pzShowError('This saved puzzle wouldn\u2019t load.', 'Skip it, or remove it from Saved Puzzles.'); }
   }
 
@@ -18753,7 +18883,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   let spModal = null;     // { pid, entry (when not saved yet), cids:Set, returnFocus }
   const saveOverlay = document.getElementById('save-overlay');
-  function spOpenSave(pid){
+  // given: a cleaned entry for a puzzle that isn't the one on screen (Puzzle
+  // History saves its rows through this).
+  function spOpenSave(pid, given){
     const nx = document.getElementById('next-overlay');
     if(!pid && nx && nx.classList.contains('active')){ document.getElementById('next-save').click(); return; }
     let entry = null;
@@ -18762,6 +18894,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       pid = String(roundPz.id);
       if(!SP.puzzles[pid]) entry = spEntryFromRound(roundPz);
     }
+    else if(!SP.puzzles[pid] && given) entry = given;
     const p = SP.puzzles[pid] || entry;
     if(!p) return;
     // A new save starts in the collections used last time: saving a run of
@@ -18991,7 +19124,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const pr = p.practice;
     main.appendChild(spMake('div', 'saved-practice', pr.tries
       ? 'Practised '+pr.tries+'\u00d7 \u00b7 '+pr.solved+' clean \u00b7 last '+relTime(pr.last)
-      : (p.tokens.length ? 'Saved '+relTime(p.savedAt) : 'Saved on another device \u00b7 fills in from Lichess')));
+      : (p.tokens.length ? 'Saved '+relTime(p.savedAt) : 'Moves fill in from Lichess')));
     const acts = spMake('div', 'saved-actions');
     const play = spMake('button', 'btn btn-primary', 'Play');
     play.addEventListener('click', ()=> spPlayQueue(ids, index, spQueueLabel()));
@@ -19580,6 +19713,676 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   spRenderSync();
   if(getLichessToken()) setTimeout(()=> spSync(), 5000);
 
+  /* ================= PUZZLE HISTORY =================
+     Every puzzle the Puzzles drill puts on screen is logged on this device
+     the moment its board is drawn (phSeen, from pzStartRound) -- including
+     ones left before any move, which Lichess never records -- and its first
+     live result once there is one (phResult, from spRoundEnded). The Puzzle
+     History view lists them, merged at render time with the user's Lichess
+     puzzle activity (other devices, lichess.org), which is kept in memory
+     only. Practising one from here is a one-puzzle practice run through the
+     Saved machinery (SP_PLAY.home = 'puzzle-history'), so it never reports
+     a result and can't move the rating; #puzzle/<id> opens any puzzle that
+     way, with or without a token. Rush, practice runs and linked puzzles
+     aren't logged. A "Puzzle left unfinished" banner on the menu and the
+     Puzzles setup offers the newest live puzzle that never got a result.
+     Everything here is a var: showView('menu') runs at boot, before this
+     block, and reaches phRenderLeft, which must find PH unset and bail.
+     Nothing here throws into the Puzzles code (every hook is wrapped), and
+     a storage problem never reaches #pz-status (it shows in the view's
+     subtitle only). */
+  var PH_KEY = 'wavyChessPrepPuzzleHistory';
+  var PH_OUTS = ['solved','missed','viewed','skipped'];
+  var PH_MAX = 200, PH_FULL = 30, PH_LEFT_MS = 864e5;
+  var PH_FEN_RE = /^[1-8pnbrqkPNBRQK\/]+ [wb] /, PH_THEME_RE = /^[A-Za-z0-9]{1,30}$/;
+  var PH_HIDE_THEMES = ['short','long','veryLong','oneMove','master','masterVsMaster','superGM'];
+  var PH_ACT = phBlankAct('');      // Lichess activity, this visit only
+  var phFetched = new Map();        // id -> spCleanPuzzle entry fetched by id this visit (cap 20)
+  var phThumbCache = new Map(), phThumbOwner = null;   // apart from spThumbCache: a node lives in one place only
+  var phFilter = { show:'all' }, phLimit = 40, phReturn = 'setup-puzzle', phDirty = false, phSaveTimer = 0, phStoreFull = false;
+  var phFocusKey = null;            // a focused control that came back disabled ("Loading..."), refocused once enabled
+  var PH = null;                    // { v:1, dis:{id,at}|null, rows:[...] }, set at the end of this block
+
+  function phBlankAct(token){ return { token:token||'', rows:new Map(), newest:0, oldest:Infinity, done:false, busy:false, state:'off', detail:'', at:0, until:0 }; }
+  function phFind(id){ return PH ? (PH.rows.find(x=> x.id===id) || null) : null; }
+  function phLite(x){ const y = Object.assign({}, x); delete y.e; return y; }
+
+  /* ---- The store: { v:1, dis, rows } newest first, unique by id ---- */
+  function phCleanRow(x){
+    if(!x || typeof x!=='object') return null;
+    const id = String(x.id||''), t = Number(x.t);
+    if(!/^\w{5}$/.test(id) || !isFinite(t) || t <= 0) return null;
+    const fen = typeof x.fen==='string' && PH_FEN_RE.test(x.fen) ? x.fen.slice(0, 100) : '';
+    const r = Number(x.r);
+    const row = {
+      id, t, out: PH_OUTS.includes(x.out) ? x.out : null, r: isFinite(r) ? (r||0) : 0, fen,
+      s: fen ? (fen.split(' ')[1]==='b' ? 'b' : 'w') : (x.s==='b' ? 'b' : 'w'),
+      th: (Array.isArray(x.th) ? x.th : []).filter(k=> typeof k==='string' && PH_THEME_RE.test(k)).slice(0, 8),
+      a: typeof x.a==='string' && PH_THEME_RE.test(x.a) ? x.a : ''
+    };
+    ['pt','pc','pl'].forEach(k=>{ const n = Number(x[k]); if(isFinite(n) && n > 0) row[k] = n; });
+    if(x.e){ const e = spCleanPuzzle(x.e); if(e && e.id===id && e.tokens.length) row.e = e; }
+    return row;
+  }
+  function phLoad(raw){
+    const out = { v:1, dis:null, rows:[] };
+    let d = null;
+    try{ d = JSON.parse(raw!=null ? raw : (localStorage.getItem(PH_KEY) || 'null')); }catch(e){ d = null; }
+    if(!d || typeof d!=='object') return out;
+    try{
+      const dis = d.dis;
+      if(dis && typeof dis==='object' && /^\w{5}$/.test(String(dis.id||'')) && typeof dis.at==='number' && isFinite(dis.at)) out.dis = { id:String(dis.id), at:dis.at };
+    }catch(e){ out.dis = null; }
+    // Row by row: a hostile row (a field that can't become a string or a
+    // number) drops only itself, never the rest of the log.
+    const seen = new Set();
+    (Array.isArray(d.rows) ? d.rows : []).forEach(x=>{
+      let r = null;
+      try{ r = phCleanRow(x); }catch(e){ r = null; }
+      if(r && !seen.has(r.id)){ seen.add(r.id); out.rows.push(r); }
+    });
+    out.rows.sort((p,q)=> q.t - p.t);
+    out.rows = out.rows.slice(0, PH_MAX);
+    return out;
+  }
+  // Union by id: a = this tab's memory, b = what's on disk (or another tab's).
+  function phMergeRows(a, b){
+    const by = new Map();
+    [...a, ...b].forEach(x=>{
+      const m = by.get(x.id);
+      if(!m){ by.set(x.id, Object.assign({}, x)); return; }
+      const keep = x.t > m.t ? Object.assign({}, x) : m, other = keep===m ? x : m;
+      keep.out = keep.out || other.out || null;          // a result is never lost
+      if(!keep.e && other.e) keep.e = other.e;
+      ['pt','pc','pl'].forEach(k=>{ const n = Math.max(keep[k]||0, other[k]||0); if(n) keep[k] = n; });
+      by.set(x.id, keep);
+    });
+    return [...by.values()].sort((p,q)=> q.t - p.t).slice(0, PH_MAX);
+  }
+  function phNewerDis(a, b){ return !a ? b : !b ? a : (b.at > a.at ? b : a); }
+  // Read, merge, write. Full moves (e) ride on the newest 30 rows only; when
+  // storage is full they're shed (30, then 5, then none), and past that the
+  // log lives in memory for this visit and the view's subtitle says so.
+  function phPersist(){
+    if(!PH) return;
+    const disk = phLoad();
+    PH.rows = phMergeRows(PH.rows, disk.rows);
+    PH.dis = phNewerDis(PH.dis, disk.dis);
+    PH.rows.forEach((x,i)=>{ if(i >= PH_FULL) delete x.e; });
+    for(const full of [PH_FULL, 5, 0]){
+      try{
+        localStorage.setItem(PH_KEY, JSON.stringify({ v:1, dis:PH.dis, rows:PH.rows.map((x,i)=> i<full ? x : phLite(x)) }));
+        phStoreFull = false; phDirty = false; return;
+      }catch(e){}
+    }
+    phStoreFull = true;
+  }
+  function phSaveSoon(){ phDirty = true; clearTimeout(phSaveTimer); phSaveTimer = setTimeout(phFlush, 1000); }
+  function phFlush(){ clearTimeout(phSaveTimer); try{ if(PH && phDirty) phPersist(); }catch(e){} }
+
+  /* ---- Capture: shown (C1), result (C2) ---- */
+  function phSeen(r, state){
+    if(!PH || !r || r.replay) return;
+    try{
+      const id = String(r.id); if(!/^\w{5}$/.test(id)) return;
+      const e = spEntryFromRound(r, pzStateToFEN(state, r.tokens.length));   // the position pzStartRound already replayed
+      if(!e) return;
+      const old = PH.rows.find(x=> x.id===id);
+      const row = Object.assign({}, old || { out:null }, { id, t:Date.now(), r:e.rating, fen:e.fen, s:e.solver,
+        th:e.themes.slice(0, 8), a:String(settingsPz.theme||''), e });
+      PH.rows = [row].concat(PH.rows.filter(x=> x.id!==id)).slice(0, PH_MAX);
+      phSaveSoon();
+    }catch(err){}
+  }
+  function phResult(clean){
+    if(!PH || !roundPz) return;
+    try{
+      const row = PH.rows.find(x=> x.id===String(roundPz.id)); if(!row) return;
+      if(roundPz.replay){                                   // practice: counters only, once per round
+        if(roundPz.phCounted) return; roundPz.phCounted = true;
+        row.pt = (row.pt||0) + 1; if(clean) row.pc = (row.pc||0) + 1; row.pl = Date.now();
+      } else {
+        if(row.out) return;                                 // the first live result, as reported to Lichess
+        row.out = clean ? 'solved' : roundPz.phRevealed ? 'viewed' : roundPz.failed ? 'missed' : 'skipped';
+      }
+      phSaveSoon();
+    }catch(err){}
+  }
+
+  /* ---- Practice: a one-puzzle run that never reports ---- */
+  function phReplay(id, label){
+    if(!PH || !/^\w{5}$/.test(id)) return;
+    try{
+      spCloseSave();                                        // no-op when it's closed
+      if(document.getElementById('settings-overlay').classList.contains('active')) document.getElementById('settings-close').click();
+      // A bad-link notice is done with once a puzzle starts: the play view's
+      // "Puzzle history" links go back to the view without phOpen.
+      const n = document.getElementById('ph-notice'); n.textContent = ''; n.hidden = true;
+    }catch(e){}
+    spPlayQueue([id], 0, label || 'Puzzle history', { home:'puzzle-history', firstTry: phFirstTry(phFind(id)) });
+    try{ history.replaceState(null, '', '#puzzle/'+id); }catch(e){}   // the address bar is the share link; a reload replays it
+  }
+  function phFirstTry(row){ return row && row.out ? (row.out==='solved' ? 'solved' : 'missed') : null; }
+  function phEntry(id){ const r = phFind(id); return (r && r.e) || phFetched.get(id) || null; }
+  var PH_FETCH_MSG = {
+    missing:['Lichess has no puzzle #ID.', 'Puzzle ids are five letters and digits, and capitals matter.'],
+    slow:['Lichess asked to slow down.', 'Wait a minute, then retry.'],
+    net:['Couldn\u2019t reach Lichess.', 'This puzzle\u2019s moves come from Lichess the first time it opens here. Check the connection and retry.'],
+    bad:['This puzzle wouldn\u2019t load.', 'Open it on Lichess instead.']
+  };
+  // From spStartCurrent while SP_PLAY.home is 'puzzle-history' (so Retry,
+  // Next and Skip in the play view work unchanged).
+  function phStartCurrent(){
+    const id = SP_PLAY.queue[0];
+    const myFetch = pzResetForRound();
+    spPlayUi();
+    const sp = SP.puzzles[id];
+    const p = (sp && sp.tokens.length) ? sp : phEntry(id);     // saved copy, then the logged moves, then fetched this visit
+    if(!p){
+      pzStatusEl.textContent = 'Fetching puzzle #'+id+' from Lichess\u2026';
+      phFetchEntry(id).then(res=>{
+        if(myFetch!==pzFetchToken || !SP_PLAY || SP_PLAY.home!=='puzzle-history') return;
+        if(res.entry) return phStartCurrent();
+        const m = PH_FETCH_MSG[res.why] || PH_FETCH_MSG.net;
+        pzShowError(m[0].replace('#ID', '#'+id), m[1]);
+      });
+      return;
+    }
+    try{ pzStartRound(spRoundEntry(p), myFetch, { pos:1, total:1, label:SP_PLAY.label, kind:'history', firstTry:SP_PLAY.firstTry||null }); }
+    catch(e){ pzShowError('This puzzle wouldn\u2019t load.', 'Go back to Puzzle history and try another, or open it on Lichess.'); }
+  }
+  // The public by-id call (no token), as spHydrateOne makes it.
+  async function phFetchEntry(id){
+    if(phFetched.has(id)) return { entry:phFetched.get(id) };
+    try{
+      const res = await spApi('/api/puzzle/'+id, { auth:false });
+      if(res.status===404) return { why:'missing' };
+      if(!res.ok) return { why:'net' };
+      const it = await res.json();
+      if(!it || !it.puzzle || !it.game) return { why:'bad' };
+      const ip = Number(it.puzzle.initialPly);
+      const tokens = String(it.game.pgn || '').trim().split(/\s+/).filter(Boolean).slice(0, ip+1);
+      const e = spEntryFromRound({ id:it.puzzle.id, rating:it.puzzle.rating, plays:it.puzzle.plays, themes:it.puzzle.themes,
+        tokens, solution:it.puzzle.solution, gameId:it.game.id, gamePerf:it.game.perf && it.game.perf.name,
+        gameClock:it.game.clock, players:it.game.players, solverColor:'w', replay:{} });   // spCleanPuzzle takes the solver from the fen
+      if(!e || e.id!==id || !e.tokens.length || !e.solution.length || !e.fen) return { why:'bad' };
+      if(phFetched.size >= 20) phFetched.delete(phFetched.keys().next().value);
+      phFetched.set(id, e);
+      return { entry:e };
+    }catch(err){ return { why: err && err.status===429 ? 'slow' : 'net' }; }
+  }
+
+  /* ---- Save a row (a logged one, or one only Lichess activity has) ---- */
+  var phSaveGen = 0;                // every Save tap and every change of screen; a Save still fetching checks it
+  async function phSave(row, btn){
+    if(!PH || !row || btn.dataset.busy) return;
+    const gen = ++phSaveGen;
+    if(spIsSaved(row.id)) return spOpenSave(row.id);         // already saved: the dialog edits collections and note
+    let e = phEntry(row.id);
+    if(!e){                                                  // no moves here yet: try Lichess, 3 s at most
+      btn.dataset.busy = '1'; btn.setAttribute('aria-busy', 'true');   // NOT disabled: focus stays, for the dialog's returnFocus
+      const label = btn.textContent; btn.textContent = 'Loading\u2026';
+      const res = await Promise.race([phFetchEntry(row.id), new Promise(r=> setTimeout(()=> r({}), 3000))]);
+      delete btn.dataset.busy; btn.removeAttribute('aria-busy'); btn.textContent = label;
+      e = res.entry || null;
+      // The user moved on while it fetched (another Save, a practice run,
+      // another screen, Settings, the banner dismissed): opening now would
+      // land on top of that, or swap a dialog they're filling in.
+      if(gen !== phSaveGen || spModal || saveOverlay.classList.contains('active')
+        || document.getElementById('settings-overlay').classList.contains('active')) return;
+      if(document.contains(btn) ? btn.offsetParent===null : !document.querySelector('#ph-list [data-ph-key="'+row.id+'|save"]')) return;
+    }
+    // Without moves it saves as a stub, which fills in from Lichess on the
+    // next sync (spHydrate) or its first practice (spHydrateOne).
+    const base = e ? Object.assign({}, e) : { id:row.id, rating:row.r, themes:row.th, fen:row.fen, solver:row.s, tokens:[], solution:[] };
+    Object.assign(base, { savedAt:Date.now(), firstTry:phFirstTry(row), practice:{}, collections:[], links:{}, note:'' });
+    const clean = spCleanPuzzle(base);
+    if(clean) spOpenSave(row.id, clean);
+  }
+  // From spAfterChange: relabel every history Save button in place (no
+  // re-render, so the Save dialog returns focus to the same button).
+  function phSyncSaved(){
+    if(!PH) return;
+    try{
+      document.querySelectorAll('#ph-list .ph-save, .ph-left-save').forEach(b=>{
+        const host = b.closest('[data-pid]'), pid = host && host.dataset.pid;
+        if(!pid || b.dataset.busy) return;
+        b.textContent = spIsSaved(pid) ? '\u2605 Saved' : '\u2606 Save';
+      });
+    }catch(e){}
+  }
+
+  /* ---- "Puzzle left unfinished" (menu + Puzzles setup) ---- */
+  // Derived, never stored: the newest LIVE puzzle (practice never creates or
+  // moves a row), with no result, not practised, under a day old, and not
+  // dismissed since it was last shown.
+  function phLeftRow(){
+    if(!PH) return null;
+    const r = PH.rows[0];
+    if(!r || r.out || r.pt || Date.now() - r.t > PH_LEFT_MS) return null;
+    if(PH.dis && PH.dis.id===r.id && PH.dis.at >= r.t) return null;
+    return r;
+  }
+  function phRenderLeft(){
+    if(!PH) return;
+    try{
+      const r = phLeftRow();
+      ['ph-left-menu','ph-left-setup'].forEach(bid=>{
+        const b = document.getElementById(bid);
+        if(!b) return;
+        if(!r){ b.style.display = 'none'; delete b.dataset.pid; return; }
+        b.dataset.pid = r.id;
+        b.querySelector('.ph-left-detail').textContent = '#'+r.id+' \u00b7 rating '+r.r+' \u00b7 '+(r.s==='b' ? 'Black' : 'White')+' to move \u00b7 '+relTime(r.t);
+        b.querySelector('.ph-left-save').textContent = spIsSaved(r.id) ? '\u2605 Saved' : '\u2606 Save';
+        b.style.display = 'flex';
+      });
+    }catch(e){}
+  }
+
+  /* ---- The view ---- */
+  function phOpen(from, notice){
+    if(!PH) return;
+    if(from) phReturn = from;                                   // phOpen() keeps the old target (the end of a practice run)
+    const back = document.getElementById('ph-back');
+    back.dataset.nav = phReturn;
+    back.innerHTML = phReturn==='saved' ? '&larr; Saved puzzles' : phReturn==='menu' ? '&larr; All drills' : '&larr; Puzzles';
+    const n = document.getElementById('ph-notice'); n.textContent = notice || ''; n.hidden = !notice;
+    showView('puzzle-history');                                 // phShown() runs from showView
+  }
+  function phShown(){ if(!PH) return; phLimit = 40; phRender(); phLoadActivity(false); }
+
+  // A local result wins; otherwise Lichess's (latest) result; otherwise
+  // practised, or not finished.
+  function phStateOf(x){ return x.out ? x.out : x.li!=null ? (x.li ? 'solved' : 'missed') : x.pt ? 'practised' : 'open'; }
+  var PH_PILL = { solved:['history-result-win','Solved'], missed:['history-result-loss','Missed'],
+    viewed:['history-result-loss','Solution viewed'], skipped:['history-result-loss','Skipped'],
+    practised:['history-result-draw','Practised'], open:['history-result-draw','Not finished'] };
+  function phMatches(x, f){
+    const s = phStateOf(x);
+    return f==='open' ? s==='open' : f==='missed' ? (s==='missed' || s==='viewed' || s==='skipped') : f==='solved' ? s==='solved' : true;
+  }
+  // Under a day: "5 minutes ago". Older: the local date and time.
+  function phWhen(ms){
+    if(Date.now() - ms < 864e5) return relTime(ms);
+    try{ return new Date(ms).toLocaleString([], { weekday:'short', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' }); }
+    catch(e){ return new Date(ms).toLocaleString(); }
+  }
+  function phCard(x){
+    const card = spMake('div', 'saved-card');
+    card.dataset.pid = x.id;
+    if(PIECE_SVG !== phThumbOwner){ phThumbCache.clear(); phThumbOwner = PIECE_SVG; }
+    const tkey = x.id+'|'+x.fen+'|'+x.s;
+    let thumb = phThumbCache.get(tkey);
+    if(!thumb){
+      thumb = spMake('div', 'plaque-board saved-thumb');
+      thumb.setAttribute('aria-hidden', 'true');
+      if(x.fen){ try{ spBuildThumb(thumb, boardFromFENChecks(x.fen).board, x.s==='b'); }catch(e){} }
+      phThumbCache.set(tkey, thumb);
+    }
+    card.appendChild(thumb);
+    const main = spMake('div', 'saved-main');
+    const l1 = spMake('div', 'saved-line1');
+    l1.appendChild(spMake('span', 'saved-id', '#'+x.id));
+    l1.appendChild(spMake('span', 'saved-rating', String(x.r||'')));
+    l1.appendChild(spMake('span', 'saved-side', (x.s==='b' ? 'Black' : 'White')+' to move'));
+    const pill = PH_PILL[phStateOf(x)];
+    l1.appendChild(spMake('span', 'history-result-pill '+pill[0], pill[1]));
+    main.appendChild(l1);
+    if(x.th && x.th.length){
+      const th = spMake('div', 'saved-themes');
+      const shown = x.th.filter(t=> !PH_HIDE_THEMES.includes(t));
+      (shown.length ? shown : x.th).slice(0, 3).forEach(t=> th.appendChild(spMake('span', 'chip basic', pzThemeLabel(t))));
+      main.appendChild(th);
+    }
+    main.appendChild(spMake('div', 'saved-practice', x.here
+      ? 'Shown '+phWhen(x.t)+(x.a ? ' \u00b7 Puzzles \u00b7 '+pzThemeLabel(x.a) : '')+(!x.out && x.li!=null ? ' \u00b7 finished on Lichess' : '')
+      : 'Played '+phWhen(x.t)+' \u00b7 from your Lichess history'));
+    if(x.pt) main.appendChild(spMake('div', 'saved-practice',
+      'Practised '+x.pt+'\u00d7 \u00b7 '+(x.pc||0)+' clean \u00b7 last '+relTime(x.pl||x.t)+(!x.out && x.li==null ? ' \u00b7 not counted on Lichess' : '')));
+    const acts = spMake('div', 'saved-actions');
+    const play = spMake('button', 'btn btn-primary', 'Practise');
+    play.type = 'button'; play.dataset.phKey = x.id+'|play';
+    play.addEventListener('click', ()=> phReplay(x.id, 'Puzzle history'));
+    acts.appendChild(play);
+    const save = spMake('button', 'btn btn-ghost ph-save', spIsSaved(x.id) ? '\u2605 Saved' : '\u2606 Save');
+    save.type = 'button'; save.dataset.phKey = x.id+'|save';
+    save.addEventListener('click', ()=> phSave(x, save));
+    acts.appendChild(save);
+    const shareMode = phShareMode();
+    const share = spMake('button', 'btn-link', shareMode ? 'Share' : 'Copy link');
+    share.type = 'button'; share.dataset.phKey = x.id+'|share';
+    share.setAttribute('aria-label', (shareMode ? 'Share puzzle ' : 'Copy link to puzzle ')+x.id);   // starts with the visible label
+    share.addEventListener('click', ()=> phShare(x.id, share, main));
+    acts.appendChild(share);
+    const link = spMake('a', 'btn-link', 'On Lichess');
+    link.href = 'https://lichess.org/training/'+x.id;      // ids reach here only after /^\w{5}$/
+    link.target = '_blank'; link.rel = 'noopener'; link.dataset.phKey = x.id+'|lichess';
+    acts.appendChild(link);
+    main.appendChild(acts);
+    card.appendChild(main);
+    return card;
+  }
+  // Where the Lichess activity loaded so far ends, and the button for more.
+  function phDivider(){
+    const act = PH_ACT;
+    const d = spMake('div', 'ph-divider');
+    let when = '';
+    try{ when = new Date(act.oldest).toLocaleString([], { dateStyle:'medium', timeStyle:'short' }); }catch(e){ when = new Date(act.oldest).toLocaleString(); }
+    d.appendChild(spMake('span', '', 'Your Lichess history is loaded back to '+when+'.'));
+    const wait = Date.now() < act.until;
+    const b = spMake('button', 'btn btn-ghost', act.busy ? 'Loading\u2026' : wait ? 'Lichess asked to wait a minute' : 'Load more from Lichess');
+    b.type = 'button'; b.dataset.phKey = 'li-more';
+    b.disabled = act.busy || wait;
+    b.addEventListener('click', ()=> phLoadActivity(true));
+    d.appendChild(b);
+    return d;
+  }
+  function phRender(){
+    if(!PH) return;
+    const view = views['puzzle-history'];
+    if(!view) return;
+    try{
+      const list = document.getElementById('ph-list');
+      const fa = document.activeElement;
+      let fKey = fa && list.contains(fa) && fa.dataset ? (fa.dataset.phKey || null) : null;
+      if(!fKey && phFocusKey && (!fa || fa===document.body)) fKey = phFocusKey;
+      phFocusKey = null;
+      const all = phMerged();
+      const rows = all.filter(x=> phMatches(x, phFilter.show));
+      const shown = rows.slice(0, phLimit);
+      const act = PH_ACT;
+      const actOn = !!(act && act.token && act.token===getLichessToken());
+      // One divider where the loaded Lichess history ends: local rows older
+      // than it stay visible below it.
+      let divAt = -1;
+      if(actOn && act.oldest!==Infinity && !act.done && act.state!=='scope' && phFilter.show!=='open'){
+        divAt = shown.findIndex(x=> x.t < act.oldest);
+        if(divAt===-1 && shown.length===rows.length) divAt = shown.length;
+      }
+      list.textContent = '';
+      shown.forEach((x, i)=>{ if(i===divAt) list.appendChild(phDivider()); list.appendChild(phCard(x)); });
+      if(divAt===shown.length) list.appendChild(phDivider());
+      document.getElementById('ph-more').style.display = rows.length > phLimit ? '' : 'none';
+      const empty = document.getElementById('ph-empty');
+      empty.style.display = rows.length ? 'none' : '';
+      empty.textContent = !all.length
+        ? 'No puzzles yet. Every puzzle the Puzzles drill shows you lands here, even ones you leave before making a move.'
+          + (getLichessToken() ? '' : ' Connect Lichess in Settings to add the ones you\u2019ve played on other devices and lichess.org.')
+        : phFilter.show==='open' ? 'No unfinished puzzles on this device.' : 'Nothing here with this filter.';
+      const n = PH.rows.length, m = all.length - n;
+      document.getElementById('ph-subtitle').textContent = n+' on this device'
+        + (m > 0 ? ' \u00b7 '+m+' more from Lichess' : '')
+        + (phStoreFull ? ' \u00b7 This device\u2019s storage is full, so new history won\u2019t survive a reload.' : '');
+      if(fKey){
+        const t = list.querySelector('[data-ph-key="'+fKey+'"]');
+        if(t && !t.disabled) t.focus({ preventScroll:true });
+        else if(t) phFocusKey = fKey;
+      }
+      // A redraw while the Save dialog is open: its returnFocus pointed at a
+      // button that's gone, so point it at the same row's new one.
+      if(spModal && spModal.returnFocus && !document.contains(spModal.returnFocus)){
+        const t = list.querySelector('[data-ph-key="'+spModal.pid+'|save"]');
+        if(t) spModal.returnFocus = t;
+      }
+    }catch(e){}
+  }
+  var PH_SYNC_TEXT = {
+    off:'History from this device. Connect Lichess in Settings to add puzzles you\u2019ve played on lichess.org and your other devices.',
+    busy:'Checking your Lichess puzzle history\u2026',
+    ok:'Includes your Lichess puzzle history. Puzzles you leave unfinished are kept on this device only.',
+    net:'Couldn\u2019t reach Lichess. Showing this device\u2019s history.',
+    slow:'Lichess asked to slow down. Try again in a minute.',
+    status:'Lichess didn\u2019t answer properly. Showing this device\u2019s history.',
+    scope:'Lichess didn\u2019t accept the token for puzzle history (it needs puzzle:read, in Settings).'
+  };
+  // Only the states the Saved status line already has dots for.
+  function phRenderSync(){
+    if(!PH) return;
+    try{
+      const box = document.getElementById('ph-sync'), t = document.getElementById('ph-sync-text');
+      const tok = getLichessToken(), act = PH_ACT;
+      const st = !tok || !act || act.token!==tok ? 'off' : act.state;
+      box.dataset.state = st;
+      t.textContent = st==='error' ? (PH_SYNC_TEXT[act.detail] || PH_SYNC_TEXT.net) : (PH_SYNC_TEXT[st] || PH_SYNC_TEXT.off);
+    }catch(e){}
+  }
+
+  /* ---- Links, Copy and Share ---- */
+  function phLink(id){
+    const base = (location.origin && location.origin!=='null') ? location.origin + location.pathname : location.href.split('#')[0].split('?')[0];
+    return base + '#puzzle/' + id;          // only the public id: no query string, no token, no username
+  }
+  // iPhone / iPad: the share sheet. A Mac (fine pointer) copies, even though
+  // desktop Safari has navigator.share too.
+  function phShareMode(){ return !!navigator.share && !!window.matchMedia && matchMedia('(pointer:coarse)').matches; }
+  async function phShare(id, btn, host){
+    if(!/^\w{5}$/.test(id)) return;
+    const url = phLink(id);
+    if(phShareMode()){
+      try{ await navigator.share({ title:'Chess puzzle #'+id, url }); return; }   // the first await: still the user's tap
+      catch(e){ if(e && e.name==='AbortError') return; }      // they closed the sheet: say nothing
+      return phShowUrl(host, url);                            // the tap is spent: show the link to copy by hand
+    }
+    let ok = false;
+    try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(url); ok = true; } }catch(e){}
+    if(!ok) ok = phExecCopy(url);
+    if(ok) phFlash(btn, 'Copied'); else phShowUrl(host, url);
+  }
+  // The #hv-copy-pgn way: a hidden readonly textarea, select(), execCommand.
+  function phExecCopy(text){
+    let ok = false;
+    const prev = document.activeElement;
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.setAttribute('aria-hidden', 'true');
+    ta.style.cssText = 'position:fixed; top:0; left:0; width:1px; height:1px; opacity:0;';
+    try{
+      document.body.appendChild(ta);
+      ta.focus({ preventScroll:true }); ta.select();
+      ok = !!document.execCommand('copy');
+    }catch(e){ ok = false; }
+    ta.remove();
+    try{ if(prev && prev!==document.body && document.contains(prev)) prev.focus({ preventScroll:true }); }catch(e){}
+    return ok;
+  }
+  // The button says "Copied" for 1.6 s (a text change, no toast), and
+  // screen readers hear "Link copied".
+  function phFlash(btn, text){
+    if(!btn) return;
+    if(btn.dataset.phLabel==null) btn.dataset.phLabel = btn.textContent;
+    clearTimeout(Number(btn.dataset.phFlash)||0);
+    btn.textContent = text;
+    const live = document.getElementById('ph-live');
+    if(live) live.textContent = 'Link copied';
+    btn.dataset.phFlash = String(setTimeout(()=>{
+      btn.textContent = btn.dataset.phLabel; delete btn.dataset.phLabel; delete btn.dataset.phFlash;
+      if(live) live.textContent = '';
+    }, 1600));
+  }
+  // Nothing could copy: a selected, read-only field holding the link, gone on blur.
+  function phShowUrl(host, url){
+    if(!host) return;
+    let inp = host.querySelector('.ph-url');
+    if(!inp){
+      inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'text-input ph-url'; inp.readOnly = true;
+      inp.setAttribute('aria-label', 'Link to this puzzle');
+      inp.addEventListener('blur', ()=> inp.remove());
+      host.appendChild(inp);
+    }
+    inp.value = url;
+    inp.focus({ preventScroll:true });
+    inp.select();
+  }
+
+  /* ---- Lichess puzzle activity (other devices, lichess.org) ----
+     Pages of 20, newest first, one request at a time. before = oldest+1
+     (before is exclusive), so a round sharing the boundary millisecond comes
+     back again (deduped by id) instead of being lost; paging stops when a
+     page has nothing strictly older. Kept in memory only. */
+  async function phLoadActivity(older){
+    if(!PH) return;
+    const token = getLichessToken();
+    if(!token){ PH_ACT = phBlankAct(''); phRenderSync(); return; }
+    if(PH_ACT.token !== token) PH_ACT = phBlankAct(token);
+    const act = PH_ACT;
+    if(act.busy) return;
+    if(Date.now() < act.until){ phRenderSync(); return; }
+    if(!older && act.at && Date.now() - act.at < 60000) return;            // fresh enough
+    if(older && (act.done || act.oldest===Infinity)) return;
+    const fa = document.activeElement, fromMore = older && !!fa && !!fa.dataset && fa.dataset.phKey==='li-more';
+    act.busy = true; act.state = 'busy'; phRenderSync(); if(older) phRender();
+    const prevOldest = act.oldest;
+    try{
+      const res = await spApi('/api/puzzle/activity?max=20' + (older ? '&before='+(prevOldest+1) : ''), { headers:{ Accept:'application/x-ndjson' } });
+      if(act !== PH_ACT) return;
+      if(res.status===401 || res.status===403){ act.state = 'scope'; act.rows.clear(); return; }
+      if(!res.ok){ act.state = 'error'; act.detail = 'status'; return; }
+      // spApi's timer stops at the headers; a stalled body must not keep busy set.
+      const text = await Promise.race([res.text(), new Promise((_, rej)=> setTimeout(()=> rej(new Error('stalled')), 15000))]);
+      if(act !== PH_ACT) return;
+      const { rows, dates } = phParseActivity(text);
+      if(!older){
+        // Nothing overlapping what's loaded (20+ played elsewhere since): start the run again.
+        if(act.rows.size && dates.length && Math.min(...dates) > act.newest){ act.rows.clear(); act.oldest = Infinity; act.done = false; }
+        if(dates.length) act.newest = Math.max(act.newest, ...dates);
+        act.at = Date.now();
+        if(!dates.length && !act.rows.size) act.done = true;
+      } else if(!dates.length || !dates.some(d=> d < prevOldest)) act.done = true;
+      rows.forEach(r=> act.rows.set(r.id, r));
+      if(dates.length) act.oldest = Math.min(act.oldest, ...dates);
+      act.state = 'ok'; act.detail = '';
+    }catch(err){
+      if(act !== PH_ACT) return;
+      act.state = 'error';
+      if(err && err.status===429){
+        act.detail = 'slow'; act.until = Date.now() + 60000;
+        setTimeout(()=>{ if(views['puzzle-history'].classList.contains('active')){ phRenderSync(); phRender(); } }, 60500);
+      }
+      else act.detail = 'net';
+    }finally{
+      act.busy = false;
+      if(act === PH_ACT){
+        phRenderSync(); phRender();
+        if(fromMore && act.state==='ok') phFocusCard((t)=> t < prevOldest, 'li-more');   // the first card where the divider was
+      }
+    }
+  }
+  // Keyboard "Load more" / "Show more": focus moves to the Practise button of
+  // the first card that passes test(t, index), the first one just shown, which
+  // sits where the button was. Otherwise the button moves down off screen, or
+  // goes with the last page and focus falls to <body>. With no such card,
+  // focus stays on the button, or (button gone) goes to the last card. Focus
+  // the user has put somewhere else is left alone.
+  function phFocusCard(test, from){
+    try{
+      const a = document.activeElement;
+      const onFrom = !!a && (a.id===from || (!!a.dataset && a.dataset.phKey===from));
+      if(a && a!==document.body && !onFrom && document.contains(a) && a.offsetParent!==null) return;
+      const at = new Map(phMerged().map(x=> [x.id, x.t]));
+      const cards = [...document.querySelectorAll('#ph-list .saved-card')];
+      let c = cards.find((el, i)=> test(at.get(el.dataset.pid), i));
+      if(!c){
+        if(onFrom && a.offsetParent!==null && !a.disabled) return;
+        c = cards[cards.length - 1];
+      }
+      const b = c && c.querySelector('[data-ph-key$="|play"]');
+      if(b) b.focus();
+    }catch(e){}
+  }
+  // NDJSON lines -> rows. Every line with a numeric date counts for paging,
+  // even when the rest of it is rejected. A line that throws (an id or a
+  // rating that can't become text or a number) is dropped alone.
+  function phParseActivity(text){
+    const rows = [], dates = [], lim = Date.now() + 864e5;
+    String(text || '').split('\n').forEach(line=>{ try{
+      line = line.trim();
+      if(!line) return;
+      let o = null;
+      try{ o = JSON.parse(line); }catch(e){ return; }
+      if(!o || typeof o!=='object' || typeof o.date!=='number' || !isFinite(o.date)) return;
+      dates.push(o.date);
+      const pz = o.puzzle;
+      if(!pz || typeof pz!=='object') return;
+      const id = String(pz.id || ''), fen = typeof pz.fen==='string' ? pz.fen : '';
+      if(!/^\w{5}$/.test(id) || !PH_FEN_RE.test(fen) || o.date > lim) return;
+      const f = fen.slice(0, 100), r = Number(pz.rating);
+      rows.push({ id, t:o.date, win: o.win===true ? 1 : 0, r: isFinite(r) ? (r||0) : 0, fen:f, s: f.split(' ')[1]==='b' ? 'b' : 'w',
+        th:(Array.isArray(pz.themes) ? pz.themes : []).filter(k=> typeof k==='string' && PH_THEME_RE.test(k)).slice(0, 8) });
+    }catch(e){} });
+    return { rows, dates };
+  }
+  // Local rows plus activity, at render time only (never stored). Local
+  // fields win, and a local result is never overwritten; li is Lichess's
+  // latest result, which decides the pill only where there's no local one.
+  function phMerged(){
+    const m = new Map();
+    PH.rows.forEach(r=> m.set(r.id, Object.assign({ here:true, li:null }, r)));
+    if(PH_ACT && PH_ACT.token && PH_ACT.token===getLichessToken()) PH_ACT.rows.forEach(a=>{
+      const x = m.get(a.id);
+      if(x){ x.li = a.win; if(!x.fen){ x.fen = a.fen; x.s = a.s; } return; }
+      m.set(a.id, { id:a.id, t:a.t, out:null, r:a.r, fen:a.fen, s:a.s, th:a.th, a:'', here:false, li:a.win });
+    });
+    return [...m.values()].sort((p,q)=> q.t - p.t);
+  }
+
+  /* ---- Writes go out on leaving a puzzle, hiding the page, or 1 s later ---- */
+  onLeavePlay(phFlush);
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') phFlush(); });
+  window.addEventListener('pagehide', phFlush);
+  // Another tab wrote: fold its rows in (no write back, so tabs never ping-pong).
+  window.addEventListener('storage', e=>{
+    if(e.key!==PH_KEY || !PH) return;
+    try{
+      const o = phLoad(e.newValue);
+      PH.rows = phMergeRows(PH.rows, o.rows);
+      PH.dis = phNewerDis(PH.dis, o.dis);
+      if(views['puzzle-history'].classList.contains('active')) phRender();
+      if(currentView==='menu' || currentView==='setup-puzzle') phRenderLeft();
+    }catch(err){}
+  });
+
+  views['puzzle-history'] = document.getElementById('view-puzzle-history');
+  PH = phLoad();
+  PH_ACT = phBlankAct(getLichessToken());
+  wireToggleRow('ph-show-row', 'show', phFilter);
+  document.getElementById('ph-show-row').addEventListener('click', e=>{
+    if(e.target.closest('.toggle')){ phLimit = 40; phRender(); }
+  });
+  document.getElementById('ph-more').addEventListener('click', ()=>{
+    const more = document.getElementById('ph-more'), had = document.activeElement===more, n = phLimit;
+    phLimit += 40; phRender();
+    if(had) phFocusCard((t, i)=> i >= n, 'ph-more');                       // the first new card, where the button was
+  });
+  document.getElementById('setup-ph-btn').addEventListener('click', ()=> phOpen('setup-puzzle'));
+  document.getElementById('saved-ph-btn').addEventListener('click', ()=> phOpen('saved'));
+  document.getElementById('ph-saved-btn').addEventListener('click', spOpenLibrary);
+  ['ph-left-menu', 'ph-left-setup'].forEach(bid=>{
+    const b = document.getElementById(bid);
+    b.querySelector('.ph-left-go').addEventListener('click', ()=>{ if(b.dataset.pid) phReplay(b.dataset.pid, 'Puzzle history'); });
+    const saveBtn = b.querySelector('.ph-left-save');
+    saveBtn.addEventListener('click', ()=>{ const row = phFind(b.dataset.pid); if(row) phSave(row, saveBtn); });
+    b.querySelector('.ph-left-history').addEventListener('click', ()=> phOpen(currentView));
+    b.querySelector('.ph-left-dismiss').addEventListener('click', ()=>{
+      if(!PH || !b.dataset.pid) return;
+      PH.dis = { id:b.dataset.pid, at:Date.now() };
+      phSaveSoon();
+      phRenderLeft();
+      // Focus moves on to the control that takes the banner's place (the
+      // first drill on the menu, the first theme on setup), so it's on screen.
+      const next = b.nextElementSibling;
+      const f = next && [...next.querySelectorAll('button, a[href], input, select')].find(x=> !x.disabled && x.offsetParent!==null);
+      if(f) f.focus();
+    });
+  });
+  // The meta card's Link pill: copy (or share) the puzzle on screen.
+  (function(){
+    const btn = document.getElementById('pz-link');
+    btn.textContent = phShareMode() ? 'Share' : 'Link';   // no aria-label: the name is the visible label, the title says more
+    btn.title = phShareMode() ? 'Share this puzzle' : 'Copy a link to this puzzle';
+    btn.addEventListener('click', ()=>{ if(roundPz) phShare(String(roundPz.id), btn, document.querySelector('.pz-meta-card')); });
+  })();
+  phRenderLeft();
+
   (function wireAnnoHintCollapse(){
     const KEY = 'annoHintCollapsed';
     let collapsed = localStorage.getItem(KEY) === '1';
@@ -19708,6 +20511,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(overlay) overlay.classList.add('active');
       return;
     }
+    // #puzzle/<id>: one Lichess puzzle as practice (never reported, so it
+    // works the same with or without a token). The cut at "?" above keeps
+    // #puzzle?theme=...&start=1 on the Puzzles route.
+    if(slug.indexOf('puzzle/')===0){
+      const id = slug.slice(7);
+      if(/^\w{5}$/.test(id)) phReplay(id, 'Shared link');
+      else phOpen('setup-puzzle', 'That link doesn\u2019t name a Lichess puzzle.');   // also catches the reserved A,B,C form
+      return;
+    }
     const route = DEEP_LINKS[slug];
     if(!route) return;
     const btn = document.getElementById(route.card);
@@ -19749,6 +20561,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const reviewBtn = document.getElementById('next-review');
     const settingsBtn = document.getElementById('next-settings');
     const saveBtn = document.getElementById('next-save');
+    const linkBtn = document.getElementById('next-link');
     const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner']
       .map(id => document.getElementById(id)).filter(Boolean);
     // dismissed: the banner whose box was closed to look at the board, so it
@@ -19778,6 +20591,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const isPuzzle = banner.id === 'pz-result-banner' && !!roundPz;
       saveBtn.style.display = isPuzzle ? '' : 'none';
       if(isPuzzle) saveBtn.innerHTML = spIsSaved(String(roundPz.id)) ? '&#9733; Saved' : '&#9734; Save puzzle';
+      linkBtn.style.display = isPuzzle ? '' : 'none';
+      if(isPuzzle) linkBtn.textContent = phShareMode() ? 'Share puzzle' : 'Copy link';
       current = banner;
       returnFocus = document.activeElement;
       overlay.classList.add('active');
@@ -19801,6 +20616,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // Save from the box: it steps aside (as "look at the board" does) so the
     // dialog has the keyboard to itself.
     saveBtn.addEventListener('click', () => { afterSave = current; close(); spOpenSave(); });
+    // Copy (or share) a link to the puzzle; the box stays open.
+    linkBtn.addEventListener('click', () => { if(roundPz) phShare(String(roundPz.id), linkBtn, linkBtn.closest('.next-card')); });
     settingsBtn.addEventListener('click', () => act('settings'));
     const review = () => { dismissed = current; close(); };
     reviewBtn.addEventListener('click', review);
@@ -19808,7 +20625,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.addEventListener('keydown', e => {
       if(!overlay.classList.contains('active')) return;
       if(e.key === 'Escape'){ e.preventDefault(); review(); }
-      else if(e.key === 'Enter' && ![reviewBtn, settingsBtn, saveBtn].includes(document.activeElement)){
+      // Enter on a box button (or in the copy-by-hand link field) is that
+      // control's own; anywhere else it's Next.
+      else if(e.key === 'Enter' && ![reviewBtn, settingsBtn, saveBtn, linkBtn].includes(document.activeElement)
+              && !(document.activeElement && document.activeElement.classList.contains('ph-url'))){
         e.preventDefault(); act('next');
       }
     }, true);
