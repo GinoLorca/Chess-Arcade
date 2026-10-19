@@ -4131,7 +4131,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="toggle active" data-val="on">On</button>
         <button class="toggle" data-val="off">Off</button>
       </div>
-      <div class="field-hint">The opening over the board. Every theme shows the black-and-white VS screen, with &#8220;Round one, fight,&#8221; when an online game against another player begins. Uptown Express opens its subway doors instead, for any game and when a Puzzles session or a Puzzle Rush starts. Off skips the screen; the start sound still plays.</div>
+      <div class="field-hint">The opening over the board. Every theme shows the black-and-white VS screen, with &#8220;Round one, fight,&#8221; when an online game begins, against a player or the bot. Uptown Express opens its subway doors instead, for any game and when a Puzzles session or a Puzzle Rush starts. Off skips the screen; the start sound still plays.</div>
     </div>
 
     <div class="field" id="uxlines-field">
@@ -17575,9 +17575,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       showDoorsIntro({ left: vsShortenName(meName), right: vsShortenName(oppName) });
       return;
     }
-    // The VS screen is for games against people. A bot game, or the intro
-    // switched off, still gets the theme's start sound, just no screen.
-    if(vsBot || !introOn()){ playSound('matchStart'); return; }
+    // Every game gets the VS screen, the bot's too (Play Bot is how new
+    // in-game features get tried out); the bot's side wears a BOT badge
+    // where a player's title would go. With the intro switched off, the
+    // start sound still plays, just no screen.
+    if(!introOn()){ playSound('matchStart'); return; }
+    if(vsBot && !oppTitle) oppTitle = 'BOT';
     const overlay = document.getElementById('vs-overlay');
     if(!overlay) return;
     clearTimeout(vsIntroTimer);
