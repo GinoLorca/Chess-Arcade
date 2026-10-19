@@ -3246,6 +3246,84 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   .history-row:last-child{ border-bottom:none; }
   .history-thumb{ --tsq:7px; flex:0 0 auto; }
+
+  /* ---- Saved Puzzles: the Save control on a puzzle, the library, the save
+     dialog. Built from the app's own tokens and classes (.toggle, .chip,
+     .btn, .panel, .plaque-board) so every skin dresses it. ---- */
+  .pz-meta-row .pz-save-btn{ margin-left:auto; align-self:flex-start; }
+  .pz-save-btn{
+    flex:0 0 auto; display:inline-flex; align-items:center; gap:5px; cursor:pointer;
+    font-family:"JetBrains Mono",monospace; font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--brass-text); background:transparent; border:1px solid var(--brass-soft); border-radius:999px; padding:4px 10px;
+  }
+  .pz-save-btn:hover{ border-color:var(--brass); }
+  .pz-save-btn.is-saved{ background:var(--brass); border-color:var(--brass); color:var(--brass-ink); }
+  .pz-save-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .saved-head-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .saved-sync{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); }
+  .saved-sync-dot{ width:8px; height:8px; border-radius:50%; background:var(--line); flex:0 0 auto; }
+  .saved-sync[data-state="ok"] .saved-sync-dot{ background:var(--good); }
+  .saved-sync[data-state="busy"] .saved-sync-dot{ background:var(--brass); }
+  .saved-sync[data-state="error"] .saved-sync-dot, .saved-sync[data-state="scope"] .saved-sync-dot{ background:var(--bad); }
+  .saved-sync-text{ flex:1 1 240px; min-width:0; }
+  .saved-cols .toggle .saved-count{ opacity:.7; margin-left:5px; font-variant-numeric:tabular-nums; }
+  .saved-col-tools{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .saved-col-tools .text-input{ flex:1 1 200px; min-width:0; }
+  .saved-col-tools .btn{ padding:7px 12px; font-size:13px; }
+  .saved-col-tools .field-hint{ flex:1 1 100%; margin-top:0; }
+  .saved-filters{ display:flex; gap:10px; flex-wrap:wrap; }
+  .saved-filters .select-input{ flex:1 1 180px; min-width:0; }
+  .saved-list{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:14px; }
+  .saved-card{
+    display:flex; gap:12px; align-items:flex-start; min-width:0;
+    background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:12px; box-shadow:var(--shadow);
+  }
+  .saved-thumb{ --tsq:12px; }
+  .saved-main{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; }
+  .saved-line1{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .saved-id{ font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:20px; line-height:1; color:var(--ink); }
+  .saved-rating{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .saved-side{ font-family:"JetBrains Mono",monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); }
+  .saved-themes{ display:flex; flex-wrap:wrap; gap:4px; }
+  .saved-cols-line{ font-size:12px; color:var(--brass-text); overflow-wrap:anywhere; }
+  .saved-note{
+    font-size:12.5px; color:var(--ink); font-style:italic; overflow-wrap:anywhere;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .saved-practice{ font-size:11.5px; color:var(--ink-soft); }
+  .saved-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:2px; }
+  .saved-actions .btn{ padding:6px 12px; font-size:13px; }
+  .saved-actions .btn-link{ font-size:11px; }
+  .saved-actions .btn-link.danger{ color:var(--bad); }
+  @media (max-width:480px){ .saved-thumb{ --tsq:10px; } .saved-list{ grid-template-columns:1fr; } }
+  .save-card{ max-width:440px; }
+  .save-sum{ font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--ink-soft); }
+  .save-note{ width:100%; box-sizing:border-box; resize:vertical; min-height:64px; font-family:inherit; }
+  .save-cols:empty::before{ content:"No collections yet \2014  add one below."; font-size:12.5px; color:var(--ink-soft); }
+  /* Above the Solved-it box (55), which waits for it to close. */
+  #save-overlay{ z-index:56; }
+  /* The Save pill sits beside the title only, so "Rating \B7  Played N
+     times" keeps the card's full width. */
+  .pz-meta-card{ position:relative; }
+  .pz-meta-row .pz-save-btn{ position:absolute; top:10px; right:10px; margin:0; }
+  .pz-meta-card .pz-meta-title{ padding-right:86px; }
+  /* Long names wrap instead of pushing the page sideways. */
+  .saved-cols .toggle, .save-cols .toggle{ max-width:100%; overflow-wrap:anywhere; text-align:left; }
+  #saved-empty{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; color:var(--ink-soft); box-shadow:var(--shadow); }
+  #view-saved.active{ padding-bottom:64px; }   /* clear of the fixed Friends tab */
+  #view-saved .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .saved-sync{ align-items:flex-start; }
+  .saved-sync-dot{ margin-top:5px; }
+  .saved-card{ content-visibility:auto; contain-intrinsic-size:auto 170px; }
+  /* Each skin's own card corners, as its panels have them. */
+  :root[data-skin="hustler"] .saved-card{ border-radius:5px; }
+  :root[data-skin="bauhaus"] .saved-card{ border-radius:0; border-width:2px; }
+  :root[data-skin="bauhaus"] .pz-save-btn{ border-radius:0; }
+  :root[data-skin="outerspace"] .saved-card{ border-radius:6px; }
+  :root[data-skin="drivethru"] .saved-card{ border-radius:18px; }
+  :root[data-skin="rose"] .saved-card{ border-radius:14px; }
+  :root[data-skin="chessbook"] .saved-card{ border-radius:3px; }
+  :root[data-skin="uptown"] .saved-card{ border-radius:6px; }
   .history-main{ min-width:0; display:flex; flex-direction:column; gap:3px; }
   .history-line1{ display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
   .history-result-pill{
@@ -4036,8 +4114,36 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <button class="btn btn-primary next-go" id="next-go">Next position</button>
       <button class="btn btn-ghost" id="next-review">Look at the board</button>
       <button class="btn btn-ghost" id="next-settings">Change settings</button>
+      <button class="btn btn-ghost" id="next-save" style="display:none;">&#9734; Save puzzle</button>
     </div>
     <div class="next-keys">Enter: next &#183; Esc: look at the board</div>
+  </div>
+</div>
+<!-- Save a puzzle (or edit a saved one): its collections and a note. -->
+<div class="modal-overlay" id="save-overlay" role="dialog" aria-modal="true" aria-labelledby="save-title">
+  <div class="modal-card save-card">
+    <div class="modal-head">
+      <div class="modal-title" id="save-title">Save puzzle</div>
+      <button class="modal-close" id="save-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="save-sum" id="save-sum"></div>
+    <div class="field">
+      <div class="field-label">Collections</div>
+      <div class="toggle-row save-cols" id="save-cols"></div>
+      <div class="token-row">
+        <input type="text" class="text-input" id="save-new-col" maxlength="60" placeholder="New collection, e.g. Counterattacking" aria-label="New collection name">
+        <button class="btn btn-ghost" id="save-add-col">Add</button>
+      </div>
+      <div class="field-hint">Pick any number. With none picked it stays in Unsorted.</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Note</div>
+      <textarea class="text-input save-note" id="save-note" rows="3" maxlength="300" placeholder="What to remember about it"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="save-ok">Save</button>
+      <button class="btn btn-ghost" id="save-remove" style="display:none;">Remove from saved</button>
+    </div>
   </div>
 </div>
 <div class="modal-overlay" id="settings-overlay">
@@ -4190,7 +4296,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="btn-row">
         <button class="btn btn-ghost" id="lichess-token-clear">Disconnect</button>
       </div>
-      <div class="field-hint">Needed for the Puzzles drill, Play Online, Play Bot, and the friends-online list. Create a token at lichess.org/account/oauth/token with <b>puzzle:read</b>, <b>puzzle:write</b>, <b>board:play</b>, <b>challenge:write</b>, <b>bot:play</b>, and <b>follow:read</b> &#8212; puzzle:write because Lichess only serves a new puzzle once the last one's result is reported, board:play to seek and play real games, challenge:write and bot:play to start a game against the Lichess AI, follow:read to see which of your followed players are online. Paste it here &#8212; it's saved on this device only, in this browser's local storage, and is never written into the app itself. These features need a real network origin (this app's Netlify URL, or a locally-saved copy) &#8212; the hosted claude.ai preview link's security sandbox blocks outside network calls entirely.</div>
+      <div class="field-hint">Needed for the Puzzles drill, Play Online, Play Bot, and the friends-online list. Create a token at lichess.org/account/oauth/token with <b>puzzle:read</b>, <b>puzzle:write</b>, <b>board:play</b>, <b>challenge:write</b>, <b>bot:play</b>, <b>follow:read</b>, <b>study:read</b> and <b>study:write</b> &#8212; puzzle:write because Lichess only serves a new puzzle once the last one's result is reported, board:play to seek and play real games, challenge:write and bot:play to start a game against the Lichess AI, follow:read to see which of your followed players are online, study:read and study:write to keep your Saved Puzzles in private Lichess studies so they appear on all your devices. Paste it here &#8212; it's saved on this device only, in this browser's local storage, and is never written into the app itself. These features need a real network origin (this app's Netlify URL, or a locally-saved copy) &#8212; the hosted claude.ai preview link's security sandbox blocks outside network calls entirely.</div>
     </div>
 
     <div class="modal-sep"></div>
@@ -4262,6 +4368,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <button class="neon-sign" id="card-play-online">Play Online</button>
       <button class="history-cta" id="card-play-bot">Play Bot</button>
       <button class="history-cta" id="card-history">Game History</button>
+      <button class="history-cta" id="card-saved">Saved Puzzles</button>
     </div>
     <div class="plaque-board" id="theme-preview-board" aria-hidden="true"></div>
   </header>
@@ -4303,6 +4410,47 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   </section>
 
   <!-- ============ GAME HISTORY: single-game review ============ -->
+  <!-- Saved Puzzles: the library of puzzles saved from the Puzzles drill,
+       in the user's own collections and filterable by Lichess's themes. -->
+  <section class="view" id="view-saved">
+    <button class="back-link" data-nav="menu">&larr; All drills</button>
+    <div class="panel">
+      <div class="history-head">
+        <div>
+          <div class="eyebrow">Puzzles</div>
+          <h1 class="title" style="font-size:26px;">Saved Puzzles</h1>
+          <div class="subtitle" id="saved-subtitle">&#8212;</div>
+        </div>
+        <div class="saved-head-actions">
+          <button class="btn btn-primary" id="saved-play">Play these</button>
+          <button class="btn btn-ghost" id="saved-shuffle">Shuffle</button>
+        </div>
+      </div>
+      <div class="saved-sync" id="saved-sync" data-state="idle">
+        <span class="saved-sync-dot" aria-hidden="true"></span>
+        <span class="saved-sync-text" id="saved-sync-text">Saved on this device.</span>
+        <button class="btn-link" id="saved-sync-now">Sync now</button>
+      </div>
+      <div class="field">
+        <div class="field-label">Collections</div>
+        <div class="toggle-row saved-cols" id="saved-cols"></div>
+        <div class="saved-col-tools" id="saved-col-tools"></div>
+      </div>
+      <div class="saved-filters">
+        <select class="select-input" id="saved-theme-filter" aria-label="Filter by theme"><option value="">All themes</option></select>
+        <select class="select-input" id="saved-sort" aria-label="Sort">
+          <option value="new">Newest first</option>
+          <option value="old">Oldest first</option>
+          <option value="easy">Easiest first</option>
+          <option value="hard">Hardest first</option>
+          <option value="missed">Missed first</option>
+        </select>
+      </div>
+    </div>
+    <div class="saved-list" id="saved-list"></div>
+    <div class="history-empty" id="saved-empty" style="display:none;"></div>
+  </section>
+
   <section class="view has-side-left" id="view-play-history">
     <button class="back-link" data-nav="history">&larr; Game History</button>
     <div class="side-panel">
@@ -5499,6 +5647,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
       <div class="btn-row">
         <button class="btn btn-primary" id="start-puzzle-drill">Start drill</button>
+        <button class="btn btn-ghost" id="setup-saved-btn">Saved puzzles</button>
       </div>
     </div>
   </section>
@@ -5559,6 +5708,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
             <div class="pz-meta-title">Puzzle <span id="pz-meta-id">&#8212;</span></div>
             <div class="pz-meta-sub">Rating <span id="pz-meta-rating">&#8212;</span> &middot; Played <span id="pz-meta-plays">&#8212;</span> times</div>
           </div>
+          <button class="pz-save-btn" id="pz-save" type="button" title="Save this puzzle (S)">&#9734; Save</button>
         </div>
         <div class="pz-meta-row" id="pz-meta-game-row" style="display:none;">
           <span class="pz-meta-icon">&#9889;</span>
@@ -7399,7 +7549,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                              {param:'rated', type:'toggle', row:'online-rated-row'},
                              {param:'showRatings', type:'toggle', row:'online-ratings-row'},
                              {param:'time', param2:'increment', type:'timeinc', row:'online-time-row', timeInput:'online-time-custom', incInput:'online-inc-custom'} ] },
-    history:      { view:'history',          card:'card-history',     startBtn:null, fields:[] }
+    history:      { view:'history',          card:'card-history',     startBtn:null, fields:[] },
+    saved:        { view:'saved',            card:'card-saved',       startBtn:null, fields:[] }
   };
   const VIEW_TO_SLUG = Object.fromEntries(Object.entries(DEEP_LINKS).map(([slug,r])=>[r.view,slug]));
 
@@ -7535,6 +7686,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // "entry" views. A play-* sub-state isn't something you'd want to land
     // back on directly (mid-drill state isn't reconstructed from a link).
     if(!isPlay) dlSyncHash(VIEW_TO_SLUG[name]);
+    if(name==='saved') spLibraryShown();     // name first: never touches the library before it exists
     // Refresh whether there's a live Lichess game to offer "Return to
     // game" for every time the menu comes on screen -- covers both
     // landing here mid-game (home button, a back-link) and a game having
@@ -13391,6 +13543,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   function pzRefreshMeta(){
     if(!roundPz) return;
+    spRefreshPlaySave();
     document.getElementById('pz-meta-id').textContent = '#'+roundPz.id;
     document.getElementById('pz-meta-rating').textContent = roundPz.rating;
     document.getElementById('pz-meta-plays').textContent = roundPz.plays!=null ? roundPz.plays.toLocaleString() : '\u2014';
@@ -13400,9 +13553,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       document.getElementById('pz-meta-game').textContent = 'From game'
         + (roundPz.gameClock ? ' \u00b7 '+roundPz.gameClock : '')
         + (roundPz.gamePerf ? ' \u00b7 '+roundPz.gamePerf : '');
-      document.getElementById('pz-meta-players').innerHTML = roundPz.players.map(p=>
-        (p.name||p.userId||'?') + (p.rating!=null ? ' ('+p.rating+')' : '')
-      ).join('<br>');
+      // As text: a saved puzzle's names can come back from a Lichess study.
+      const playersEl = document.getElementById('pz-meta-players');
+      playersEl.textContent = '';
+      roundPz.players.forEach((p, i)=>{
+        if(i) playersEl.appendChild(document.createElement('br'));
+        playersEl.appendChild(document.createTextNode((p.name||p.userId||'?') + (p.rating!=null ? ' ('+p.rating+')' : '')));
+      });
     } else {
       gameRow.style.display = 'none';
     }
@@ -13456,16 +13613,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       pzReportResult(roundPz.id, false);
       statsPz.rounds++; statsPz.streak=0;
       refreshStatsPz();
+      if(!roundPz.replay) spRoundEnded(false);
     }
     pzStatusEl.textContent = 'Playing out the solution\u2026';
     function stepNext(){
       if(myFetch!==pzFetchToken || !roundPz) return;
       if(roundPz.solIndex >= roundPz.solution.length){
         roundPz.done = true;
+        spRoundEnded(false);
         pzStatusEl.textContent = '';
         pzRefreshTurnCard();
         pzResultLine.textContent = 'Solution shown';
-        pzResultSub.textContent = 'Rating '+roundPz.rating+' \u00b7 '+pzThemeLabel(settingsPz.theme);
+        pzResultSub.textContent = 'Rating '+roundPz.rating+' \u00b7 '+(roundPz.replay ? roundPz.replay.label : pzThemeLabel(settingsPz.theme));
         pzResultBanner.style.display='flex';
         renderBoardPz();
         return;
@@ -13515,11 +13674,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     setLichessToken(val);
     input.value = '';
     refreshTokenStatus();
+    spTokenChanged();
   });
   document.getElementById('lichess-token-clear').addEventListener('click', ()=>{
     setLichessToken('');
     document.getElementById('lichess-token-input').value = '';
     refreshTokenStatus();
+    spTokenChanged();
     friendsUsernames = [];
     friendsAuthOk = false;
     renderFriendsWidget([]);
@@ -15030,9 +15191,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.addEventListener('keydown', (e)=>{
     if(!roundPz) return;
     if(!views['play-puzzle'] || !views['play-puzzle'].classList.contains('active')) return;
+    if(document.querySelector('.modal-overlay.active')) return;   // Settings or the Save dialog has the keys
     const tag = document.activeElement && document.activeElement.tagName;
     if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return;
     if(e.ctrlKey || e.metaKey || e.altKey) return;
+    if(e.key==='s' || e.key==='S'){ e.preventDefault(); spOpenSave(); return; }
     if(e.key==='x' || e.key==='X'){
       e.preventDefault();
       roundPz.flipped = !roundPz.flipped;
@@ -15160,6 +15323,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         pzReportResult(roundPz.id, false);
         statsPz.rounds++; statsPz.streak=0;
         refreshStatsPz();
+        if(!roundPz.replay) spRoundEnded(false);   // a saved puzzle: missed on the first try
       }
       pzWrongFeedback();
       return;
@@ -15227,13 +15391,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       refreshStatsPz();
       pzReportResult(roundPz.id, true);
     }
+    spRoundEnded(!roundPz.failed);
     const mate = pzIsInCheck(roundPz.state, roundPz.state.turn) && pzAllLegalMoves(roundPz.state).length===0;
     if(!mate) playSolvedSound();
     pzStatusEl.textContent = '';
     pzResultLine.textContent = roundPz.failed
       ? (mate ? 'Checkmate \u2014 found it after a miss' : 'Found it \u2014 already marked wrong')
       : (mate ? 'Checkmate \u2014 solved!' : 'Solved!');
-    pzResultSub.textContent = 'Rating '+roundPz.rating+' \u00b7 '+pzThemeLabel(settingsPz.theme);
+    pzResultSub.textContent = 'Rating '+roundPz.rating+' \u00b7 '+(roundPz.replay ? roundPz.replay.label : pzThemeLabel(settingsPz.theme));
     pzResultBanner.style.display='flex';
     pzRefreshTurnCard();
     renderBoardPz();
@@ -15261,6 +15426,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // checked the badge right after missing one, which is exactly what was
   // reported. Now updates the badge immediately from this response too.
   function pzReportResult(id, win){
+    // A saved puzzle's practice run is never reported: Lichess already has
+    // its first result, and a replay mustn't move the rating.
+    if(roundPz && roundPz.replay){ pzPendingReport = Promise.resolve(); return pzPendingReport; }
     const token = getLichessToken();
     if(!token || !id){ pzPendingReport = Promise.resolve(); return pzPendingReport; }
     pzPendingReport = fetch('https://lichess.org/api/puzzle/batch/'+encodeURIComponent(settingsPz.theme)+'?nb=0', {
@@ -15363,7 +15531,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     pzErrorBanner.style.display='flex';
   }
 
-  async function fetchNewPuzzle(){
+  // Clears the board and every per-round timer for a new round, live or a
+  // saved puzzle's practice run; returns the round's generation token.
+  function pzResetForRound(){
     const myFetch = ++pzFetchToken;
     clearTimeout(pzReplyTimer); clearTimeout(pzWrongTimer);
     removePromoPickerPz();
@@ -15377,6 +15547,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     pzStatusEl.textContent = 'Loading puzzle\u2026';
     pzStatusEl.style.color='';
     document.getElementById('pz-hud-round').textContent = 'Loading\u2026';
+    return myFetch;
+  }
+
+  async function fetchNewPuzzle(){
+    const myFetch = pzResetForRound();
 
     await pzPendingReport;
     if(myFetch!==pzFetchToken) return;
@@ -15423,6 +15598,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         pzShowError('No puzzle came back.', 'Try a different theme or difficulty.');
         return;
       }
+      pzStartRound(entry, myFetch, null);
+    }catch(err){
+      if(myFetch!==pzFetchToken) return;
+      pzShowError('Couldn\u2019t reach Lichess.', 'Puzzles need an internet connection \u2014 every drill except Puzzle Rush still works offline.');
+    }
+  }
+
+  // Starts a round from a Lichess puzzle entry ({game, puzzle}, the shape the
+  // batch and by-id endpoints both return). replay is null for a live puzzle,
+  // or {pos, total, label} for a saved puzzle's practice run, which never
+  // reports a result to Lichess.
+  function pzStartRound(entry, myFetch, replay){
       const tokens = entry.game.pgn.trim().split(/\s+/).slice(0, entry.puzzle.initialPly+1);
       const { state, plyStates, moves } = pzReplayPGNWithStates(tokens);
       roundNumPz++;
@@ -15464,14 +15651,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         // happened: right or wrong on the FIRST attempt, matching
         // lichess.org's own puzzle rating semantics.
         failed:false,
-        done:false, locked:true
+        done:false, locked:true,
+        // Kept for saving: the setup moves, the source game, and whether
+        // this is a saved puzzle's practice run (never reported).
+        tokens: tokens.slice(), gameId: (entry.game && entry.game.id) || '',
+        replay: replay || null
       };
       buildLabelsPz(roundPz.flipped);
       renderBoardPz();
       pzRenderMoveList();
       document.getElementById('pz-side-dot').className = 'side-dot ' + roundPz.solverColor;
       document.getElementById('pz-hud-mode-text').textContent = (roundPz.solverColor==='w'?'WHITE':'BLACK') + ' TO MOVE';
-      document.getElementById('pz-hud-round').textContent = 'Puzzle '+roundNumPz+' \u00b7 rating '+roundPz.rating+' \u00b7 '+pzThemeLabel(settingsPz.theme);
+      document.getElementById('pz-hud-round').textContent = replay
+        ? 'Saved '+replay.pos+' of '+replay.total+' \u00b7 rating '+roundPz.rating+' \u00b7 '+replay.label
+        : 'Puzzle '+roundNumPz+' \u00b7 rating '+roundPz.rating+' \u00b7 '+pzThemeLabel(settingsPz.theme);
       pzRefreshMeta();
       pzRefreshTurnCard();
       pzStatusEl.textContent = '';
@@ -15531,10 +15724,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(!roundPz || myFetch!==pzFetchToken) return;
         pzRevealThenUnlock();
       });
-    }catch(err){
-      if(myFetch!==pzFetchToken) return;
-      pzShowError('Couldn\u2019t reach Lichess.', 'Puzzles need an internet connection \u2014 every drill except Puzzle Rush still works offline.');
-    }
   }
 
   onLeavePlay(()=>{
@@ -15550,6 +15739,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   document.getElementById('start-puzzle-drill').addEventListener('click', ()=>{
     if(!getLichessToken()){ refreshTokenStatus(); return; }
+    SP_PLAY = null; spPlayUi();
     playSound('puzzleStart');
     if(uptownDoors()) showDoorsIntro({ isReady: ()=> pzBoardEl.children.length>0 || pzErrorBanner.style.display!=='none' });
     roundNumPz = 0;
@@ -15559,13 +15749,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     showView('play-puzzle');
     fetchNewPuzzle();
   });
-  document.getElementById('pz-next').addEventListener('click', fetchNewPuzzle);
-  document.getElementById('pz-retry').addEventListener('click', fetchNewPuzzle);
+  document.getElementById('pz-next').addEventListener('click', ()=> SP_PLAY ? spAdvance() : fetchNewPuzzle());
+  document.getElementById('pz-retry').addEventListener('click', ()=> SP_PLAY ? spStartCurrent() : fetchNewPuzzle());
   document.getElementById('pz-skip').addEventListener('click', ()=>{
+    if(SP_PLAY){ spAdvance(); return; }
     if(!roundPz || roundPz.done) return;
-    pzReportResult(roundPz.id, false);
-    statsPz.rounds++; statsPz.streak=0;
-    refreshStatsPz();
+    // A wrong guess already reported this puzzle as a loss and counted it;
+    // skipping afterwards doesn't report or count it a second time.
+    if(!roundPz.failed){
+      pzReportResult(roundPz.id, false);
+      statsPz.rounds++; statsPz.streak=0;
+      refreshStatsPz();
+      spRoundEnded(false);
+    }
     fetchNewPuzzle();
   });
 
@@ -18221,6 +18417,1162 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // rows (Puzzles, Play Online) lead with a LIVE status span (current move
   // prompt, updated during play) rather than pure instructions -- data-dynamic
   // on those marks that first span to stay visible even when collapsed.
+  /* ================= SAVED PUZZLES =================
+     Puzzles worth keeping, saved from the Puzzles drill into the user's own
+     collections (and browsable by Lichess's own themes), then replayed for
+     practice -- a practice run never reports a result, so it can't move the
+     Lichess rating. Kept in this browser (localStorage) and mirrored into
+     private Lichess studies, one per collection ("Chess Arcade \u00b7 <name>",
+     rolling over to "(2)" past a study's 64 chapters) with one chapter per
+     puzzle, so the same library appears on every device and on lichess.org.
+     Puzzles in no collection live in "Unsorted". Lichess can't rename or
+     delete a study through its API, so renaming a collection moves its
+     puzzles into a new study, and studies left empty are simply ignored. */
+  const SAVED_KEY = 'wavyChessPrepSavedPuzzles';
+  const SP_STUDY_PREFIX = 'Chess Arcade \u00b7 ';
+  const SP_UNSORTED = 'unsorted';
+  const SP_MAX_CHAPTERS = 64;
+  let SP_PLAY = null;          // a practice run: { queue:[ids], index, label }
+  let nextBoxAfterSave = null; // set by the Solved-it box: reopen it after the Save dialog
+  let spLibDirty = true, spPassiveRender = false, spColFocus = null;
+  let spArmedPid = null, spArmTimer = 0;
+  let spOtherTabValue = null, spBackoffUntil = 0;
+  const spThumbCache = new Map();
+  let spThumbOwner = null;
+  let SP = spLoad();
+
+  function spBlank(){
+    return { v:1, puzzles:{}, collections:{ [SP_UNSORTED]:{ id:SP_UNSORTED, name:'Unsorted', createdAt:0, studies:[] } },
+      sync:{ deletes:[], deletedPids:{}, retired:{}, lastSync:0, user:'' }, lastCols:[] };
+  }
+  function spCleanName(name){
+    // Trailing "(2)" is how a collection's overflow studies are numbered.
+    return String(name||'').replace(/[\u0000-\u001f]/g, '').replace(/\s+/g, ' ').trim()
+      .replace(/\s*\((\d+)\)$/, ' #$1').slice(0, 60);
+  }
+  function spCleanPlayers(arr){
+    return (Array.isArray(arr) ? arr : []).slice(0, 2).map(x=>({
+      name: String((x && (x.name || x.id)) || '?').slice(0, 40),
+      rating: x && x.rating!=null && isFinite(Number(x.rating)) ? Number(x.rating) : null,
+      title: x && x.title ? String(x.title).slice(0, 4) : '',
+      color: x && x.color==='black' ? 'black' : 'white'
+    }));
+  }
+  function spCleanPuzzle(p){
+    if(!p || typeof p!=='object' || !/^\w{5}$/.test(String(p.id||''))) return null;
+    const strs = (a, max)=> Array.isArray(a) ? a.filter(x=> typeof x==='string' && x.length < 40).slice(0, max) : [];
+    const fen = typeof p.fen==='string' && /^[1-8pnbrqkPNBRQK\/]+ [wb] /.test(p.fen) ? p.fen.slice(0, 100) : '';
+    const links = {};
+    if(p.links && typeof p.links==='object') Object.keys(p.links).forEach(cid=>{
+      const l = p.links[cid];
+      if(l && /^\w{8}$/.test(l.s) && /^\w{8}$/.test(l.c)) links[cid] = { s:l.s, c:l.c };
+    });
+    const pr = p.practice && typeof p.practice==='object' ? p.practice : {};
+    const tokens = strs(p.tokens, 1000), solution = strs(p.solution, 60);
+    return {
+      id:String(p.id), rating:Number(p.rating)||0, plays:Number(p.plays)||0, themes:strs(p.themes, 24).filter(t=> /^[A-Za-z0-9]{1,30}$/.test(t)),   // Lichess theme keys
+      // Both filled in, or both empty (a puzzle another device saved, not yet fetched).
+      tokens: tokens.length && solution.length ? tokens : [], solution: tokens.length && solution.length ? solution : [],
+      gameId: /^\w{8}$/.test(String(p.gameId||'')) ? String(p.gameId) : '',
+      gamePerf:String(p.gamePerf||'').slice(0, 20), gameClock:String(p.gameClock||'').slice(0, 12),
+      players:spCleanPlayers(p.players), fen,
+      solver: fen ? (fen.split(' ')[1]==='b' ? 'b' : 'w') : (p.solver==='b' ? 'b' : 'w'),
+      savedAt:Number(p.savedAt)||Date.now(), note:String(p.note||'').slice(0, 300),
+      firstTry: p.firstTry==='solved' || p.firstTry==='missed' ? p.firstTry : null,
+      practice:{ tries:Number(pr.tries)||0, solved:Number(pr.solved)||0, last:Number(pr.last)||0 },
+      editedAt:Number(p.editedAt)||0, pushedAt:Number(p.pushedAt)||0,
+      san: typeof p.san==='string' ? p.san.replace(/[^A-Za-z0-9.+#=\- ]/g, '').slice(0, 400) : '',
+      fillTriedAt:Number(p.fillTriedAt)||0,
+      collections: Array.isArray(p.collections) ? Array.from(new Set(p.collections.filter(x=> typeof x==='string' && x!==SP_UNSORTED))) : [],
+      links
+    };
+  }
+  function spLoad(raw){
+    let d = null;
+    try{ d = JSON.parse(raw!=null ? raw : (localStorage.getItem(SAVED_KEY) || 'null')); }catch(e){ d = null; }
+    const out = spBlank();
+    if(!d || typeof d!=='object') return out;
+    const C = d.collections && typeof d.collections==='object' ? d.collections : {};
+    Object.keys(C).forEach(cid=>{
+      const c = C[cid];
+      if(!c || typeof c.name!=='string') return;
+      const name = cid===SP_UNSORTED ? 'Unsorted' : spCleanName(c.name);
+      if(!name) return;
+      out.collections[cid] = { id:cid, name, createdAt:Number(c.createdAt)||0,
+        studies: Array.isArray(c.studies) ? c.studies.filter(x=> x && /^\w{8}$/.test(x.id))
+          .map(x=>({ id:x.id, part:Number(x.part)||1, count:Number(x.count)||0 })) : [] };
+    });
+    const P = d.puzzles && typeof d.puzzles==='object' ? d.puzzles : {};
+    Object.keys(P).forEach(id=>{ const p = spCleanPuzzle(P[id]); if(p) out.puzzles[p.id] = p; });
+    Object.values(out.puzzles).forEach(p=>{
+      p.collections = p.collections.filter(cid=> out.collections[cid]);
+      Object.keys(p.links).forEach(cid=>{ if(!out.collections[cid]) delete p.links[cid]; });
+    });
+    const S = d.sync && typeof d.sync==='object' ? d.sync : {};
+    out.sync.deletes = Array.isArray(S.deletes) ? S.deletes.filter(x=> x && /^\w{8}$/.test(x.s) && /^\w{8}$/.test(x.c)).map(x=>({ s:x.s, c:x.c, pid:/^\w{5}$/.test(String(x.pid||'')) ? String(x.pid) : '' })) : [];
+    out.sync.user = typeof S.user==='string' ? S.user : '';
+    out.sync.deletedPids = S.deletedPids && typeof S.deletedPids==='object' ? S.deletedPids : {};
+    out.sync.retired = {};
+    if(S.retired && typeof S.retired==='object') Object.keys(S.retired).forEach(id=>{
+      if(!/^\w{8}$/.test(id)) return;
+      const r = S.retired[id];
+      out.sync.retired[id] = r && typeof r==='object'
+        ? { at:Number(r.at)||0, to: typeof r.to==='string' ? r.to : SP_UNSORTED, emptySince:Number(r.emptySince)||0 }
+        : { at:Number(r)||0, to:SP_UNSORTED, emptySince:0 };
+    });
+    out.sync.lastSync = Number(S.lastSync)||0;
+    out.lastCols = Array.isArray(d.lastCols) ? d.lastCols.filter(cid=> typeof cid==='string' && out.collections[cid] && cid!==SP_UNSORTED) : [];
+    return out;
+  }
+  // Reports failure: the library shares this browser's storage with uploaded
+  // backgrounds and sounds, so a save can genuinely run out of room.
+  function spPersist(){
+    try{ localStorage.setItem(SAVED_KEY, JSON.stringify(SP)); return true; }
+    catch(e){ spNotice('Couldn\u2019t save on this device \u2014 its storage is full.'); return false; }
+  }
+  function spNotice(msg){
+    const t = document.getElementById('saved-sync-text');
+    if(t) t.textContent = msg;
+    if(views['play-puzzle'] && views['play-puzzle'].classList.contains('active')) pzStatusEl.textContent = msg;
+  }
+  // After any change: store it, redraw what shows it, and (unless it's only
+  // local bookkeeping) sync it to Lichess shortly.
+  function spAfterChange(sync){
+    spLibDirty = true;
+    if(views['saved'] && views['saved'].classList.contains('active')) spRenderLibrary();
+    spRefreshPlaySave();
+    spRenderSync();
+    if(sync) spScheduleSync(2000);
+  }
+  function spChanged(){ spPersist(); spAfterChange(true); }
+
+  function spIsSaved(id){ return !!(id && SP.puzzles[id]); }
+  function spUserCollections(){
+    return Object.values(SP.collections).filter(c=> c.id!==SP_UNSORTED).sort((a,b)=> a.name.localeCompare(b.name));
+  }
+  function spDesired(p){ return p.collections.length ? p.collections.slice() : [SP_UNSORTED]; }
+  function spCreateCollection(name){
+    name = spCleanName(name);
+    if(!name) return null;
+    if(name.toLowerCase()==='unsorted') return SP_UNSORTED;
+    const existing = Object.values(SP.collections).find(c=> c.name.toLowerCase()===name.toLowerCase());
+    if(existing) return existing.id;
+    const cid = 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2, 7);
+    SP.collections[cid] = { id:cid, name, createdAt:Date.now(), studies:[] };
+    return cid;
+  }
+  // Leaving a collection (or Unsorted): its chapter is queued for deletion.
+  function spDropLink(p, cid){
+    const l = p.links[cid];
+    if(l) SP.sync.deletes.push({ s:l.s, c:l.c, pid:p.id });
+    delete p.links[cid];
+  }
+  function spSetCollections(id, cids){
+    const p = SP.puzzles[id];
+    if(!p) return;
+    const before = spDesired(p);
+    p.collections = Array.from(new Set(cids.filter(cid=> cid!==SP_UNSORTED && SP.collections[cid])));
+    const after = spDesired(p);
+    Object.keys(p.links).filter(cid=> !after.includes(cid)).forEach(cid=> spDropLink(p, cid));
+  }
+  function spSavePuzzle(entry, cids, note){
+    const existing = SP.puzzles[entry.id];
+    const p = existing || entry;
+    if(!existing){ SP.puzzles[p.id] = p; delete SP.sync.deletedPids[p.id]; }
+    if(note!=null){ const n = String(note).slice(0, 300); if(n!==(p.note||'')){ p.note = n; p.editedAt = Date.now(); } }
+    spSetCollections(p.id, cids);
+    spChanged();
+  }
+  function spRemovePuzzle(id){
+    const p = SP.puzzles[id];
+    if(!p) return;
+    Object.keys(p.links).forEach(cid=> spDropLink(p, cid));
+    delete SP.puzzles[id];
+    SP.sync.deletedPids[id] = Date.now();
+    spChanged();
+  }
+  function spRenameCollection(cid, name){
+    const c = SP.collections[cid];
+    if(!c || cid===SP_UNSORTED) return 'That one can\u2019t be renamed.';
+    name = spCleanName(name);
+    if(!name) return 'Give it a name.';
+    if(name.toLowerCase()==='unsorted' || Object.values(SP.collections).some(o=> o.id!==cid && o.name.toLowerCase()===name.toLowerCase())) return 'There\u2019s already a collection with that name.';
+    if(name===c.name) return '';
+    c.name = name;
+    // Its studies keep the old name on Lichess, so they're emptied and set
+    // aside; the next sync files every puzzle under the new name.
+    c.studies.forEach(st=> SP.sync.retired[st.id] = { at:Date.now(), to:cid });
+    c.studies = [];
+    Object.values(SP.puzzles).forEach(p=>{ if(p.links[cid]) spDropLink(p, cid); });
+    spChanged();
+    return '';
+  }
+  function spDeleteCollection(cid){
+    const c = SP.collections[cid];
+    if(!c || cid===SP_UNSORTED) return;
+    Object.values(SP.puzzles).forEach(p=>{ if(p.collections.includes(cid) || p.links[cid]) spSetCollections(p.id, p.collections.filter(x=> x!==cid)); });
+    c.studies.forEach(st=> SP.sync.retired[st.id] = { at:Date.now(), to:SP_UNSORTED });
+    delete SP.collections[cid];
+    if(spFilter.col===cid) spFilter.col = 'all';
+    spChanged();
+  }
+
+  // FEN for a position, so a chapter (and a thumbnail) can show it without
+  // replaying the game. The en passant square only when a capture is on.
+  function pzStateToFEN(state, plies){
+    const rows = [];
+    for(let r=7; r>=0; r--){
+      let row = '', empty = 0;
+      for(let c=0; c<8; c++){
+        const pc = state.board[rcIdx(r,c)];
+        if(!pc){ empty++; continue; }
+        if(empty){ row += empty; empty = 0; }
+        row += pc.color==='w' ? pc.type.toUpperCase() : pc.type;
+      }
+      if(empty) row += empty;
+      rows.push(row);
+    }
+    const cs = state.castling || {};
+    const castle = ((cs.wK?'K':'')+(cs.wQ?'Q':'')+(cs.bK?'k':'')+(cs.bQ?'q':'')) || '-';
+    let ep = '-';
+    if(state.epSquare!=null){
+      const [er, ec] = idxRC(state.epSquare);
+      const pr = state.turn==='w' ? er-1 : er+1;
+      const can = [ec-1, ec+1].some(c=>{
+        if(c<0 || c>7 || pr<0 || pr>7) return false;
+        const pc = state.board[rcIdx(pr,c)];
+        return !!pc && pc.type==='p' && pc.color===state.turn;
+      });
+      if(can) ep = idxToAlg(state.epSquare);
+    }
+    return rows.join('/')+' '+state.turn+' '+castle+' '+ep+' 0 '+(Math.floor(plies/2)+1);
+  }
+  function spEntryFromRound(r){
+    let fen = '';
+    try{ fen = pzStateToFEN(pzReplayPGNWithStates(r.tokens).state, r.tokens.length); }catch(e){}
+    return spCleanPuzzle({
+      id:String(r.id), rating:r.rating, plays:r.plays, themes:r.themes || [], tokens:r.tokens, solution:r.solution,
+      gameId:r.gameId, gamePerf:r.gamePerf, gameClock:r.gameClock, players:r.players, fen, solver:r.solverColor,
+      savedAt:Date.now(), note:'', firstTry: r.replay ? null : (r.failed ? 'missed' : (r.done ? 'solved' : null)),
+      practice:{}, collections:[], links:{}
+    });
+  }
+  // A round just ended. A live puzzle that's saved records how the first try
+  // went; a practice run counts towards the puzzle's practice record.
+  function spRoundEnded(clean){
+    if(!roundPz) return;
+    const p = SP.puzzles[String(roundPz.id)];
+    if(!p) return;
+    if(roundPz.replay){
+      p.practice.tries++;
+      if(clean) p.practice.solved++;
+      p.practice.last = Date.now();
+    } else if(!p.firstTry){
+      p.firstTry = clean ? 'solved' : 'missed';
+      p.editedAt = Date.now();
+    } else return;
+    spPersist();
+    spAfterChange(!roundPz.replay);
+  }
+
+  /* ---- Practice runs: play a list of saved puzzles in turn ---- */
+  function spPlayUi(){
+    const on = !!SP_PLAY;
+    const last = on && SP_PLAY.index >= SP_PLAY.queue.length-1;
+    const next = document.getElementById('pz-next');
+    const skip = document.getElementById('pz-skip');
+    const back = document.querySelector('#view-play-puzzle > .back-link');
+    next.textContent = on ? (last ? 'Back to saved puzzles' : 'Next saved puzzle') : 'Next puzzle';
+    skip.textContent = on ? (last ? 'Skip' : 'Skip to next') : 'Skip puzzle';
+    [pzResultBanner, pzErrorBanner].forEach(b=>{
+      const btn = b.querySelector('.btn-row button[data-nav]');
+      if(!btn) return;
+      btn.dataset.nav = on ? 'saved' : 'setup-puzzle';
+      btn.textContent = on ? 'Saved puzzles' : 'Change settings';
+    });
+    if(back){ back.dataset.nav = on ? 'saved' : 'setup-puzzle'; back.innerHTML = on ? '&larr; Saved puzzles' : '&larr; Change settings'; }
+  }
+  function spPlayQueue(ids, index, label){
+    if(!ids.length) return;
+    SP_PLAY = { queue:ids.slice(), index:index||0, label:label||'Saved' };
+    roundNumPz = 0;
+    statsPz.rounds=0; statsPz.solved=0; statsPz.streak=0; statsPz.best=0;
+    refreshStatsPz();
+    pzSideBadgeReset();
+    playSound('puzzleStart');
+    if(uptownDoors()) showDoorsIntro({ isReady: ()=> pzBoardEl.children.length>0 || pzErrorBanner.style.display!=='none' });
+    showView('play-puzzle');
+    spStartCurrent();
+  }
+  function spAdvance(){
+    if(!SP_PLAY) return;
+    SP_PLAY.index++;
+    if(SP_PLAY.index >= SP_PLAY.queue.length){ SP_PLAY = null; spPlayUi(); spOpenLibrary(); return; }
+    spStartCurrent();
+  }
+  function spStartCurrent(){
+    if(!SP_PLAY) return;
+    while(SP_PLAY.index < SP_PLAY.queue.length && !SP.puzzles[SP_PLAY.queue[SP_PLAY.index]]) SP_PLAY.index++;
+    if(SP_PLAY.index >= SP_PLAY.queue.length){ SP_PLAY = null; spPlayUi(); spOpenLibrary(); return; }
+    const p = SP.puzzles[SP_PLAY.queue[SP_PLAY.index]];
+    const myFetch = pzResetForRound();
+    spPlayUi();
+    if(!p.tokens.length){
+      // Saved on another device: its moves come from Lichess the first time.
+      pzStatusEl.textContent = 'Fetching this puzzle from Lichess\u2026';
+      spHydrateOne(p.id).then(ok=>{
+        if(myFetch!==pzFetchToken) return;
+        if(ok){ spPersist(); spStartCurrent(); }
+        else pzShowError('Couldn\u2019t load this puzzle yet.', 'It was saved on another device, and needs Lichess once to fill in its moves. Check the connection and retry.');
+      });
+      return;
+    }
+    const entry = {
+      game:{ id:p.gameId, pgn:p.tokens.join(' '), perf:{ name:p.gamePerf }, clock:p.gameClock, players:p.players.map(x=> Object.assign({}, x)) },
+      puzzle:{ id:p.id, rating:p.rating, plays:p.plays, initialPly:p.tokens.length-1, solution:p.solution.slice(), themes:p.themes.slice() }
+    };
+    try{ pzStartRound(entry, myFetch, { pos:SP_PLAY.index+1, total:SP_PLAY.queue.length, label:SP_PLAY.label }); }
+    catch(e){ pzShowError('This saved puzzle wouldn\u2019t load.', 'Skip it, or remove it from Saved Puzzles.'); }
+  }
+
+  /* ---- The Save control and dialog ---- */
+  function spRefreshPlaySave(){
+    const btn = document.getElementById('pz-save');
+    if(!btn) return;
+    const saved = !!roundPz && spIsSaved(String(roundPz.id));
+    btn.classList.toggle('is-saved', saved);
+    btn.innerHTML = saved ? '&#9733; Saved' : '&#9734; Save';
+    btn.disabled = !roundPz;
+  }
+  let spModal = null;     // { pid, entry (when not saved yet), cids:Set, returnFocus }
+  const saveOverlay = document.getElementById('save-overlay');
+  function spOpenSave(pid){
+    const nx = document.getElementById('next-overlay');
+    if(!pid && nx && nx.classList.contains('active')){ document.getElementById('next-save').click(); return; }
+    let entry = null;
+    if(!pid){
+      if(!roundPz) return;
+      pid = String(roundPz.id);
+      if(!SP.puzzles[pid]) entry = spEntryFromRound(roundPz);
+    }
+    const p = SP.puzzles[pid] || entry;
+    if(!p) return;
+    // A new save starts in the collections used last time: saving a run of
+    // puzzles for one theme is then one tap each.
+    const start = SP.puzzles[pid] ? p.collections : (SP.lastCols || []).filter(cid=> SP.collections[cid] && cid!==SP_UNSORTED);
+    spModal = { pid, entry, cids:new Set(start), returnFocus:document.activeElement };
+    document.getElementById('save-title').textContent = SP.puzzles[pid] ? 'Saved puzzle' : 'Save puzzle';
+    document.getElementById('save-sum').textContent = '#'+p.id+' \u00b7 rating '+p.rating+' \u00b7 '+(p.solver==='b' ? 'Black' : 'White')+' to move';
+    document.getElementById('save-note').value = p.note || '';
+    document.getElementById('save-new-col').value = '';
+    document.getElementById('save-remove').style.display = SP.puzzles[pid] ? '' : 'none';
+    document.getElementById('save-ok').textContent = SP.puzzles[pid] ? 'Done' : 'Save';
+    spRenderModalCols();
+    saveOverlay.classList.add('active');
+    saveOverlay.querySelector('.modal-card').scrollTop = 0;   // after it shows: a hidden one ignores scrollTop
+    document.getElementById('save-ok').focus({ preventScroll:true });
+  }
+  function spCloseSave(){
+    if(!saveOverlay.classList.contains('active')) return;
+    saveOverlay.classList.remove('active');
+    const rf = spModal && spModal.returnFocus;
+    spModal = null;
+    if(rf && document.contains(rf)) rf.focus({ preventScroll:true });
+    if(nextBoxAfterSave) nextBoxAfterSave();
+  }
+  function spRenderModalCols(){
+    const row = document.getElementById('save-cols');
+    row.textContent = '';
+    spUserCollections().forEach(c=>{
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'toggle' + (spModal.cids.has(c.id) ? ' active' : '');
+      b.textContent = c.name;
+      b.addEventListener('click', ()=>{
+        if(spModal.cids.has(c.id)) spModal.cids.delete(c.id); else spModal.cids.add(c.id);
+        b.classList.toggle('active', spModal.cids.has(c.id));
+      });
+      row.appendChild(b);
+    });
+  }
+  function spModalAddCol(){
+    const input = document.getElementById('save-new-col');
+    const cid = spCreateCollection(input.value);
+    input.value = '';
+    if(!cid || cid===SP_UNSORTED) return;
+    spModal.cids.add(cid);
+    spPersist();
+    spRenderModalCols();
+    spRenderLibrary();
+  }
+  document.getElementById('save-add-col').addEventListener('click', spModalAddCol);
+  document.getElementById('save-close').addEventListener('click', spCloseSave);
+  saveOverlay.addEventListener('click', e=>{ if(e.target===saveOverlay) spCloseSave(); });
+  document.getElementById('save-ok').addEventListener('click', ()=>{
+    if(!spModal) return;
+    const pending = document.getElementById('save-new-col').value.trim();
+    if(pending) spModalAddCol();     // typed a name but didn't press Add
+    const p = SP.puzzles[spModal.pid] || spModal.entry;
+    SP.lastCols = Array.from(spModal.cids);
+    if(p) spSavePuzzle(p, Array.from(spModal.cids), document.getElementById('save-note').value);
+    spCloseSave();
+  });
+  document.getElementById('save-remove').addEventListener('click', ()=>{
+    if(!spModal) return;
+    spRemovePuzzle(spModal.pid);
+    spCloseSave();
+  });
+  // While the dialog is open it has the keyboard: Escape closes it, Enter in
+  // the name box adds the collection, and nothing reaches the board's keys
+  // (x flips, arrows browse, s saves) underneath.
+  document.addEventListener('keydown', e=>{
+    if(!saveOverlay.classList.contains('active')) return;
+    if(e.key==='Escape'){ e.preventDefault(); e.stopImmediatePropagation(); spCloseSave(); return; }
+    if(e.key==='Enter' && e.target && e.target.id==='save-new-col'){ e.preventDefault(); e.stopImmediatePropagation(); spModalAddCol(); return; }
+    e.stopImmediatePropagation();
+  }, true);
+  document.getElementById('pz-save').addEventListener('click', ()=> spOpenSave());
+
+  /* ---- The library ---- */
+  views['saved'] = document.getElementById('view-saved');
+  const spFilter = { col:'all', theme:'', sort:'new' };
+  let spColEdit = null;     // 'rename' | 'delete' while the collection tools ask
+  function spOpenLibrary(){
+    spLibDirty = true;
+    showView('saved');       // draws it, through spLibraryShown
+    spScheduleSync(400);
+  }
+  function spLibraryShown(){ if(spLibDirty) spRenderLibrary(); }
+  document.getElementById('card-saved').addEventListener('click', spOpenLibrary);
+  document.getElementById('setup-saved-btn').addEventListener('click', spOpenLibrary);
+  function spInCol(p, col){
+    return col==='all' ? true : col===SP_UNSORTED ? !p.collections.length : p.collections.includes(col);
+  }
+  function spMissScore(p){ return (p.firstTry==='missed' ? 2 : 0) + (p.practice.tries ? 1 - p.practice.solved/p.practice.tries : 0); }
+  function spFilteredIds(){
+    const list = Object.values(SP.puzzles).filter(p=> spInCol(p, spFilter.col) && (!spFilter.theme || p.themes.includes(spFilter.theme)));
+    const s = spFilter.sort;
+    list.sort((a,b)=>
+      s==='old' ? a.savedAt-b.savedAt :
+      s==='easy' ? (a.rating-b.rating) || (b.savedAt-a.savedAt) :
+      s==='hard' ? (b.rating-a.rating) || (b.savedAt-a.savedAt) :
+      s==='missed' ? (spMissScore(b)-spMissScore(a)) || (b.savedAt-a.savedAt) :
+      b.savedAt-a.savedAt);
+    return list.map(p=> p.id);
+  }
+  function spQueueLabel(){
+    const c = spFilter.col==='all' ? 'All saved' : (SP.collections[spFilter.col] ? SP.collections[spFilter.col].name : 'Saved');
+    return spFilter.theme ? c+' \u00b7 '+pzThemeLabel(spFilter.theme) : c;
+  }
+  function spBuildThumb(container, board, flip){
+    container.textContent = '';
+    for(let i=0; i<64; i++){
+      const r = flip ? Math.floor(i/8) : 7-Math.floor(i/8);
+      const c = flip ? 7-(i%8) : i%8;
+      const sq = document.createElement('div');
+      sq.className = 'sq ' + (((r+c)%2===0) ? 'dark' : 'light');
+      const code = ghPieceCode(board[rcIdx(r,c)]);
+      if(code && PIECE_SVG[code]){
+        const w = document.createElement('span');
+        w.className = 'piece-wrap';
+        w.innerHTML = PIECE_SVG[code];
+        sq.appendChild(w);
+      }
+      container.appendChild(sq);
+    }
+  }
+  function spMake(tag, cls, text){
+    const n = document.createElement(tag);
+    if(cls) n.className = cls;
+    if(text!=null) n.textContent = text;
+    return n;
+  }
+  function spRenderLibrary(){
+    const view = views['saved'];
+    if(!view) return;
+    spLibDirty = false;
+    if(spFilter.col!=='all' && !SP.collections[spFilter.col]) spFilter.col = 'all';
+    const all = Object.values(SP.puzzles);
+    // collections row
+    const colsRow = document.getElementById('saved-cols');
+    colsRow.textContent = '';
+    const addCol = (id, name, count)=>{
+      const b = spMake('button', 'toggle' + (spFilter.col===id ? ' active' : ''));
+      b.type = 'button';
+      b.appendChild(document.createTextNode(name));
+      b.appendChild(spMake('span', 'saved-count', String(count)));
+      b.addEventListener('click', ()=>{ spFilter.col = id; spColEdit = null; spRenderLibrary(); });
+      colsRow.appendChild(b);
+    };
+    addCol('all', 'All', all.length);
+    const unsorted = all.filter(p=> !p.collections.length).length;
+    if(unsorted || spFilter.col===SP_UNSORTED) addCol(SP_UNSORTED, 'Unsorted', unsorted);
+    spUserCollections().forEach(c=> addCol(c.id, c.name, all.filter(p=> p.collections.includes(c.id)).length));
+    // A sync finishing mustn't wipe a name being typed; the user's own clicks redraw.
+    const tools = document.getElementById('saved-col-tools');
+    const ae = document.activeElement;
+    if(!(spPassiveRender && tools.contains(ae) && ae.tagName==='INPUT')) spRenderColTools();
+    // theme filter: Lichess's themes present among the saved puzzles
+    const themeSel = document.getElementById('saved-theme-filter');
+    const counts = Object.create(null);
+    all.forEach(p=> p.themes.forEach(t=> counts[t] = (counts[t]||0)+1));
+    if(spFilter.theme && !counts[spFilter.theme]) spFilter.theme = '';
+    themeSel.textContent = '';
+    const optAll = spMake('option', null, 'All themes'); optAll.value = ''; themeSel.appendChild(optAll);
+    Object.keys(counts).sort((a,b)=> pzThemeLabel(a).localeCompare(pzThemeLabel(b))).forEach(t=>{
+      const o = spMake('option', null, pzThemeLabel(t)+' ('+counts[t]+')');
+      o.value = t;
+      themeSel.appendChild(o);
+    });
+    themeSel.value = spFilter.theme;
+    document.getElementById('saved-sort').value = spFilter.sort;
+    // the list
+    const ids = spFilteredIds();
+    const list = document.getElementById('saved-list');
+    const fa = document.activeElement, fCard = fa && list.contains(fa) ? fa.closest('.saved-card') : null;
+    const fPid = fCard ? fCard.dataset.pid : null, fIdx = fCard ? Array.from(fCard.querySelectorAll('button,a')).indexOf(fa) : -1;
+    list.textContent = '';
+    ids.forEach((id, i)=> list.appendChild(spCard(SP.puzzles[id], ids, i)));
+    if(fPid){
+      const c = list.querySelector('.saved-card[data-pid="'+fPid+'"]');
+      const t = c && c.querySelectorAll('button,a')[fIdx];
+      if(t) t.focus({ preventScroll:true });
+    }
+    const empty = document.getElementById('saved-empty');
+    empty.style.display = ids.length ? 'none' : '';
+    empty.textContent = all.length
+      ? 'Nothing here with these filters.'
+      : 'No saved puzzles yet. While solving a puzzle, tap Save on its card (or press S) to keep it here.';
+    document.getElementById('saved-subtitle').textContent = all.length
+      ? all.length+' saved \u00b7 '+spUserCollections().length+' collection'+(spUserCollections().length===1 ? '' : 's')
+      : 'Puzzles you save from the Puzzles drill, sorted your way.';
+    document.getElementById('saved-play').disabled = !ids.length;
+    document.getElementById('saved-shuffle').disabled = ids.length < 2;
+    spRenderSync();
+  }
+  function spCard(p, ids, index){
+    const card = spMake('div', 'saved-card');
+    card.dataset.pid = p.id;
+    // Thumbnails are the costly part of a card and never change for a
+    // puzzle, so they're built once (again only when the piece set changes).
+    if(PIECE_SVG !== spThumbOwner){ spThumbCache.clear(); spThumbOwner = PIECE_SVG; }
+    const tkey = p.id+'|'+p.fen+'|'+p.solver;
+    let thumb = spThumbCache.get(tkey);
+    if(!thumb){
+      thumb = spMake('div', 'plaque-board saved-thumb');
+      thumb.setAttribute('aria-hidden', 'true');
+      if(p.fen){ try{ spBuildThumb(thumb, boardFromFENChecks(p.fen).board, p.solver==='b'); }catch(e){} }
+      spThumbCache.set(tkey, thumb);
+    }
+    card.appendChild(thumb);
+    const main = spMake('div', 'saved-main');
+    const l1 = spMake('div', 'saved-line1');
+    l1.appendChild(spMake('span', 'saved-id', '#'+p.id));
+    l1.appendChild(spMake('span', 'saved-rating', String(p.rating)));
+    l1.appendChild(spMake('span', 'saved-side', (p.solver==='b' ? 'Black' : 'White')+' to move'));
+    if(p.firstTry) l1.appendChild(spMake('span', 'history-result-pill '+(p.firstTry==='solved' ? 'history-result-win' : 'history-result-loss'), p.firstTry==='solved' ? 'Solved first try' : 'Missed first try'));
+    main.appendChild(l1);
+    if(p.themes.length){
+      const th = spMake('div', 'saved-themes');
+      const shown = p.themes.filter(t=> !['short','long','veryLong','oneMove','master','masterVsMaster','superGM'].includes(t));
+      (shown.length ? shown : p.themes).slice(0, 4).forEach(t=> th.appendChild(spMake('span', 'chip basic', pzThemeLabel(t))));
+      main.appendChild(th);
+    }
+    const cn = p.collections.map(cid=> SP.collections[cid] && SP.collections[cid].name).filter(Boolean);
+    main.appendChild(spMake('div', 'saved-cols-line', cn.length ? cn.join(' \u00b7 ') : 'Unsorted'));
+    if(p.note) main.appendChild(spMake('div', 'saved-note', p.note));
+    const pr = p.practice;
+    main.appendChild(spMake('div', 'saved-practice', pr.tries
+      ? 'Practised '+pr.tries+'\u00d7 \u00b7 '+pr.solved+' clean \u00b7 last '+relTime(pr.last)
+      : (p.tokens.length ? 'Saved '+relTime(p.savedAt) : 'Saved on another device \u00b7 fills in from Lichess')));
+    const acts = spMake('div', 'saved-actions');
+    const play = spMake('button', 'btn btn-primary', 'Play');
+    play.addEventListener('click', ()=> spPlayQueue(ids, index, spQueueLabel()));
+    acts.appendChild(play);
+    const edit = spMake('button', 'btn btn-ghost', 'Edit');
+    edit.addEventListener('click', ()=> spOpenSave(p.id));
+    acts.appendChild(edit);
+    const link = spMake('a', 'btn-link', 'On Lichess');
+    link.href = 'https://lichess.org/training/'+p.id;
+    link.target = '_blank'; link.rel = 'noopener';
+    acts.appendChild(link);
+    const rm = spMake('button', 'btn-link danger', spArmedPid===p.id ? 'Remove it?' : 'Remove');
+    rm.addEventListener('click', ()=>{
+      if(spArmedPid===p.id){ clearTimeout(spArmTimer); spArmedPid = null; spRemovePuzzle(p.id); return; }
+      spArmedPid = p.id;
+      rm.textContent = 'Remove it?';
+      clearTimeout(spArmTimer);
+      spArmTimer = setTimeout(()=>{
+        spArmedPid = null;
+        const c = document.querySelector('#saved-list .saved-card[data-pid="'+p.id+'"] .btn-link.danger');
+        if(c) c.textContent = 'Remove';
+      }, 3000);
+    });
+    acts.appendChild(rm);
+    main.appendChild(acts);
+    card.appendChild(main);
+    return card;
+  }
+  function spRenderColTools(){
+    const box = document.getElementById('saved-col-tools');
+    box.textContent = '';
+    const c = SP.collections[spFilter.col];
+    const userCol = c && c.id!==SP_UNSORTED;
+    if(userCol && spColEdit==='rename'){
+      const input = spMake('input', 'text-input');
+      input.type = 'text'; input.maxLength = 60; input.value = c.name;
+      input.setAttribute('aria-label', 'New name');
+      const ok = spMake('button', 'btn btn-primary', 'Rename');
+      const cancel = spMake('button', 'btn btn-ghost', 'Cancel');
+      const hint = spMake('div', 'field-hint');
+      const go = ()=>{ const err = spRenameCollection(c.id, input.value); if(err){ hint.textContent = err; return; } spColEdit = null; spRenderLibrary(); };
+      ok.addEventListener('click', go);
+      input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } if(e.key==='Escape'){ spColEdit = null; spRenderLibrary(); } });
+      cancel.addEventListener('click', ()=>{ spColEdit = null; spColFocus = 'rename'; spRenderLibrary(); });
+      box.append(input, ok, cancel, hint);
+      input.focus();
+      return;
+    }
+    if(userCol && spColEdit==='delete'){
+      box.appendChild(spMake('div', 'field-hint', 'Delete \u201c'+c.name+'\u201d? Its puzzles stay saved \u2014 in Unsorted if they\u2019re in no other collection.'));
+      const yes = spMake('button', 'btn btn-primary', 'Delete collection');
+      const no = spMake('button', 'btn btn-ghost', 'Keep it');
+      yes.addEventListener('click', ()=>{ spColEdit = null; spDeleteCollection(c.id); });
+      no.addEventListener('click', ()=>{ spColEdit = null; spColFocus = 'rename'; spRenderLibrary(); });
+      box.append(yes, no);
+      no.focus({ preventScroll:true });
+      return;
+    }
+    const input = spMake('input', 'text-input');
+    input.type = 'text'; input.maxLength = 60; input.placeholder = 'New collection, e.g. Counterattacking';
+    input.setAttribute('aria-label', 'New collection name');
+    const add = spMake('button', 'btn btn-ghost', 'Add');
+    const go = ()=>{ const cid = spCreateCollection(input.value); if(!cid) return; spFilter.col = cid; spColFocus = 'input'; spPersist(); spRenderLibrary(); };
+    add.addEventListener('click', go);
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+    box.append(input, add);
+    if(userCol){
+      const ren = spMake('button', 'btn-link', 'Rename');
+      ren.addEventListener('click', ()=>{ spColEdit = 'rename'; spRenderLibrary(); });
+      const del = spMake('button', 'btn-link danger', 'Delete');
+      del.addEventListener('click', ()=>{ spColEdit = 'delete'; spRenderLibrary(); });
+      box.append(ren, del);
+    }
+    const want = spColFocus; spColFocus = null;
+    if(want==='input') input.focus({ preventScroll:true });
+    else if(want==='rename'){ const r = box.querySelector('.btn-link'); if(r) r.focus({ preventScroll:true }); }
+    const st = c && c.studies.slice().sort((a,b)=> a.part-b.part)[0];
+    if(st){
+      const a = spMake('a', 'btn-link', 'Study on Lichess');
+      a.href = 'https://lichess.org/study/'+st.id; a.target = '_blank'; a.rel = 'noopener';
+      box.appendChild(a);
+    }
+  }
+  document.getElementById('saved-theme-filter').addEventListener('change', e=>{ spFilter.theme = e.target.value; spRenderLibrary(); });
+  document.getElementById('saved-sort').addEventListener('change', e=>{ spFilter.sort = e.target.value; spRenderLibrary(); });
+  document.getElementById('saved-play').addEventListener('click', ()=> spPlayQueue(spFilteredIds(), 0, spQueueLabel()));
+  document.getElementById('saved-shuffle').addEventListener('click', ()=>{
+    const ids = spFilteredIds();
+    for(let i=ids.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+    spPlayQueue(ids, 0, spQueueLabel()+' \u00b7 shuffled');
+  });
+  document.getElementById('saved-sync-now').addEventListener('click', ()=>{ spScopeCache.ok = null; spSync(); });
+
+  /* ---- Sync with private Lichess studies ----
+     One request at a time (Lichess asks API clients to). Each sync: send
+     queued chapter deletions, read every "Chess Arcade \u00b7 ..." study,
+     reconcile -- chapters gone from a study were removed on another device,
+     chapters not known here were added on one -- fill in puzzles another
+     device saved, then add this device's new ones as chapters. Metadata
+     rides in each chapter's opening comment, since Lichess keeps only
+     standard PGN tags. */
+  let spSyncTimer = 0, spSyncRunning = false, spSyncAgain = false;
+  let spSyncState = { status:'idle', detail:'' };
+  let spScopeCache = { token:'', ok:null };
+  function spScheduleSync(ms){
+    clearTimeout(spSyncTimer);
+    spSyncTimer = setTimeout(()=> spSync(), Math.max(ms==null ? 2000 : ms, spBackoffUntil - Date.now()));
+  }
+  function spTokenChanged(){
+    spScopeCache = { token:'', ok:null };
+    GH_STATE.username = null;
+    spSetSync(getLichessToken() ? 'idle' : 'off');
+    if(getLichessToken()) spScheduleSync(800);
+  }
+  function spSetSync(status, detail){ spSyncState = { status, detail:detail||'' }; spRenderSync(); }
+  function spRenderSync(){
+    const t = document.getElementById('saved-sync-text'), box = document.getElementById('saved-sync');
+    if(!t || !box) return;
+    const st = getLichessToken() ? spSyncState.status : 'off';
+    let msg;
+    if(st==='off') msg = 'Saved on this device. Connect Lichess in Settings to keep them on all your devices.';
+    else if(st==='scope') msg = 'Saved on this device. To sync, make a new Lichess token that also has study:read and study:write, and paste it in Settings.';
+    else if(st==='busy') msg = 'Syncing with Lichess\u2026';
+    else if(st==='error') msg = 'Couldn\u2019t sync with Lichess'+(spSyncState.detail ? ' ('+spSyncState.detail+')' : '')+'. Everything is saved on this device; it\u2019ll try again.';
+    else if(SP.sync.lastSync) msg = 'Synced with Lichess '+relTime(SP.sync.lastSync)+', in private studies named \u201cChess Arcade \u00b7 \u2026\u201d.';
+    else msg = 'Saved on this device.';
+    t.textContent = msg;
+    box.dataset.state = st;
+    document.getElementById('saved-sync-now').style.display = st==='off' || st==='busy' ? 'none' : '';
+  }
+  async function spApi(path, opts){
+    const token = getLichessToken();
+    const o = Object.assign({ cache:'no-store' }, opts || {});
+    const auth = o.auth !== false;
+    delete o.auth;
+    o.headers = Object.assign({}, o.headers || {});
+    if(auth && token) o.headers.Authorization = 'Bearer '+token;
+    const ctrl = typeof AbortController==='function' ? new AbortController() : null;
+    if(ctrl) o.signal = ctrl.signal;
+    const killer = ctrl ? setTimeout(()=> ctrl.abort(), 20000) : null;
+    try{
+      let res;
+      try{ res = await fetch('https://lichess.org'+path, o); }
+      catch(e){
+        const err = new Error(ctrl && ctrl.signal.aborted ? 'Lichess didn\u2019t answer in time' : 'no connection');
+        err.cause = e;
+        throw err;
+      }
+      if(res.status===429){ const err = new Error('Lichess asked to slow down'); err.status = 429; throw err; }
+      return res;
+    } finally { clearTimeout(killer); }
+  }
+  // A personal token's scopes are fixed when it's made, so check them once:
+  // without study access, saving stays on this device and says why.
+  async function spStudyAccess(){
+    const token = getLichessToken();
+    if(!token) return 'off';
+    if(spScopeCache.token===token && spScopeCache.ok!=null) return spScopeCache.ok ? 'ok' : 'scope';
+    const res = await spApi('/api/token/test', { method:'POST', auth:false, headers:{ 'Content-Type':'text/plain' }, body:token });
+    if(!res.ok) throw new Error('token check '+res.status);
+    const data = await res.json();
+    const info = data && data[token];
+    if(!info) throw new Error('Lichess doesn\u2019t recognise that token');
+    const scopes = typeof info.scopes==='string' ? info.scopes.split(',') : [];
+    const ok = scopes.includes('study:read') && scopes.includes('study:write');
+    spScopeCache = { token, ok };
+    return ok ? 'ok' : 'scope';
+  }
+  function spParseStudyName(name){
+    if(typeof name!=='string' || name.indexOf(SP_STUDY_PREFIX)!==0) return null;
+    let rest = name.slice(SP_STUDY_PREFIX.length).trim(), part = 1;
+    const m = rest.match(/^(.*?) \((\d+)\)$/);
+    if(m){ rest = m[1].trim(); part = Number(m[2]) || 1; }
+    return rest ? { name:spCleanName(rest), part } : null;
+  }
+  function spStudyName(cname, part){ return (SP_STUDY_PREFIX + cname + (part > 1 ? ' ('+part+')' : '')).slice(0, 100); }
+  function spParseExport(text){
+    const out = [];
+    String(text||'').trim().split(/\n\n(?=\[)/).forEach(game=>{
+      const tags = {};
+      game.replace(/^\[(\w+) "((?:[^"\\]|\\.)*)"\][ \t]*$/gm, (m, k, v)=>{ tags[k] = v.replace(/\\(.)/g, '$1'); return m; });
+      const url = (tags.ChapterURL||'').match(/\/study\/(\w{8})\/(\w{8})/);
+      const site = (tags.Site||'').match(/\/training\/(\w{5})\b/);
+      const body = game.replace(/^\[.*\][ \t]*$/gm, '');
+      const cm = body.match(/\{\s*arcade\s+([^}]*)\}/);
+      const meta = {};
+      if(cm) cm[1].trim().split(/\s+/).forEach(kv=>{ const i = kv.indexOf('='); if(i>0) meta[kv.slice(0,i)] = kv.slice(i+1); });
+      const pid = site ? site[1] : (/^\w{5}$/.test(meta.id||'') ? meta.id : null);
+      // the solution as written, kept for filing a puzzle not yet filled in
+      const after = cm ? body.slice(body.indexOf(cm[0]) + cm[0].length) : body;
+      const san = after.replace(/\{[^}]*\}/g, ' ').replace(/\s+/g, ' ').replace(/\s*\*\s*$/, '').trim();
+      if(url) out.push({ studyId:url[1], chapterId:url[2], pid, tags, meta, san });
+    });
+    return out;
+  }
+  function spTagVal(v){ return String(v==null ? '' : v).replace(/["\\\r\n\]]/g, '').slice(0, 200); }
+  function spChapterName(p){ return p.id+' \u00b7 '+p.rating+' \u00b7 '+(p.solver==='b' ? 'Black' : 'White')+' to move'; }
+  function spSolutionSan(p){
+    try{
+      let state = pzReplayPGNWithStates(p.tokens).state, ply = p.tokens.length;
+      const parts = [];
+      p.solution.forEach((uci, i)=>{
+        const before = state;
+        const { next, move } = pzApplyUCI(state, uci);
+        const san = pzMoveToSAN(before, move, next);
+        const num = Math.floor(ply/2)+1;
+        parts.push(before.turn==='w' ? num+'. '+san : (i===0 ? num+'... ' : '')+san);
+        state = next; ply++;
+      });
+      return parts.join(' ');
+    }catch(e){ return ''; }
+  }
+  function spChapterPgn(p, cname){
+    const t = [];
+    const tag = (k, v)=>{ if(v!=null && v!=='') t.push('['+k+' "'+spTagVal(v)+'"]'); };
+    tag('Event', cname);
+    tag('Site', 'https://lichess.org/training/'+p.id);
+    if(p.gameId) tag('GameId', p.gameId);
+    const w = p.players.find(x=> x.color==='white'), b = p.players.find(x=> x.color==='black');
+    if(w){ tag('White', w.name); if(w.rating!=null) tag('WhiteElo', w.rating); }
+    if(b){ tag('Black', b.name); if(b.rating!=null) tag('BlackElo', b.rating); }
+    tag('Result', '*');
+    tag('ChapterName', spChapterName(p));
+    tag('FEN', p.fen);
+    tag('SetUp', '1');
+    const meta = 'arcade id='+p.id+' rating='+Math.round(p.rating)+' themes='+(p.themes.join(',') || '-')
+      +' saved='+Math.round(p.savedAt)+' first='+(p.firstTry || '-')+' edited='+Math.round(p.editedAt||0)+(p.note ? ' note='+encodeURIComponent(p.note) : '');
+    return t.join('\n')+'\n\n{ '+meta+' } '+(p.tokens.length ? spSolutionSan(p) : (p.san || ''))+' *';
+  }
+  function spStubFromChapter(ch, cid){
+    const t = ch.tags, m = ch.meta;
+    const players = [];
+    if(t.White) players.push({ name:t.White, rating:t.WhiteElo, color:'white' });
+    if(t.Black) players.push({ name:t.Black, rating:t.BlackElo, color:'black' });
+    let note = '';
+    try{ note = m.note ? decodeURIComponent(m.note) : ''; }catch(e){ note = ''; }
+    return spCleanPuzzle({ id:ch.pid, rating:Number(m.rating)||0, themes: m.themes && m.themes!=='-' ? m.themes.split(',') : [],
+      tokens:[], solution:[], gameId:t.GameId||'', players, fen:t.FEN||'', savedAt:Number(m.saved)||Date.now(), note,
+      firstTry:m.first, practice:{}, collections: cid===SP_UNSORTED ? [] : [cid], links:{}, editedAt:Number(m.edited)||0, pushedAt:Number(m.edited)||0,
+      san:ch.san || '' });
+  }
+  function spFill(it){
+    if(!it || !it.puzzle || !it.game) return false;
+    const p = SP.puzzles[String(it.puzzle.id)];
+    if(!p) return false;
+    const ip = Number(it.puzzle.initialPly);
+    const tokens = String(it.game.pgn||'').trim().split(/\s+/).filter(Boolean).slice(0, ip+1);
+    if(!tokens.length || !Array.isArray(it.puzzle.solution) || !it.puzzle.solution.length) return false;
+    let state;
+    try{ state = pzReplayPGNWithStates(tokens).state; }catch(e){ return false; }
+    p.tokens = tokens.map(String);
+    p.solution = it.puzzle.solution.map(String);
+    p.fillTriedAt = 0;
+    if(!p.fen) p.fen = pzStateToFEN(state, tokens.length);
+    p.solver = state.turn;
+    if(!p.themes.length && Array.isArray(it.puzzle.themes)) p.themes = it.puzzle.themes.map(String).slice(0, 24);
+    p.plays = Number(it.puzzle.plays)||p.plays;
+    if(/^\w{8}$/.test(String(it.game.id||''))) p.gameId = String(it.game.id);
+    p.gamePerf = String((it.game.perf && it.game.perf.name) || p.gamePerf).slice(0, 20);
+    p.gameClock = String(it.game.clock || p.gameClock).slice(0, 12);
+    if(Array.isArray(it.game.players) && it.game.players.length===2) p.players = spCleanPlayers(it.game.players);
+    if(!p.rating) p.rating = Number(it.puzzle.rating)||0;
+    return true;
+  }
+  // By id, without the token: these endpoints are public, and /many refuses
+  // a personal token outright.
+  async function spHydrateOne(id){
+    try{
+      const res = await spApi('/api/puzzle/'+id, { auth:false });
+      if(!res.ok) return false;
+      return spFill(await res.json());
+    }catch(e){ return false; }
+  }
+  // Fills in puzzles another device saved. One Lichess can't serve (removed,
+  // or the puzzle API is down) is tried again after six hours, not every
+  // sync; a 429 here just stops filling in for this sync.
+  async function spHydrate(){
+    const now = Date.now();
+    const need = Object.values(SP.puzzles).filter(p=> !p.tokens.length && now - (p.fillTriedAt||0) > 6*3600e3).map(p=> p.id);
+    for(let i=0; i<need.length; i+=50){
+      const ids = need.slice(i, i+50);
+      const got = new Set();
+      try{
+        const res = await spApi('/api/puzzle/many?ids='+ids.join(','), { auth:false });
+        if(res.ok){ const d = await res.json(); ((d && d.puzzles) || []).forEach(it=>{ if(spFill(it)) got.add(String(it.puzzle.id)); }); }
+      }catch(e){ if(e && e.status===429) return; }
+      for(const id of ids){
+        if(got.has(id)) continue;
+        if(!(await spHydrateOne(id)) && SP.puzzles[id]) SP.puzzles[id].fillTriedAt = Date.now();
+      }
+    }
+  }
+  async function spRunDeletes(){
+    const uniq = new Map();
+    SP.sync.deletes.forEach(d=> uniq.set(d.s+'/'+d.c, d));
+    SP.sync.deletes = Array.from(uniq.values());
+    const list = SP.sync.deletes.slice();
+    for(const d of list){
+      const keep = d.pid && SP.puzzles[d.pid];
+      if(keep && !Object.keys(keep.links).length) continue;   // waits until it's filed in its new place
+      const res = await spApi('/api/study/'+d.s+'/'+d.c, { method:'DELETE' });
+      if(res.ok || res.status===404){
+        SP.sync.deletes = SP.sync.deletes.filter(x=> !(x.s===d.s && x.c===d.c));
+        Object.values(SP.collections).forEach(c=> c.studies.forEach(st=>{ if(st.id===d.s && st.count>0) st.count--; }));
+      } else if(res.status===401 || res.status===403){
+        throw new Error('Lichess refused a change ('+res.status+')');
+      }
+    }
+    spPersist();
+  }
+  async function spCreateStudy(name){
+    const body = new URLSearchParams({ name, visibility:'private', computer:'everyone', explorer:'everyone',
+      cloneable:'owner', shareable:'owner', chat:'nobody' });
+    const res = await spApi('/api/study', { method:'POST', body });
+    if(!res.ok) throw new Error('couldn\u2019t create a study ('+res.status+')');
+    const data = await res.json();
+    if(!data || !/^\w{8}$/.test(String(data.id||''))) throw new Error('no study id came back');
+    return data.id;
+  }
+  async function spImport(studyId, puzzles, cname, initial){
+    // conceal: on lichess.org the moves stay hidden until played through.
+    const body = new URLSearchParams({ pgn:puzzles.map(p=> spChapterPgn(p, cname)).join('\n\n'), mode:'conceal' });
+    if(initial) body.set('initial', 'true');    // drops the empty chapter a new study starts with
+    const res = await spApi('/api/study/'+studyId+'/import-pgn', { method:'POST', body });
+    if(!res.ok) throw new Error('couldn\u2019t add to a study ('+res.status+')');
+    const data = await res.json();
+    const got = {};
+    ((data && data.chapters) || []).forEach(ch=>{
+      const m = String(ch.name||'').match(/^(\w{5}) /);
+      if(m && /^\w{8}$/.test(String(ch.id||''))) got[m[1]] = ch.id;
+    });
+    return got;
+  }
+  function spReconcile(remoteAll, listed){
+    const remote = remoteAll.filter(s=> !s.retiredTo), retiredRemote = remoteAll.filter(s=> s.retiredTo);
+    // collections <-> studies: a study already linked keeps its collection;
+    // a new one joins the collection of the same name, or makes one.
+    const studyCol = {};
+    Object.values(SP.collections).forEach(c=> c.studies.forEach(st=> studyCol[st.id] = c.id));
+    remote.forEach(s=>{
+      let cid = studyCol[s.id];
+      if(!cid && s.chapters.length){
+        cid = spCreateCollection(s.name);
+        const c = cid && SP.collections[cid];
+        if(!c) return;
+        c.studies.push({ id:s.id, part:s.part, count:s.total });
+        studyCol[s.id] = cid;
+      }
+      s.cid = cid || null;
+    });
+    remote.forEach(s=>{
+      const c = s.cid && SP.collections[s.cid];
+      const st = c && c.studies.find(x=> x.id===s.id);
+      if(st) st.count = s.total;
+    });
+    // what each study holds now; a study of ours that's gone holds nothing
+    const seen = {};
+    remoteAll.forEach(s=>{ seen[s.id] = new Set(s.chapters.map(ch=> ch.chapterId)); });
+    Object.values(SP.collections).forEach(c=> c.studies.forEach(st=>{ if(!listed.has(st.id)) seen[st.id] = new Set(); }));   // deleted on lichess.org
+    const pendingDel = new Set(SP.sync.deletes.map(d=> d.c));
+    const lostCols = new Set(), lostPids = new Set();
+    // a) chapters gone from a study we just read: removed on another device
+    Object.values(SP.puzzles).forEach(p=>{
+      Object.keys(p.links).forEach(cid=>{
+        const l = p.links[cid];
+        if(seen[l.s] && !seen[l.s].has(l.c)){
+          delete p.links[cid];
+          p.collections = p.collections.filter(x=> x!==cid);
+          lostCols.add(cid); lostPids.add(p.id);
+        }
+      });
+    });
+    // b) chapters this device doesn't know: saved or filed on another device
+    remote.forEach(s=>{
+      const cid = s.cid;
+      if(!cid || !SP.collections[cid]) return;
+      s.chapters.forEach(ch=>{
+        if(!ch.pid || pendingDel.has(ch.chapterId)) return;
+        let p = SP.puzzles[ch.pid];
+        if(!p){
+          if(SP.sync.deletedPids[ch.pid]){ SP.sync.deletes.push({ s:s.id, c:ch.chapterId }); return; }
+          p = spStubFromChapter(ch, cid);
+          if(!p) return;
+          SP.puzzles[p.id] = p;
+        }
+        // a newer note / first-try result from another device
+        const re = Number(ch.meta.edited)||0;
+        if(re > (p.editedAt||0)){
+          let n = p.note; try{ n = ch.meta.note ? decodeURIComponent(ch.meta.note) : ''; }catch(e){}
+          p.note = String(n).slice(0, 300);
+          if(ch.meta.first==='solved' || ch.meta.first==='missed') p.firstTry = ch.meta.first;
+          p.editedAt = re; p.pushedAt = Math.max(p.pushedAt||0, re);
+        }
+        const link = p.links[cid];
+        if(link && link.c!==ch.chapterId && seen[link.s] && seen[link.s].has(link.c)){
+          // the same puzzle filed twice: every device keeps the same copy (lowest chapter id)
+          if(ch.chapterId < link.c){ SP.sync.deletes.push({ s:link.s, c:link.c, pid:p.id }); p.links[cid] = { s:s.id, c:ch.chapterId }; }
+          else SP.sync.deletes.push({ s:s.id, c:ch.chapterId, pid:p.id });
+          return;
+        }
+        if(spDesired(p).includes(cid)){ p.links[cid] = { s:s.id, c:ch.chapterId }; return; }
+        // Filed differently here. Only a change made on this device deletes a
+        // chapter, so this copy is linked, never deleted: another device may be
+        // moving the puzzle right now.
+        if(cid!==SP_UNSORTED && !p.collections.includes(cid)) p.collections.push(cid);
+        p.links[cid] = { s:s.id, c:ch.chapterId };
+      });
+    });
+    // b2) a study this device renamed or deleted that another device (which
+    //     hadn't heard yet) filed a puzzle into: move it to where that went
+    retiredRemote.forEach(s=>{
+      const to = SP.collections[s.retiredTo] ? s.retiredTo : SP_UNSORTED;
+      s.chapters.forEach(ch=>{
+        if(!ch.pid || pendingDel.has(ch.chapterId)) return;
+        let p = SP.puzzles[ch.pid];
+        if(!p){
+          if(SP.sync.deletedPids[ch.pid]){ SP.sync.deletes.push({ s:s.id, c:ch.chapterId }); return; }
+          p = spStubFromChapter(ch, to); if(!p) return; SP.puzzles[p.id] = p;
+        }
+        if(to!==SP_UNSORTED && !p.collections.includes(to)) p.collections.push(to);
+        SP.sync.deletes.push({ s:s.id, c:ch.chapterId, pid:p.id });
+      });
+    });
+    // c) every chapter of a puzzle gone, nothing pending here: deleted elsewhere
+    const remotePids = new Set();
+    remoteAll.forEach(s=> s.chapters.forEach(ch=> remotePids.add(ch.pid)));
+    lostPids.forEach(pid=>{
+      const p = SP.puzzles[pid];
+      // Deleted only if no study holds it any more: a copy still there means
+      // it was moved or taken out of a collection, not deleted.
+      if(p && !Object.keys(p.links).length && !p.collections.length && !remotePids.has(pid)) delete SP.puzzles[pid];
+    });
+    // d) a collection emptied from another device, with nothing in it here, goes too
+    Object.values(SP.collections).forEach(c=>{
+      c.studies = c.studies.filter(st=> listed.has(st.id));
+      if(c.id===SP_UNSORTED || !lostCols.has(c.id)) return;
+      const remoteHas = remote.some(s=> s.cid===c.id && s.chapters.length);
+      const localHas = Object.values(SP.puzzles).some(p=> p.collections.includes(c.id));
+      // Not retired: if a puzzle is filed into it again from another
+      // device, the study comes back here as the collection.
+      if(!remoteHas && !localHas) delete SP.collections[c.id];
+    });
+    // tombstones for deleted puzzles can go once no study holds them
+    Object.keys(SP.sync.deletedPids).forEach(pid=>{ if(!remotePids.has(pid)) delete SP.sync.deletedPids[pid]; });
+  }
+  async function spPush(){
+    const byCol = {};
+    Object.values(SP.puzzles).forEach(p=>{
+      if(!p.fen || !(p.tokens.length || p.san)) return;      // nothing to write a chapter from
+      spDesired(p).forEach(cid=>{ if(!p.links[cid] && SP.collections[cid]) (byCol[cid] = byCol[cid] || []).push(p); });
+    });
+    for(const cid of Object.keys(byCol)){
+      const c = SP.collections[cid];
+      let list = byCol[cid];
+      while(list.length){
+        let st = c.studies.filter(x=> x.count < SP_MAX_CHAPTERS && !SP.sync.retired[x.id]).sort((a,b)=> a.part-b.part)[0];
+        let initial = false;
+        if(!st){
+          const part = c.studies.reduce((m, x)=> Math.max(m, x.part), 0) + 1;
+          const id = await spCreateStudy(spStudyName(c.name, part));
+          st = { id, part, count:1 };
+          c.studies.push(st);
+          initial = true;
+          spPersist();
+        }
+        const room = SP_MAX_CHAPTERS - (initial ? 0 : st.count);
+        const batch = list.slice(0, Math.max(1, Math.min(room, 20)));
+        const got = await spImport(st.id, batch, c.name, initial);
+        if(initial) st.count = 0;
+        let added = 0;
+        batch.forEach(p=>{ if(got[p.id]){ p.links[cid] = { s:st.id, c:got[p.id] }; st.count++; added++; } });
+        spPersist();
+        if(!added){
+          // Lichess took none of them (the study may be full): next part.
+          st.count = SP_MAX_CHAPTERS;
+          if(c.studies.length > 50) throw new Error('Lichess didn\u2019t take the puzzles');
+          continue;
+        }
+        list = list.slice(batch.length);
+      }
+    }
+    // notes / first-try results changed since their chapters were written
+    for(const p of Object.values(SP.puzzles)){
+      if(!p.tokens.length || !p.fen || !((p.editedAt||0) > (p.pushedAt||0))) continue;
+      for(const cid of Object.keys(p.links)){
+        const l = p.links[cid], c = SP.collections[cid];
+        const res = await spApi('/api/study/'+l.s+'/'+l.c+'/moves', { method:'POST', body:new URLSearchParams({ pgn: spChapterPgn(p, c ? c.name : 'Unsorted') }) });
+        if(!res.ok && res.status!==404) throw new Error('couldn\u2019t update a saved puzzle ('+res.status+')');
+      }
+      p.pushedAt = p.editedAt;
+      spPersist();
+    }
+  }
+  async function spSync(){
+    clearTimeout(spSyncTimer);
+    if(spSyncRunning){ spSyncAgain = true; return; }
+    if(Date.now() < spBackoffUntil){ spScheduleSync(0); return; }
+    if(!getLichessToken()){ spSetSync('off'); return; }
+    spSyncRunning = true;
+    spSetSync('busy');
+    try{
+      const access = await spStudyAccess();
+      if(access!=='ok'){ spSetSync(access); return; }
+      const user = await ghEnsureUsername();
+      if(!user) throw new Error('couldn\u2019t read your Lichess account');
+      const uid = String(user).toLowerCase();
+      if(SP.sync.user && SP.sync.user!==uid){
+        // Another Lichess account: its studies aren't this library's. Keep
+        // every puzzle and file it afresh there, instead of reading the old
+        // account's studies as deleted.
+        Object.values(SP.collections).forEach(c=> c.studies = []);
+        Object.values(SP.puzzles).forEach(p=> p.links = {});
+        SP.sync.deletes = []; SP.sync.retired = {}; SP.sync.deletedPids = {};
+      }
+      SP.sync.user = uid;
+      const listRes = await spApi('/api/study/by/'+encodeURIComponent(user), { headers:{ Accept:'application/x-ndjson' } });
+      if(!listRes.ok) throw new Error('couldn\u2019t list your studies ('+listRes.status+')');
+      const studies = (await listRes.text()).split('\n').map(l=> l.trim()).filter(Boolean)
+        .map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).filter(x=> x && /^\w{8}$/.test(String(x.id||'')));
+      // Every study of ours that exists; one we couldn't read this time is
+      // left as it was (nothing in it counts as removed).
+      const listed = new Set(studies.map(x=> x.id));
+      // A linked study missing from the list counts as deleted only when
+      // Lichess says so for that study (HEAD needs no permission).
+      for(const c of Object.values(SP.collections)) for(const st of c.studies){
+        if(listed.has(st.id)) continue;
+        const h = await spApi('/api/study/'+st.id+'.pgn', { method:'HEAD', auth:false });
+        if(h.status!==404) listed.add(st.id);
+      }
+      const remote = [];
+      for(const st of studies){
+        const pn = spParseStudyName(st.name);
+        if(!pn) continue;
+        const ret = SP.sync.retired[st.id];
+        if(ret && ret.emptySince && Date.now() - ret.emptySince > 30*86400e3) continue;
+        const res = await spApi('/api/study/'+st.id+'.pgn?clocks=false&comments=true&variations=false&orientation=true');
+        if(!res.ok) continue;
+        const chapters = spParseExport(await res.text());
+        if(ret){ if(chapters.some(ch=> ch.pid)) ret.emptySince = 0; else if(!ret.emptySince) ret.emptySince = Date.now(); }
+        remote.push({ id:st.id, name:pn.name, part:pn.part, total:chapters.length, chapters:chapters.filter(ch=> ch.pid), retiredTo: ret ? ((ret && ret.to) || SP_UNSORTED) : null });
+      }
+      spReconcile(remote, listed);
+      spPersist();
+      await spHydrate();
+      spPersist();
+      // New chapters first, deletions after: a puzzle being moved or renamed
+      // is never missing from every study, so another device mid-sync can't
+      // take it for deleted.
+      await spPush();
+      await spRunDeletes();
+      SP.sync.lastSync = Date.now();
+      spPersist();
+      spSetSync('ok');
+    }catch(err){
+      if(err && err.status===429) spBackoffUntil = Date.now() + 65000;
+      spSetSync('error', (err && err.message) || '');
+      spScheduleSync(err && err.status===429 ? 65000 : 90000);
+    }finally{
+      spSyncRunning = false;
+      // Another tab saved while this sync ran: fold its copy in, then sync it.
+      if(spOtherTabValue!=null){ const v = spOtherTabValue; spOtherTabValue = null; spMergeFrom(v); spPersist(); spSyncAgain = true; }
+      spPassiveRender = true;
+      try{ spAfterChange(false); } finally { spPassiveRender = false; }
+      if(spSyncAgain){ spSyncAgain = false; spScheduleSync(1500); }
+    }
+  }
+  // Another tab of the app saved: take its copy (unless a sync is mid-way).
+  window.addEventListener('storage', e=>{
+    if(e.key!==SAVED_KEY) return;
+    if(spSyncRunning){ spOtherTabValue = e.newValue; return; }
+    SP = spLoad(); spAfterChange(false);
+  });
+  // Another tab's copy, merged into this one: puzzles and collections this
+  // tab doesn't have (unless deleted here), and newer notes.
+  function spMergeFrom(raw){
+    const o = spLoad(raw || 'null');
+    Object.values(o.collections).forEach(c=>{ if(!SP.collections[c.id]) SP.collections[c.id] = c; });
+    Object.values(o.puzzles).forEach(op=>{
+      const p = SP.puzzles[op.id];
+      if(!p){ if(!SP.sync.deletedPids[op.id]) SP.puzzles[op.id] = op; return; }
+      if((op.editedAt||0) > (p.editedAt||0)){ p.note = op.note; p.firstTry = op.firstTry || p.firstTry; p.editedAt = op.editedAt; }
+      op.collections.forEach(cid=>{ if(SP.collections[cid] && !p.collections.includes(cid)) p.collections.push(cid); });
+    });
+  }
+  // First sync a few seconds after the app opens, once everything is up.
+  spRenderSync();
+  if(getLichessToken()) setTimeout(()=> spSync(), 5000);
+
   (function wireAnnoHintCollapse(){
     const KEY = 'annoHintCollapsed';
     let collapsed = localStorage.getItem(KEY) === '1';
@@ -18389,11 +19741,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const goBtn = document.getElementById('next-go');
     const reviewBtn = document.getElementById('next-review');
     const settingsBtn = document.getElementById('next-settings');
+    const saveBtn = document.getElementById('next-save');
     const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner']
       .map(id => document.getElementById(id)).filter(Boolean);
     // dismissed: the banner whose box was closed to look at the board, so it
     // stays closed until that round is over.
     let current = null, dismissed = null, openTimer = 0, returnFocus = null;
+    // afterSave: the banner whose box made way for the Save dialog; it comes
+    // back (focus on Next) when the dialog closes.
+    let afterSave = null;
+    const saveOv = document.getElementById('save-overlay');
+    nextBoxAfterSave = () => { const b = afterSave; afterSave = null; if(b && shown(b) && dismissed !== b) open(b); };
     const shown = el => el.style.display !== 'none' && el.offsetParent !== null;
     const bannerButtons = b => {
       const btns = b.querySelectorAll('.btn-row button');
@@ -18409,6 +19767,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const { next, settings } = bannerButtons(banner);
       goBtn.textContent = next ? next.textContent : 'Next position';
       settingsBtn.style.display = settings ? '' : 'none';
+      if(settings) settingsBtn.textContent = settings.textContent;
+      const isPuzzle = banner.id === 'pz-result-banner' && !!roundPz;
+      saveBtn.style.display = isPuzzle ? '' : 'none';
+      if(isPuzzle) saveBtn.innerHTML = spIsSaved(String(roundPz.id)) ? '&#9733; Saved' : '&#9734; Save puzzle';
       current = banner;
       returnFocus = document.activeElement;
       overlay.classList.add('active');
@@ -18429,6 +19791,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(btn) btn.click();
     }
     goBtn.addEventListener('click', () => act('next'));
+    // Save from the box: it steps aside (as "look at the board" does) so the
+    // dialog has the keyboard to itself.
+    saveBtn.addEventListener('click', () => { afterSave = current; close(); spOpenSave(); });
     settingsBtn.addEventListener('click', () => act('settings'));
     const review = () => { dismissed = current; close(); };
     reviewBtn.addEventListener('click', review);
@@ -18436,7 +19801,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.addEventListener('keydown', e => {
       if(!overlay.classList.contains('active')) return;
       if(e.key === 'Escape'){ e.preventDefault(); review(); }
-      else if(e.key === 'Enter' && document.activeElement !== reviewBtn && document.activeElement !== settingsBtn){
+      else if(e.key === 'Enter' && ![reviewBtn, settingsBtn, saveBtn].includes(document.activeElement)){
         e.preventDefault(); act('next');
       }
     }, true);
@@ -18448,7 +19813,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           const isOpen = overlay.classList.contains('active') && current === b;
           if(!isOpen && dismissed !== b){
             clearTimeout(openTimer);
-            openTimer = setTimeout(() => { if(shown(b) && dismissed !== b) open(b); }, 450);
+            openTimer = setTimeout(() => {
+              if(!shown(b) || dismissed === b) return;
+              if(saveOv && saveOv.classList.contains('active')){ afterSave = b; return; }   // not over the dialog
+              open(b);
+            }, 450);
           }
           return;
         }
@@ -18456,6 +19825,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       close();
       current = null;
       dismissed = null;
+      afterSave = null;
     });
     BANNERS.forEach(b => watch.observe(b, { attributes:true, attributeFilter:['style'] }));
   })();
