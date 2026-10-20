@@ -19123,7 +19123,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(p.note) main.appendChild(spMake('div', 'saved-note', p.note));
     const pr = p.practice;
     main.appendChild(spMake('div', 'saved-practice', pr.tries
-      ? 'Practised '+pr.tries+'\u00d7 \u00b7 '+pr.solved+' clean \u00b7 last '+relTime(pr.last)
+      ? 'Practiced '+pr.tries+'\u00d7 \u00b7 '+pr.solved+' clean \u00b7 last '+relTime(pr.last)
       : (p.tokens.length ? 'Saved '+relTime(p.savedAt) : 'Moves fill in from Lichess')));
     const acts = spMake('div', 'saved-actions');
     const play = spMake('button', 'btn btn-primary', 'Play');
@@ -19720,7 +19720,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      live result once there is one (phResult, from spRoundEnded). The Puzzle
      History view lists them, merged at render time with the user's Lichess
      puzzle activity (other devices, lichess.org), which is kept in memory
-     only. Practising one from here is a one-puzzle practice run through the
+     only. Practicing one from here is a one-puzzle practice run through the
      Saved machinery (SP_PLAY.home = 'puzzle-history'), so it never reports
      a result and can't move the rating; #puzzle/<id> opens any puzzle that
      way, with or without a token. Rush, practice runs and linked puzzles
@@ -19954,7 +19954,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   /* ---- "Puzzle left unfinished" (menu + Puzzles setup) ---- */
   // Derived, never stored: the newest LIVE puzzle (practice never creates or
-  // moves a row), with no result, not practised, under a day old, and not
+  // moves a row), with no result, not practiced, under a day old, and not
   // dismissed since it was last shown.
   function phLeftRow(){
     if(!PH) return null;
@@ -19992,11 +19992,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function phShown(){ if(!PH) return; phLimit = 40; phRender(); phLoadActivity(false); }
 
   // A local result wins; otherwise Lichess's (latest) result; otherwise
-  // practised, or not finished.
-  function phStateOf(x){ return x.out ? x.out : x.li!=null ? (x.li ? 'solved' : 'missed') : x.pt ? 'practised' : 'open'; }
+  // practiced, or not finished.
+  function phStateOf(x){ return x.out ? x.out : x.li!=null ? (x.li ? 'solved' : 'missed') : x.pt ? 'practiced' : 'open'; }
   var PH_PILL = { solved:['history-result-win','Solved'], missed:['history-result-loss','Missed'],
     viewed:['history-result-loss','Solution viewed'], skipped:['history-result-loss','Skipped'],
-    practised:['history-result-draw','Practised'], open:['history-result-draw','Not finished'] };
+    practiced:['history-result-draw','Practiced'], open:['history-result-draw','Not finished'] };
   function phMatches(x, f){
     const s = phStateOf(x);
     return f==='open' ? s==='open' : f==='missed' ? (s==='missed' || s==='viewed' || s==='skipped') : f==='solved' ? s==='solved' : true;
@@ -20038,9 +20038,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       ? 'Shown '+phWhen(x.t)+(x.a ? ' \u00b7 Puzzles \u00b7 '+pzThemeLabel(x.a) : '')+(!x.out && x.li!=null ? ' \u00b7 finished on Lichess' : '')
       : 'Played '+phWhen(x.t)+' \u00b7 from your Lichess history'));
     if(x.pt) main.appendChild(spMake('div', 'saved-practice',
-      'Practised '+x.pt+'\u00d7 \u00b7 '+(x.pc||0)+' clean \u00b7 last '+relTime(x.pl||x.t)+(!x.out && x.li==null ? ' \u00b7 not counted on Lichess' : '')));
+      'Practiced '+x.pt+'\u00d7 \u00b7 '+(x.pc||0)+' clean \u00b7 last '+relTime(x.pl||x.t)+(!x.out && x.li==null ? ' \u00b7 not counted on Lichess' : '')));
     const acts = spMake('div', 'saved-actions');
-    const play = spMake('button', 'btn btn-primary', 'Practise');
+    const play = spMake('button', 'btn btn-primary', 'Practice');
     play.type = 'button'; play.dataset.phKey = x.id+'|play';
     play.addEventListener('click', ()=> phReplay(x.id, 'Puzzle history'));
     acts.appendChild(play);
@@ -20267,7 +20267,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
     }
   }
-  // Keyboard "Load more" / "Show more": focus moves to the Practise button of
+  // Keyboard "Load more" / "Show more": focus moves to the Practice button of
   // the first card that passes test(t, index), the first one just shown, which
   // sits where the button was. Otherwise the button moves down off screen, or
   // goes with the last page and focus falls to <body>. With no such card,
