@@ -3712,6 +3712,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     display:inline-block; width:8px; height:8px; border-radius:50%;
     vertical-align:middle; margin:0 1px;
   }
+  /* Arrow color profile label (see ANNO_PROFILES). Its own item at the end
+     of each board's hint row, after the row's text (which wraps exactly as
+     before), and it cycles the profile when clicked. It holds all three
+     profiles' texts stacked in one grid cell, only the active one visible,
+     so its size never changes: a switch never re-wraps the row. With a
+     profile on it stays visible when the row is collapsed, so anyone
+     reading the board knows what the colors mean; in Default a collapsed
+     row looks exactly as it always did. */
+  .anno-profile{
+    font:inherit; color:inherit; background:none; border:none;
+    padding:0; margin:0; cursor:pointer; text-align:left;
+    display:inline-grid; white-space:nowrap; line-height:inherit;
+  }
+  .anno-profile > .anno-pv{ grid-area:1 / 1; visibility:hidden; }
+  .anno-profile > .anno-pv.on{ visibility:visible; }
+  .anno-profile:hover{ color:var(--ink); }
+  .anno-profile:not(.is-default) .anno-profile-name{ color:var(--ink); }
+  .pen-dot.pen-dot-ring{ box-shadow:0 0 0 1px var(--ink-soft); }
+  .anno-dots{ white-space:nowrap; }
+  .anno-profile-off{ display:none; }
+  .anno-hint.collapsed > .anno-profile{ display:none; }
+  .anno-hint-prof{ display:none; }
+  :root[data-anno-prof="on"] .anno-profile-off{ display:inline; }
+  :root[data-anno-prof="on"] .anno-hint.anno-hint-prof{ display:flex; }
+  :root[data-anno-prof="on"] .anno-hint.collapsed > .anno-profile{ display:inline-grid; }
 
   /* ---------- PLAY ---------- */
   .hud{
@@ -4077,6 +4102,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .stat-label{
     font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-top:2px;
   }
+  /* The Solved stat (Puzzles and its practice runs, Knight's Tour, Sneaky
+     Checks) is a button: a click shows it as solved/total ("3/4") instead
+     of the percentage, and back (see renderSolvedStat). It keeps the plain
+     cells' box exactly -- padding, divider, contents at the top -- and
+     min-width:0, so a long "12/15" never widens it or pushes the strip:
+     fitSolvedStat shrinks the digits instead, inside a line that keeps its
+     height, so the scoreboard never changes height either. */
+  .stat-toggle{
+    font:inherit; color:inherit; letter-spacing:inherit; text-transform:inherit; text-shadow:inherit;
+    background:none; border:0; border-right:1px solid var(--line); border-radius:0; margin:0;
+    display:flex; flex-direction:column; align-items:stretch; justify-content:flex-start;
+    min-width:0; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .stat-toggle > .stat-val, .stat-toggle > .stat-label{ display:block; }
+  .stat-toggle > .stat-val{ white-space:nowrap; }
+  /* hover only where there is one: a tap on an iPad would leave it lit */
+  @media (hover:hover){ .stat-toggle:hover > .stat-label{ color:var(--ink); } }
+  /* inset: the scoreboard clips anything outside its cells */
+  .stat-toggle:focus-visible{ outline:2px solid var(--focus); outline-offset:-4px; }
 </style>
 
 <button class="home-fab" id="home-fab" data-nav="menu" title="All drills" aria-label="All drills">&#8962;</button>
@@ -4249,6 +4293,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="toggle" data-val="black">Black</button>
       </div>
       <div class="field-hint">A hairline around every square. Applies to every drill.</div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Arrow colors</div>
+      <div class="toggle-row" id="anno-profile-row">
+        <button class="toggle active" data-val="default">Default</button>
+        <button class="toggle" data-val="sequential">Sequential</button>
+        <button class="toggle" data-val="strategic">Strategic</button>
+      </div>
+      <div class="field-hint" id="anno-profile-hint">The color of the arrows and highlights you draw on a board.</div>
     </div>
 
     <div class="field">
@@ -4568,6 +4622,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <button class="btn btn-ghost" id="hv-prev" title="Previous move (&larr;)">&#8592;</button>
       <button class="btn btn-ghost" id="hv-next" title="Next move (&rarr;)">&#8594;</button>
       <button class="btn btn-ghost" id="hv-end" title="Latest (End)">&#8677;</button>
+    </div>
+    <!-- Only shown while an arrow color profile is on, so the profile label
+         has a home under this board too; in Default the view is unchanged. -->
+    <div class="anno-hint anno-hint-prof" id="hv-anno-hint">
+      <span>Right-click-drag: arrow</span>
+      <span>&#183; plain right-click: highlight</span>
+      <span>&#183; left-click: clear</span>
     </div>
   </section>
 
@@ -4925,7 +4986,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
       <div class="scoreboard">
         <div class="stat"><div class="stat-val" id="knight-stat-rounds">0</div><div class="stat-label">Rounds</div></div>
-        <div class="stat"><div class="stat-val" id="knight-stat-acc">&mdash;</div><div class="stat-label">Solved</div></div>
+        <button type="button" class="stat stat-toggle"><span class="stat-val" id="knight-stat-acc"><span class="stat-fit">&mdash;</span></span><span class="stat-label">Solved</span></button>
         <div class="stat"><div class="stat-val" id="knight-stat-streak">0</div><div class="stat-label">Streak</div></div>
         <div class="stat"><div class="stat-val" id="knight-stat-best">0</div><div class="stat-label">Best streak</div></div>
       </div>
@@ -5020,7 +5081,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <span class="phase-arrow">&rarr;</span>
       <span class="phase-step" id="checks-phase-3"><i>3</i> Walk the king</span>
     </div>
-    <div class="anno-hint">
+    <div class="anno-hint" data-anno-profile="off">
       <span>Right-click-drag: arrow</span>
       <span>&#183; left-click: clear</span>
     </div>
@@ -5065,7 +5126,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
       <div class="scoreboard">
         <div class="stat"><div class="stat-val" id="checks-stat-rounds">0</div><div class="stat-label">Rounds</div></div>
-        <div class="stat"><div class="stat-val" id="checks-stat-acc">&mdash;</div><div class="stat-label">Solved</div></div>
+        <button type="button" class="stat stat-toggle"><span class="stat-val" id="checks-stat-acc"><span class="stat-fit">&mdash;</span></span><span class="stat-label">Solved</span></button>
         <div class="stat"><div class="stat-val" id="checks-stat-streak">0</div><div class="stat-label">Streak</div></div>
         <div class="stat"><div class="stat-val" id="checks-stat-best">0</div><div class="stat-label">Best streak</div></div>
       </div>
@@ -5860,7 +5921,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
       <div class="scoreboard">
         <div class="stat"><div class="stat-val" id="pz-stat-rounds">0</div><div class="stat-label">Puzzles</div></div>
-        <div class="stat"><div class="stat-val" id="pz-stat-acc">&mdash;</div><div class="stat-label">Solved</div></div>
+        <button type="button" class="stat stat-toggle"><span class="stat-val" id="pz-stat-acc"><span class="stat-fit">&mdash;</span></span><span class="stat-label">Solved</span></button>
         <div class="stat"><div class="stat-val" id="pz-stat-streak">0</div><div class="stat-label">Streak</div></div>
         <div class="stat"><div class="stat-val" id="pz-stat-best">0</div><div class="stat-label">Best streak</div></div>
       </div>
@@ -7369,6 +7430,317 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     for(const p of PEN_KEYS){ if(heldPenKeys.has(p.key)) return p.color; }
     return DEFAULT_PEN_COLOR;
   }
+  // The held pen key's color, or null when no pen key is held.
+  function heldPenColor(){
+    for(const p of PEN_KEYS){ if(heldPenKeys.has(p.key)) return p.color; }
+    return null;
+  }
+
+  /* ---- arrow color profiles ----
+     A profile decides the color of the marks the USER draws without a pen
+     key. One app-wide setting, lookPrefs.annoProfile:
+       default    -- the free pen above, exactly as it always was. Stored
+                     colors are drawn as stored; nothing is derived.
+       sequential -- arrows take ANNO_SEQ_COLORS in the order they were
+                     drawn on the position, the 11th starting over at green.
+       strategic  -- by side and captures: White green, Black blue, a White
+                     capture red, a Black capture yellow.
+     In both, a highlight takes the color of the step you are on: the arrow
+     drawn just before it (Sequential: green with none yet; Strategic: the
+     side to move's plain color with none yet). A held pen key still wins
+     and keeps its own color: in Sequential that arrow takes no step, in
+     Strategic it still counts as a move of the imagined line.
+     Colors are worked out at render time from draw order (annoResolveColors),
+     so removing an arrow recolors the later ones and a switch of profile
+     recolors what is already on the board.
+     Bookkeeping on a marks store (newMarks): every mark the user draws
+     carries `auto` (true = no pen key), `seq` (draw order across arrows AND
+     squares; squares have no order of their own) and `seg`, an index into
+     marks.segs: one snapshot {key, colors, turn} per position the user
+     has drawn on, as SHOWN. Marks outlive positions on several boards (a
+     puzzle's reply, browsing moves), so each position has its own run: the
+     first arrow drawn on a new position is step 1 again, earlier arrows
+     keep the colors of their own run, and browsing back to a position
+     drawn on before carries on with its run. Clearing the marks resets it
+     all. Each board supplies the shown position through
+     marks.pos() -> {board, turn}; a board without one is read as empty
+     with White to move.
+     Marks the app draws itself (Knight's Tour route, Sneaky Checks reveal,
+     the Puzzles hint square) and forced colors (Sneaky Checks' answer
+     arrows) have no `auto`, so no profile ever touches them. A board can
+     also opt out entirely with marks.noProfile.
+     Kept self-contained -- constants plus one pure resolver -- so it can be
+     copied to Repertoire Lab and the planners as is. */
+  const ANNO_SEQ_COLORS = ['#2ecc71','#e8b339','#3b9cff','#e5534b','#f97316',
+                           '#8b5cf6','#f472b6','#7dd3fc','#8b5a2b','#1a1a1a'];
+  const ANNO_SEQ_NAMES  = ['green','yellow','blue','red','orange',
+                           'purple','pink','light blue','brown','black'];
+  const ANNO_STRATEGIC  = { w:'#2ecc71', b:'#3b9cff', wx:'#e5534b', bx:'#e8b339' };
+  const ANNO_PROFILES = {
+    default:    { label:'Default' },
+    sequential: { label:'Sequential' },
+    strategic:  { label:'Strategic' }
+  };
+  // Click order of the label in each board's hint row. A fourth profile is planned
+  // but not designed yet: it gets an entry here and in ANNO_PROFILES when it
+  // is built. Until then any other stored id behaves exactly like Default.
+  const ANNO_PROFILE_ORDER = ['default','sequential','strategic'];
+  // The two darkest colors get a light halo instead of the usual dark one,
+  // or they sink into dark squares (Hustler, Outer Space, Game Boy, Felt).
+  const ANNO_LIGHT_HALO = ['#8b5a2b','#1a1a1a'];
+  function annoProfile(){
+    // lookPrefs is declared further down this script; a board can render
+    // before that line runs at boot, and then this is just Default.
+    try{
+      const p = lookPrefs.annoProfile;
+      return ANNO_PROFILE_ORDER.indexOf(p)>=0 ? p : 'default';
+    }catch(e){ return 'default'; }
+  }
+  function annoPosSnapshot(marks){
+    let p = null;
+    try{ p = typeof marks.pos==='function' ? marks.pos() : null; }catch(e){ p = null; }
+    const board = (p && p.board) || [];
+    const colors = [], types = [];
+    let key = '';
+    for(let i=0;i<board.length;i++){
+      const pc = board[i];
+      colors.push(pc ? pc.color : null);
+      types.push(pc ? (pc.type || '?') : null);
+      key += pc ? pc.color + (pc.type || '?') : '.';
+    }
+    const turn = p && p.turn==='b' ? 'b' : 'w';
+    // The en passant square, when the shown position has one (Puzzles,
+    // Rush, Play, Game History). King's Ground's grid is 5 or 6 wide.
+    const ep = p && typeof p.ep==='number' ? p.ep : null;
+    const cols = board.length===25 ? 5 : board.length===36 ? 6 : 8;
+    return { key: key + turn + (ep==null ? '' : ep), colors, types, turn, ep, cols };
+  }
+  // Draw order and position run for a mark the user is drawing right now.
+  function annoStamp(marks){
+    if(!marks.segs) marks.segs = [];
+    const snap = annoPosSnapshot(marks);
+    let seg = marks.segs.findIndex(s=> s.key===snap.key);
+    if(seg<0){ marks.segs.push(snap); seg = marks.segs.length-1; }
+    marks.n = (marks.n || 0) + 1;
+    return { seq: marks.n, seg };
+  }
+  // The one place a profile picks colors. Pure: reads only the marks store
+  // and the profile id. Returns null for Default (draw the stored colors),
+  // else { arrows:[a color per marks.arrows entry], squares:{idx:color} }.
+  // Strategic walks the user's arrows of each run, in draw order, over an
+  // imagined copy of that run's position: the mover is the piece on the
+  // from-square there; on an empty from-square it is the other side from
+  // the previous arrow (the side to move, for the first). Landing on the
+  // other side's piece is a capture. Then the arrow is played on the copy,
+  // the mover's piece going to the to-square, with no legality check
+  // (arrows are ideas) -- which is how Nf3-g5 then g5-f7 stays White's.
+  // Arrows are also drawn side by side, as alternatives, so two more rules
+  // keep a piece's ideas its own: a from-square an earlier arrow moved a
+  // piece off (and nothing has landed on since) still belongs to that
+  // piece -- a fork, a bishop's two checks, a fan of knight hops are all
+  // one side's -- and a square holding your own piece only because an
+  // earlier arrow of yours landed there is judged by what that arrow took
+  // (a battery: Bxf7, then Ng5xf7 is a capture too). En passant counts as
+  // a capture, on the shown position's square or one a pawn's double step
+  // in the imagined line opened.
+  function annoResolveColors(marks, profile){
+    if(profile!=='sequential' && profile!=='strategic') return null;
+    const out = { arrows: marks.arrows.map(a=> a.color), squares: Object.assign({}, marks.squares) };
+    const meta = marks.sqMeta || {};
+    const items = [];
+    marks.arrows.forEach((a,i)=>{
+      if(typeof a.auto==='boolean') items.push({ i, a, seq:a.seq||0, seg:a.seg||0 });
+    });
+    Object.keys(marks.squares).forEach(idx=>{
+      const m = meta[idx];
+      // A square the app has since painted over (the Puzzles hint) is the
+      // app's now: its color no longer matches what the user drew.
+      if(m && typeof m.auto==='boolean' && m.color===marks.squares[idx]) items.push({ idx, m, seq:m.seq||0, seg:m.seg||0 });
+    });
+    items.sort((x,y)=> x.seq-y.seq);
+    const runs = {};
+    items.forEach(it=>{
+      let r = runs[it.seg];
+      if(!r){
+        const s = (marks.segs && marks.segs[it.seg]) || { colors:[], turn:'w' };
+        r = runs[it.seg] = { step:0, cur:null, board:s.colors.slice(), types:(s.types || []).slice(), turn:s.turn, prev:null,
+          cols:s.cols || 8, left:{}, landed:{}, under:{}, ep:{} };
+        // ep[square] = the side that may take en passant there.
+        if(s.ep!=null) r.ep[s.ep] = s.turn;
+      }
+      if(it.a){
+        let c;
+        if(profile==='sequential'){
+          if(!it.a.auto) return;
+          c = ANNO_SEQ_COLORS[r.step % ANNO_SEQ_COLORS.length];
+          r.step++;
+        } else {
+          const from = it.a.from, to = it.a.to, B = r.board, T = r.types, N = r.cols;
+          let mover = B[from], kind = T[from] || null;
+          if(!mover && r.left[from]){ mover = r.left[from].c; kind = r.left[from].t; }   // another idea for that piece
+          if(!mover){ mover = r.prev ? (r.prev==='w' ? 'b' : 'w') : r.turn; kind = null; }
+          const ownLanded = B[to]===mover && r.landed[to];
+          const victim = ownLanded ? r.under[to] : B[to];
+          let capture = !!victim && victim!==mover, epTaken = null;
+          if(!B[to] && kind==='p' && r.ep[to]===mover && Math.abs(from%N - to%N)===1
+             && Math.floor(to/N) - Math.floor(from/N)===(mover==='w' ? 1 : -1)){
+            const v = Math.floor(from/N)*N + to%N;
+            if(B[v] && B[v]!==mover && T[v]==='p'){ capture = true; epTaken = v; }
+          }
+          c = mover==='w' ? (capture ? ANNO_STRATEGIC.wx : ANNO_STRATEGIC.w)
+                          : (capture ? ANNO_STRATEGIC.bx : ANNO_STRATEGIC.b);
+          // Play it on the imagined copy.
+          if(B[from]===mover){ r.left[from] = { c:mover, t:kind }; B[from] = null; T[from] = null; r.landed[from] = false; }
+          if(!ownLanded) r.under[to] = B[to];
+          if(epTaken!=null){ B[epTaken] = null; T[epTaken] = null; }
+          B[to] = mover; T[to] = kind; r.landed[to] = true; delete r.left[to];
+          if(kind==='p' && from%N===to%N && Math.abs(to-from)===2*N) r.ep[(from+to)/2] = mover==='w' ? 'b' : 'w';
+          r.prev = mover;
+        }
+        r.cur = c;
+        if(it.a.auto) out.arrows[it.i] = c;
+      } else if(it.m.auto){
+        out.squares[it.idx] = r.cur || (profile==='sequential' ? ANNO_SEQ_COLORS[0]
+          : (r.turn==='w' ? ANNO_STRATEGIC.w : ANNO_STRATEGIC.b));
+      }
+    });
+    return out;
+  }
+  // With a profile on, a highlight's ring gets the same thin halo as an
+  // arrow: a profile picks colors without asking, so one can land on a
+  // square of its own hue (red on Drive-Thru's red, blue on Bauhaus's and
+  // Uptown's blue, yellow on Outer Space's orange, pink on Rose's pink),
+  // and the halo keeps the ring visible there. The fill is also stronger
+  // than Default's 40%: at 40% it takes on the square's own hue, so on a
+  // colored square two steps blur into one (yellow and orange on Drive-Thru's
+  // red, red and orange on Game Boy's green, blue and light blue on Rose's
+  // pink). At 70% each step keeps its own color; black stays at 55% so a
+  // dark piece standing on it does not vanish (its light halo marks it).
+  // Default draws as it always did.
+  function annoSquareShadow(color, profiled){
+    if(!profiled) return 'inset 0 0 0 3px '+color+', inset 0 0 0 999px '+color+'66';
+    const halo = ANNO_LIGHT_HALO.indexOf(color)>=0 ? '5px rgba(255,255,255,.6)' : '4.5px rgba(0,0,0,.45)';
+    const fill = color==='#1a1a1a' ? '8c' : 'b3';
+    return 'inset 0 0 0 3px '+color+', inset 0 0 0 '+halo+', inset 0 0 0 999px '+color+fill;
+  }
+  // Every board's last renderMarks arguments, so a profile switch can
+  // repaint the marks already on screen. A board out of sight (another
+  // view) has no size to draw arrows at, so it is repainted when it shows.
+  const annoBoards = new Map();
+  const annoShowRO = typeof ResizeObserver==='function' ? new ResizeObserver(entries=>{
+    entries.forEach(en=>{
+      const v = annoBoards.get(en.target);
+      if(v && v.stale && en.target.clientWidth){ v.stale = false; renderMarks(en.target, v.svgEl, v.marks, null, v.cols); }
+    });
+  }) : null;
+  function annoRepaintAll(){
+    annoBoards.forEach((v, el)=>{
+      if(!el.isConnected || !hasMarks(v.marks)) return;
+      if(el.clientWidth || !annoShowRO) renderMarks(el, v.svgEl, v.marks, null, v.cols);
+      else v.stale = true;
+    });
+  }
+  function setAnnoProfile(id){
+    if(ANNO_PROFILE_ORDER.indexOf(id)<0) id = 'default';
+    try{ lookPrefs.annoProfile = id; saveLookPrefs(); }catch(e){}
+    annoSyncLabels();
+    annoRepaintAll();
+  }
+  function cycleAnnoProfile(){
+    const i = ANNO_PROFILE_ORDER.indexOf(annoProfile());
+    setAnnoProfile(ANNO_PROFILE_ORDER[(i+1) % ANNO_PROFILE_ORDER.length]);
+  }
+  function annoDot(color){
+    return '<span class="pen-dot'+(ANNO_LIGHT_HALO.indexOf(color)>=0 ? ' pen-dot-ring' : '')+'" style="background:'+color+';"></span>';
+  }
+  // One profile's text in a board's label. Every label holds all three, on
+  // top of each other in one grid cell with only the active one visible,
+  // so the label is as wide as the widest and switching never re-wraps the
+  // row: the board does not move and the label stays under the pointer.
+  function annoLabelHTML(id){
+    const head = '<span aria-hidden="true">&#183; </span>Arrows: <span class="anno-profile-name">'+ANNO_PROFILES[id].label+'</span>';
+    if(id==='sequential') return head+' '+ANNO_SEQ_COLORS.slice(0,4).map(annoDot).join('')+'&#8230;';
+    if(id==='strategic') return head+' '+annoDot(ANNO_STRATEGIC.w)+'W '+annoDot(ANNO_STRATEGIC.b)+'B '
+      +annoDot(ANNO_STRATEGIC.wx)+annoDot(ANNO_STRATEGIC.bx)+'x';
+    return head;
+  }
+  function annoLabelTitle(id){
+    if(id==='sequential') return 'Arrow colors follow the order you draw them on this position: '
+      +ANNO_SEQ_NAMES.map((n,i)=> (i+1)+' '+n).join(', ')+', then green again. A highlight takes the color of the arrow before it. Click for Strategic.';
+    if(id==='strategic') return 'Arrow colors follow the side: W = White green, B = Black blue, x = a capture, White red, Black yellow. A highlight takes the color of the arrow before it. Click for Default.';
+    return 'Arrows use the pen color (hold Z, R, F or C to pick one). Click for Sequential: colors in the order you draw.';
+  }
+  // A strip of dots that must not break across lines.
+  function annoDots(colors){ return '<span class="anno-dots">'+colors.map(annoDot).join('')+'</span>'; }
+  function annoSettingsHint(id){
+    const tail = ' Hold a pen key to pick a color yourself. Sneaky Checks keeps its own colors: there they are the answer.';
+    if(id==='sequential') return 'Each arrow you draw on a position takes the next color: '
+      +annoDots(ANNO_SEQ_COLORS)+' then green again. A highlight takes the color of the arrow before it.'+tail;
+    if(id==='strategic') return 'Colors follow the side that moves: <span class="anno-dots">White '+annoDot(ANNO_STRATEGIC.w)+'</span>, <span class="anno-dots">Black '+annoDot(ANNO_STRATEGIC.b)
+      +'</span>, <span class="anno-dots">a White capture '+annoDot(ANNO_STRATEGIC.wx)+'</span>, <span class="anno-dots">a Black capture '+annoDot(ANNO_STRATEGIC.bx)
+      +'</span>. A piece keeps its side all along the line you draw, and two arrows from one square are two ideas for the same piece. A highlight takes the color of the arrow before it.'+tail;
+    // Where the label is: its tips line sits above some boards and below
+    // others; Sneaky Checks has none, Game History only with a profile on.
+    return 'The pen color: green, or hold Z, R, F or C while you draw for green, red, blue or yellow. You can also switch by clicking &#8220;Arrows&#8221; in the tips line above or below most boards.';
+  }
+  function annoMakeLabel(){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'anno-profile';
+    b.innerHTML = ANNO_PROFILE_ORDER.map(id=> '<span class="anno-pv" data-prof="'+id+'">'+annoLabelHTML(id)+'</span>').join('');
+    // No focus on click: Space and the drill's letter keys must keep going
+    // to the drill, not press this button again.
+    b.addEventListener('mousedown', (e)=> e.preventDefault());
+    b.addEventListener('click', cycleAnnoProfile);
+    // Reached with Tab, Enter and Space switch the profile and go no
+    // further: the drills' own Enter / Space keys (Check Storm's lock-in,
+    // Ghosts' threat, King's Ground's push) listen on the document.
+    b.addEventListener('keydown', (e)=>{
+      if(e.key!=='Enter' && e.key!==' ') return;
+      e.preventDefault(); e.stopPropagation();
+      if(!e.repeat) cycleAnnoProfile();
+    });
+    b.addEventListener('keyup', (e)=>{
+      if(e.key!=='Enter' && e.key!==' ') return;
+      e.preventDefault(); e.stopPropagation();
+    });
+    return b;
+  }
+  function annoSyncLabels(){
+    const id = annoProfile();
+    document.documentElement.setAttribute('data-anno-prof', id==='default' ? 'off' : 'on');
+    document.querySelectorAll('.anno-profile').forEach(el=>{
+      el.querySelectorAll('.anno-pv').forEach(v=> v.classList.toggle('on', v.dataset.prof===id));
+      el.title = annoLabelTitle(id);
+      el.setAttribute('aria-label', 'Arrow colors: '+ANNO_PROFILES[id].label+'. Switch arrow colors');
+      el.classList.toggle('is-default', id==='default');
+    });
+    document.querySelectorAll('.anno-profile-off').forEach(el=>{
+      el.innerHTML = id==='default' ? '' : '&#183; Arrows: this drill sets its own colors';
+      el.title = id==='default' ? '' : ANNO_PROFILES[id].label+' arrow colors are off in this drill: its yellow and purple arrows are the answer.';
+    });
+    document.querySelectorAll('#anno-profile-row .toggle').forEach(b=>{
+      b.classList.toggle('active', b.dataset.val===id);
+    });
+    const hint = document.getElementById('anno-profile-hint');
+    if(hint) hint.innerHTML = annoSettingsHint(id);
+  }
+  // One label per hint row (an off note instead on a row marked
+  // data-anno-profile="off"), at the end of the row. Runs once at boot,
+  // before the rows get their collapse toggle; that keeps both out of the
+  // collapsible text, as their own item at the end of the row, so the row's
+  // text wraps exactly as it always did. A collapsed row hides them in
+  // Default (it looks as it always did) and keeps them with a profile on.
+  function annoMountLabels(){
+    document.querySelectorAll('.anno-hint').forEach(row=>{
+      if(row.dataset.annoProfile==='off'){
+        const s = document.createElement('span');
+        s.className = 'anno-profile-off';
+        row.appendChild(s);
+      } else row.appendChild(annoMakeLabel());
+    });
+    annoSyncLabels();
+  }
 
   const ARROW_SVG_NS = 'http://www.w3.org/2000/svg';
   function makeArrowOverlay(){
@@ -7389,11 +7761,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return { x: el.offsetLeft + el.offsetWidth/2, y: el.offsetTop + el.offsetHeight/2 };
   }
 
-  function newMarks(){ return { arrows:[], squares:{} }; }
+  // sqMeta / segs / n are the profile bookkeeping (see ANNO_PROFILES); a
+  // board adds marks.pos() for the position it shows.
+  function newMarks(){ return { arrows:[], squares:{}, sqMeta:{}, segs:[], n:0 }; }
   function hasMarks(marks){ return marks.arrows.length>0 || Object.keys(marks.squares).length>0; }
   function clearMarksObj(marks){
     marks.arrows.length = 0;
     Object.keys(marks.squares).forEach(k=> delete marks.squares[k]);
+    // The count starts over with the marks: the next arrow is step 1.
+    if(marks.sqMeta) Object.keys(marks.sqMeta).forEach(k=> delete marks.sqMeta[k]);
+    if(marks.segs) marks.segs.length = 0;
+    marks.n = 0;
   }
 
   // Redraws both the highlight box-shadows and the arrow SVG for one board.
@@ -7407,17 +7785,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // it's deliberately not reused here.
   function renderMarks(boardEl, svgEl, marks, board, cols){
     cols = cols || 8;
+    if(annoShowRO && !annoBoards.has(boardEl)) annoShowRO.observe(boardEl);
+    annoBoards.set(boardEl, { svgEl, marks, cols, stale:false });
+    // null in Default and on a board that opts out: every mark is drawn in
+    // its stored color, exactly as before profiles existed.
+    const prof = marks.noProfile ? null : annoResolveColors(marks, annoProfile());
     boardEl.querySelectorAll('.sq').forEach(sq=>{ sq.style.boxShadow=''; });
     Object.entries(marks.squares).forEach(([idx,color])=>{
+      if(prof) color = prof.squares[idx];
       const sq = boardEl.querySelector('[data-idx="'+idx+'"]');
-      if(sq) sq.style.boxShadow = 'inset 0 0 0 3px '+color+', inset 0 0 0 999px '+color+'66';
+      if(sq) sq.style.boxShadow = annoSquareShadow(color, !!prof);
     });
 
     while(svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
     const w = boardEl.clientWidth || 1;
     const sqSize = w/cols;
     const shaft = sqSize*0.26, headLen = sqSize*0.44, headHalf = sqSize*0.34, tipInset = sqSize*0.08;
-    marks.arrows.forEach(({from,to,color})=>{
+    marks.arrows.forEach(({from,to,color}, ai)=>{
+      if(prof) color = prof.arrows[ai];
+      const halo = prof && ANNO_LIGHT_HALO.indexOf(color)>=0 ? 'rgba(255,255,255,.6)' : 'rgba(0,0,0,.45)';
       const a = squareCenterPx(boardEl, from), b = squareCenterPx(boardEl, to);
       if(!a || !b) return;
       const fr = Math.floor(from/cols), fc = from%cols, tr = Math.floor(to/cols), tc = to%cols;
@@ -7480,13 +7866,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const outline = document.createElementNS(ARROW_SVG_NS,'path');
       outline.setAttribute('d', pathD);
       outline.setAttribute('fill','none');
-      outline.setAttribute('stroke','rgba(0,0,0,.45)');
+      outline.setAttribute('stroke', halo);
       outline.setAttribute('stroke-width', shaft+3);
       outline.setAttribute('stroke-linecap','butt');
       const outlineTri = document.createElementNS(ARROW_SVG_NS,'polygon');
       outlineTri.setAttribute('points', triPoints);
       outlineTri.setAttribute('fill','none');
-      outlineTri.setAttribute('stroke','rgba(0,0,0,.45)');
+      outlineTri.setAttribute('stroke', halo);
       outlineTri.setAttribute('stroke-width', 3);
       outlineTri.setAttribute('stroke-linejoin','round');
       const line = document.createElementNS(ARROW_SVG_NS,'path');
@@ -7528,19 +7914,43 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const toIdx = sqEl ? Number(sqEl.dataset.idx) : null;
       if(toIdx!=null){
         const marks = getMarks();
-        const color = (typeof forceColor==='function' ? forceColor() : forceColor)
-                    || currentPenColor();
+        const forced = (typeof forceColor==='function' ? forceColor() : forceColor);
+        const held = forced ? null : heldPenColor();
+        const color = forced || held || DEFAULT_PEN_COLOR;   // the same color as ever
+        // A forced color is the drill's, so it is stored plain like the
+        // app's own marks and no profile touches it. Anything else is a user
+        // mark: auto when no pen key was held.
+        const user = !forced, auto = !held;
+        // Redrawing a mark removes it when it is the same mark. In Default
+        // that means the same color, as always; with a profile on, a keyless
+        // mark only matches a keyless one (its shown color is derived).
+        const prof = user && !marks.noProfile && annoProfile()!=='default';
+        const sameAs = (exColor, exAuto)=> (prof && typeof exAuto==='boolean')
+          ? (exAuto===auto && exColor===color) : exColor===color;
         if(toIdx===fromIdx){
-          if(marks.squares[toIdx]===color) delete marks.squares[toIdx];
-          else marks.squares[toIdx] = color;
+          if(!marks.sqMeta) marks.sqMeta = {};
+          const m = marks.sqMeta[toIdx];
+          const exColor = marks.squares[toIdx];
+          if(sameAs(exColor, m && m.color===exColor ? m.auto : undefined)){
+            delete marks.squares[toIdx]; delete marks.sqMeta[toIdx];
+          } else {
+            marks.squares[toIdx] = color;
+            if(user){ const st = annoStamp(marks); marks.sqMeta[toIdx] = { auto, color, seq:st.seq, seg:st.seg }; }
+            else delete marks.sqMeta[toIdx];
+          }
         } else {
+          const make = ()=>{
+            const a = {from:fromIdx, to:toIdx, color};
+            if(user){ const st = annoStamp(marks); a.auto = auto; a.seq = st.seq; a.seg = st.seg; }
+            return a;
+          };
           const i = marks.arrows.findIndex(a=> a.from===fromIdx && a.to===toIdx);
           if(i>=0){
             const existing = marks.arrows[i];
             marks.arrows.splice(i,1);
-            if(existing.color!==color) marks.arrows.push({from:fromIdx, to:toIdx, color});
+            if(!sameAs(existing.color, existing.auto)) marks.arrows.push(make());
           } else {
-            marks.arrows.push({from:fromIdx, to:toIdx, color});
+            marks.arrows.push(make());
           }
         }
         onChange();
@@ -7933,6 +8343,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   const boardEl = document.getElementById('board');
   const marks1 = newMarks();
+  marks1.pos = ()=> round && round.board ? { board:round.board, turn:round.side } : null;
   const arrowSvg1 = makeArrowOverlay();
   const rankLabelsEl = document.getElementById('rank-labels');
   const fileLabelsEl = document.getElementById('file-labels');
@@ -8725,7 +9136,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // rest, and if it ever blows the storage quota the theme settings must not
   // go down with it.
   const BG_KEY = 'wavyChessPrepBackground';
-  let lookPrefs = { skin:'felt', sqStroke:'none', glass:'on', glassAlpha:50, intro:'on', bauhausBgCleared:false,
+  // annoProfile: the arrow color profile, one for the whole app, not per
+  // theme ('default' | 'sequential' | 'strategic'; see ANNO_PROFILES).
+  let lookPrefs = { skin:'felt', sqStroke:'none', glass:'on', glassAlpha:50, intro:'on', annoProfile:'default', bauhausBgCleared:false,
     gameboyBgCleared:false,
     pieceStyleBySkin:{},
     // pieceStrokeEnabled is Custom-theme-only, same as customColors itself --
@@ -8941,6 +9354,63 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   applyLookPrefs();
 
+  /* The Solved stat on the scoreboards of Puzzles (so also its Saved and
+     Puzzle History practice runs), Knight's Tour and Sneaky Checks: a click,
+     or Enter/Space, shows it as solved/total ("3/4") instead of the
+     percentage, and back. One choice for the whole app, kept with the look
+     prefs (solvedAs: 'pct' | 'frac'), so it holds across puzzles, drills and
+     reloads. Each value keeps its counts in data-solved/data-total, so a
+     click redraws all three. Before any result it is the dash either way. */
+  function solvedAsFraction(){ return lookPrefs.solvedAs==='frac'; }
+  function renderSolvedStat(id, solved, total){
+    const val = document.getElementById(id);
+    if(!val) return;
+    if(total!==undefined){ val.dataset.solved = solved; val.dataset.total = total; }
+    const s = Number(val.dataset.solved)||0, t = Number(val.dataset.total)||0;
+    const frac = solvedAsFraction(), pct = t ? Math.round(100*s/t)+'%' : '';
+    val.firstElementChild.textContent = !t ? '\u2014' : frac ? s+'/'+t : pct;
+    val.parentNode.setAttribute('aria-label', 'Solved: '+(!t ? 'no results yet' : frac ? s+' of '+t : pct)
+      +'. Show as '+(frac ? 'a percentage' : t ? s+' of '+t : 'a fraction'));
+    fitSolvedStat(val.parentNode);
+  }
+  // Digits wider than their cell (a long "12/15" on a narrow strip, or
+  // Uptown's LED housing around them) get a smaller font, never a wider
+  // cell, and keep the full-size line height: the page has no doctype, and
+  // in quirks mode the line would otherwise shrink with them and lift the
+  // label. Only on the drill on screen: a hidden one measures nothing, and
+  // the ResizeObserver below fits it when it shows.
+  function fitSolvedStat(btn){
+    const val = btn.firstElementChild, fit = val.firstElementChild;
+    fit.style.fontSize = ''; fit.style.lineHeight = '';
+    if(!btn.closest('.view.active') || !btn.clientWidth) return;
+    const px = (v)=> parseFloat(v)||0;
+    const bs = getComputedStyle(btn), vs = getComputedStyle(val);
+    const room = btn.clientWidth - px(bs.paddingLeft) - px(bs.paddingRight)
+      - px(vs.paddingLeft) - px(vs.paddingRight) - px(vs.borderLeftWidth) - px(vs.borderRightWidth);
+    const need = fit.offsetWidth;
+    if(need <= room) return;
+    const lineH = px(vs.height) - px(vs.paddingTop) - px(vs.paddingBottom) - px(vs.borderTopWidth) - px(vs.borderBottomWidth);
+    fit.style.fontSize = Math.max(9, Math.floor(px(vs.fontSize)*room/need*2)/2)+'px';
+    if(lineH > 0) fit.style.lineHeight = lineH+'px';
+  }
+  function fitSolvedStats(){ document.querySelectorAll('.stat-toggle').forEach(fitSolvedStat); }
+  document.querySelectorAll('.stat-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      lookPrefs.solvedAs = solvedAsFraction() ? 'pct' : 'frac';
+      saveLookPrefs();
+      document.querySelectorAll('.stat-toggle > .stat-val').forEach(v=> renderSolvedStat(v.id));
+    });
+  });
+  if(typeof ResizeObserver==='function'){
+    const solvedRO = new ResizeObserver(entries=> entries.forEach(e=> fitSolvedStat(e.target)));
+    document.querySelectorAll('.stat-toggle').forEach(b=> solvedRO.observe(b));
+  }
+  // A skin brings its own digits, and web fonts arrive late: both change
+  // the digits' width without resizing a cell.
+  new MutationObserver(fitSolvedStats).observe(document.documentElement, { attributes:true, attributeFilter:['data-skin'] });
+  if(document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitSolvedStats);
+  document.querySelectorAll('.stat-toggle > .stat-val').forEach(v=> renderSolvedStat(v.id));
+
   // Assigned once wireSoundSettings runs below; called from wireLookSettings's
   // skin-toggle handler so the sound list refreshes to whichever skin was
   // just switched to. A no-op default in case anything ever calls it first.
@@ -9130,6 +9600,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       lookPrefs.customColors = { accent:null, bg:null, surface:null, boardLight:null, boardDark:null, pieceWhite:null, pieceBlack:null, pieceStroke:null };
       lookPrefs.pieceStrokeEnabled = true;
       applyLookPrefs(); saveLookPrefs(); syncCustomColorInputs(); syncPieceColorInputs(); syncButtons();
+    });
+    document.querySelectorAll('#anno-profile-row .toggle').forEach(btn=>{
+      // setAnnoProfile saves, syncs this row and every board's label, and
+      // repaints the marks on screen.
+      btn.addEventListener('click', ()=> setAnnoProfile(btn.dataset.val));
     });
     introRow.querySelectorAll('.toggle').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -9362,8 +9837,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const stats4 = { rounds:0, successes:0, streak:0, best:0 };
   function refreshStats4(){
     document.getElementById('knight-stat-rounds').textContent = stats4.rounds;
-    document.getElementById('knight-stat-acc').textContent = stats4.rounds
-      ? Math.round(100*stats4.successes/stats4.rounds)+'%' : '\u2014';
+    renderSolvedStat('knight-stat-acc', stats4.successes, stats4.rounds);
     document.getElementById('knight-stat-streak').textContent = stats4.streak;
     document.getElementById('knight-stat-best').textContent = stats4.best;
   }
@@ -9440,6 +9914,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   const boardEl4 = document.getElementById('knight-board');
   const marks4 = newMarks();
+  // The board as shown: just the knight, which is White's.
+  marks4.pos = ()=>{
+    const b = new Array(64).fill(null), k = round4.path[round4.path.length-1];
+    if(k!=null) b[k] = { type:'n', color:'w' };
+    return { board:b, turn:'w' };
+  };
   const arrowSvg4 = makeArrowOverlay();
   const rankLabelsEl4 = document.getElementById('knight-rank-labels');
   const fileLabelsEl4 = document.getElementById('knight-file-labels');
@@ -9776,14 +10256,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const statsChecks = { rounds:0, solved:0, streak:0, best:0 };
   function refreshStatsChecks(){
     document.getElementById('checks-stat-rounds').textContent = statsChecks.rounds;
-    document.getElementById('checks-stat-acc').textContent = statsChecks.rounds
-      ? Math.round(100*statsChecks.solved/statsChecks.rounds)+'%' : '\u2014';
+    renderSolvedStat('checks-stat-acc', statsChecks.solved, statsChecks.rounds);
     document.getElementById('checks-stat-streak').textContent = statsChecks.streak;
     document.getElementById('checks-stat-best').textContent = statsChecks.best;
   }
 
   const boardElChecks = document.getElementById('checks-board');
   const marksChecks = newMarks();
+  // No arrow profile here: the colors are the answer (the prompts ask for
+  // yellow and purple arrows), so forceColor alone decides them.
+  marksChecks.noProfile = true;
   const arrowSvgChecks = makeArrowOverlay();
   const rankLabelsChecks = document.getElementById('checks-rank-labels');
   const fileLabelsChecks = document.getElementById('checks-file-labels');
@@ -10370,6 +10852,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const announceElEnd = document.getElementById('endgame-announce');
   const announceTextEnd = document.getElementById('endgame-announce-text');
   const marksEnd = newMarks();
+  marksEnd.pos = ()=> posEnd ? { board:posEnd.board, turn:posEnd.sideToMove } : null;
   const arrowSvgEnd = makeArrowOverlay();
 
   let runEnd = null, posEnd = null, rafEnd = null, timeoutEnd = null, announceTimerEnd = null;
@@ -10914,6 +11397,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const bannerKiss = document.getElementById('kiss-result-banner');
   const arcadeBarKiss = document.getElementById('kiss-arcade-bar');
   const marksKiss = newMarks();
+  marksKiss.pos = ()=> posKiss ? { board:posKiss.board, turn:posKiss.defender } : null;
   const arrowSvgKiss = makeArrowOverlay();
 
   let runKiss = null;    // whole-run state
@@ -11814,6 +12298,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const announceTextGh = document.getElementById('ghosts-announce-text');
   const threatBtnGh = document.getElementById('ghosts-threat-btn');
   const marksGh = newMarks();
+  // Profiles read the board as SHOWN (renderBoardGh), never posGh.board,
+  // which is kept while the board is blank: a Strategic walk on it would
+  // give away the hidden pieces. The side to move is not shown either
+  // (only round one's call-out names it), so an arrow from an empty square
+  // starts as White's.
+  let shownGh = null;
+  marksGh.pos = ()=> ({ board:shownGh || [], turn:'w' });
   const arrowSvgGh = makeArrowOverlay();
 
   let runGh = null, posGh = null, rafGh = null, timeoutGh = null, announceTimerGh = null;
@@ -11833,6 +12324,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   buildLabelsGh(false);
 
   function renderBoardGh(board){
+    shownGh = board;
     boardElGh.innerHTML='';
     const flipped = runGh && runGh.flipped;
     const ranksGh = flipped?[0,1,2,3,4,5,6,7]:[7,6,5,4,3,2,1,0];
@@ -12303,6 +12795,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   };
   const lockBtnCs = document.getElementById('checkstorm-lock-btn');
   const marksCs = newMarks();
+  // The board as shown (blank between rounds); the side to move only once
+  // the round's position is on screen.
+  let shownCs = null;
+  marksCs.pos = ()=> ({ board:shownCs || [], turn: posCs && shownCs===posCs.board ? posCs.defColor : 'w' });
   const arrowSvgCs = makeArrowOverlay();
 
   let runCs = null, posCs = null, rafCs = null, timeoutCs = null, announceTimerCs = null;
@@ -12322,6 +12818,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   buildLabelsCs();
 
   function renderBoardCs(board){
+    shownCs = board;
     boardElCs.innerHTML='';
     for(let r=7;r>=0;r--){
       for(let c=0;c<8;c++){
@@ -12831,6 +13328,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   const boardElGr = document.getElementById('ground-board');
   const marksGr = newMarks();
+  // King's Ground has no board array: build one from the three pieces on
+  // its N-wide grid (idx r*N+c, the same idx the marks use). You are White.
+  marksGr.pos = ()=>{
+    if(!posGr) return null;
+    const N = posGr.A.N, s = posGr.state, b = new Array(N*N).fill(null);
+    const put = (i, type, color)=>{ if(i!=null && i>=0 && i<N*N) b[i] = { type, color }; };
+    put(s.wk, 'k', 'w'); put(s.bk, 'k', 'b'); put(s.pawn, 'p', 'w');
+    return { board:b, turn:'w' };
+  };
   const arrowSvgGr = makeArrowOverlay();
   const timerFillGr = document.getElementById('ground-timer');
   const promptGr = document.getElementById('ground-prompt');
@@ -13058,6 +13564,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hintElGr.innerHTML = settingsGround.mode==='escort'
       ? '<span>WASD / arrows: move your king</span><span>\u00B7 SPACE: push the pawn</span>'
       : '<span>WASD / arrows: move your king</span>';
+    // That rewrite drops the arrow-profile label; put it back at the end,
+    // as on every other row.
+    hintElGr.appendChild(annoMakeLabel());
+    annoSyncLabels();
     renderBoardGr(null);
     refreshHudGr();
     announceTimerGr=showAnnounce(announceElGr, announceTextGr, boardElGr,
@@ -15192,8 +15702,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const statsPz = { rounds:0, solved:0, streak:0, best:0 };
   function refreshStatsPz(){
     document.getElementById('pz-stat-rounds').textContent = statsPz.rounds;
-    document.getElementById('pz-stat-acc').textContent = statsPz.rounds
-      ? Math.round(100*statsPz.solved/statsPz.rounds)+'%' : '\u2014';
+    renderSolvedStat('pz-stat-acc', statsPz.solved, statsPz.rounds);
     document.getElementById('pz-stat-streak').textContent = statsPz.streak;
     document.getElementById('pz-stat-best').textContent = statsPz.best;
   }
@@ -15217,6 +15726,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   let pzFetchToken = 0;
   let pzPendingReport = Promise.resolve();
   const marksPz = newMarks();
+  marksPz.pos = ()=>{ const s = pzViewState(); return s ? { board:s.board, turn:s.turn, ep:s.epSquare } : null; };
   const arrowSvgPz = makeArrowOverlay();
 
   function buildLabelsPz(flipped){
@@ -15980,6 +16490,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   let rushReplyTimer = null, rushNextTimer = null, rushRevealTimer = null;
   let rushClockTimeout = null, rushRaf = null, rushAnnounceTimer = null;
   const marksRush = newMarks();
+  marksRush.pos = ()=> roundRush && roundRush.state ? { board:roundRush.state.board, turn:roundRush.state.turn, ep:roundRush.state.epSquare } : null;
   const arrowSvgRush = makeArrowOverlay();
 
   const settingsRush = { mode:5 };
@@ -17045,6 +17556,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const olFileLabels = document.getElementById('ol-file-labels');
   const olStatusEl = document.getElementById('ol-status');
   const marksOl = newMarks();
+  marksOl.pos = ()=>{ const s = olViewState(); return s ? { board:s.board, turn:s.turn, ep:s.epSquare } : null; };
   const arrowSvgOl = makeArrowOverlay();
 
   function olIsStale(gen){ return gen !== olGeneration; }
@@ -18323,6 +18835,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   let HV_STATE = null;
   const hvBoardEl = document.getElementById('hv-board');
   const marksHv = newMarks();
+  marksHv.pos = ()=>{ const s = HV_STATE && HV_STATE.plyStates[hvEffectivePly()]; return s ? { board:s.board, turn:s.turn, ep:s.epSquare } : null; };
   const arrowSvgHv = makeArrowOverlay();
   function hvEffectivePly(){
     if(!HV_STATE) return 0;
@@ -20383,6 +20896,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   })();
   phRenderLeft();
 
+  annoMountLabels();
   (function wireAnnoHintCollapse(){
     const KEY = 'annoHintCollapsed';
     let collapsed = localStorage.getItem(KEY) === '1';
@@ -20390,7 +20904,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hints.forEach(hint=>{
       const keepFirst = hint.dataset.dynamic === 'true';
       const kids = [...hint.childNodes];
-      const restKids = keepFirst ? kids.slice(1) : kids;
+      // The arrow-profile label / off note stay their own item at the end.
+      const own = kids.filter(k=> k.nodeType===1 && k.matches('.anno-profile, .anno-profile-off'));
+      const restKids = (keepFirst ? kids.slice(1) : kids).filter(k=> own.indexOf(k)<0);
       const textWrap = document.createElement('span');
       textWrap.className = 'anno-hint-text';
       restKids.forEach(k=> textWrap.appendChild(k));
@@ -20400,6 +20916,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       toggle.setAttribute('aria-label','Toggle controls hint');
       hint.insertBefore(toggle, hint.firstChild);
       hint.appendChild(textWrap);
+      own.forEach(k=> hint.appendChild(k));
       toggle.addEventListener('click', ()=>{
         collapsed = !collapsed;
         localStorage.setItem(KEY, collapsed?'1':'0');
