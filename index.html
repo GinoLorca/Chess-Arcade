@@ -1455,6 +1455,7 @@
   :root[data-skin="uptown"] #card-endgame{--ux-line:#00933c} :root[data-skin="uptown"] #card-loose{--ux-line:#996633}
   :root[data-skin="uptown"] #card-coord{--ux-line:#ff6319} :root[data-skin="uptown"] #card-puzzle{--ux-line:#ee352e}
   :root[data-skin="uptown"] #card-rush{--ux-line:#fccc0a}
+  :root[data-skin="uptown"] #card-wl{--ux-line:#a7a9ac}      /* L line: grey after 09 orange, 10 red, 11 yellow */
   /* Drill names are black 1:4 signs with the white rule, arrow first; no glass. */
   :root[data-skin="uptown"] .drill-name,
   :root[data-skin="uptown"][data-glass="on"] .drill-name{
@@ -4103,7 +4104,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-top:2px;
   }
   /* The Solved stat (Puzzles and its practice runs, Knight's Tour, Sneaky
-     Checks) is a button: a click shows it as solved/total ("3/4") instead
+     Checks, Whose Line) is a button: a click shows it as solved/total ("3/4") instead
      of the percentage, and back (see renderSolvedStat). It keeps the plain
      cells' box exactly -- padding, divider, contents at the top -- and
      min-width:0, so a long "12/15" never widens it or pushes the strip:
@@ -4121,6 +4122,221 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (hover:hover){ .stat-toggle:hover > .stat-label{ color:var(--ink); } }
   /* inset: the scoreboard clips anything outside its cells */
   .stat-toggle:focus-visible{ outline:2px solid var(--focus); outline-offset:-4px; }
+
+  /* ---- Drill 12: Whose Line Is It Anyway? ----
+     Scoped to #view-play-wl / #wl-board / .wl-*: nothing here reaches another
+     drill, Puzzles (pzCentreBoard) or the shared has-side rules. Tokens only;
+     the hex values are the pen colors of the reveal arrows. Motion is
+     transform/opacity only and stops under prefers-reduced-motion. */
+  #view-play-wl [hidden]{ display:none !important; }
+  /* The board is the photo and the sheet is the game: size the squares so
+     both fit one screen. The width rule as everywhere, plus a height rule. */
+  #view-play-wl{ --wl-vh:100vh; --wl-reserve:180px;
+    --sq:clamp(30px, min(calc((100vw - 100px) / 8), calc((var(--wl-vh) - var(--wl-reserve)) / 8)), 85px); }
+  @supports (height:100dvh){ #view-play-wl{ --wl-vh:100dvh; } }
+  @media (max-width:1179.98px){ #view-play-wl{ --wl-reserve:calc(250px + var(--wl-rows,4) * 52px); } }
+  /* Phones scroll to the sheet anyway: keep the house width-only squares there. */
+  @media (max-width:619.98px){ #view-play-wl{ --sq:clamp(30px, calc((100vw - 100px) / 8), 85px); } }
+  @media (min-width:1180px){
+    .wrap.play-mode #view-play-wl.view.active.has-side{ grid-template-columns:minmax(0,1fr) minmax(320px,348px); }
+  }
+  /* The reveal's three pens (WL_ARROW): the board draws them as they are,
+     and the sheet's rings, ticks, stripes and legend take the same pens
+     pulled toward the ink, so they hold 3:1 on every skin's surface and
+     still read as the arrows' green, amber and red. */
+  #view-play-wl{ --wl-found:#2ecc71; --wl-missed:#e8b339; --wl-wrong:#e5534b;
+    --wl-found-ui:color-mix(in srgb, var(--wl-found) 55%, var(--ink));
+    --wl-missed-ui:color-mix(in srgb, var(--wl-missed) 55%, var(--ink));
+    --wl-wrong-ui:color-mix(in srgb, var(--wl-wrong) 60%, var(--ink)); }
+
+  .wl-hud-right{ display:flex; align-items:center; gap:12px; }
+  #view-play-wl .life{ transition:none; }
+  .wl-call{ display:flex; align-items:center; gap:10px; min-height:42px; flex-wrap:wrap; }
+  .wl-call-glyph{ width:40px; height:40px; flex:none; display:flex; align-items:center; justify-content:center;
+    background:var(--board-dark); border-radius:8px; }
+  .wl-call-glyph:empty{ display:none; }
+  .wl-call-glyph .piece-wrap{ width:84%; height:84%; }
+  .wl-call-move{ font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:40px; line-height:1;
+    letter-spacing:.02em; color:var(--brass-text); }
+  .wl-call.is-start .wl-call-move{ font-size:28px; color:var(--ink); }
+  .wl-call-note{ font-size:12.5px; color:var(--ink-soft); }
+  .wl-call.is-good .wl-call-note{ color:color-mix(in srgb, var(--good) 65%, var(--ink)); font-weight:700; }
+  .wl-call.is-bad .wl-call-note{ color:color-mix(in srgb, var(--bad) 65%, var(--ink)); font-weight:700; }
+  .wl-call.is-fresh{ animation:wlCallIn .3s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes wlCallIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+
+  .wl-track{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+  .wl-dot{ min-width:20px; height:20px; padding:0 5px; border-radius:10px; border:1px solid var(--line);
+    background:var(--surface-2); color:color-mix(in srgb, var(--ink-soft) 60%, var(--ink));
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:"JetBrains Mono",monospace; font-size:10px; font-weight:700; }
+  .wl-dot.is-live{ opacity:1; background:var(--brass); border-color:var(--brass); color:var(--brass-ink); }
+  /* Results read like the graded chips: a tint and a ring of the result
+     color, the digit mixed toward the ink, missed dashed. Solid fills
+     failed on some skins (white on Bauhaus light's yellow --partial, 2:1;
+     Game Boy light's --good, 2.6:1), and a see-through pill vanished on
+     the page art (a red digit on Felt's green baize, 1.3:1). */
+  .wl-dot.is-clean{ opacity:1; background:var(--good-soft); border-color:var(--good);
+    box-shadow:inset 0 0 0 1px var(--good); color:color-mix(in srgb, var(--good) 60%, var(--ink)); }
+  .wl-dot.is-fixed{ opacity:1; background:var(--partial-soft); border-color:var(--partial);
+    box-shadow:inset 0 0 0 1px var(--partial); color:color-mix(in srgb, var(--partial) 60%, var(--ink)); }
+  .wl-dot.is-missed{ opacity:1; background:var(--bad-soft); border:2px dashed var(--bad);
+    color:color-mix(in srgb, var(--bad) 60%, var(--ink)); }
+
+  .wl-sheet{ background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow);
+    padding:12px 14px 10px; display:flex; flex-direction:column; gap:10px; }
+  .wl-sheet-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--brass-text); }
+  .wl-san{ text-transform:none; letter-spacing:.02em; }
+  .wl-count{ font-weight:400; letter-spacing:.02em; text-transform:none; font-size:12px; color:var(--ink-soft); }
+  .wl-count b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .wl-body{ display:flex; flex-direction:column; gap:10px; }
+  .wl-actions{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+  /* One grid: a row per guard, a column per piece, the piece's own cell
+     empty -- so a column reads "who guards the queen". */
+  .wl-grid{ display:grid; grid-template-columns:auto repeat(var(--wl-n,4), minmax(0,46px));
+    gap:6px; align-items:center; justify-content:start; }
+  .wl-who{ display:flex; align-items:center; gap:7px; padding-right:4px; position:relative; }
+  .wl-who .piece-wrap{ width:32px; height:32px; }
+  .wl-letter{ position:absolute; left:25px; top:-5px; font-family:"JetBrains Mono",monospace; font-size:9.5px;
+    font-weight:700; line-height:13px; padding:0 3px; border-radius:4px;
+    background:var(--surface-2); color:var(--ink); border:1px solid var(--line); }
+  .wl-name{ font-size:13px; font-weight:600; color:var(--ink); min-width:50px; }
+  .wl-grid[data-n="5"] .wl-name, .wl-grid[data-n="6"] .wl-name{ display:none; }
+  .wl-who.is-armed .piece-wrap{ outline:2px solid var(--focus); outline-offset:3px; border-radius:6px; }
+  .wl-who.has-error::before{ content:""; position:absolute; left:-9px; top:2px; bottom:2px; width:3px;
+    border-radius:2px; background:var(--bad); }
+  .wl-chip{ position:relative; aspect-ratio:1; width:100%; padding:0; border-radius:9px; border:1px solid var(--line);
+    background:var(--surface-2); display:flex; align-items:center; justify-content:center; cursor:pointer;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
+  .wl-chip .piece-wrap{ width:74%; height:74%; opacity:.36; }
+  .wl-chip[aria-pressed="true"]{ background:color-mix(in srgb, var(--brass) 24%, var(--surface-2));
+    border-color:var(--brass); box-shadow:inset 0 0 0 1px var(--brass); }
+  .wl-chip[aria-pressed="true"] .piece-wrap{ opacity:1; }
+  .wl-chip:active:not(:disabled){ transform:scale(.92); }
+  .wl-chip:disabled{ cursor:default; }
+  .wl-chip:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  @media (hover:hover){ .wl-chip:hover:not([aria-pressed="true"]):not(:disabled) .piece-wrap{ opacity:.6; } }
+  .wl-self{ aspect-ratio:1; width:100%; border-radius:9px; border:1px dashed var(--line); opacity:.35; }
+  /* Graded after a Reveal, in the board's pens: found, not a guard, missed
+     (dashed: the chip you didn't press). Found and not-a-guard also carry
+     a tick or a cross, so the grade never rests on color alone. */
+  .wl-chip.is-right{ background:color-mix(in srgb, var(--wl-found) 18%, var(--surface-2));
+    border-color:var(--wl-found-ui); box-shadow:inset 0 0 0 1px var(--wl-found-ui); }
+  .wl-chip.is-wrong{ background:color-mix(in srgb, var(--wl-wrong) 18%, var(--surface-2));
+    border-color:var(--wl-wrong-ui); box-shadow:inset 0 0 0 1px var(--wl-wrong-ui); }
+  .wl-chip.is-missed{ background:transparent; border:2px dashed var(--wl-missed-ui); box-shadow:none; }
+  .wl-chip.is-right .piece-wrap, .wl-chip.is-wrong .piece-wrap, .wl-chip.is-missed .piece-wrap{ opacity:1; }
+  .wl-chip.is-right::after, .wl-chip.is-wrong::after{ content:"\2713"; position:absolute; top:-5px; right:-5px;
+    width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font:700 10px/1 system-ui, -apple-system, sans-serif; color:var(--surface); background:var(--wl-found-ui);
+    box-shadow:0 0 0 2px var(--surface); pointer-events:none; }
+  .wl-chip.is-wrong::after{ content:"\2715"; font-size:9px; background:var(--wl-wrong-ui); }
+
+  .wl-foot{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    border-top:1px solid var(--line); padding-top:10px; }
+  .wl-foot .btn-row{ margin-left:auto; }
+  .wl-verdict{ font-size:13px; color:var(--ink-soft); flex:1 1 120px; }
+  .wl-verdict.is-good{ color:color-mix(in srgb, var(--good) 65%, var(--ink)); font-weight:700; }
+  .wl-verdict.is-near{ color:color-mix(in srgb, var(--partial) 60%, var(--ink)); font-weight:700; }
+  .wl-verdict.is-bad{ color:color-mix(in srgb, var(--bad) 65%, var(--ink)); font-weight:700; }
+  .wl-tools{ display:flex; gap:6px; }
+  .wl-tools .btn{ flex:1 1 0; min-width:0; padding:8px 6px; font-size:13px; background:var(--surface-2); }
+  .wl-tools .btn[aria-expanded="true"], .wl-tools .btn[aria-pressed="true"]{ border-color:var(--brass);
+    color:color-mix(in srgb, var(--brass-text) 45%, var(--ink)); }
+  /* the house disabled look (Saved Puzzles, Puzzle History) */
+  .wl-tools .btn:disabled, .wl-foot .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  #wl-peek{ touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+  .wl-list{ background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:8px 12px;
+    font-family:"JetBrains Mono",monospace; font-size:13px; line-height:1.9; color:var(--ink); }
+  .wl-mv{ display:inline-block; margin-right:12px; white-space:nowrap; }
+  .wl-mv i{ font-style:normal; color:var(--ink-soft); }
+  .wl-mv.is-now{ color:color-mix(in srgb, var(--brass-text) 45%, var(--ink)); font-weight:700;
+    text-decoration:underline 2px var(--brass); text-underline-offset:4px; }
+  .wl-why{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .wl-why li{ font-size:12.5px; line-height:1.45; color:var(--ink); background:var(--surface-2);
+    border-radius:6px; padding:6px 10px; border-left:3px solid var(--wl-wrong-ui); }
+  .wl-why li.is-missed{ border-left-color:var(--wl-missed-ui); }
+  #wl-legend > span{ white-space:nowrap; }
+  .wl-sw-found{ background:var(--wl-found-ui); }
+  .wl-sw-missed{ border:2px dashed var(--wl-missed-ui); background:transparent; }
+  .wl-sw-wrong{ border:2px dashed var(--wl-wrong-ui); background:transparent; }
+  /* Three key groups that wrap whole, never inside "hold Space peek". */
+  .wl-keys{ display:flex; flex-wrap:wrap; gap:4px 14px; font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-soft); }
+  .wl-keys > span{ white-space:nowrap; }
+  .wl-keys .kbd{ font-size:10.5px; padding:1px 5px; margin-right:3px; }
+  @media (hover:none){ .wl-keys{ display:none; } }
+
+  /* Peek and the truth view: the photo's vacated squares keep a ghost, the
+     pieces stand where they are now, moved ones get a brass ring. */
+  #wl-board .sq.wl-ghost .piece-wrap{ opacity:.22; }
+  #wl-board .sq.wl-moved::after{ content:""; position:absolute; inset:0; pointer-events:none;
+    box-shadow:inset 0 0 0 3px var(--brass); }
+  #wl-frame.wl-peeking{ outline:2px dashed var(--brass); outline-offset:-7px; }
+  /* over the arrows: a claim the wrong way round lies along a real guard's
+     arrow, and a claim through a blocker along the blocked one's */
+  .wl-wrong-svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:6; }
+
+  /* The line at the end, banner and Next box: the moves that weren't first
+     try are bold. The house brass is a fill color on some skins (Drive-Thru's
+     yellow on its pale box), so here it is pulled toward the ink and gets a
+     brass underline; Bauhaus keeps its own highlighter. */
+  :root:not([data-skin="bauhaus"]) #wl-result-answer b,
+  :root:not([data-skin="bauhaus"]) #next-answer b.wl-slip{ color:color-mix(in srgb, var(--brass-text) 45%, var(--ink));
+    text-decoration:underline 2px var(--brass); text-underline-offset:4px; }
+
+  /* Phones: the tools (Peek with them) sit right under the sheet's head,
+     next to the board, so holding Peek shows the whole board; the List
+     opens under them. */
+  @media (max-width:619.98px){
+    #view-play-wl .wl-actions{ display:contents; }
+    #view-play-wl .wl-tools{ order:-2; }
+    #view-play-wl .wl-list{ order:-1; }
+  }
+
+  /* iPad portrait and other stacked widths: the sheet goes wide and short,
+     grid on the left, buttons beside it. */
+  @media (min-width:620px) and (max-width:1179.98px){
+    .wl-body{ flex-direction:row; align-items:flex-start; gap:22px; }
+    .wl-actions{ flex:1 1 220px; }
+    .wl-foot{ border-top:0; padding-top:0; }
+  }
+  /* Landscape iPads under 1180px (1024x768, 1080x810, 1133x744): stacked,
+     the board would shrink to phone size (39px squares at 1024x768) to keep
+     the sheet on screen, so here the sheet goes beside the board as it does
+     from 1180px. The wrap is still the 880px one: 404px is its padding, the
+     panel, the gap and the board's frame and labels. */
+  @media (min-width:900px) and (max-width:1179.98px) and (min-aspect-ratio:5/4){
+    #view-play-wl{ --wl-reserve:224px;
+      --sq:clamp(30px, min(calc((min(100vw, 880px) - 404px) / 8), calc((var(--wl-vh) - var(--wl-reserve)) / 8)), 85px); }
+    .wrap.play-mode #view-play-wl.view.active.has-side{ display:grid; grid-template-columns:minmax(0,1fr) 300px;
+      column-gap:18px; align-items:start; }
+    .wrap.play-mode #view-play-wl.view.active.has-side > *{ grid-column:1; }
+    .wrap.play-mode #view-play-wl.view.active.has-side > .side-panel{ grid-column:2; grid-row:1 / span 20; gap:12px; }
+    .wrap.play-mode #view-play-wl .hud{ padding-right:18px; }
+    #view-play-wl .wl-body{ flex-direction:column; gap:10px; }
+    #view-play-wl .wl-foot{ border-top:1px solid var(--line); padding-top:10px; }
+  }
+  /* Under 960px the panel's top right runs under the settings button. */
+  @media (min-width:900px) and (max-width:959.98px) and (min-aspect-ratio:5/4){
+    .wrap.play-mode #view-play-wl.view.active.has-side > .side-panel{ padding-top:56px; }
+  }
+  /* The eyebrow stays one line, so holding Peek never moves the board (or
+     the Peek button under the finger); phones get the short form. */
+  #view-play-wl .hud-left{ min-width:0; }
+  #view-play-wl .hud-mode{ white-space:nowrap; min-width:0; }
+  #wl-hud-mode{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width:480px){
+    .wl-mode-more{ display:none; }
+    .wl-call-move{ font-size:32px; }
+    .wl-grid{ grid-template-columns:auto repeat(var(--wl-n,4), minmax(0,44px)); gap:5px; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .wl-call.is-fresh{ animation:none; }
+    .wl-chip{ transition:none; }
+    .wl-chip:active:not(:disabled){ transform:none; }
+  }
 </style>
 
 <button class="home-fab" id="home-fab" data-nav="menu" title="All drills" aria-label="All drills">&#8962;</button>
@@ -4753,6 +4969,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="drill-name">Puzzle Rush</div>
         <div class="drill-desc">Chess.com-style. Real puzzles that start easy and get harder with every one you solve &#8212; how many can you get before the clock runs out? One wrong move is a strike; three strikes and the rush is over. 3 Minute, 5 Minute, or Survival. No Lichess account needed.</div>
       </button>
+      <button class="drill-card" id="card-wl">
+        <div class="drill-head">
+          <span class="drill-num">DRILL 12</span>
+          <span class="chip ready">Ready</span>
+        </div>
+        <div class="drill-name">Whose Line Is It Anyway?</div>
+        <div class="drill-desc">Train your memory and calculation. The board never moves: a move is called out &#8212; <b>Bb5</b>, then <b>Ne5</b> &#8212; and you play it in your head, then mark what's guarding what. The first position is the easy one; after that, the board in your head is the only one that counts.</div>
+      </button>
 
 </div>
   </section>
@@ -5129,6 +5353,163 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" class="stat stat-toggle"><span class="stat-val" id="checks-stat-acc"><span class="stat-fit">&mdash;</span></span><span class="stat-label">Solved</span></button>
         <div class="stat"><div class="stat-val" id="checks-stat-streak">0</div><div class="stat-label">Streak</div></div>
         <div class="stat"><div class="stat-val" id="checks-stat-best">0</div><div class="stat-label">Best streak</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SETUP: WHOSE LINE IS IT ANYWAY? ============ -->
+  <section class="view" id="view-setup-wl">
+    <button class="back-link" data-nav="menu">&larr; All drills</button>
+    <div class="panel">
+      <div>
+        <div class="eyebrow">Drill 12</div>
+        <h1 class="title" style="font-size:26px;">Whose Line Is It Anyway?</h1>
+      </div>
+
+      <div class="field-hint" style="margin-top:-6px;">A memory and calculation workout. The board shows where the pieces <b>started</b> and never changes. Mark which pieces guard which and press <b>Check</b>; then a move is called out &#8212; picture it on top of everything before it and mark the guards again. It trains you to hold the board in your head and see what's guarding what.</div>
+
+      <div class="field">
+        <div class="field-label">How a line runs</div>
+        <div class="hotkey-grid">
+          <div class="hotkey-item"><span class="kbd">1</span><span class="hotkey-desc">Mark every guard in the start position, then <b>Check</b></span></div>
+          <div class="hotkey-item"><span class="kbd">2</span><span class="hotkey-desc">A move is called out, like <b>Bb5</b>. The board stays put &#8212; play it in your head</span></div>
+          <div class="hotkey-item"><span class="kbd">3</span><span class="hotkey-desc">Mark the guards in the new position. <b>Next move</b> calls the one after</span></div>
+        </div>
+        <div class="field-hint">A piece <b>guards</b> another if it covers that piece's square, so it could take back there. Lines stop at the first piece in the way, counting pieces only you can see; knights jump; a pawn covers the two squares diagonally ahead. The king counts both ways: it guards the pieces on the eight squares around it, and any piece that covers the king's square <b>guards the king</b>. A move can land where the board still shows a piece &#8212; that piece has already left.</div>
+        <div class="field-hint"><b>List</b> shows the moves called so far. Hold <b>Peek</b> to see the board in your head, or tap it to keep it showing &#8212; that position then can't count as first try. <b>Reveal</b> shows the answer and the real board.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Pieces</div>
+        <div class="toggle-row" id="wl-pieces-row">
+          <button class="toggle" data-val="3">3</button>
+          <button class="toggle active" data-val="4">4</button>
+          <button class="toggle" data-val="5">5</button>
+          <button class="toggle" data-val="6">6</button>
+        </div>
+        <div class="field-hint">Four is the classic set: queen, rook, bishop and knight. Three drops one of them; five adds a king or a pawn; six has one of every piece.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Moves per line</div>
+        <div class="toggle-row" id="wl-length-row">
+          <button class="toggle" data-val="6">6</button>
+          <button class="toggle active" data-val="10">10</button>
+          <button class="toggle" data-val="15">15</button>
+          <button class="toggle" data-val="endless">Endless</button>
+        </div>
+        <div class="field-hint">Endless keeps calling moves with no List or Peek. A wrong Check or a Reveal costs one of three lives, and your deepest line is saved for each piece count.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Clock</div>
+        <div class="toggle-row" id="wl-time-row">
+          <button class="toggle active" data-val="0">Untimed</button>
+          <button class="toggle" data-val="20">20s</button>
+          <button class="toggle" data-val="40">40s</button>
+          <button class="toggle" data-val="custom">Custom</button>
+        </div>
+        <div class="custom-time">
+          <input type="number" id="wl-time-custom" min="5" max="60" step="5" value="30" disabled aria-label="Custom clock, in seconds per move">
+          <span class="unit">seconds per move</span>
+        </div>
+        <div class="field-hint">Untimed counts up so you can see your pace. With a clock, running out reveals the answer.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Keys</div>
+        <div class="hotkey-grid">
+          <div class="hotkey-item"><span class="kbd">Q R</span><span class="hotkey-desc">Queen guards rook (any two piece letters: K Q R B N P)</span></div>
+          <div class="hotkey-item"><span class="kbd">Enter</span><span class="hotkey-desc"><b>Check</b>, then <b>Next move</b></span></div>
+          <div class="hotkey-item"><span class="kbd">Space</span><span class="hotkey-desc">Hold to <b>Peek</b> &#183; <span class="kbd">L</span> List &#183; <span class="kbd">Backspace</span> Clear &#183; <span class="kbd">X</span> flip</span></div>
+        </div>
+        <div class="field-hint">On a touch screen, tap a chip: in the queen's row, the rook chip means the queen guards the rook.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="start-wl-drill">Start drill</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PLAY: WHOSE LINE IS IT ANYWAY? ============ -->
+  <section class="view has-side" id="view-play-wl">
+    <button class="back-link" data-nav="setup-wl">&larr; Change settings</button>
+
+    <div class="hud">
+      <div class="hud-left">
+        <div class="hud-mode"><span class="side-dot w"></span><span id="wl-hud-mode">START &#183; 4 PIECES</span></div>
+        <div class="wl-call is-start" id="wl-call" aria-live="polite">
+          <span class="wl-call-glyph" id="wl-call-glyph" aria-hidden="true"></span>
+          <span class="wl-call-move" id="wl-call-move">Find every guard</span>
+          <span class="wl-call-note" id="wl-call-note">This one you can see.</span>
+        </div>
+      </div>
+      <div class="wl-hud-right">
+        <div class="lives" id="wl-lives" hidden></div>
+        <div class="clock" id="wl-clock">0:00</div>
+      </div>
+    </div>
+
+    <div class="wl-track" id="wl-track" aria-label="Progress through the line"></div>
+
+    <div class="board-frame" id="wl-frame" style="position:relative;">
+      <div class="board-col">
+        <div class="board-inner">
+          <div class="rank-labels" id="wl-rank-labels"></div>
+          <div class="board" id="wl-board"></div>
+        </div>
+        <div class="file-labels" id="wl-file-labels"></div>
+      </div>
+      <div class="announce" id="wl-announce"><span id="wl-announce-text"></span></div>
+    </div>
+
+    <div class="side-panel">
+      <div class="wl-sheet" id="wl-sheet">
+        <div class="wl-sheet-head"><span id="wl-ask">Start position</span><span class="wl-count" id="wl-count"><b>0</b> marked</span></div>
+        <div class="wl-body">
+          <div class="wl-grid" id="wl-grid" role="group" aria-label="Who guards whom"></div>
+          <div class="wl-actions">
+            <div class="wl-foot">
+              <div class="wl-verdict" id="wl-verdict" aria-live="polite"></div>
+              <div class="btn-row">
+                <button class="btn btn-ghost" id="wl-clear">Clear</button>
+                <button class="btn btn-primary" id="wl-check">Check</button>
+              </div>
+            </div>
+            <div class="wl-tools">
+              <button class="btn btn-ghost" id="wl-restart">Restart</button>
+              <button class="btn btn-ghost" id="wl-list-btn" aria-expanded="false" aria-controls="wl-list">List</button>
+              <button class="btn btn-ghost" id="wl-peek" aria-pressed="false">Peek</button>
+              <button class="btn btn-ghost" id="wl-reveal">Reveal</button>
+            </div>
+            <div class="wl-list" id="wl-list" hidden></div>
+            <ul class="wl-why" id="wl-why" aria-live="polite" hidden></ul>
+            <div class="legend" id="wl-legend" hidden>
+              <span><i class="swatch wl-sw-found"></i> found</span>
+              <span><i class="swatch wl-sw-missed"></i> missed</span>
+              <span><i class="swatch wl-sw-wrong"></i> not a guard</span>
+            </div>
+            <div class="wl-keys"><span><span class="kbd">Q</span><span class="kbd">R</span> queen guards rook</span><span><span class="kbd">Enter</span> check</span><span>hold <span class="kbd">Space</span> peek</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-banner" id="wl-result-banner" style="display:none;">
+        <div class="result-line" id="wl-result-line">Line held</div>
+        <div class="result-sub" id="wl-result-sub"></div>
+        <div class="result-answer" id="wl-result-answer"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="wl-next-line">Next line</button>
+          <button class="btn btn-ghost" data-nav="setup-wl">Change settings</button>
+        </div>
+      </div>
+
+      <div class="scoreboard">
+        <div class="stat"><div class="stat-val" id="wl-stat-pos">0</div><div class="stat-label">Positions</div></div>
+        <button type="button" class="stat stat-toggle"><span class="stat-val" id="wl-stat-acc"><span class="stat-fit">&mdash;</span></span><span class="stat-label">First try</span></button>
+        <div class="stat"><div class="stat-val" id="wl-stat-streak">0</div><div class="stat-label">Streak</div></div>
+        <div class="stat"><div class="stat-val" id="wl-stat-best">0</div><div class="stat-label" id="wl-stat-best-label">Best streak</div></div>
       </div>
     </div>
   </section>
@@ -8053,6 +8434,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                              {param:'color', type:'toggle', row:'puzzle-color-row'} ] },
     rush:         { view:'setup-rush',       card:'card-rush',        startBtn:'start-rush-drill',
                     fields:[ {param:'mode', type:'toggle', row:'rush-mode-row'} ] },
+    'whose-line': { view:'setup-wl',         card:'card-wl',          startBtn:'start-wl-drill',
+                    fields:[ {param:'pieces', type:'toggle', row:'wl-pieces-row'},
+                             {param:'length', type:'toggle', row:'wl-length-row'},
+                             {param:'time', type:'clock', row:'wl-time-row', input:'wl-time-custom'} ] },
     'play-bot':   { view:'setup-bot',        card:'card-play-bot',    startBtn:null,
                     fields:[ {param:'level', type:'toggle', row:'bot-level-row'},
                              {param:'color', type:'toggle', row:'bot-color-row'},
@@ -9355,7 +9740,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   applyLookPrefs();
 
   /* The Solved stat on the scoreboards of Puzzles (so also its Saved and
-     Puzzle History practice runs), Knight's Tour and Sneaky Checks: a click,
+     Puzzle History practice runs), Knight's Tour, Sneaky Checks and Whose Line: a click,
      or Enter/Space, shows it as solved/total ("3/4") instead of the
      percentage, and back. One choice for the whole app, kept with the look
      prefs (solvedAs: 'pct' | 'frac'), so it holds across puzzles, drills and
@@ -9369,7 +9754,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const s = Number(val.dataset.solved)||0, t = Number(val.dataset.total)||0;
     const frac = solvedAsFraction(), pct = t ? Math.round(100*s/t)+'%' : '';
     val.firstElementChild.textContent = !t ? '\u2014' : frac ? s+'/'+t : pct;
-    val.parentNode.setAttribute('aria-label', 'Solved: '+(!t ? 'no results yet' : frac ? s+' of '+t : pct)
+    const name = val.parentNode.querySelector('.stat-label');   // "Solved"; Whose Line's is "First try"
+    val.parentNode.setAttribute('aria-label', (name ? name.textContent : 'Solved')+': '+(!t ? 'no results yet' : frac ? s+' of '+t : pct)
       +'. Show as '+(frac ? 'a percentage' : t ? s+' of '+t : 'a fraction'));
     fitSolvedStat(val.parentNode);
   }
@@ -10633,6 +11019,1107 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     refreshStatsChecks();
     showView('play-checks');
     newRoundChecks();
+  });
+
+  /* ================= DRILL 12: WHOSE LINE IS IT ANYWAY? ================= */
+  /* Chess Viz's "Who's Guarding Whom", rebuilt. The board is a photo of the
+     start position and never moves; each round a move is called ("Bb5") and
+     you mark who guards whom in the position in your head -- the start
+     squares with every called move applied. Every guard is the app's own
+     attacksSquare on that imagined position (wlGuards), and Check wants the
+     exact set: nothing missing, nothing extra.
+
+     A fixed line is built whole at Start (wlMakeLine), so Restart replays it
+     exactly and nothing is computed mid-line; Endless grows one move at a
+     time (wlExtend), which always finds one. The board takes no input and
+     has no annotation layer (so none of wireAnnotations' capture-click
+     clearing or the arrow profiles): Peek, held, and the truth view after a
+     Reveal are the only times it shows anything but the photo, and its
+     arrows are drawn with noProfile so a profile never recolors them. */
+  /* WL-GEN-BEGIN -- Drill 12 line generator and guard rules. Pure and offline:
+     it only uses attacksSquare and randInt from the engine bits above, so
+     scratchpad/wl/final/wl-test.js can lift this block out and test it in Node.
+     A position is a map type -> square ({q:38, r:22, ...}); there is one piece
+     of each type, all White, so a type is a permanent identity and "Bb5" is
+     never ambiguous. A guard is the string 'a>b': piece a guards piece b. */
+  const WL_ORDER = ['k','q','r','b','n','p'];          // sheet row/column order
+  const WL_NAME = {k:'king', q:'queen', r:'rook', b:'bishop', n:'knight', p:'pawn'};
+  const WL_BAND0 = {3:[1,2], 4:[1,3], 5:[2,3], 6:[2,4]};   // guards in the start position
+  const WL_GMAX  = {3:3, 4:5, 5:6, 6:8};                   // guards in any later position
+  function wlAlg(i){ return 'abcdefgh'[i%8] + (Math.floor(i/8)+1); }
+  function wlTypesFor(n){
+    if(n===3){ const s=['q','r','b','n']; s.splice(randInt(4),1); return s; }
+    if(n===4) return ['q','r','b','n'];
+    if(n===5) return ['q','r','b','n', Math.random()<0.5 ? 'k' : 'p'];
+    return ['k','q','r','b','n','p'];
+  }
+  function wlSorted(types){ return WL_ORDER.filter(t=> types.indexOf(t)>=0); }
+  function wlBoardOf(sq){
+    const b = new Array(64).fill(null);
+    for(const t in sq) b[sq[t]] = {color:'w', type:t};
+    return b;
+  }
+  // Every guard in a position, on that position's own squares (the imagined
+  // board): sliders stop at the first piece in the way, knights jump, the king
+  // covers the 8 squares around it, a White pawn the two diagonally ahead.
+  function wlGuards(sq){
+    const b = wlBoardOf(sq), g = new Set();
+    for(const a in sq) for(const t in sq){
+      if(a!==t && attacksSquare(b, sq[a], b[sq[a]], sq[t])) g.add(a+'>'+t);
+    }
+    return g;
+  }
+  function wlSameSet(A, B){ if(A.size!==B.size) return false; for(const x of A) if(!B.has(x)) return false; return true; }
+  // Does a slider of this type share a line with that square at all?
+  function wlAligned(type, from, to){
+    const dr = Math.floor(to/8)-Math.floor(from/8), dc = to%8-from%8;
+    if(from===to) return false;
+    const straight = (dr===0)!==(dc===0), diag = Math.abs(dr)===Math.abs(dc);
+    if(type==='r') return straight;
+    if(type==='b') return diag;
+    if(type==='q') return straight || diag;
+    return false;
+  }
+  // Squares strictly between two aligned squares; [] when not aligned.
+  function wlBetween(from, to){
+    const fr=Math.floor(from/8), fc=from%8, tr=Math.floor(to/8), tc=to%8;
+    const dr=tr-fr, dc=tc-fc;
+    if(!(dr===0 || dc===0 || Math.abs(dr)===Math.abs(dc)) || from===to) return [];
+    const sr=Math.sign(dr), sc=Math.sign(dc), n=Math.max(Math.abs(dr),Math.abs(dc)), out=[];
+    for(let i=1;i<n;i++) out.push((fr+sr*i)*8 + fc+sc*i);
+    return out;
+  }
+  // The first piece standing between slider a and piece t, or -1.
+  function wlBlocker(sq, a, t){
+    if(!wlAligned(a, sq[a], sq[t])) return -1;
+    const b = wlBoardOf(sq);
+    const hit = wlBetween(sq[a], sq[t]).find(s=> b[s]);
+    return hit===undefined ? -1 : hit;
+  }
+  function wlBlockedPairs(sq){
+    const out = [];
+    for(const a in sq){ if('qrb'.indexOf(a)<0) continue;
+      for(const t in sq){ if(a!==t && wlBlocker(sq, a, t)>=0) out.push(a+'>'+t); } }
+    return out;
+  }
+  // Quiet moves on the imagined board: no captures (everything is a friend),
+  // no castling, a pawn pushes one (two from its 2nd rank) and never reaches
+  // the 8th, so there are no promotions.
+  function wlLegalMoves(sq){
+    const b = wlBoardOf(sq), out = [];
+    for(const t in sq){
+      const from = sq[t];
+      if(t==='p'){
+        const r = Math.floor(from/8), one = from+8;
+        if(r+1<=6 && !b[one]){
+          out.push({t, from, to:one});
+          if(r===1 && !b[one+8]) out.push({t, from, to:one+8});
+        }
+        continue;
+      }
+      for(let to=0; to<64; to++) if(!b[to] && attacksSquare(b, from, b[from], to)) out.push({t, from, to});
+    }
+    return out;
+  }
+  function wlSan(m){ return (m.t==='p' ? '' : m.t.toUpperCase()) + wlAlg(m.to); }
+  function wlKey(sq){ return Object.keys(sq).sort().map(t=> t+sq[t]).join(','); }
+  function wlDiff(A, B){
+    const d = [];
+    A.forEach(x=>{ if(!B.has(x)) d.push('-'+x); });
+    B.forEach(x=>{ if(!A.has(x)) d.push('+'+x); });
+    return d;
+  }
+  // Guards where the photo misleads: a guard running over a square the photo
+  // still shows occupied (that piece has left), or a guard cut by a moved
+  // piece the photo shows somewhere else. Returns the changed-edge strings.
+  function wlPhotoLies(sq, photo){
+    const out = new Set(), b = wlBoardOf(sq);
+    const ghost = new Set(Object.keys(photo).filter(t=> photo[t]!==sq[t]).map(t=> photo[t]));
+    const movedNow = new Set(Object.keys(sq).filter(t=> photo[t]!==sq[t]).map(t=> sq[t]));
+    for(const a in sq){ if('qrb'.indexOf(a)<0) continue;
+      for(const t in sq){
+        if(a===t || !wlAligned(a, sq[a], sq[t])) continue;
+        const path = wlBetween(sq[a], sq[t]);
+        const open = attacksSquare(b, sq[a], b[sq[a]], sq[t]);
+        if(open && path.some(s=> ghost.has(s))) out.add('+'+a+'>'+t);
+        if(!open && path.some(s=> movedNow.has(s))) out.add('-'+a+'>'+t);
+      } }
+    return out;
+  }
+  function wlMakeStart(types){
+    const [lo, hi] = WL_BAND0[types.length];
+    for(let tries=0; tries<4000; tries++){
+      const sq = {}, used = new Set();
+      for(const t of types){
+        let s;
+        do{ s = randInt(64); const r = Math.floor(s/8); if(t==='p' && (r<1 || r>4)) s = -1; }
+        while(s<0 || used.has(s));
+        used.add(s); sq[t] = s;
+      }
+      const g = wlGuards(sq);
+      if(g.size<lo || g.size>hi) continue;
+      if(wlBlockedPairs(sq).length) continue;            // step 0 hides nothing
+      const mob = {};
+      wlLegalMoves(sq).forEach(m=>{ mob[m.t] = (mob[m.t]||0)+1; });
+      if(types.some(t=> t==='p' ? !(mob.p>0) : (mob[t]||0)<3)) continue;
+      let mutual = 0;
+      g.forEach(x=>{ const [a,b] = x.split('>'); if(g.has(b+'>'+a)) mutual++; });
+      if(mutual>4) continue;                              // at most 2 mutual pairs (each counted twice)
+      return sq;
+    }
+    return null;
+  }
+  function wlNewGen(start){
+    const st = { sq:Object.assign({}, start), photo:start, ans0:wlGuards(start),
+      seen:new Set([wlKey(start)]), lastMovers:[], zeroUsed:0, lastEmptyK:null, lastDelta:-1, trail:{} };
+    for(const t in start) st.trail[t] = [start[t]];
+    return st;
+  }
+  // Score every legal quiet move for move number k, keep the hard rules (the
+  // higher `relax`, the fewer of them), pick at random among the best three.
+  function wlPickMove(st, k, len, relax){
+    const sq = st.sq, n = Object.keys(sq).length, g = wlGuards(sq);
+    const photoOcc = new Set(Object.values(st.photo));
+    const target = k<=2 ? 1 : 2;
+    const zeroCap = Math.max(1, Math.floor(len/8));
+    const wantZero = relax<2 && k>=3 && st.lastDelta>0 && st.zeroUsed<zeroCap && Math.random()<0.12;
+    const emptyOk = k>=3 && (st.lastEmptyK===null || k-st.lastEmptyK>=15);
+    const cands = [];
+    for(const m of wlLegalMoves(sq)){
+      const nsq = Object.assign({}, sq, {[m.t]:m.to});
+      const lm = st.lastMovers;
+      if(relax<3 && st.seen.has(wlKey(nsq))) continue;                        // no repeats, so no undo
+      if(relax<3 && lm.length>=2 && lm[lm.length-1]===m.t && lm[lm.length-2]===m.t) continue;
+      if(relax<1 && (st.trail[m.t]||[]).slice(-3).indexOf(m.to)>=0) continue;  // no shuffling back
+      const ng = wlGuards(nsq);
+      if(relax<3 && ng.size>WL_GMAX[n]) continue;
+      if(relax<2 && ng.size===0 && !emptyOk) continue;
+      if(relax<1 && k>=2 && wlSameSet(ng, st.ans0)) continue;                 // never just the photo's answer
+      const diff = wlDiff(g, ng);
+      if(relax<2 && diff.length===0 && !wantZero) continue;
+      if(relax<2 && diff.length>0 && wantZero) continue;
+      const bystander = diff.filter(d=>{ const [a,b] = d.slice(1).split('>'); return a!==m.t && b!==m.t; });
+      if(relax<2 && k<=2){                                                       // the gentle ramp
+        if(diff.length>2 || bystander.length) continue;
+        if(photoOcc.has(m.to) || wlBetween(m.from, m.to).some(s=> photoOcc.has(s))) continue;
+      }
+      const lies = wlPhotoLies(nsq, st.photo);
+      const newLie = diff.some(d=> lies.has(d));
+      let score = Math.random();
+      if(relax<4){
+        score -= Math.abs(Math.min(diff.length,4)-target)*0.8;
+        if(k>=3 && bystander.length) score += 1.2;                               // discoveries and blocks
+        if(k>=4 && newLie) score += 1.4;                                         // the photo misleads
+        const last = lm.lastIndexOf(m.t);
+        score += Math.min(last<0 ? 5 : lm.length-1-last, 4)*0.45;                // spread the moves around
+        if(lm.filter(t=> t===m.t).length >= Math.ceil(len/n)+1) score -= 1.5;    // no piece hogs the line
+      }
+      cands.push({m, nsq, ng, diff, by:bystander.length>0, lie:newLie, score});
+    }
+    if(!cands.length){
+      if(wantZero) return wlPickMove(Object.assign({}, st, {zeroUsed:99}), k, len, relax);
+      return null;
+    }
+    cands.sort((a,b)=> b.score-a.score);
+    return cands[randInt(Math.min(3, cands.length))];
+  }
+  function wlApply(line, c, relax){
+    const st = line.gen, k = line.moves.length;
+    st.sq = c.nsq; st.seen.add(wlKey(c.nsq)); st.lastMovers.push(c.m.t); st.trail[c.m.t].push(c.m.to);
+    if(!c.diff.length) st.zeroUsed++;
+    if(c.ng.size===0) st.lastEmptyK = k;
+    st.lastDelta = c.diff.length;
+    line.moves.push({t:c.m.t, from:c.m.from, to:c.m.to, san:wlSan(c.m)});
+    line.pos.push(c.nsq);
+    line.ans.push(c.ng);
+    line.tags.push({by:c.by, lie:c.lie, zero:!c.diff.length, relax});
+  }
+  // Always returns a move: each rung of the ladder drops more rules, and the
+  // last rung takes any legal move (a knight or slider always has one).
+  function wlExtend(line){
+    const k = line.moves.length;
+    const len = line.endless ? Math.max(10, k+6) : line.len;
+    for(let relax=0; relax<=4; relax++){
+      const c = wlPickMove(line.gen, k, len, relax);
+      if(c){ wlApply(line, c, relax); return true; }
+    }
+    return false;
+  }
+  function wlEmptyLine(n, len, endless){
+    const types = wlSorted(wlTypesFor(n));
+    const start = wlMakeStart(types);
+    if(!start) return null;
+    return { n, len, endless, types, pos:[start], moves:[null], ans:[wlGuards(start)], tags:[null], gen:wlNewGen(start) };
+  }
+  // A fixed line is built whole at Start (so Restart replays it exactly):
+  // every move at relax 0, with at least one discovery/block (6+ moves) and
+  // one photo-lie move (8+ moves). Endless lines grow with wlExtend.
+  function wlMakeLine(n, len){
+    if(len==='endless'){
+      let L = null; while(!L) L = wlEmptyLine(n, 0, true);
+      return L;
+    }
+    for(let attempt=1; attempt<=40; attempt++){
+      const L = wlEmptyLine(n, len, false);
+      if(!L) continue;
+      let ok = true;
+      for(let k=1; k<=len; k++){
+        const c = wlPickMove(L.gen, k, len, 0);
+        if(!c){ ok = false; break; }
+        wlApply(L, c, 0);
+      }
+      if(!ok) continue;
+      const by = L.tags.some(x=> x && x.by), lie = L.tags.some(x=> x && x.lie);
+      if(len>=6 && !by) continue;
+      if(len>=8 && !lie) continue;
+      L.attempts = attempt;
+      return L;
+    }
+    let L = null; while(!L) L = wlEmptyLine(n, len, false);
+    while(L.moves.length<=len) wlExtend(L);
+    L.attempts = 41;
+    return L;
+  }
+
+  /* Reasons, shown on Reveal: one short clause per relation. */
+  function wlOrd(n){ return n + (n===1 ? 'st' : n===2 ? 'nd' : n===3 ? 'rd' : 'th'); }
+  function wlLineName(from, to){
+    const fr=Math.floor(from/8), fc=from%8, tr=Math.floor(to/8), tc=to%8;
+    if(fr===tr) return 'the '+wlOrd(fr+1)+' rank';
+    if(fc===tc) return 'the '+'abcdefgh'[fc]+'-file';
+    const sr=Math.sign(tr-fr), sc=Math.sign(tc-fc);
+    let a=[fr,fc], b=[fr,fc];
+    while(a[0]-sr>=0 && a[0]-sr<8 && a[1]-sc>=0 && a[1]-sc<8) a=[a[0]-sr, a[1]-sc];
+    while(b[0]+sr>=0 && b[0]+sr<8 && b[1]+sc>=0 && b[1]+sc<8) b=[b[0]+sr, b[1]+sc];
+    const A = wlAlg(a[0]*8+a[1]), B = wlAlg(b[0]*8+b[1]);
+    return 'the '+(A<B ? A+'-'+B : B+'-'+A)+' diagonal';
+  }
+  function wlWhyGuards(sq, a, t){
+    if(a==='n') return 'by a knight jump';
+    if(a==='k') return 'from the next square';
+    if(a==='p') return 'diagonally forward';
+    return 'along '+wlLineName(sq[a], sq[t]);
+  }
+  function wlWhyNot(sq, a, t){
+    const blk = wlBlocker(sq, a, t);
+    if(blk>=0){
+      const bt = Object.keys(sq).find(x=> sq[x]===blk);
+      return 'the '+WL_NAME[bt]+' on '+wlAlg(blk)+' blocks '+wlLineName(sq[a], sq[t]);
+    }
+    if(a==='n') return "that's not a knight jump";
+    if(a==='k') return 'the king only guards the squares next to it';
+    if(a==='p'){
+      const dr = Math.floor(sq[t]/8)-Math.floor(sq[a]/8), dc = sq[t]%8-sq[a]%8;
+      return (dr===-1 && Math.abs(dc)===1) ? 'pawns guard forward, not backward'
+                                           : 'a pawn guards only the two squares diagonally in front of it';
+    }
+    if(a==='r') return "they don't share a rank or file";
+    if(a==='b') return "they don't share a diagonal";
+    return 'they share no rank, file or diagonal';
+  }
+  // Up to `max` reasons, missed guards first: [{kind:'missed'|'wrong', text}]
+  function wlReasons(sq, marked, ans, max){
+    const out = [], the = t=> 'the '+WL_NAME[t]+' on '+wlAlg(sq[t]);
+    const key = e=> e.split('>');
+    [...ans].filter(e=> !marked.has(e)).sort().forEach(e=>{ const [a,t] = key(e);
+      out.push({kind:'missed', text:'Missed: '+the(a)+' guards '+the(t)+' '+wlWhyGuards(sq, a, t)+'.'}); });
+    [...marked].filter(e=> !ans.has(e)).sort().forEach(e=>{ const [a,t] = key(e);
+      out.push({kind:'wrong', text:'Not a guard: '+the(a)+" doesn't reach "+the(t)+' \u2014 '+wlWhyNot(sq, a, t)+'.'}); });
+    return out.slice(0, max||4);
+  }
+  /* WL-GEN-END */
+
+  views['setup-wl'] = document.getElementById('view-setup-wl');
+  views['play-wl'] = document.getElementById('view-play-wl');
+  document.getElementById('card-wl').addEventListener('click', ()=> showView('setup-wl'));
+
+  const settingsWL = { pieces:4, length:10, time:0 };   // length 6|10|15|'endless'; time 0 = untimed
+  wireToggleRow('wl-pieces-row','pieces',settingsWL);
+  wireToggleRow('wl-length-row','length',settingsWL);
+  wireCustomClock('wl-time-row','wl-time-custom',settingsWL);
+
+  const WL_LIVES = 3;
+  // Pen colors of the truth view: a guard you found, one you missed, and a
+  // claim that isn't a guard (dashed, over the arrows). The CSS block's
+  // --wl-found / --wl-missed / --wl-wrong are the same three, for the sheet.
+  const WL_ARROW = { found:'#2ecc71', missed:'#e8b339', wrong:'#e5534b' };
+  const statsWL = { positions:0, clean:0, streak:0, best:0 };   // session only, reset on Start drill
+  let lineWL = null, runWL = null, announceTimerWL = null;
+
+  const viewElWL = views['play-wl'];
+  const boardElWL = document.getElementById('wl-board');
+  const frameElWL = document.getElementById('wl-frame');
+  const rankLabelsWL = document.getElementById('wl-rank-labels');
+  const fileLabelsWL = document.getElementById('wl-file-labels');
+  const announceElWL = document.getElementById('wl-announce');
+  const announceTextElWL = document.getElementById('wl-announce-text');
+  const hudModeWL = document.getElementById('wl-hud-mode');
+  const callWL = document.getElementById('wl-call');
+  const callGlyphWL = document.getElementById('wl-call-glyph');
+  const callMoveWL = document.getElementById('wl-call-move');
+  const callNoteWL = document.getElementById('wl-call-note');
+  const livesWL = document.getElementById('wl-lives');
+  const clockWL = document.getElementById('wl-clock');
+  const trackWL = document.getElementById('wl-track');
+  const askWL = document.getElementById('wl-ask');
+  const countWL = document.getElementById('wl-count');
+  const gridWL = document.getElementById('wl-grid');
+  const verdictWL = document.getElementById('wl-verdict');
+  const clearBtnWL = document.getElementById('wl-clear');
+  const checkBtnWL = document.getElementById('wl-check');
+  const restartBtnWL = document.getElementById('wl-restart');
+  const listBtnWL = document.getElementById('wl-list-btn');
+  const peekBtnWL = document.getElementById('wl-peek');
+  const revealBtnWL = document.getElementById('wl-reveal');
+  const listWL = document.getElementById('wl-list');
+  const whyWL = document.getElementById('wl-why');
+  const legendWL = document.getElementById('wl-legend');
+  const bannerWL = document.getElementById('wl-result-banner');
+  const resultLineWL = document.getElementById('wl-result-line');
+  const resultSubWL = document.getElementById('wl-result-sub');
+  const resultAnswerWL = document.getElementById('wl-result-answer');
+  const bestValWL = document.getElementById('wl-stat-best');
+  const bestLabelWL = document.getElementById('wl-stat-best-label');
+  const nextOverlayWL = document.getElementById('next-overlay');
+
+  const marksWL = newMarks();
+  marksWL.noProfile = true;          // the colors are the grading, never a profile's
+  const arrowSvgWL = makeArrowOverlay();
+  // The claims that aren't guards: dashed red lines ending in an X, drawn in
+  // board units (8 x 8) so they scale with the board and need no resize code.
+  const wrongSvgWL = document.createElementNS(ARROW_SVG_NS, 'svg');
+  wrongSvgWL.setAttribute('class','wl-wrong-svg');
+  wrongSvgWL.setAttribute('viewBox','0 0 8 8');
+  wrongSvgWL.setAttribute('preserveAspectRatio','none');
+  wrongSvgWL.setAttribute('aria-hidden','true');
+
+  const wlCap = s=> s.charAt(0).toUpperCase()+s.slice(1);
+  const wlGlyph = t=> '<span class="piece-wrap">'+PIECE_SVG['w'+t.toUpperCase()]+'</span>';
+  const wlEdge = e=> e.split('>');
+  function wlNewStep(){ return { result:null, checks:0, peeked:false, listed:false }; }
+
+  /* ---- best (Endless only): the deepest line per piece count ---- */
+  const WL_BEST_KEY = 'wavyChessPrepWhoseLineBest';      // {"deep":{"3":n,"4":n,"5":n,"6":n}}
+  function wlLoadBest(){
+    try{ const o = JSON.parse(localStorage.getItem(WL_BEST_KEY)||'{}');
+      return (o && typeof o==='object') ? o : {}; }catch(e){ return {}; }
+  }
+  function wlRecordFor(n){
+    const o = wlLoadBest();
+    return (o.deep && typeof o.deep==='object') ? (Number(o.deep[n])||0) : 0;
+  }
+  function wlBankRecord(){                                   // idempotent; finish + leave
+    if(!lineWL || !lineWL.endless || !runWL) return false;
+    const o = wlLoadBest(), deep = (o.deep && typeof o.deep==='object') ? o.deep : {};
+    if(runWL.depth <= (Number(deep[lineWL.n])||0)) return false;
+    deep[lineWL.n] = runWL.depth; o.deep = deep;
+    try{ localStorage.setItem(WL_BEST_KEY, JSON.stringify(o)); }catch(e){}
+    return true;
+  }
+
+  /* ---- rendering ---- */
+  function wlBuildLabels(flipped){
+    rankLabelsWL.innerHTML='';
+    (flipped ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0]).forEach(r=>{
+      const d=document.createElement('div'); d.className='rlabel'; d.textContent=r+1;
+      rankLabelsWL.appendChild(d);
+    });
+    fileLabelsWL.innerHTML='';
+    (flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7]).forEach(c=>{
+      const d=document.createElement('div'); d.className='flabel'; d.textContent='abcdefgh'[c];
+      fileLabelsWL.appendChild(d);
+    });
+  }
+
+  // Photo: the start squares. Peek and truth: where everything stands now,
+  // a ghost on each photo square a piece has left (when nothing stands
+  // there now) and a brass ring on each moved piece.
+  function wlRenderBoard(){
+    const r = runWL;
+    if(!r) return;
+    const photo = lineWL.pos[0], live = r.view!=='photo';
+    const now = live ? lineWL.pos[r.k] : photo;
+    const at = {}, ghost = {}, moved = new Set();
+    for(const t in now) at[now[t]] = t;
+    if(live) for(const t in photo){
+      if(photo[t]===now[t]) continue;
+      moved.add(now[t]);
+      if(at[photo[t]]===undefined) ghost[photo[t]] = t;
+    }
+    boardElWL.innerHTML='';
+    const ranks = r.flipped ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
+    const files = r.flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+    ranks.forEach(rk=>{
+      files.forEach(c=>{
+        const idx = rcIdx(rk,c);
+        const sq = document.createElement('div');
+        sq.className = 'sq ' + (((rk+c)%2===0) ? 'dark' : 'light');
+        sq.dataset.idx = idx;
+        const t = at[idx]!==undefined ? at[idx] : ghost[idx];
+        if(t!==undefined){
+          const wrap = document.createElement('span');
+          wrap.className='piece-wrap';
+          wrap.innerHTML = PIECE_SVG['w'+t.toUpperCase()];
+          sq.appendChild(wrap);
+          if(at[idx]===undefined) sq.classList.add('wl-ghost');
+        }
+        if(moved.has(idx)) sq.classList.add('wl-moved');
+        boardElWL.appendChild(sq);
+      });
+    });
+    boardElWL.appendChild(wrongSvgWL);
+    boardElWL.appendChild(arrowSvgWL);
+    frameElWL.classList.toggle('wl-peeking', r.view==='peek');
+    clearMarksObj(marksWL);
+    if(r.view==='truth') r.arrows.forEach(a=> marksWL.arrows.push({ from:a.from, to:a.to, color:a.color }));
+    wlDrawWrong(r.view==='truth' ? r.wrong : []);
+    renderMarks(boardElWL, arrowSvgWL, marksWL, wlBoardOf(now));
+  }
+
+  function wlDrawWrong(list){
+    while(wrongSvgWL.firstChild) wrongSvgWL.removeChild(wrongSvgWL.firstChild);
+    const flip = !!(runWL && runWL.flipped);
+    const pt = i=>{ const f = i%8, rk = Math.floor(i/8);
+      return [(flip ? 7-f : f)+0.5, (flip ? rk : 7-rk)+0.5]; };
+    const mk = (tag, attrs, parent)=>{
+      const el = document.createElementNS(ARROW_SVG_NS, tag);
+      for(const k in attrs) el.setAttribute(k, attrs[k]);
+      parent.appendChild(el);
+      return el;
+    };
+    list.forEach(({from, to, beside})=>{
+      let [x1,y1] = pt(from), [x2,y2] = pt(to);
+      const d = 0.17;
+      // A claim the wrong way round (the rook guards the queen, when it's
+      // the queen that guards the rook) would lie inside that arrow's
+      // shaft: it runs beside it instead, its X still on the target square.
+      if(beside){
+        const len = Math.hypot(x2-x1, y2-y1) || 1, nx = -(y2-y1)/len*0.22, ny = (x2-x1)/len*0.22;
+        x1 += nx; y1 += ny; x2 += nx; y2 += ny;
+      }
+      const g = mk('g', { fill:'none', 'stroke-linecap':'round', opacity:'.9' }, wrongSvgWL);
+      const strokes = [
+        { x1, y1, x2, y2, dash:'.16 .12', w:0.075 },
+        { x1:x2-d, y1:y2-d, x2:x2+d, y2:y2+d, w:0.1 },
+        { x1:x2-d, y1:y2+d, x2:x2+d, y2:y2-d, w:0.1 }
+      ];
+      // A thin dark halo under each stroke, as the house arrows have, so the
+      // red reads on every board color.
+      [true, false].forEach(halo=> strokes.forEach(s=>{
+        const a = { x1:s.x1, y1:s.y1, x2:s.x2, y2:s.y2,
+          stroke: halo ? 'rgba(0,0,0,.35)' : WL_ARROW.wrong, 'stroke-width': String(halo ? s.w+0.05 : s.w) };
+        if(s.dash) a['stroke-dasharray'] = s.dash;
+        mk('line', a, g);
+      }));
+    });
+  }
+
+  // One row per guard (K Q R B N P order), one chip per other piece showing
+  // the guarded piece; the piece's own cell stays empty, so a column reads
+  // "who guards the queen". Rebuilt each step, so a skin's new piece set
+  // shows on the next move.
+  function wlBuildSheet(){
+    const types = lineWL.types, n = types.length;
+    gridWL.innerHTML='';
+    gridWL.dataset.n = n;
+    gridWL.style.setProperty('--wl-n', n);
+    types.forEach(a=>{
+      const who = document.createElement('div');
+      who.className = 'wl-who';
+      who.dataset.t = a;
+      who.innerHTML = wlGlyph(a)+'<span class="wl-letter">'+a.toUpperCase()+'</span><span class="wl-name">'+wlCap(WL_NAME[a])+'</span>';
+      gridWL.appendChild(who);
+      types.forEach(t=>{
+        if(t===a){
+          const s = document.createElement('div');
+          s.className = 'wl-self';
+          s.setAttribute('aria-hidden','true');
+          gridWL.appendChild(s);
+          return;
+        }
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'wl-chip';
+        b.dataset.e = a+'>'+t;
+        b.setAttribute('aria-pressed','false');
+        const label = wlCap(WL_NAME[a])+' guards '+WL_NAME[t];
+        b.setAttribute('aria-label', label);
+        b.title = label;
+        b.innerHTML = wlGlyph(t);
+        gridWL.appendChild(b);
+      });
+    });
+  }
+
+  function wlSyncSheet(){
+    const r = runWL;
+    if(!r) return;
+    const ans = lineWL.ans[r.k];
+    const graded = r.phase==='solved' || r.phase==='revealed' || r.phase==='done';
+    gridWL.querySelectorAll('.wl-chip').forEach(ch=>{
+      const e = ch.dataset.e, on = r.marks.has(e), [a, t] = wlEdge(e);
+      const right = graded && on && ans.has(e), wrong = graded && on && !ans.has(e), missed = graded && !on && ans.has(e);
+      ch.setAttribute('aria-pressed', on ? 'true' : 'false');
+      ch.disabled = r.phase!=='answer';
+      ch.classList.toggle('is-right', right);
+      ch.classList.toggle('is-wrong', wrong);
+      ch.classList.toggle('is-missed', missed);
+      // the grade in words too, for a screen reader and the tooltip
+      const label = wlCap(WL_NAME[a])+' guards '+WL_NAME[t]
+        + (right ? ': found' : wrong ? ': not a guard' : missed ? ': missed' : '');
+      ch.setAttribute('aria-label', label);
+      ch.title = label;
+    });
+    gridWL.querySelectorAll('.wl-who').forEach(w=>{
+      w.classList.toggle('is-armed', r.armed===w.dataset.t);
+      w.classList.toggle('has-error', r.flags.has(w.dataset.t));
+    });
+    countWL.innerHTML = '<b>'+r.marks.size+'</b> marked';
+  }
+
+  function wlIsLast(){ return lineWL.endless ? runWL.over : runWL.k>=lineWL.len; }
+  function wlCanPeek(){ return !!(runWL && lineWL && !lineWL.endless && runWL.phase==='answer' && runWL.k>=1); }
+
+  function wlRenderHud(){
+    const r = runWL, L = lineWL, k = r.k, mv = L.moves[k];
+    let mode;
+    if(r.phase==='done') mode = L.endless ? 'LINE DROPPED' : 'LINE COMPLETE';
+    else if(r.view==='truth') mode = 'THE REAL POSITION';
+    else if(r.view==='peek') mode = 'PEEKING<span class="wl-mode-more"> \u00B7 THE BOARD IN YOUR HEAD</span>';
+    else if(!k) mode = 'START \u00B7 '+L.n+' PIECES';
+    else mode = L.endless ? 'MOVE '+k+' \u00B7 DEPTH '+r.depth : 'MOVE '+k+' OF '+L.len;
+    hudModeWL.innerHTML = mode;           // plain text, except the peek's long tail
+    callWL.classList.toggle('is-start', !k);
+    callWL.classList.toggle('is-good', r.note.tone==='good');
+    callWL.classList.toggle('is-bad', r.note.tone==='bad');
+    callGlyphWL.innerHTML = k ? wlGlyph(mv.t) : '';
+    callMoveWL.textContent = k ? mv.san : 'Find every guard';
+    callNoteWL.textContent = r.note.text;
+    livesWL.hidden = !L.endless;
+    if(L.endless){
+      livesWL.innerHTML='';
+      for(let i=0;i<WL_LIVES;i++){
+        const s = document.createElement('span');
+        s.className = 'life'+(i<r.lives ? ' on' : '');
+        s.textContent = '\u2665';
+        livesWL.appendChild(s);
+      }
+      livesWL.setAttribute('aria-label', r.lives+(r.lives===1 ? ' life' : ' lives')+' left');
+    }
+    askWL.innerHTML = k ? 'After '+k+'. <span class="wl-san">'+mv.san+'</span>' : 'Start position';
+
+    const p = r.phase, fixed = !L.endless;
+    checkBtnWL.textContent = (p==='answer' || p==='intro') ? 'Check'
+      : p==='done' ? 'Next line' : (wlIsLast() ? 'Finish line' : 'Next move');
+    checkBtnWL.disabled = p==='intro';
+    clearBtnWL.disabled = p!=='answer';
+    revealBtnWL.disabled = p!=='answer';
+    restartBtnWL.hidden = !fixed;
+    listBtnWL.hidden = !fixed;
+    peekBtnWL.hidden = !fixed;
+    restartBtnWL.disabled = p==='intro';
+    listBtnWL.disabled = p==='intro';
+    peekBtnWL.disabled = !wlCanPeek();
+    peekBtnWL.setAttribute('aria-pressed', r.peeking ? 'true' : 'false');
+    legendWL.hidden = r.view!=='truth';
+  }
+
+  // The call slides in for each new move (transform/opacity; off under
+  // reduced motion).
+  function wlFresh(){
+    callWL.classList.remove('is-fresh');
+    void callWL.offsetWidth;
+    callWL.classList.add('is-fresh');
+  }
+
+  // S 1 2 ... N: colored by result, never in a fixed order. Endless shows
+  // the last ten and the live one.
+  function wlRenderTrack(){
+    const r = runWL, L = lineWL;
+    const last = L.endless ? r.k : L.len, first = L.endless ? Math.max(0, r.k-10) : 0;
+    trackWL.innerHTML='';
+    for(let i=first;i<=last;i++){
+      const st = r.steps[i], res = st && st.result;
+      const d = document.createElement('span');
+      d.className = 'wl-dot' + (res ? ' is-'+res : (i===r.k && r.phase!=='done' ? ' is-live' : ''));
+      d.textContent = i ? i : 'S';
+      const label = (i ? 'Move '+i : 'Start')+': '+(res || (i===r.k ? 'now' : 'to come'));
+      d.title = label;
+      d.setAttribute('aria-label', label);
+      trackWL.appendChild(d);
+    }
+  }
+
+  function wlRefreshStats(){
+    document.getElementById('wl-stat-pos').textContent = statsWL.positions;
+    renderSolvedStat('wl-stat-acc', statsWL.clean, statsWL.positions);
+    document.getElementById('wl-stat-streak').textContent = statsWL.streak;
+    const endless = !!(lineWL && lineWL.endless);
+    bestLabelWL.textContent = endless ? 'Record' : 'Best streak';
+    bestValWL.textContent = endless ? (runWL ? runWL.record : 0) : statsWL.best;
+  }
+
+  function wlRenderList(){
+    const r = runWL;
+    listWL.hidden = !r.listOpen;
+    listBtnWL.setAttribute('aria-expanded', r.listOpen ? 'true' : 'false');
+    if(!r.listOpen) return;
+    if(!r.k){ listWL.textContent = 'No moves called yet.'; return; }
+    listWL.innerHTML = lineWL.moves.slice(1, r.k+1).map((m,i)=>
+      '<span class="wl-mv'+(i+1===r.k ? ' is-now' : '')+'"><i>'+(i+1)+'.</i> '+m.san+'</span>').join('');
+  }
+
+  function wlRenderWhy(list){
+    whyWL.innerHTML='';
+    list.forEach(x=>{
+      const li = document.createElement('li');
+      if(x.kind==='missed') li.className = 'is-missed';
+      li.textContent = x.text;
+      whyWL.appendChild(li);
+    });
+    whyWL.hidden = !list.length;
+  }
+
+  function wlSetVerdict(text, tone){
+    verdictWL.textContent = text;
+    verdictWL.className = 'wl-verdict'+(tone ? ' is-'+tone : '');
+  }
+
+  function wlRenderClock(){
+    const r = runWL;
+    clockWL.textContent = fmtTime(r.time ? r.left : r.elapsed);
+    clockWL.classList.toggle('low', !!r.time && r.phase==='answer' && r.left<=5);
+  }
+
+  function wlRenderAll(){
+    wlRenderBoard();
+    wlRenderHud();
+    wlSyncSheet();
+    wlRenderTrack();
+    wlRenderList();
+    wlRenderClock();
+  }
+
+  /* ---- flow ---- */
+  function wlStartLine(fresh){
+    if(runWL){ clearInterval(runWL.timerId); wlPeekEnd(true); }
+    clearAnnounce(announceElWL, boardElWL, announceTimerWL);
+    announceTimerWL = null;
+    if(fresh || !lineWL || lineWL.endless) lineWL = wlMakeLine(settingsWL.pieces, settingsWL.length);
+    const L = lineWL;
+    const time = settingsWL.time>0 ? Math.max(1, Math.round(settingsWL.time)) : 0;
+    runWL = {
+      k:0, phase:'intro', view:'photo', marks:new Set(), armed:null, flags:new Set(),
+      steps:[], arrows:[], wrong:[], lives:WL_LIVES, depth:0, over:false,
+      peeking:false, peekLatched:false, peekDownAt:0, listOpen:false,
+      flipped: runWL ? runWL.flipped : false,
+      timerId:null, time, left:time, elapsed:0,
+      record: L.endless ? wlRecordFor(L.n) : 0,
+      note:{ text:'This one you can see.', tone:'' }
+    };
+    for(let i=0;i<=(L.endless ? 0 : L.len);i++) runWL.steps.push(wlNewStep());
+    bannerWL.style.display='none';
+    resultAnswerWL.innerHTML='';
+    viewElWL.style.setProperty('--wl-rows', L.n);
+    wlSetVerdict('', '');
+    wlRenderWhy([]);
+    wlBuildLabels(runWL.flipped);
+    wlBuildSheet();
+    wlRefreshStats();
+    wlRenderAll();
+    announceTimerWL = showAnnounce(announceElWL, announceTextElWL, boardElWL,
+      L.endless ? 'Hold the line' : 'Find every guard', ()=>{
+        announceTimerWL = null;
+        if(!views['play-wl'].classList.contains('active')) return;
+        if(!runWL || runWL.phase!=='intro') return;
+        runWL.phase = 'answer';
+        wlRenderAll();
+        wlStartClock();
+      });
+  }
+
+  function wlEnterStep(k){
+    const r = runWL, L = lineWL;
+    if(L.endless){
+      while(L.moves.length<=k){
+        if(!wlExtend(L)){ r.over = true; wlFinish(); return; }
+      }
+    }
+    r.k = k;
+    r.marks = new Set(); r.armed = null; r.flags = new Set(); r.listOpen = false;
+    r.steps[k] = wlNewStep();
+    r.phase = 'answer'; r.view = 'photo'; r.arrows = []; r.wrong = [];
+    r.note = { text:'Picture it. The board stays put.', tone:'' };
+    if(r.time) r.left = r.time;
+    wlSetVerdict('', '');
+    wlRenderWhy([]);
+    wlBuildSheet();
+    wlRenderAll();
+    wlFresh();
+    playSound('move');
+  }
+
+  // One place for step results and the session stats.
+  function wlResolve(result){
+    const st = runWL.steps[runWL.k];
+    st.result = result;
+    statsWL.positions++;
+    if(result==='clean'){
+      statsWL.clean++; statsWL.streak++; statsWL.best = Math.max(statsWL.best, statsWL.streak);
+      if(lineWL.endless && runWL.k>0) runWL.depth++;
+    } else statsWL.streak = 0;
+    wlRefreshStats();
+  }
+
+  function wlCheck(){
+    const r = runWL;
+    if(!r || r.phase!=='answer') return;
+    wlPeekEnd(true);
+    const ans = lineWL.ans[r.k], st = r.steps[r.k];
+    const exact = ans.size===r.marks.size && [...ans].every(e=> r.marks.has(e));
+    if(exact) return wlSolved(st.checks===0 && !st.peeked ? 'clean' : 'fixed');
+    if(lineWL.endless) return wlReveal('strike');
+    st.checks++;
+    const missing = [...ans].filter(e=> !r.marks.has(e)), extra = [...r.marks].filter(e=> !ans.has(e));
+    const parts = [];
+    if(missing.length) parts.push(missing.length+' missing');
+    if(extra.length) parts.push(extra.length+' extra');
+    let text = 'Not yet \u2014 '+parts.join(', ');
+    r.flags = new Set();
+    if(st.checks>=2){
+      missing.concat(extra).forEach(e=> r.flags.add(wlEdge(e)[0]));
+      text += ' \u00B7 the flagged rows are off';
+    }
+    r.armed = null;
+    wlSetVerdict(text, 'near');
+    wlRenderAll();
+  }
+
+  function wlSolved(result){
+    const r = runWL, n = lineWL.ans[r.k].size;
+    r.phase = 'solved'; r.armed = null; r.flags = new Set();
+    r.note = { text: result==='clean' ? 'Excellent' : 'Solved', tone:'good' };
+    wlSetVerdict(!n ? 'Nothing guards anything. Right.'
+      : (n===1 ? 'One guard' : 'All '+n+' guards')+(result==='clean' ? ', first try.' : '.'), 'good');
+    wlResolve(result);
+    playSolvedSound();
+    wlRenderAll();
+  }
+
+  // Reveal, a timeout or an Endless strike: grade the sheet and show the
+  // real position with its arrows and the reasons.
+  function wlReveal(why){
+    const r = runWL;
+    if(!r || r.phase!=='answer') return;
+    wlPeekEnd(true);
+    const k = r.k, now = lineWL.pos[k], ans = lineWL.ans[k], marks = r.marks;
+    r.phase = 'revealed'; r.view = 'truth'; r.armed = null; r.flags = new Set();
+    r.arrows = [...ans].map(e=>{ const [a,t] = wlEdge(e);
+      return { from:now[a], to:now[t], color: marks.has(e) ? WL_ARROW.found : WL_ARROW.missed }; });
+    r.wrong = [...marks].filter(e=> !ans.has(e)).map(e=>{ const [a,t] = wlEdge(e);
+      return { from:now[a], to:now[t], beside: t!=='n' && ans.has(t+'>'+a) }; });
+    wlRenderWhy(wlReasons(now, marks, ans, 4));
+    const timeNote = 'Time \u2014 the board shows where everything stands now.';
+    if(lineWL.endless){
+      r.lives--;
+      playSound('check');
+      if(r.lives<=0){ r.lives = 0; r.over = true; }
+      wlSetVerdict(r.over ? 'Last life gone'
+        : 'Strike \u2014 '+r.lives+(r.lives===1 ? ' life left' : ' lives left'), 'bad');
+      r.note = { text: why==='time' ? timeNote : 'Strike \u2014 the board shows the real position.', tone:'bad' };
+    } else {
+      const found = [...ans].filter(e=> marks.has(e)).length, bad = r.wrong.length;
+      wlSetVerdict((ans.size ? found+' of '+ans.size+' found' : 'Nothing guards anything')
+        + (bad ? ', '+bad+(bad===1 ? ' not a guard' : ' not guards') : ''), 'bad');
+      r.note = why==='time' ? { text:timeNote, tone:'bad' }
+        : { text:'Revealed \u2014 the board shows where everything stands now.', tone:'' };
+    }
+    wlResolve('missed');
+    wlRenderAll();
+  }
+
+  function wlNext(){
+    const r = runWL;
+    if(!r || (r.phase!=='solved' && r.phase!=='revealed')) return;
+    wlPeekEnd(true);
+    if(wlIsLast()) wlFinish();
+    else wlEnterStep(r.k+1);
+  }
+
+  function wlFinish(){
+    const r = runWL, L = lineWL;
+    if(!r || (r.phase!=='solved' && r.phase!=='revealed')) return;
+    wlPeekEnd(true);
+    clearInterval(r.timerId);
+    if(r.phase==='solved'){
+      const now = L.pos[r.k];
+      r.arrows = [...L.ans[r.k]].map(e=>{ const [a,t] = wlEdge(e);
+        return { from:now[a], to:now[t], color:WL_ARROW.found }; });
+      r.wrong = [];
+      wlRenderWhy([]);
+    }
+    r.phase = 'done'; r.view = 'truth';
+    r.note = { text:'The board shows the final position.', tone:'' };
+
+    const steps = r.steps.slice(0, r.k+1);
+    const count = res=> steps.filter(s=> s.result===res).length;
+    const clean = count('clean'), fixed = count('fixed'), missed = count('missed');
+    const peeks = steps.filter(s=> s.peeked).length, looks = steps.filter(s=> s.listed).length;
+    const tail = ' \u00B7 '+L.n+' pieces \u00B7 '+fmtTime(r.elapsed);
+    // The line, with every move that wasn't first try in bold (wl-slip: so
+    // the Next box's copy is styled as the banner's).
+    const called = [];
+    if(steps[0].result!=='clean') called.push('<b class="wl-slip">Start</b>');
+    for(let i=1;i<=r.k;i++){
+      const t = i+'. '+L.moves[i].san;
+      called.push(steps[i].result==='clean' ? t : '<b class="wl-slip">'+t+'</b>');
+    }
+    let title, sub;
+    if(L.endless){
+      const isRecord = r.depth > r.record;
+      wlBankRecord();
+      title = isRecord ? 'New record' : 'Line dropped';
+      sub = 'Held '+r.depth+' \u00B7 reached move '+r.k+tail+(isRecord ? '' : ' \u00B7 record '+r.record);
+      if(isRecord){ r.record = r.depth; playSolvedSound(); }
+      else playLoseSound();
+    } else {
+      const total = steps.length;
+      title = clean===total ? 'Clean sheet' : (clean/total>=0.7 ? 'Line held' : 'Line slipped');
+      const parts = [clean+' of '+total+' first try'];
+      if(fixed) parts.push(fixed+' fixed');
+      if(missed) parts.push(missed+' missed');
+      if(peeks) parts.push(peeks+(peeks===1 ? ' peek' : ' peeks'));
+      if(looks) parts.push(looks+(looks===1 ? ' list look' : ' list looks'));
+      sub = parts.join(' \u00B7 ')+tail;
+      if(clean===total) playWinSound();
+    }
+    resultLineWL.textContent = title;
+    resultSubWL.textContent = sub;
+    resultAnswerWL.innerHTML = r.k ? 'The line: '+called.join(' ') : 'The line: the start position only.';
+    wlRefreshStats();
+    wlRenderAll();
+    bannerWL.style.display='flex';
+  }
+
+  // Enter and the primary button: Check, then Next move / Finish line, and
+  // once the line is over, the next line.
+  function wlPrimary(){
+    const r = runWL;
+    if(!r) return;
+    if(r.phase==='answer') wlCheck();
+    else if(r.phase==='solved' || r.phase==='revealed') wlNext();
+    else if(r.phase==='done') wlStartLine(true);
+  }
+
+  function wlToggle(e){
+    const r = runWL;
+    if(!r || r.phase!=='answer') return;
+    if(r.marks.has(e)) r.marks.delete(e); else r.marks.add(e);
+    r.flags.delete(wlEdge(e)[0]);          // that row's flag was about the old marks
+    wlSyncSheet();
+  }
+
+  function wlClear(){
+    const r = runWL;
+    if(!r || r.phase!=='answer') return;
+    r.marks = new Set(); r.armed = null; r.flags = new Set();
+    wlSyncSheet();
+  }
+
+  // Q then R: the queen guards the rook. The first letter arms a row; the
+  // same letter again disarms it; letters of pieces not in play do nothing.
+  function wlLetter(t){
+    const r = runWL;
+    if(!r || r.phase!=='answer' || lineWL.types.indexOf(t)<0) return;
+    if(!r.armed) r.armed = t;
+    else if(r.armed===t) r.armed = null;
+    else { const a = r.armed; r.armed = null; wlToggle(a+'>'+t); }
+    wlSyncSheet();
+  }
+
+  function wlToggleList(){
+    const r = runWL;
+    if(!r || lineWL.endless || r.phase==='intro') return;
+    r.listOpen = !r.listOpen;
+    if(r.listOpen && r.phase==='answer' && r.k>0) r.steps[r.k].listed = true;
+    wlRenderList();
+  }
+
+  function wlPeekStart(){
+    const r = runWL;
+    if(!wlCanPeek() || r.peeking) return;
+    r.peeking = true; r.peekLatched = false;
+    r.steps[r.k].peeked = true;
+    r.view = 'peek';
+    wlRenderBoard();
+    wlRenderHud();
+  }
+  function wlPeekEnd(quiet){
+    const r = runWL;
+    if(!r || !r.peeking) return;
+    r.peeking = false; r.peekLatched = false;
+    if(r.view==='peek') r.view = 'photo';
+    peekBtnWL.setAttribute('aria-pressed','false');
+    if(!quiet){ wlRenderBoard(); wlRenderHud(); }
+  }
+
+  function wlStartClock(){
+    const r = runWL;
+    clearInterval(r.timerId);
+    r.timerId = setInterval(wlTick, 1000);
+    wlRenderClock();
+  }
+  function wlTick(){
+    const r = runWL;
+    if(!r || r.phase==='intro' || r.phase==='done') return;
+    r.elapsed++;
+    if(r.time && r.phase==='answer'){
+      r.left = Math.max(0, r.left-1);
+      if(r.left<=0){ wlRenderClock(); wlReveal('time'); return; }
+    }
+    wlRenderClock();
+  }
+
+  function wlFlip(){
+    const r = runWL;
+    if(!r) return;
+    r.flipped = !r.flipped;
+    wlBuildLabels(r.flipped);
+    wlRenderBoard();
+  }
+
+  /* ---- input ---- */
+  gridWL.addEventListener('click', (e)=>{
+    const ch = e.target.closest('.wl-chip');
+    if(!ch || !runWL || runWL.phase!=='answer') return;
+    runWL.armed = null;
+    wlToggle(ch.dataset.e);
+  });
+  // A mouse or finger click leaves no focus behind on this screen (the
+  // sheet, the Solved toggle, the banner), so a later Space means Peek and
+  // Enter means Check; keyboard focus stays put.
+  viewElWL.addEventListener('click', (e)=>{
+    const b = e.target.closest && e.target.closest('button');
+    if(b && e.detail>0) b.blur();
+  });
+  checkBtnWL.addEventListener('click', wlPrimary);
+  clearBtnWL.addEventListener('click', wlClear);
+  revealBtnWL.addEventListener('click', ()=> wlReveal('reveal'));
+  listBtnWL.addEventListener('click', wlToggleList);
+  restartBtnWL.addEventListener('click', ()=>{
+    if(!runWL || !lineWL || lineWL.endless || runWL.phase==='intro') return;
+    wlStartLine(false);
+  });
+
+  // Peek: hold to see the board in your head; a quick tap latches it on and
+  // the next press ends it.
+  peekBtnWL.addEventListener('pointerdown', (e)=>{
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    if(runWL && runWL.peekLatched){ e.preventDefault(); wlPeekEnd(); return; }
+    if(!wlCanPeek()) return;
+    e.preventDefault();
+    try{ peekBtnWL.setPointerCapture(e.pointerId); }catch(err){}
+    runWL.peekDownAt = performance.now();
+    wlPeekStart();
+  });
+  peekBtnWL.addEventListener('pointerup', ()=>{
+    const r = runWL;
+    if(!r || !r.peeking || r.peekLatched) return;
+    if(performance.now()-r.peekDownAt < 250) r.peekLatched = true;
+    else wlPeekEnd();
+  });
+  peekBtnWL.addEventListener('pointercancel', ()=>{
+    if(runWL && runWL.peeking && !runWL.peekLatched) wlPeekEnd();
+  });
+  // A click with no pointer behind it (assistive tech) toggles a latched peek.
+  peekBtnWL.addEventListener('click', (e)=>{
+    if(e.detail!==0 || !runWL) return;
+    if(runWL.peeking) wlPeekEnd();
+    else if(wlCanPeek()){ wlPeekStart(); runWL.peekLatched = true; }
+  });
+  peekBtnWL.addEventListener('contextmenu', (e)=> e.preventDefault());
+  window.addEventListener('blur', ()=>{ if(runWL) wlPeekEnd(); });
+
+  function wlKeysLive(e){
+    if(!runWL || !views['play-wl'] || !views['play-wl'].classList.contains('active')) return false;
+    if(e.defaultPrevented) return false;                         // the Next box took it
+    if(nextOverlayWL && nextOverlayWL.classList.contains('active')) return false;
+    if(document.querySelector('.modal-overlay.active')) return false;
+    const tag = document.activeElement && document.activeElement.tagName;
+    if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return false;
+    if(e.ctrlKey || e.metaKey || e.altKey) return false;
+    return true;
+  }
+  // A button reached with the keyboard keeps its own Enter and Space: a
+  // chip toggles, Clear clears, Reveal reveals, Home goes home. A mouse or
+  // finger click leaves no focus behind on this screen (see above), and a
+  // clicked Home or Settings button outside it isn't :focus-visible, so
+  // then Enter is Check / Next and Space is Peek.
+  function wlFocusedControl(){
+    const a = document.activeElement;
+    if(!a || a.tagName!=='BUTTON' || a.disabled) return null;
+    if(viewElWL.contains(a)) return a;
+    try{ return a.matches(':focus-visible') ? a : null; }catch(err){ return a; }
+  }
+  // Space held on the Peek button is still a hold-to-peek.
+  function wlSpaceIsNative(){ const a = wlFocusedControl(); return !!a && a!==peekBtnWL; }
+  function wlEnterIsNative(){ return !!wlFocusedControl(); }
+  document.addEventListener('keydown', (e)=>{
+    if(!wlKeysLive(e)) return;
+    const r = runWL, key = e.key, low = key.length===1 ? key.toLowerCase() : key;
+    if(key==='Enter'){
+      if(wlEnterIsNative()){ if(e.repeat) e.preventDefault(); return; }   // one click per press
+      e.preventDefault();
+      if(!e.repeat) wlPrimary();
+      return;
+    }
+    if(key===' ' || key==='Spacebar'){
+      if(wlSpaceIsNative()) return;
+      e.preventDefault();
+      if(!e.repeat) wlPeekStart();
+      return;
+    }
+    if(key==='Escape'){
+      if(r.armed){ r.armed = null; wlSyncSheet(); }
+      if(r.peekLatched) wlPeekEnd();
+      return;
+    }
+    if(key==='Backspace' || key==='Delete'){
+      if(r.phase==='answer'){ e.preventDefault(); wlClear(); }
+      return;
+    }
+    if(low==='x'){ e.preventDefault(); wlFlip(); return; }
+    if(low==='l'){
+      if(!lineWL.endless){ e.preventDefault(); wlToggleList(); }
+      return;
+    }
+    if(low.length===1 && 'kqrbnp'.indexOf(low)>=0){
+      if(r.phase!=='answer' || e.repeat) return;
+      e.preventDefault();
+      wlLetter(low);
+    }
+  });
+  document.addEventListener('keyup', (e)=>{
+    if(!runWL || (e.key!==' ' && e.key!=='Spacebar')) return;
+    if(!views['play-wl'] || !views['play-wl'].classList.contains('active')) return;
+    if(wlSpaceIsNative()) return;
+    e.preventDefault();
+    if(runWL.peeking && !runWL.peekLatched) wlPeekEnd();
+  });
+
+  onLeavePlay(()=>{
+    if(runWL){ clearInterval(runWL.timerId); wlPeekEnd(true); wlBankRecord(); }
+    clearAnnounce(announceElWL, boardElWL, announceTimerWL);
+    announceTimerWL = null;
+  });
+
+  document.getElementById('wl-next-line').addEventListener('click', ()=> wlStartLine(true));
+  document.getElementById('start-wl-drill').addEventListener('click', ()=>{
+    statsWL.positions = 0; statsWL.clean = 0; statsWL.streak = 0; statsWL.best = 0;
+    lineWL = null;
+    wlRefreshStats();
+    showView('play-wl');
+    wlStartLine(true);
   });
 
   /* ================= DRILL 03: ENDGAME REFLEXES (arcade) ================= */
@@ -21079,7 +22566,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const settingsBtn = document.getElementById('next-settings');
     const saveBtn = document.getElementById('next-save');
     const linkBtn = document.getElementById('next-link');
-    const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner']
+    const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner', 'wl-result-banner']
       .map(id => document.getElementById(id)).filter(Boolean);
     // dismissed: the banner whose box was closed to look at the board, so it
     // stays closed until that round is over.
