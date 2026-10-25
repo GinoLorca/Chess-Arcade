@@ -1456,6 +1456,7 @@
   :root[data-skin="uptown"] #card-coord{--ux-line:#ff6319} :root[data-skin="uptown"] #card-puzzle{--ux-line:#ee352e}
   :root[data-skin="uptown"] #card-rush{--ux-line:#fccc0a}
   :root[data-skin="uptown"] #card-wl{--ux-line:#a7a9ac}      /* L line: grey after 09 orange, 10 red, 11 yellow */
+  :root[data-skin="uptown"] #card-sb{--ux-line:#996633}      /* J/Z brown after 11 yellow, 12 grey */
   /* Drill names are black 1:4 signs with the white rule, arrow first; no glass. */
   :root[data-skin="uptown"] .drill-name,
   :root[data-skin="uptown"][data-glass="on"] .drill-name{
@@ -4104,7 +4105,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); margin-top:2px;
   }
   /* The Solved stat (Puzzles and its practice runs, Knight's Tour, Sneaky
-     Checks, Whose Line) is a button: a click shows it as solved/total ("3/4") instead
+     Checks, Whose Line, Static Boards) is a button: a click shows it as solved/total ("3/4") instead
      of the percentage, and back (see renderSolvedStat). It keeps the plain
      cells' box exactly -- padding, divider, contents at the top -- and
      min-width:0, so a long "12/15" never widens it or pushes the strip:
@@ -4373,6 +4374,136 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #wl-announce.wl-callout #wl-announce-text{ animation:wlCalloutFade var(--wl-co-fade, 350ms) linear var(--wl-co-hold, 650ms) forwards; }
     .wl-chip{ transition:none; }
     .wl-chip:active:not(:disabled){ transform:none; }
+  }
+  /* ---- Drill 13: Static Boards ----
+     Scoped to #view-play-sb / #sb-board / .sb-*: nothing here reaches another
+     drill, Puzzles (pzCentreBoard) or the shared has-side rules. Tokens only;
+     motion is transform/opacity only and stops under prefers-reduced-motion. */
+  /* With 13 drills the menu's last row holds one card: it takes the whole
+     row, so every row of the two-column grid stays full. */
+  .drill-grid > .drill-card:last-child:nth-child(odd){ grid-column:1 / -1; }
+  #view-play-sb [hidden]{ display:none !important; }
+  #sb-step-banner{ display:none !important; }
+  /* The board and the tray on one screen: the house width rule plus a height
+     rule. Stacked (under 1180px) the tray card sits under the board, so the
+     reserve holds the HUD, the frame and that card. */
+  #view-play-sb{ --sb-vh:100vh; --sb-reserve:190px;
+    --sq:clamp(30px, min(calc((100vw - 100px) / 8), calc((var(--sb-vh) - var(--sb-reserve)) / 8)), 85px);
+    --sb-good-ui:color-mix(in srgb, var(--good) 55%, var(--ink));
+    --sb-bad-ui:color-mix(in srgb, var(--bad) 60%, var(--ink)); }
+  @supports (height:100dvh){ #view-play-sb{ --sb-vh:100dvh; } }
+  @media (max-width:1179.98px){ #view-play-sb{ --sb-reserve:400px; } }
+  /* Phones scroll a little anyway: keep the house width-only squares there. */
+  @media (max-width:619.98px){ #view-play-sb{ --sq:clamp(30px, calc((100vw - 100px) / 8), 85px); } }
+  /* Landscape iPads under 1180px (1024x768, 1133x744): the tray goes beside
+     the board, as it does from 1180px (the Whose Line rule). */
+  @media (min-width:900px) and (max-width:1179.98px) and (min-aspect-ratio:5/4){
+    #view-play-sb{ --sb-reserve:224px;
+      --sq:clamp(30px, min(calc((min(100vw, 880px) - 404px) / 8), calc((var(--sb-vh) - var(--sb-reserve)) / 8)), 85px); }
+    .wrap.play-mode #view-play-sb.view.active.has-side{ display:grid; grid-template-columns:minmax(0,1fr) 300px;
+      column-gap:18px; align-items:start; }
+    .wrap.play-mode #view-play-sb.view.active.has-side > *{ grid-column:1; }
+    .wrap.play-mode #view-play-sb.view.active.has-side > .side-panel{ grid-column:2; grid-row:1 / span 20; gap:12px; }
+    .wrap.play-mode #view-play-sb .hud{ padding-right:18px; }
+  }
+  @media (min-width:900px) and (max-width:959.98px) and (min-aspect-ratio:5/4){
+    .wrap.play-mode #view-play-sb.view.active.has-side > .side-panel{ padding-top:56px; }
+  }
+
+  /* HUD: the eyebrow stays one line; the call says what to do now. */
+  .sb-hud-right{ display:flex; align-items:center; gap:12px; }
+  #view-play-sb .life{ transition:none; }
+  #view-play-sb .hud-left{ min-width:0; flex:1 1 200px; }
+  #view-play-sb .hud-mode{ white-space:nowrap; min-width:0; }
+  #sb-hud-mode{ min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  /* A phone's HUD is narrow between the home and settings buttons: the
+     eyebrow wraps between its parts instead of losing the area to "...". */
+  @media (max-width:619.98px){
+    #view-play-sb .hud-mode{ white-space:normal; }
+    #sb-hud-mode{ overflow:visible; line-height:1.45; }
+    #sb-hud-mode .sb-seg{ white-space:nowrap; }
+  }
+  .sb-call{ display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 12px; min-height:36px; }
+  .sb-call-main{ font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:30px; line-height:1.1;
+    letter-spacing:.02em; color:var(--ink); }
+  .sb-call-note{ font-size:12.5px; color:var(--ink-soft); }
+  .sb-call.is-good .sb-call-main{ color:color-mix(in srgb, var(--good) 65%, var(--ink)); }
+  .sb-call.is-bad .sb-call-main{ color:color-mix(in srgb, var(--bad) 65%, var(--ink)); }
+  #sb-clock.sb-countdown{ color:color-mix(in srgb, var(--brass-text) 45%, var(--ink)); }
+
+  /* The board. Outside the area: dimmed, never a drop square. */
+  #sb-board .sq.sb-out::before{ content:""; position:absolute; inset:0; background:rgba(0,0,0,.36); pointer-events:none; }
+  @media (hover:hover){ #sb-board.sb-armed .sq:not(.sb-out):hover{ box-shadow:inset 0 0 0 3px var(--brass); } }
+  /* Graded: right is a green wash and a tick, wrong a red wash and a cross,
+     and a faded piece in the house dashed ring is one that belongs there.
+     Where another piece sat on it, that piece is the small badge. */
+  #sb-board .sq.sb-right{ box-shadow:inset 0 0 0 999px color-mix(in srgb, var(--good) 30%, transparent), inset 0 0 0 3px var(--good); }
+  #sb-board .sq.sb-wrong{ box-shadow:inset 0 0 0 999px color-mix(in srgb, var(--bad) 36%, transparent), inset 0 0 0 3px var(--bad); }
+  /* Drive-Thru's dark squares are the same red as --bad, so a red wash is
+     lost there: they take a --bad-soft wash instead, under the ring. */
+  :root[data-skin="drivethru"] #sb-board .sq.dark.sb-wrong{
+    box-shadow:inset 0 0 0 3px var(--bad), inset 0 0 0 999px color-mix(in srgb, var(--bad-soft) 55%, transparent); }
+  #sb-board .piece-wrap.sb-ghost{ opacity:.45; }
+  #sb-board .piece-wrap.sb-mini{ position:absolute; left:3%; bottom:3%; width:40%; height:40%; z-index:2;
+    filter:drop-shadow(0 0 1.5px var(--surface)) drop-shadow(0 1px 1px rgba(0,0,0,.45)); }
+  #sb-board .sb-badge{ position:absolute; top:5%; right:5%; width:26%; height:26%; max-width:20px; max-height:20px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:3;
+    font:700 clamp(8px, calc(var(--sq) * .15), 12px)/1 system-ui, -apple-system, sans-serif; color:var(--surface);
+    box-shadow:0 0 0 1.5px var(--surface); }
+  #sb-board .sb-badge.is-right{ background:var(--sb-good-ui); }
+  #sb-board .sb-badge.is-wrong{ background:var(--sb-bad-ui); }
+  #sb-board .sb-badge.is-right::before{ content:"\2713"; }
+  #sb-board .sb-badge.is-wrong::before{ content:"\2715"; }
+
+  /* The card beside (or under) the board: the tray, the verdict, the buttons. */
+  .sb-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow);
+    padding:12px 14px; display:flex; flex-direction:column; gap:10px; }
+  .sb-card-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:color-mix(in srgb, var(--brass-text) 45%, var(--ink)); }
+  .sb-left{ font-weight:400; letter-spacing:.02em; text-transform:none; font-size:12px; color:var(--ink-soft); }
+  .sb-left b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .sb-tray{ display:flex; flex-direction:column; justify-content:center; gap:8px; min-height:120px; padding:10px;
+    border-radius:8px; background:var(--surface-2); border:1px dashed var(--line); }
+  .sb-tray.is-drop{ border-style:solid; border-color:var(--brass); box-shadow:inset 0 0 0 1px var(--brass); }
+  .sb-tray-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .sb-tray-note{ margin:0; font-size:13px; line-height:1.5; color:var(--ink-soft); }
+  .sb-tp{ position:relative; width:46px; height:46px; padding:0; flex:none; border-radius:8px;
+    border:1px solid var(--board-border); background:var(--board-light);
+    display:flex; align-items:center; justify-content:center; cursor:grab;
+    touch-action:none; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
+    -webkit-tap-highlight-color:transparent; transition:transform .12s ease; }
+  .sb-tp .piece-wrap{ width:86%; height:86%; }
+  .sb-tp:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .sb-tp.is-picked{ outline:3px solid var(--focus); outline-offset:2px; transform:translateY(-3px); }
+  .sb-tp.is-used{ background:transparent; border:1px dashed var(--line); cursor:default; transform:none; }
+  .sb-tp.is-used .piece-wrap{ visibility:hidden; }
+  .sb-tp.is-lifting .piece-wrap{ opacity:0; }
+  .sb-tray.is-inert .sb-tp{ cursor:default; }
+  .sb-tray.is-inert .sb-tp:not(.is-used){ opacity:.5; }
+  @media (hover:hover){ .sb-tray:not(.is-inert) .sb-tp:not(.is-used):not(.is-picked):hover{ transform:translateY(-2px); } }
+  .sb-verdict{ font-size:13px; line-height:1.4; color:var(--ink-soft); min-height:18px; }
+  .sb-verdict.is-good{ color:color-mix(in srgb, var(--good) 65%, var(--ink)); font-weight:700; }
+  .sb-verdict.is-bad{ color:color-mix(in srgb, var(--bad) 65%, var(--ink)); font-weight:700; }
+  .sb-actions{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .sb-actions .btn{ padding:9px 12px; font-size:13.5px; }
+  .sb-actions .btn-ghost{ background:var(--surface-2); }
+  .sb-actions .sb-primary{ margin-left:auto; min-width:104px; }
+  .sb-actions .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  #sb-legend > span{ white-space:nowrap; }
+  .sb-sw-right{ background:var(--sb-good-ui); }
+  .sb-sw-wrong{ background:var(--sb-bad-ui); }
+  .sb-keys{ display:flex; flex-wrap:wrap; gap:4px 14px; font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-soft); }
+  .sb-keys > span{ white-space:nowrap; }
+  .sb-keys .kbd{ font-size:10.5px; padding:1px 5px; margin-right:3px; }
+  @media (hover:none){ .sb-keys{ display:none; } }
+  @media (max-width:480px){
+    .sb-call-main{ font-size:26px; }
+    .sb-tp{ width:42px; height:42px; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .sb-tp{ transition:none; }
+    .sb-tp.is-picked, .sb-tp:hover{ transform:none !important; }
   }
 </style>
 
@@ -5014,6 +5145,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="drill-name">Whose Line Is It Anyway?</div>
         <div class="drill-desc">Train your memory and calculation. The board never moves: a move is called out &#8212; <b>Bb5</b>, then <b>Ne5</b> &#8212; and you play it in your head, then mark what's guarding what. The first position is the easy one; after that, the board in your head is the only one that counts.</div>
       </button>
+      <button class="drill-card" id="card-sb">
+        <div class="drill-head">
+          <span class="drill-num">DRILL 13</span>
+          <span class="chip ready">Ready</span>
+        </div>
+        <div class="drill-name">Static Boards</div>
+        <div class="drill-desc">A memory workout. A position flashes up &#8212; a king on <b>e7</b>, a bishop on <b>h6</b> &#8212; then the board empties and you rebuild it piece by piece from memory. Add pieces, or climb the ladder, as the picture in your head gets sharper.</div>
+      </button>
 
 </div>
   </section>
@@ -5558,6 +5697,161 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" class="stat stat-toggle"><span class="stat-val" id="wl-stat-acc"><span class="stat-fit">&mdash;</span></span><span class="stat-label">First try</span></button>
         <div class="stat"><div class="stat-val" id="wl-stat-streak">0</div><div class="stat-label">Streak</div></div>
         <div class="stat"><div class="stat-val" id="wl-stat-best">0</div><div class="stat-label" id="wl-stat-best-label">Best streak</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SETUP: STATIC BOARDS ============ -->
+  <section class="view" id="view-setup-sb">
+    <button class="back-link" data-nav="menu">&larr; All drills</button>
+    <div class="panel">
+      <div>
+        <div class="eyebrow">Drill 13</div>
+        <h1 class="title" style="font-size:26px;">Static Boards</h1>
+      </div>
+
+      <div class="field-hint" style="margin-top:-6px;">A memory workout. A position appears on the board: hold it in your head, press <b>Rebuild</b>, and the board empties. Put every piece back on its square, then <b>Check work</b>. It trains you to take in the whole board at once and keep it.</div>
+
+      <div class="field">
+        <div class="field-label">How a board runs</div>
+        <div class="hotkey-grid">
+          <div class="hotkey-item"><span class="kbd">1</span><span class="hotkey-desc"><b>Study</b> the position for as long as you like, or against a clock</span></div>
+          <div class="hotkey-item"><span class="kbd">2</span><span class="hotkey-desc"><b>Rebuild</b>: the board empties and the pieces wait beside it. Drag each one to its square, or tap a piece, then a square</span></div>
+          <div class="hotkey-item"><span class="kbd">3</span><span class="hotkey-desc"><b>Check work</b>: green is right, red is on the wrong square, and a faded piece shows where one belongs</span></div>
+        </div>
+        <div class="field-hint">Two pieces of the same kind are interchangeable: either white knight can go on either knight square. <b>Give up</b> shows the board you studied; <b>Try again</b> brings the same position back to study.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Pieces</div>
+        <div class="toggle-row" id="sb-pieces-row">
+          <button class="toggle active" data-val="3">3</button>
+          <button class="toggle" data-val="4">4</button>
+          <button class="toggle" data-val="5">5</button>
+          <button class="toggle" data-val="6">6</button>
+          <button class="toggle" data-val="8">8</button>
+          <button class="toggle" data-val="ladder">Ladder</button>
+        </div>
+        <div class="field-hint">Both kings are always on the board, plus pieces from both sides. <b>Ladder</b> starts at three and adds a piece after every perfect rebuild; three misses end the climb, and your best is saved.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Board area</div>
+        <div class="toggle-row" id="sb-area-row">
+          <button class="toggle active" data-val="whole">Whole board</button>
+          <button class="toggle" data-val="half">Half</button>
+          <button class="toggle" data-val="quarter">Quarter</button>
+        </div>
+        <div class="field-hint">Half keeps every piece inside four ranks or four files, Quarter inside one 4x4 corner, and the rest of the board is dimmed. A smaller area packs the pieces closer together.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Study time</div>
+        <div class="toggle-row" id="sb-study-row">
+          <button class="toggle active" data-val="0">Until I'm ready</button>
+          <button class="toggle" data-val="3">3 s</button>
+          <button class="toggle" data-val="5">5 s</button>
+          <button class="toggle" data-val="10">10 s</button>
+        </div>
+        <div class="field-hint">Until I'm ready waits for <b>Rebuild</b>. With a clock, the board empties by itself when it runs out.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Start the pieces</div>
+        <div class="toggle-row" id="sb-place-row">
+          <button class="toggle active" data-val="tray">In the tray</button>
+          <button class="toggle" data-val="scatter">Scattered on the board</button>
+        </div>
+        <div class="field-hint">Scattered drops every piece on a wrong square of the board, and you move each one home.</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Keys</div>
+        <div class="hotkey-grid">
+          <div class="hotkey-item"><span class="kbd">Space</span><span class="hotkey-desc"><b>Rebuild</b> once you have the position</span></div>
+          <div class="hotkey-item"><span class="kbd">e7</span><span class="hotkey-desc">Type a square to put the picked piece there (Tab to a piece in the tray; Enter picks it). With nothing picked, it picks up the piece on that square</span></div>
+          <div class="hotkey-item"><span class="kbd">Enter</span><span class="hotkey-desc"><b>Check work</b>, then <b>Next board</b> &#183; <span class="kbd">Backspace</span> back to the tray &#183; <span class="kbd">Esc</span> let go &#183; <span class="kbd">T</span> try again</span></div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="start-sb-drill">Start drill</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PLAY: STATIC BOARDS ============ -->
+  <section class="view has-side" id="view-play-sb">
+    <button class="back-link" data-nav="setup-sb">&larr; Change settings</button>
+
+    <div class="hud">
+      <div class="hud-left">
+        <div class="hud-mode"><span id="sb-hud-mode">BOARD 1 &#183; 3 PIECES &#183; WHOLE BOARD</span></div>
+        <div class="sb-call" id="sb-call">
+          <span class="sb-call-main" id="sb-call-main" aria-live="polite">Study the board</span>
+          <span class="sb-call-note" id="sb-call-note">Press Rebuild when you have it.</span>
+        </div>
+      </div>
+      <div class="sb-hud-right">
+        <div class="lives" id="sb-lives" hidden></div>
+        <div class="clock" id="sb-clock">0:00</div>
+      </div>
+    </div>
+
+    <div class="board-frame" id="sb-frame" style="position:relative;">
+      <div class="board-col">
+        <div class="board-inner">
+          <div class="rank-labels" id="sb-rank-labels"></div>
+          <div class="board" id="sb-board"></div>
+        </div>
+        <div class="file-labels" id="sb-file-labels"></div>
+      </div>
+      <div class="announce" id="sb-announce"><span id="sb-announce-text"></span></div>
+    </div>
+
+    <div class="side-panel">
+      <div class="sb-card" id="sb-card">
+        <div class="sb-card-head"><span id="sb-head">Study</span><span class="sb-left" id="sb-left"><b>3</b> pieces</span></div>
+        <div class="sb-tray" id="sb-tray" role="group" aria-label="Pieces to place"></div>
+        <div class="sb-verdict" id="sb-verdict" aria-live="polite"></div>
+        <div class="sb-actions">
+          <button class="btn btn-ghost" id="sb-giveup" hidden>Give up</button>
+          <button class="btn btn-ghost" id="sb-clear" hidden>Clear</button>
+          <button class="btn btn-ghost" id="sb-retry" hidden>Try again</button>
+          <button class="btn btn-primary sb-primary" id="sb-primary">Rebuild</button>
+        </div>
+        <div class="legend" id="sb-legend" hidden>
+          <span><i class="swatch sb-sw-right"></i> right</span>
+          <span><i class="swatch sb-sw-wrong"></i> wrong square</span>
+          <span><i class="swatch missed"></i> belongs here</span>
+        </div>
+        <div class="sb-keys"><span><span class="kbd">Space</span> rebuild</span><span>type <span class="kbd">e7</span> to place</span><span><span class="kbd">Enter</span> check work</span></div>
+      </div>
+
+      <!-- Never drawn (see #sb-step-banner): the words and the button of the
+           centered Next box after a perfect rebuild. -->
+      <div class="result-banner" id="sb-step-banner" style="display:none;" data-box-only data-fresh-enter aria-hidden="true">
+        <div class="result-line" id="sb-step-line">Perfect</div>
+        <div class="result-sub" id="sb-step-sub"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="sb-step-next" tabindex="-1">Next board</button>
+        </div>
+      </div>
+
+      <div class="result-banner" id="sb-result-banner" style="display:none;">
+        <div class="result-line" id="sb-result-line">Ladder over</div>
+        <div class="result-sub" id="sb-result-sub"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="sb-new-ladder">New ladder</button>
+          <button class="btn btn-ghost" data-nav="setup-sb">Change settings</button>
+        </div>
+      </div>
+
+      <div class="scoreboard">
+        <div class="stat"><div class="stat-val" id="sb-stat-boards">0</div><div class="stat-label">Boards</div></div>
+        <button type="button" class="stat stat-toggle"><span class="stat-val" id="sb-stat-acc"><span class="stat-fit">&mdash;</span></span><span class="stat-label">First try</span></button>
+        <div class="stat"><div class="stat-val" id="sb-stat-3">0</div><div class="stat-label" id="sb-stat-3-label">Streak</div></div>
+        <div class="stat"><div class="stat-val" id="sb-stat-4">0</div><div class="stat-label" id="sb-stat-4-label">Best streak</div></div>
       </div>
     </div>
   </section>
@@ -8486,6 +8780,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                     fields:[ {param:'pieces', type:'toggle', row:'wl-pieces-row'},
                              {param:'length', type:'toggle', row:'wl-length-row'},
                              {param:'time', type:'clock', row:'wl-time-row', input:'wl-time-custom'} ] },
+    'static-boards': { view:'setup-sb', card:'card-sb', startBtn:'start-sb-drill',
+                    fields:[ {param:'pieces', type:'toggle', row:'sb-pieces-row'},
+                             {param:'area', type:'toggle', row:'sb-area-row'},
+                             {param:'study', type:'toggle', row:'sb-study-row'},
+                             {param:'place', type:'toggle', row:'sb-place-row'} ] },
     'play-bot':   { view:'setup-bot',        card:'card-play-bot',    startBtn:null,
                     fields:[ {param:'level', type:'toggle', row:'bot-level-row'},
                              {param:'color', type:'toggle', row:'bot-color-row'},
@@ -9932,7 +10231,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   applyLookPrefs();
 
   /* The Solved stat on the scoreboards of Puzzles (so also its Saved and
-     Puzzle History practice runs), Knight's Tour, Sneaky Checks and Whose Line: a click,
+     Puzzle History practice runs), Knight's Tour, Sneaky Checks, Whose Line and Static Boards: a click,
      or Enter/Space, shows it as solved/total ("3/4") instead of the
      percentage, and back. One choice for the whole app, kept with the look
      prefs (solvedAs: 'pct' | 'frac'), so it holds across puzzles, drills and
@@ -12402,6 +12701,1008 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     wlRefreshStats();
     showView('play-wl');
     wlStartLine(true);
+  });
+
+  /* ================= DRILL 13: STATIC BOARDS ================= */
+  /* ChessViz's "Static Boards", rebuilt. A position flashes up -- both kings
+     and a few pieces from both sides, inside the chosen area -- you hold it
+     in your head and press Rebuild; the board empties (or every piece lands
+     on a wrong square) and you put each piece back, then Check work.
+
+     Grading is square by square on color+type keys ('wN'), so identical
+     pieces are interchangeable by construction (sbGrade). Pieces cross
+     between the tray and the board, which wireDrag (one board only) can't
+     do, so placement is this block's own pointer code with the house drag
+     ghost, hover ring and per-frame painting; board taps still come through
+     fastBoardTaps like every board's. No arrows, no annotation layer, no
+     network. */
+
+  /* SB-GEN-BEGIN -- Drill 13 areas, positions, scatter and grading. Pure and
+     offline: uses only attacksSquare and randInt from the app, so the Node
+     tests (test-kits/chess-arcade/static-boards/sbpure.mjs) lift this block
+     out of index.html and run exactly what ships. Squares are 0-63 (a1 = 0,
+     h8 = 63); a position is { square: key } with keys like 'wK' and 'bN'. */
+  const SB_ORDER = 'kqrbnp';
+  const SB_NAME = { k:'king', q:'queen', r:'rook', b:'bishop', n:'knight', p:'pawn' };
+  const SB_MAX = { q:1, r:2, b:2, n:2, p:2 };          // per side, besides the king
+  const SB_CAP = { whole:16, half:16, quarter:8 };     // the most pieces a board of each area holds
+  const SB_PARTS = {
+    half: [ ['ranks 1-4', (r,c)=> r<4], ['ranks 5-8', (r,c)=> r>=4],
+            ['files a-d', (r,c)=> c<4], ['files e-h', (r,c)=> c>=4] ],
+    quarter: [ ['a1-d4 corner', (r,c)=> r<4 && c<4], ['e1-h4 corner', (r,c)=> r<4 && c>=4],
+               ['a5-d8 corner', (r,c)=> r>=4 && c<4], ['e5-h8 corner', (r,c)=> r>=4 && c>=4] ]
+  };
+  function sbAlg(i){ return 'abcdefgh'[i&7]+((i>>3)+1); }
+  // whole = every square; half = four ranks or four files; quarter = a 4x4
+  // corner. part (0-3) picks which one; left out, it's drawn at random.
+  function sbArea(kind, part){
+    const parts = SB_PARTS[kind];
+    if(!parts) return { kind:'whole', part:0, label:'whole board', squares:Array.from({length:64}, (x,i)=> i) };
+    if(!(part>=0 && part<parts.length)) part = randInt(parts.length);
+    const [label, inside] = parts[part], squares = [];
+    for(let i=0;i<64;i++) if(inside(i>>3, i&7)) squares.push(i);
+    return { kind, part, label, squares };
+  }
+  function sbBoardOf(at){
+    const b = new Array(64).fill(null);
+    for(const s in at) b[s] = { color:at[s][0], type:at[s][1].toLowerCase() };
+    return b;
+  }
+  function sbAdjacent(a, b){ return Math.max(Math.abs((a>>3)-(b>>3)), Math.abs((a&7)-(b&7)))<=1; }
+  function sbInCheck(at, color){
+    const b = sbBoardOf(at);
+    let ks = -1;
+    for(const s in at) if(at[s]===color+'K') ks = Number(s);
+    if(ks<0) return false;
+    for(let i=0;i<64;i++){ const p = b[i]; if(p && p.color!==color && attacksSquare(b, i, p, ks)) return true; }
+    return false;
+  }
+  // The pieces besides the kings: a side drawn for each, then a type that
+  // side still has room for (one queen, two of anything else).
+  function sbPickSet(n){
+    const have = { w:{}, b:{} }, out = [];
+    const room = side=> 'qrbnp'.split('').filter(t=> (have[side][t]||0) < SB_MAX[t]);
+    for(let i=0;i<n-2;i++){
+      let side = randInt(2) ? 'w' : 'b', free = room(side);
+      if(!free.length){ side = side==='w' ? 'b' : 'w'; free = room(side); }
+      if(!free.length) break;
+      const t = free[randInt(free.length)];
+      have[side][t] = (have[side][t]||0)+1;
+      out.push(side+t.toUpperCase());
+    }
+    return out;
+  }
+  // Kings first (never touching), then the rest: pawns off ranks 1 and 8, a
+  // side's second bishop on the other color from its first.
+  function sbTryPlace(keys, squares){
+    const free = squares.slice(), at = {};
+    const take = ok=>{
+      const c = free.filter(ok);
+      if(!c.length) return -1;
+      const s = c[randInt(c.length)];
+      free.splice(free.indexOf(s), 1);
+      return s;
+    };
+    const wk = take(()=> true);
+    if(wk<0) return null;
+    at[wk] = 'wK';
+    const bk = take(s=> !sbAdjacent(s, wk));
+    if(bk<0) return null;
+    at[bk] = 'bK';
+    for(const k of keys){
+      let ok = ()=> true;
+      if(k[1]==='P') ok = s=> (s>>3)>0 && (s>>3)<7;
+      else if(k[1]==='B'){
+        const twin = Object.keys(at).find(s=> at[s]===k);
+        if(twin!==undefined){ const col = ((twin>>3)+(twin&7))%2; ok = s=> ((s>>3)+(s&7))%2!==col; }
+      }
+      const s = take(ok);
+      if(s<0) return null;
+      at[s] = k;
+    }
+    return at;
+  }
+  // n pieces counting both kings, all inside the area. Neither king in
+  // check if it can be had (400 tries), then not both, then any placement
+  // that keeps the rules above.
+  function sbMakePosition(n, area){
+    n = Math.max(2, Math.min(Math.round(n)||2, SB_CAP[area.kind]||16));
+    for(let relax=0; relax<3; relax++){
+      for(let t=0; t<400; t++){
+        const at = sbTryPlace(sbPickSet(n), area.squares);
+        if(!at) continue;
+        if(relax<2){
+          const wc = sbInCheck(at, 'w'), bc = sbInCheck(at, 'b');
+          if(relax===0 ? (wc || bc) : (wc && bc)) continue;
+        }
+        return { n:Object.keys(at).length, area, at, relax };
+      }
+    }
+    return null;
+  }
+  // Scattered: every piece on a square of the area that's wrong for it (no
+  // identical piece belongs there), never a pawn on rank 1 or 8. The whole
+  // board stands in only if the area can't take them.
+  function sbScatter(at, area){
+    const keys = Object.keys(at).map(s=> at[s]);
+    const wrongFor = (s, k)=> at[s]!==k && !(k[1]==='P' && ((s>>3)===0 || (s>>3)===7));
+    for(const pool of [area.squares, Array.from({length:64}, (x,i)=> i)]){
+      for(let t=0; t<200; t++){
+        const free = pool.slice(), out = {};
+        let ok = true;
+        for(const k of keys){
+          const c = free.filter(s=> wrongFor(s, k));
+          if(!c.length){ ok = false; break; }
+          const s = c[randInt(c.length)];
+          free.splice(free.indexOf(s), 1);
+          out[s] = k;
+        }
+        if(ok) return out;
+      }
+    }
+    return null;
+  }
+  // Square by square on color+type keys, so identical pieces are
+  // interchangeable: right = a square holding the piece that belongs there;
+  // wrong = one holding another piece, or a piece where none belongs;
+  // missing = a square whose piece isn't on it.
+  function sbGrade(target, placed){
+    const right = [], wrong = [], missing = [];
+    for(const s in placed) (placed[s]===target[s] ? right : wrong).push(Number(s));
+    for(const s in target) if(placed[s]!==target[s]) missing.push(Number(s));
+    return { right, wrong, missing, n:Object.keys(target).length, perfect:!wrong.length && !missing.length };
+  }
+  // The tray: white first, then black, each K Q R B N P.
+  function sbTrayKeys(at){
+    const ord = k=> (k[0]==='w' ? 0 : 6) + SB_ORDER.indexOf(k[1].toLowerCase());
+    return Object.keys(at).map(s=> at[s]).sort((a, b)=> ord(a)-ord(b));
+  }
+  // The ladder: a perfect board adds a piece, up to the area's cap.
+  function sbLadderNext(level, perfect, kind){ return perfect ? Math.min(SB_CAP[kind]||16, level+1) : level; }
+  /* SB-GEN-END */
+
+  views['setup-sb'] = document.getElementById('view-setup-sb');
+  views['play-sb'] = document.getElementById('view-play-sb');
+  document.getElementById('card-sb').addEventListener('click', ()=> showView('setup-sb'));
+
+  // pieces 3|4|5|6|8|'ladder'; area 'whole'|'half'|'quarter'; study 0 (until
+  // ready) or seconds; place 'tray'|'scatter'
+  const settingsSB = { pieces:3, area:'whole', study:0, place:'tray' };
+  wireToggleRow('sb-pieces-row','pieces',settingsSB);
+  wireToggleRow('sb-area-row','area',settingsSB);
+  wireToggleRow('sb-study-row','study',settingsSB);
+  wireToggleRow('sb-place-row','place',settingsSB);
+
+  const SB_LIVES = 3, SB_LADDER_START = 3, SB_SLOP = 4;
+  const statsSB = { boards:0, first:0, streak:0, best:0 };     // session only, reset on Start drill
+  // runSB: one Start drill (a ladder climb); boardSB: the board on screen.
+  let runSB = null, boardSB = null, runNoSB = 0, boardNoSB = 0, announceTimerSB = null, clockTimerSB = null;
+
+  const viewElSB = views['play-sb'];
+  const boardElSB = document.getElementById('sb-board');
+  const frameElSB = document.getElementById('sb-frame');
+  const announceElSB = document.getElementById('sb-announce');
+  const announceTextElSB = document.getElementById('sb-announce-text');
+  const hudModeSB = document.getElementById('sb-hud-mode');
+  const callSB = document.getElementById('sb-call');
+  const callMainSB = document.getElementById('sb-call-main');
+  const callNoteSB = document.getElementById('sb-call-note');
+  const livesSB = document.getElementById('sb-lives');
+  const clockSB = document.getElementById('sb-clock');
+  const headSB = document.getElementById('sb-head');
+  const leftSB = document.getElementById('sb-left');
+  const trayElSB = document.getElementById('sb-tray');
+  const verdictSB = document.getElementById('sb-verdict');
+  const giveupBtnSB = document.getElementById('sb-giveup');
+  const clearBtnSB = document.getElementById('sb-clear');
+  const retryBtnSB = document.getElementById('sb-retry');
+  const primaryBtnSB = document.getElementById('sb-primary');
+  const legendSB = document.getElementById('sb-legend');
+  const stepBannerSB = document.getElementById('sb-step-banner');
+  const stepLineSB = document.getElementById('sb-step-line');
+  const stepSubSB = document.getElementById('sb-step-sub');
+  const bannerSB = document.getElementById('sb-result-banner');
+  const resultLineSB = document.getElementById('sb-result-line');
+  const resultSubSB = document.getElementById('sb-result-sub');
+  const stat3SB = document.getElementById('sb-stat-3');
+  const stat3LabelSB = document.getElementById('sb-stat-3-label');
+  const stat4SB = document.getElementById('sb-stat-4');
+  const stat4LabelSB = document.getElementById('sb-stat-4-label');
+  const nextOverlaySB = document.getElementById('next-overlay');
+
+  const sbPieceName = k=> (k[0]==='w' ? 'white ' : 'black ')+SB_NAME[k[1].toLowerCase()];
+  const sbCap1 = s=> s.charAt(0).toUpperCase()+s.slice(1);
+  const sbAreaName = kind=> kind==='half' ? 'half board' : kind==='quarter' ? 'quarter board' : 'whole board';
+  function sbInArea(s){ return !!boardSB && boardSB.inA.has(s); }
+  function sbSetPhase(p){ boardSB.phase = p; boardSB.phaseAt = performance.now(); }
+
+  /* ---- best ladder (per area), the one thing kept ---- */
+  const SB_BEST_KEY = 'wavyChessPrepStaticBoardsBest';   // {"ladder":{"whole":n,"half":n,"quarter":n}}
+  function sbLoadBest(){
+    try{ const o = JSON.parse(localStorage.getItem(SB_BEST_KEY)||'{}');
+      return (o && typeof o==='object') ? o : {}; }catch(e){ return {}; }
+  }
+  function sbRecordFor(kind){
+    const o = sbLoadBest();
+    return (o.ladder && typeof o.ladder==='object') ? (Number(o.ladder[kind])||0) : 0;
+  }
+  function sbBankBest(){                                   // idempotent; every cleared rung, the end of a climb, leaving
+    const r = runSB;
+    if(!r || !r.ladder) return false;
+    const o = sbLoadBest(), l = (o.ladder && typeof o.ladder==='object') ? o.ladder : {};
+    if(r.top <= (Number(l[r.area])||0)) return false;
+    l[r.area] = r.top; o.ladder = l;
+    try{ localStorage.setItem(SB_BEST_KEY, JSON.stringify(o)); }catch(e){}
+    return true;
+  }
+
+  /* ---- rendering ---- */
+  (function sbBuildLabels(){
+    const rl = document.getElementById('sb-rank-labels'), fl = document.getElementById('sb-file-labels');
+    [7,6,5,4,3,2,1,0].forEach(r=>{ const d = document.createElement('div'); d.className = 'rlabel'; d.textContent = r+1; rl.appendChild(d); });
+    [0,1,2,3,4,5,6,7].forEach(c=>{ const d = document.createElement('div'); d.className = 'flabel'; d.textContent = 'abcdefgh'[c]; fl.appendChild(d); });
+  })();
+
+  // Study: the position. Rebuild: what you've placed. Graded: the answer --
+  // right squares green, wrong ones red, a faded piece where one belongs.
+  function sbRenderBoard(){
+    const b = boardSB;
+    if(!b) return;
+    const ph = b.phase, at = b.pos.at, whole = b.pos.area.kind==='whole', g = ph==='graded' ? b.grade : null;
+    boardElSB.innerHTML = '';
+    boardElSB.classList.toggle('sb-armed', ph==='rebuild' && !!b.sel);
+    for(let rk=7; rk>=0; rk--) for(let c=0; c<8; c++){
+      const idx = rk*8+c;
+      const sq = document.createElement('div');
+      sq.className = 'sq '+(((rk+c)%2===0) ? 'dark' : 'light');
+      sq.dataset.idx = idx;
+      if(!whole && !b.inA.has(idx)) sq.classList.add('sb-out');
+      let show = null, ghost = false, mini = null, badge = null, title = '';
+      if(ph==='study') show = at[idx] || null;        // never under the call-out: the clock times all of it
+      else if(ph==='rebuild'){
+        show = b.placed[idx] || null;
+        if(show) sq.classList.add('draggable');
+        if(b.sel && b.sel.from==='sq' && b.sel.sq===idx) sq.classList.add('picked');
+      } else if(g){
+        const T = at[idx], P = b.placed[idx];
+        if(T && P===T){ show = T; badge = 'right'; sq.classList.add('sb-right'); title = sbAlg(idx)+': '+sbPieceName(T)+', right'; }
+        else if(T && !P){ show = T; ghost = true; sq.classList.add('mark-missed'); title = sbAlg(idx)+': the '+sbPieceName(T)+' belongs here'; }
+        else if(T){ show = T; ghost = true; mini = P; badge = 'wrong'; sq.classList.add('sb-wrong');
+          title = sbAlg(idx)+': you put the '+sbPieceName(P)+' here; the '+sbPieceName(T)+' belongs here'; }
+        else if(P){ show = P; badge = 'wrong'; sq.classList.add('sb-wrong'); title = sbAlg(idx)+': the '+sbPieceName(P)+" doesn't belong here"; }
+      }
+      if(show){
+        const w = document.createElement('span');
+        w.className = 'piece-wrap'+(ghost ? ' sb-ghost' : '');
+        w.innerHTML = PIECE_SVG[show];
+        sq.appendChild(w);
+      }
+      if(mini){
+        const m = document.createElement('span');
+        m.className = 'piece-wrap sb-mini';
+        m.innerHTML = PIECE_SVG[mini];
+        sq.appendChild(m);
+      }
+      if(badge){
+        const d = document.createElement('span');
+        d.className = 'sb-badge is-'+badge;
+        d.setAttribute('aria-hidden','true');
+        sq.appendChild(d);
+      }
+      if(title) sq.title = title;
+      boardElSB.appendChild(sq);
+    }
+  }
+
+  // The tray: a note while you study; then one slot per piece (white row,
+  // black row). Slots never move: a placed piece leaves an empty dashed slot,
+  // so nothing shifts under a finger. Built once per phase (sbSyncTray keeps
+  // the classes), so a focused slot keeps its focus.
+  function sbRenderTray(){
+    const b = boardSB, ph = b.phase, note = ph==='intro' || ph==='study';
+    const key = runNoSB+':'+b.no+':'+b.attempt+':'+(note ? 'note' : 'slots');
+    if(trayElSB.dataset.for!==key){
+      trayElSB.dataset.for = key;
+      trayElSB.innerHTML = '';
+      if(note){
+        const p = document.createElement('p');
+        p.className = 'sb-tray-note';
+        p.textContent = 'Take in every piece and its square. '
+          + (runSB.place==='scatter' ? 'When you rebuild, the pieces land on wrong squares and you move each one home.'
+            : 'When you rebuild, the board empties and the pieces wait here.')
+          + (runSB.study ? ' The board clears by itself after '+runSB.study+' seconds.' : '');
+        trayElSB.appendChild(p);
+      } else {
+        ['w','b'].forEach(c=>{
+          const row = document.createElement('div');
+          row.className = 'sb-tray-row';
+          row.dataset.c = c;
+          b.tray.forEach((t, i)=>{
+            if(t.k[0]!==c) return;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sb-tp';
+            btn.dataset.slot = i;
+            btn.innerHTML = '<span class="piece-wrap">'+PIECE_SVG[t.k]+'</span>';
+            row.appendChild(btn);
+          });
+          if(row.children.length) trayElSB.appendChild(row);
+        });
+      }
+    }
+    sbSyncTray();
+  }
+  function sbSyncTray(){
+    const b = boardSB, live = b.phase==='rebuild';
+    trayElSB.querySelectorAll('.sb-tp').forEach(btn=>{
+      const i = Number(btn.dataset.slot), t = b.tray[i];
+      if(!t) return;
+      const picked = live && !!b.sel && b.sel.from==='tray' && b.sel.slot===i, off = !live || t.used;
+      btn.classList.toggle('is-used', t.used);
+      btn.classList.toggle('is-picked', picked);
+      btn.setAttribute('aria-disabled', off ? 'true' : 'false');
+      btn.setAttribute('aria-pressed', picked ? 'true' : 'false');
+      btn.tabIndex = off ? -1 : 0;
+      const name = sbCap1(sbPieceName(t.k));
+      btn.setAttribute('aria-label', name+(t.used ? ', on the board' : ''));
+      btn.title = name;
+    });
+    trayElSB.classList.toggle('is-inert', !live);
+    trayElSB.classList.toggle('is-drop', live && !!b.sel && b.sel.from==='sq');
+  }
+
+  function sbRenderHud(){
+    const r = runSB, b = boardSB, ph = b.phase;
+    const where = b.pos.area.kind==='whole' ? 'whole board' : b.pos.area.label;
+    // Three parts; a phone wraps between them, never inside one.
+    const segs = [(r.ladder ? 'Ladder' : 'Board '+b.no)+(b.attempt>1 ? ', try '+b.attempt : ''), b.pos.n+' pieces', where];
+    if(hudModeSB.textContent!==segs.join(' \u00B7 ')){
+      hudModeSB.textContent = '';
+      segs.forEach((t, i)=>{
+        if(i) hudModeSB.appendChild(document.createTextNode(' \u00B7 '));
+        const sp = document.createElement('span');
+        sp.className = 'sb-seg';
+        sp.textContent = t;
+        hudModeSB.appendChild(sp);
+      });
+    }
+    let main, note, tone = '';
+    if(ph==='intro' || ph==='study'){
+      main = 'Study the board';
+      note = r.study ? 'It clears in '+r.study+' seconds.' : 'Press Rebuild when you have it.';
+    } else if(ph==='rebuild'){
+      main = 'Rebuild it';
+      if(b.sel && b.sel.from==='sq') note = 'Tap a square to move it, or the tray to take it off.';
+      else if(b.sel) note = 'Now its square.';
+      else note = r.place==='scatter' ? 'Every piece is on a wrong square. Move each one home.'
+        : 'Drag each piece to its square, or tap a piece, then a square.';
+    } else {
+      const g = b.grade;
+      if(g.perfect && !b.gaveUp){ main = 'Perfect'; tone = 'good'; note = 'Every piece on its square.'; }
+      else if(b.gaveUp){ main = 'The board you studied'; note = 'Faded pieces show where they belong.'; }
+      else { main = g.right.length+' of '+g.n+' right'; tone = 'bad'; note = 'Faded pieces show where they belong.'; }
+    }
+    if(callMainSB.textContent!==main) callMainSB.textContent = main;   // a live region: written only when it changes
+    callNoteSB.textContent = note;
+    callSB.classList.toggle('is-good', tone==='good');
+    callSB.classList.toggle('is-bad', tone==='bad');
+    livesSB.hidden = !r.ladder;
+    if(r.ladder){
+      livesSB.innerHTML = '';
+      for(let i=0;i<SB_LIVES;i++){
+        const s = document.createElement('span');
+        s.className = 'life'+(i<r.lives ? ' on' : '');
+        s.textContent = '\u2665';
+        livesSB.appendChild(s);
+      }
+      livesSB.setAttribute('aria-label', r.lives+(r.lives===1 ? ' life' : ' lives')+' left');
+    }
+  }
+
+  function sbRenderCard(){
+    const r = runSB, b = boardSB, ph = b.phase, n = b.pos.n, placedN = Object.keys(b.placed).length;
+    if(ph==='intro' || ph==='study'){ headSB.textContent = 'Study'; leftSB.innerHTML = '<b>'+n+'</b> pieces'; }
+    else if(ph==='rebuild'){ headSB.textContent = 'Pieces'; leftSB.innerHTML = '<b>'+placedN+'</b> of '+n+' placed'; }
+    else { headSB.textContent = 'Result'; leftSB.innerHTML = '<b>'+b.grade.right.length+'</b> of '+n+' right'; }
+    const perfect = ph==='graded' && b.grade.perfect && !b.gaveUp;
+    giveupBtnSB.hidden = ph!=='rebuild';
+    clearBtnSB.hidden = ph!=='rebuild';
+    clearBtnSB.disabled = !placedN;
+    retryBtnSB.hidden = !(ph==='graded' && !r.ladder && !perfect);
+    primaryBtnSB.textContent = ph==='rebuild' ? 'Check work' : ph==='graded' ? (r.over ? 'New ladder' : 'Next board') : 'Rebuild';
+    primaryBtnSB.disabled = ph==='intro' || (ph==='rebuild' && !placedN);
+    legendSB.hidden = ph!=='graded' || perfect;
+  }
+
+  function sbSetVerdict(text, tone){
+    verdictSB.textContent = text;
+    verdictSB.className = 'sb-verdict'+(tone ? ' is-'+tone : '');
+  }
+
+  function sbRefreshStats(){
+    document.getElementById('sb-stat-boards').textContent = statsSB.boards;
+    renderSolvedStat('sb-stat-acc', statsSB.first, statsSB.boards);
+    const L = !!(runSB && runSB.ladder);
+    stat3LabelSB.textContent = L ? 'Ladder' : 'Streak';
+    stat3SB.textContent = L ? runSB.top : statsSB.streak;
+    stat4LabelSB.textContent = L ? 'Best ladder' : 'Best streak';
+    stat4SB.textContent = L ? Math.max(runSB.top, runSB.record) : statsSB.best;
+  }
+
+  /* ---- the clock: study time (a countdown with a study clock), then the
+     rebuild time, both from timestamps so a slow tick never drifts ---- */
+  function sbPhaseSecs(){ return boardSB && boardSB.t0 ? (performance.now()-boardSB.t0)/1000 : 0; }
+  function sbStartClock(){
+    sbStopClock();
+    boardSB.t0 = performance.now();
+    clockTimerSB = setInterval(sbTick, 200);
+    sbRenderClock();
+  }
+  function sbStopClock(){ if(clockTimerSB){ clearInterval(clockTimerSB); clockTimerSB = null; } }
+  function sbTick(){
+    const b = boardSB;
+    if(!b || (b.phase!=='study' && b.phase!=='rebuild')){ sbStopClock(); return; }
+    if(b.phase==='study' && runSB.study && sbPhaseSecs()>=runSB.study){ sbRebuild(true); return; }
+    sbRenderClock();
+  }
+  function sbRenderClock(){
+    const b = boardSB, r = runSB;
+    if(!b) return;
+    let secs, down = false;
+    if(b.phase==='intro') secs = r.study;
+    else if(b.phase==='study'){ down = !!r.study; secs = down ? Math.max(0, Math.ceil(r.study-sbPhaseSecs())) : Math.floor(sbPhaseSecs()); }
+    else if(b.phase==='rebuild') secs = Math.floor(sbPhaseSecs());
+    else secs = Math.round(b.rebuildSecs);
+    const txt = fmtTime(secs);
+    if(clockSB.textContent!==txt) clockSB.textContent = txt;
+    clockSB.classList.toggle('sb-countdown', down || (b.phase==='intro' && !!r.study));
+  }
+
+  function sbRenderAll(){
+    sbRenderBoard();
+    sbRenderTray();
+    sbRenderHud();
+    sbRenderCard();
+    sbRenderClock();
+  }
+  // After a pick, a placement or a let-go: everything but the tray's build.
+  function sbRenderSel(){
+    sbRenderBoard();
+    sbSyncTray();
+    sbRenderHud();
+    sbRenderCard();
+  }
+
+  /* ---- flow ---- */
+  function sbStartRun(){
+    const ladder = settingsSB.pieces==='ladder';
+    const kind = SB_PARTS[settingsSB.area] ? settingsSB.area : 'whole';
+    runSB = {
+      ladder, area:kind,
+      study: Math.max(0, Number(settingsSB.study)||0),
+      place: settingsSB.place==='scatter' ? 'scatter' : 'tray',
+      level: ladder ? SB_LADDER_START : Math.max(3, Number(settingsSB.pieces)||3),
+      lives:SB_LIVES, top:0, over:false,
+      record: ladder ? sbRecordFor(kind) : 0
+    };
+    runNoSB++;
+    boardNoSB = 0;
+    bannerSB.style.display = 'none';
+    sbNewBoard();
+    sbRefreshStats();
+  }
+
+  function sbNewBoard(){
+    const r = runSB;
+    const pos = sbMakePosition(r.level, sbArea(r.area)) || sbMakePosition(r.level, sbArea('whole'));
+    boardNoSB++;
+    boardSB = { no:boardNoSB, pos, inA:new Set(pos.area.squares), attempt:1, counted:false };
+    sbBeginStudy();
+  }
+
+  // Study (again, for Try again): the call-out first, over an empty board;
+  // the position appears when it ends, as the study clock starts, so a
+  // timed study shows it for exactly the time chosen.
+  function sbBeginStudy(){
+    const b = boardSB;
+    sbStopClock();
+    sbCancelDrag();
+    sbStepBoxHide();
+    clearAnnounce(announceElSB, boardElSB, announceTimerSB);
+    announceTimerSB = null;
+    Object.assign(b, { placed:{}, tray:[], sel:null, grade:null, gaveUp:false, pend:'', studySecs:0, rebuildSecs:0, t0:0 });
+    sbSetPhase('intro');
+    sbSetVerdict('', '');
+    sbRenderAll();
+    announceTimerSB = showAnnounce(announceElSB, announceTextElSB, boardElSB, 'Study the board', ()=>{
+      announceTimerSB = null;
+      if(!viewElSB.classList.contains('active') || boardSB!==b || b.phase!=='intro') return;
+      sbSetPhase('study');
+      sbStartClock();
+      sbRenderAll();
+    });
+  }
+
+  // The board empties (or scatters) and the pieces go to the tray.
+  function sbRebuild(auto){
+    const b = boardSB;
+    if(!b || b.phase!=='study') return;
+    if(!auto) playClick('press');
+    b.studySecs = sbPhaseSecs();
+    b.tray = sbTrayKeys(b.pos.at).map(k=> ({ k, used:false }));
+    b.placed = {};
+    if(runSB.place==='scatter'){
+      const sc = sbScatter(b.pos.at, b.pos.area);
+      if(sc){ b.placed = sc; b.tray.forEach(t=> t.used = true); }
+    }
+    b.sel = null; b.pend = '';
+    sbSetPhase('rebuild');
+    sbSetVerdict('', '');
+    sbStartClock();
+    sbRenderAll();
+  }
+
+  // Check work (or, gaveUp, Give up: graded the same way, always a miss).
+  function sbCheck(gaveUp){
+    const b = boardSB, r = runSB;
+    if(!b || b.phase!=='rebuild') return;
+    sbCancelDrag();
+    b.rebuildSecs = sbPhaseSecs();
+    sbStopClock();
+    const g = b.grade = sbGrade(b.pos.at, b.placed);
+    b.gaveUp = !!gaveUp;
+    b.sel = null; b.pend = '';
+    sbSetPhase('graded');
+    const ok = g.perfect && !b.gaveUp;
+    if(!b.counted){                       // a board counts once, at its first grading
+      b.counted = true;
+      statsSB.boards++;
+      if(ok && b.attempt===1){ statsSB.first++; statsSB.streak++; statsSB.best = Math.max(statsSB.best, statsSB.streak); }
+      else statsSB.streak = 0;
+    }
+    let verdict;
+    if(ok) verdict = g.n+' of '+g.n+' right'+(b.attempt===1 ? ', first try' : ' on try '+b.attempt);
+    else if(b.gaveUp) verdict = 'Given up \u00B7 '+g.right.length+' of '+g.n+(g.right.length===1 ? ' was' : ' were')+' right';
+    else {
+      const parts = [], unplaced = b.tray.filter(t=> !t.used).length;
+      if(g.wrong.length) parts.push(g.wrong.length+' on '+(g.wrong.length===1 ? 'a wrong square' : 'wrong squares'));
+      if(unplaced) parts.push(unplaced+' not placed');
+      verdict = parts.join(' \u00B7 ');
+    }
+    if(r.ladder){
+      // a cleared rung is saved at once: a reload, a closed tab or a discarded
+      // PWA mid-climb never loses it
+      if(ok){ r.top = Math.max(r.top, g.n); r.level = sbLadderNext(g.n, true, r.area); sbBankBest(); }
+      else {
+        r.lives = Math.max(0, r.lives-1);
+        if(!r.lives) r.over = true;
+        verdict += ' \u00B7 '+(r.over ? 'last life gone' : 'strike, '+r.lives+(r.lives===1 ? ' life' : ' lives')+' left');
+      }
+    }
+    sbSetVerdict(verdict, ok ? 'good' : 'bad');
+    sbRefreshStats();
+    sbRenderAll();
+    if(ok) playSolvedSound();
+    else if(r.ladder){ if(!r.over) playSound('check'); }
+    else playClick('press');
+    if(r.over) sbLadderOver();
+    else if(ok) sbStepBoxShow();
+  }
+
+  // The centered Next box after a perfect rebuild: wireNextBox opens it from
+  // the never-drawn #sb-step-banner, as for every drill's result banner.
+  // Enter = Next board (a fresh press), Esc = look at the board.
+  function sbStepBoxShow(){
+    const b = boardSB, g = b.grade, parts = [g.n+' of '+g.n];
+    if(runSB.ladder) parts.push(runSB.level>g.n ? 'next: '+runSB.level+' pieces' : 'the top rung');
+    else parts.push(b.attempt===1 ? 'first try' : b.attempt===2 ? 'second try' : 'try '+b.attempt);
+    parts.push('studied '+fmtTime(Math.round(b.studySecs)), 'rebuilt '+fmtTime(Math.round(b.rebuildSecs)));
+    stepLineSB.textContent = 'Perfect';
+    stepSubSB.textContent = parts.join(' \u00B7 ');
+    stepBannerSB.style.display = 'flex';
+  }
+  function sbStepBoxHide(){ if(stepBannerSB.style.display!=='none') stepBannerSB.style.display = 'none'; }
+
+  // Third miss on the ladder: bank the best and show the result banner (and
+  // its Next box: New ladder / Change settings).
+  function sbLadderOver(){
+    const r = runSB, isBest = r.top > r.record;
+    sbBankBest();
+    resultLineSB.textContent = isBest ? 'New best ladder' : 'Ladder over';
+    resultSubSB.textContent = [r.top ? 'Cleared '+r.top+' pieces' : 'No board cleared',
+      'best '+Math.max(r.top, r.record), sbAreaName(r.area)].join(' \u00B7 ');
+    if(isBest){ r.record = r.top; playSolvedSound(); }
+    else playLoseSound();
+    sbRefreshStats();
+    bannerSB.style.display = 'flex';
+  }
+
+  function sbNext(){
+    const b = boardSB;
+    if(!b || b.phase!=='graded') return;
+    if(runSB.over){ sbStartRun(); return; }
+    sbNewBoard();
+  }
+  function sbTryAgain(){
+    const b = boardSB;
+    if(!b || b.phase!=='graded' || runSB.ladder || (b.grade.perfect && !b.gaveUp)) return;
+    playClick('press');
+    b.attempt++;
+    sbBeginStudy();
+  }
+  // Enter and the primary button: Rebuild, Check work, Next board.
+  function sbPrimary(){
+    const b = boardSB;
+    if(!b) return;
+    if(b.phase==='study') sbRebuild(false);
+    else if(b.phase==='rebuild'){ if(Object.keys(b.placed).length) sbCheck(false); }
+    else if(b.phase==='graded'){ playClick('press'); sbNext(); }
+  }
+
+  /* ---- placing ---- */
+  const sbSlotEl = i=> trayElSB.querySelector('.sb-tp[data-slot="'+i+'"]');
+  const sbSqPiece = s=> boardElSB.querySelector('.sq[data-idx="'+s+'"] > .piece-wrap');
+  const sbRect = el=> el ? el.getBoundingClientRect() : null;
+  // A piece back to the tray: the first used slot of its kind.
+  function sbReturn(k){
+    const t = boardSB.tray;
+    for(let i=0;i<t.length;i++) if(t[i].used && t[i].k===k){ t[i].used = false; return i; }
+    return -1;
+  }
+  // A tapped piece flies from where it was to where it lands (a copy over
+  // everything, so the board's clipping never cuts it); a dropped one just
+  // settles. Transform only; nothing moves under reduced motion.
+  function sbFly(k, from, toEl){
+    if(!toEl || reducedMotion()) return;
+    if(!from){
+      toEl.classList.add('settle');
+      setTimeout(()=> toEl.classList.remove('settle'), 340);
+      return;
+    }
+    const to = toEl.getBoundingClientRect();
+    if(!to.width || !from.width) return;
+    const g = document.createElement('span');
+    g.className = 'piece-wrap drag-ghost';
+    g.innerHTML = PIECE_SVG[k];
+    g.style.width = to.width+'px';
+    g.style.height = to.height+'px';
+    g.style.transform = 'translate('+(from.left+from.width/2-to.width/2)+'px,'+(from.top+from.height/2-to.height/2)+'px) scale('+(from.width/to.width)+')';
+    document.body.appendChild(g);
+    toEl.style.opacity = '0';
+    void g.offsetWidth;
+    g.style.transition = 'transform .18s cubic-bezier(.22,1,.36,1)';
+    g.style.transform = 'translate('+to.left+'px,'+to.top+'px)';
+    let done = false;
+    const end = ()=>{ if(done) return; done = true; g.remove(); toEl.style.opacity = ''; };
+    g.addEventListener('transitionend', end);
+    setTimeout(end, 260);
+  }
+  // From the tray to a square; a piece already there goes back to the tray.
+  function sbPlace(slot, s, how){
+    const b = boardSB, t = b && b.tray[slot];
+    if(!t || b.phase!=='rebuild' || t.used || !sbInArea(s)) return false;
+    const slotEl = sbSlotEl(slot);
+    const from = how==='drop' ? null : sbRect(slotEl && slotEl.querySelector('.piece-wrap'));
+    const keyFocus = how==='key' && trayElSB.contains(document.activeElement);
+    const old = b.placed[s];
+    if(old) sbReturn(old);
+    t.used = true; b.placed[s] = t.k; b.sel = null;
+    playSound(old ? 'capture' : 'move');
+    sbSetVerdict(sbCap1(sbPieceName(t.k))+' on '+sbAlg(s)+(old ? ' \u00B7 the '+sbPieceName(old)+' went back to the tray' : ''), '');
+    sbRenderSel();
+    sbFly(t.k, from, sbSqPiece(s));
+    if(keyFocus) sbFocusNext(slot);
+    return true;
+  }
+  // From square a to square s (a drop on a piece swaps the two).
+  function sbMove(a, s, how){
+    const b = boardSB, k = b && b.placed[a];
+    if(!k || b.phase!=='rebuild' || a===s || !sbInArea(s)) return false;
+    const from = how==='drop' ? null : sbRect(sbSqPiece(a));
+    const other = b.placed[s];
+    delete b.placed[a];
+    if(other) b.placed[a] = other;
+    b.placed[s] = k; b.sel = null;
+    playSound('move');
+    sbSetVerdict(sbCap1(sbPieceName(k))+' to '+sbAlg(s)+(other ? ' \u00B7 the '+sbPieceName(other)+' to '+sbAlg(a) : ''), '');
+    sbRenderSel();
+    sbFly(k, from, sbSqPiece(s));
+    return true;
+  }
+  // From square a back to the tray.
+  function sbOff(a, how){
+    const b = boardSB, k = b && b.placed[a];
+    if(!k || b.phase!=='rebuild') return false;
+    const from = how==='drop' ? null : sbRect(sbSqPiece(a));
+    delete b.placed[a];
+    const slot = sbReturn(k);
+    b.sel = null;
+    playClick('release');
+    sbSetVerdict(sbCap1(sbPieceName(k))+' back to the tray', '');
+    sbRenderSel();
+    const el = sbSlotEl(slot);
+    sbFly(k, from, el && el.querySelector('.piece-wrap'));
+    return true;
+  }
+  // After a keyboard placement, the focus moves on to the next piece in the
+  // tray, or to Check work once the tray is empty.
+  function sbFocusNext(after){
+    const t = boardSB.tray, free = t.map((x, i)=> i).filter(i=> !t[i].used);
+    const j = free.find(i=> i>after);
+    const el = j!==undefined ? sbSlotEl(j) : (free.length ? sbSlotEl(free[0]) : primaryBtnSB);
+    if(el) el.focus({ preventScroll:true });
+  }
+  function sbPick(sel){
+    boardSB.sel = sel;
+    playClick(sel ? 'press' : 'release');
+    sbRenderSel();
+  }
+  // A tap (or a typed square) on square s.
+  function sbSquare(s, how){
+    const b = boardSB;
+    if(!b || b.phase!=='rebuild') return;
+    const sel = b.sel, outside = ()=> sbSetVerdict(sbAlg(s)+' is outside the area', '');
+    if(sel && sel.from==='tray'){
+      if(sbInArea(s)) sbPlace(sel.slot, s, how); else outside();
+      return;
+    }
+    if(sel && sel.from==='sq'){
+      if(s===sel.sq) sbPick(null);                                  // the same piece: let go
+      else if(b.placed[s]) sbPick({ from:'sq', sq:s });             // another piece: pick that one
+      else if(sbInArea(s)) sbMove(sel.sq, s, how);
+      else outside();
+      return;
+    }
+    if(b.placed[s]) sbPick({ from:'sq', sq:s });
+    else if(how==='key') sbSetVerdict('Nothing on '+sbAlg(s)+' yet', '');
+  }
+
+  /* ---- input: taps and clicks ---- */
+  boardElSB.addEventListener('click', (e)=>{
+    const sq = e.target.closest('.sq');
+    if(sq && boardElSB.contains(sq)) sbSquare(Number(sq.dataset.idx), 'tap');
+  });
+  // The tray: pick a piece (again: let go); with a board piece picked, the
+  // whole tray takes it back.
+  trayElSB.addEventListener('click', (e)=>{
+    const b = boardSB;
+    if(!b || b.phase!=='rebuild') return;
+    if(b.sel && b.sel.from==='sq'){ sbOff(b.sel.sq, e.detail===0 ? 'key' : 'tap'); return; }
+    const tp = e.target.closest('.sb-tp');
+    if(!tp) return;
+    const slot = Number(tp.dataset.slot), t = b.tray[slot];
+    if(!t || t.used) return;
+    sbPick(b.sel && b.sel.from==='tray' && b.sel.slot===slot ? null : { from:'tray', slot });
+  });
+  // A double click never skips a phase (Check work, then at once Next board):
+  // its second click is ignored.
+  primaryBtnSB.addEventListener('click', (e)=>{
+    if(e.detail>1) return;
+    sbPrimary();
+  });
+  giveupBtnSB.addEventListener('click', ()=> sbCheck(true));
+  retryBtnSB.addEventListener('click', sbTryAgain);
+  clearBtnSB.addEventListener('click', ()=>{
+    const b = boardSB;
+    if(!b || b.phase!=='rebuild' || !Object.keys(b.placed).length) return;
+    playClick('press');
+    b.placed = {}; b.sel = null;
+    b.tray.forEach(t=> t.used = false);
+    sbSetVerdict('Every piece is back in the tray', '');
+    sbRenderSel();
+  });
+  // A mouse or finger click leaves no focus behind on this screen, so a
+  // later Space or Enter is the drill's; keyboard focus stays put.
+  viewElSB.addEventListener('click', (e)=>{
+    const btn = e.target.closest && e.target.closest('button');
+    if(btn && e.detail>0) btn.blur();
+  });
+
+  /* ---- input: dragging, between the tray and the board ---- */
+  let dragSB = null, dragJustEndedSB = false, dragRafSB = null, dragXSB = 0, dragYSB = 0;
+  function sbPieceSize(){
+    const s = boardElSB.querySelector('.sq');
+    return s ? s.getBoundingClientRect().width*0.8 : 48;
+  }
+  function sbDropTarget(x, y){
+    const el = document.elementFromPoint(x, y);
+    const sq = el && el.closest ? el.closest('.sq') : null;
+    if(sq && boardElSB.contains(sq)){ const s = Number(sq.dataset.idx); return { kind:'sq', s, el:sq, ok:sbInArea(s) }; }
+    // Inside the board's own edge but on no square: floats home. Anywhere
+    // else (the coordinates, the frame around them, the page) is off the
+    // board, so a placed piece goes back to the tray.
+    const r = boardElSB.getBoundingClientRect();
+    if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) return { kind:'frame' };
+    return { kind:'off' };
+  }
+  viewElSB.addEventListener('pointerdown', (e)=>{
+    wakeClickAudio();                     // up before the click lands (asleep after a long think)
+    const b = boardSB;
+    if(!b || b.phase!=='rebuild' || dragSB || !e.isPrimary) return;
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    const tp = e.target.closest && e.target.closest('.sb-tp');
+    const sq = e.target.closest && e.target.closest('.sq');
+    let d = null;
+    if(tp && trayElSB.contains(tp)){
+      const slot = Number(tp.dataset.slot), t = b.tray[slot];
+      if(t && !t.used) d = { from:'tray', slot, k:t.k, el:tp };
+    } else if(sq && boardElSB.contains(sq)){
+      const s = Number(sq.dataset.idx);
+      if(b.placed[s]) d = { from:'sq', sq:s, k:b.placed[s], el:sq };
+    }
+    if(d) dragSB = Object.assign(d, { id:e.pointerId, x0:e.clientX, y0:e.clientY, started:false, ghost:null, size:0 });
+  }, { capture:true, passive:true });
+  function sbDragBegin(d){
+    const b = boardSB;
+    d.started = true;
+    if(b.sel){                            // a drag lets go of any pick (classes only: the source must stay put)
+      b.sel = null;
+      boardElSB.querySelectorAll('.sq.picked').forEach(x=> x.classList.remove('picked'));
+      boardElSB.classList.remove('sb-armed');
+      sbSyncTray();
+      sbRenderHud();
+    }
+    d.size = sbPieceSize();
+    const g = document.createElement('span');
+    g.className = 'piece-wrap drag-ghost';
+    g.innerHTML = PIECE_SVG[d.k];
+    g.style.width = d.size+'px';
+    g.style.height = d.size+'px';
+    document.body.appendChild(g);
+    d.ghost = g;
+    d.el.classList.add(d.from==='tray' ? 'is-lifting' : 'dragging-from');
+  }
+  function sbDragPaint(){
+    dragRafSB = null;
+    const d = dragSB;
+    if(!d || !d.ghost) return;
+    d.ghost.style.transform = 'translate('+(dragXSB-d.size/2)+'px,'+(dragYSB-d.size/2)+'px)';
+    const over = sbDropTarget(dragXSB, dragYSB);
+    boardElSB.querySelectorAll('.sq.drag-over').forEach(x=> x.classList.remove('drag-over'));
+    if(over.kind==='sq' && over.ok) over.el.classList.add('drag-over');
+    trayElSB.classList.toggle('is-drop', d.from==='sq' && over.kind==='off');
+  }
+  function sbDragCleanup(d){
+    if(dragRafSB!=null){ cancelAnimationFrame(dragRafSB); dragRafSB = null; }
+    if(d.ghost && d.ghost.parentNode) d.ghost.remove();
+    d.el.classList.remove('is-lifting', 'dragging-from');
+    boardElSB.querySelectorAll('.sq.drag-over').forEach(x=> x.classList.remove('drag-over'));
+    trayElSB.classList.remove('is-drop');
+    if(dragSB===d) dragSB = null;
+  }
+  function sbCancelDrag(){ if(dragSB) sbDragCleanup(dragSB); }
+  document.addEventListener('pointermove', (e)=>{
+    const d = dragSB;
+    if(!d || e.pointerId!==d.id) return;
+    if(!d.started){
+      if(Math.hypot(e.clientX-d.x0, e.clientY-d.y0) < SB_SLOP) return;
+      sbDragBegin(d);
+    }
+    dragXSB = e.clientX; dragYSB = e.clientY;
+    if(dragRafSB==null) dragRafSB = requestAnimationFrame(sbDragPaint);
+  });
+  // Capture phase: this runs before fastBoardTaps' document pointerup, whose
+  // synthetic click (a finger that drifted past the slop and came back) is
+  // then swallowed like a mouse drag's, instead of picking the piece and
+  // rebuilding the board under the ghost.
+  document.addEventListener('pointerup', (e)=>{
+    const d = dragSB;
+    if(!d || e.pointerId!==d.id) return;
+    if(!d.started){ dragSB = null; return; }          // a tap: its click does the rest
+    // The click a mouse drag can end with (same task) is never also a tap;
+    // a mouse press focused the tray piece: let go of that too, so Enter
+    // is still Check work.
+    dragJustEndedSB = true;
+    setTimeout(()=>{ dragJustEndedSB = false; }, 0);
+    if(document.activeElement===d.el) d.el.blur();
+    const over = sbDropTarget(e.clientX, e.clientY);
+    if(over.kind==='sq' && over.ok && !(d.from==='sq' && over.s===d.sq)){
+      sbDragCleanup(d);
+      if(d.from==='tray') sbPlace(d.slot, over.s, 'drop');
+      else sbMove(d.sq, over.s, 'drop');
+      return;
+    }
+    if(d.from==='sq' && over.kind==='off'){ sbDragCleanup(d); sbOff(d.sq, 'drop'); return; }
+    // Nowhere to go (outside the area, the frame, back where it was): it
+    // floats home.
+    dragSB = null;
+    const home = d.el.querySelector('.piece-wrap'), g = d.ghost;
+    if(home && g && home.isConnected && !reducedMotion()){
+      const r = home.getBoundingClientRect();
+      g.classList.add('returning');
+      g.style.transform = 'translate('+(r.left+r.width/2-d.size/2)+'px,'+(r.top+r.height/2-d.size/2)+'px)';
+      setTimeout(()=> sbDragCleanup(d), 170);
+    } else sbDragCleanup(d);
+  }, true);
+  document.addEventListener('pointercancel', (e)=>{ if(dragSB && e.pointerId===dragSB.id) sbCancelDrag(); });
+  window.addEventListener('blur', ()=> sbCancelDrag());
+  // (see pointerup) the click that ends a mouse drag
+  viewElSB.addEventListener('click', (e)=>{
+    if(dragJustEndedSB){ dragJustEndedSB = false; e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
+
+  /* ---- keys ---- */
+  function sbKeysLive(e){
+    if(!boardSB || !runSB || !viewElSB.classList.contains('active')) return false;
+    if(e.defaultPrevented) return false;                          // the Next box took it
+    if(nextOverlaySB && nextOverlaySB.classList.contains('active')) return false;
+    if(document.querySelector('.modal-overlay.active')) return false;
+    const tag = document.activeElement && document.activeElement.tagName;
+    if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return false;
+    if(e.ctrlKey || e.metaKey || e.altKey) return false;
+    return true;
+  }
+  // A button reached with the keyboard keeps its own Enter and Space (a tray
+  // piece picks, Give up gives up); after a mouse or finger click nothing
+  // keeps the focus, so Enter and Space are the drill's.
+  function sbFocusedControl(){
+    const a = document.activeElement;
+    if(!a || a.tagName!=='BUTTON' || a.disabled) return null;
+    if(viewElSB.contains(a)) return a;
+    try{ return a.matches(':focus-visible') ? a : null; }catch(err){ return a; }
+  }
+  document.addEventListener('keydown', (e)=>{
+    if(!sbKeysLive(e)) return;
+    const b = boardSB, key = e.key, low = key.length===1 ? key.toLowerCase() : key;
+    if(key==='Enter'){
+      if(sbFocusedControl()){ if(e.repeat) e.preventDefault(); return; }   // one click per press
+      e.preventDefault();
+      if(!e.repeat) sbPrimary();
+      return;
+    }
+    if(key===' ' || key==='Spacebar'){
+      if(sbFocusedControl()) return;
+      e.preventDefault();
+      if(!e.repeat && b.phase==='study') sbRebuild(false);
+      return;
+    }
+    if(key==='Escape'){
+      if(b.pend){ b.pend = ''; sbSetVerdict('', ''); }
+      if(b.sel && b.phase==='rebuild') sbPick(null);
+      return;
+    }
+    if(low==='t' && b.phase==='graded'){ e.preventDefault(); sbTryAgain(); return; }
+    if(b.phase!=='rebuild' || e.repeat) return;
+    if(key==='Backspace' || key==='Delete'){
+      if(b.sel && b.sel.from==='sq'){ e.preventDefault(); sbOff(b.sel.sq, 'key'); }
+      return;
+    }
+    // A square, typed: a file letter, then a rank digit.
+    if(low.length===1 && low>='a' && low<='h'){
+      e.preventDefault();
+      b.pend = low;
+      sbSetVerdict('Square: '+low+'\u2026', '');
+      return;
+    }
+    if(low.length===1 && low>='1' && low<='8' && b.pend){
+      e.preventDefault();
+      const s = 'abcdefgh'.indexOf(b.pend) + 8*(Number(low)-1);
+      b.pend = '';
+      sbSetVerdict('', '');
+      sbSquare(s, 'key');
+    }
+  });
+
+  onLeavePlay(()=>{
+    sbStopClock();
+    sbCancelDrag();
+    sbStepBoxHide();                       // its Next box closes with it
+    clearAnnounce(announceElSB, boardElSB, announceTimerSB);
+    announceTimerSB = null;
+    if(runSB && runSB.ladder){ sbBankBest(); runSB.record = Math.max(runSB.record, runSB.top); }
+  });
+
+  // the Next box's Next board: the side panel's (sbPrimary when graded)
+  document.getElementById('sb-step-next').addEventListener('click', ()=>{
+    if(boardSB && boardSB.phase==='graded') sbPrimary();
+  });
+  document.getElementById('sb-new-ladder').addEventListener('click', ()=>{
+    if(runSB && runSB.over){ playClick('press'); sbStartRun(); }
+  });
+  document.getElementById('start-sb-drill').addEventListener('click', ()=>{
+    statsSB.boards = 0; statsSB.first = 0; statsSB.streak = 0; statsSB.best = 0;
+    showView('play-sb');
+    sbStartRun();
   });
 
   /* ================= DRILL 03: ENDGAME REFLEXES (arcade) ================= */
@@ -22848,7 +24149,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const settingsBtn = document.getElementById('next-settings');
     const saveBtn = document.getElementById('next-save');
     const linkBtn = document.getElementById('next-link');
-    const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner', 'wl-result-banner', 'wl-step-banner']
+    const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner', 'wl-result-banner', 'wl-step-banner', 'sb-result-banner', 'sb-step-banner']
       .map(id => document.getElementById(id)).filter(Boolean);
     // dismissed: the banner whose box was closed to look at the board, so it
     // stays closed until that round is over.
