@@ -8635,8 +8635,99 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // forceColor pins every arrow this board draws to one colour — used by
   // drills where the arrows are the answer, not free annotation. Pass a
   // function when the colour depends on what the drill is asking for.
+  // Hold to draw, with a finger or a pencil (wireAnnotations below): a
+  // press resting this long on a square turns into drawing, and one that
+  // moves this far first is a piece drag or a scroll instead. While one is
+  // drawing, wireDrag stands down and the page doesn't scroll under it; and
+  // the lift isn't a tap (fastBoardTaps, and the click after it).
+  const ANNO_HOLD_MS = 350, ANNO_HOLD_SLOP = 6;
+  let annoHoldActive = false, annoHoldEndedAt = -Infinity;
+  window.addEventListener('touchmove', (e)=>{
+    if(annoHoldActive && e.cancelable) e.preventDefault();
+  }, { capture:true, passive:false });
+  // On a touch-first screen the boards' tips say what a finger does (the
+  // hold above), not what the right button does. Only the plain tips are
+  // reworded; a drill's own instructions are left as written.
+  (function touchAnnoHints(){
+    if(!window.matchMedia || !matchMedia('(pointer:coarse)').matches) return;
+    const SWAP = [
+      [/^(\u00b7\s*)?right-click-drag: arrow$/i, 'hold, then drag: arrow'],
+      [/^(\u00b7\s*)?(plain )?right-click: highlight$/i, 'hold and lift: highlight'],
+      [/^(\u00b7\s*)?left-click: clear$/i, 'tap: clear'],
+    ];
+    document.querySelectorAll('.anno-hint > span').forEach(sp=>{
+      if(sp.children.length) return;
+      const t = sp.textContent.trim();
+      for(const [re, txt] of SWAP){
+        const m = t.match(re);
+        if(!m) continue;
+        sp.textContent = m[1] ? '\u00b7 '+txt : txt.charAt(0).toUpperCase()+txt.slice(1);
+        break;
+      }
+    });
+  })();
+  // The click a browser may send after the lift that ends a drawing. Only
+  // until the next press: a tap straight after is a tap.
+  function annoSwallowClickNear(x, y){
+    const done = ()=>{
+      window.removeEventListener('click', swallow, true);
+      window.removeEventListener('pointerdown', done, true);
+    };
+    const swallow = (ev)=>{
+      if(Math.hypot(ev.clientX-x, ev.clientY-y) > 30) return;
+      ev.stopImmediatePropagation(); ev.preventDefault();
+      done();
+    };
+    window.addEventListener('click', swallow, true);
+    window.addEventListener('pointerdown', done, true);
+    setTimeout(done, 700);
+  }
+
   function wireAnnotations(boardEl, getMarks, onChange, shouldSkip, forceColor){
     let fromIdx = null;
+    // A mark from one square to another (the same square: a highlight) onto
+    // `marks` — a right button's release, or a held finger's lift.
+    function applyMark(marks, fromIdx, toIdx){
+      const forced = (typeof forceColor==='function' ? forceColor() : forceColor);
+      const held = forced ? null : heldPenColor();
+      const color = forced || held || DEFAULT_PEN_COLOR;   // the same color as ever
+      // A forced color is the drill's, so it is stored plain like the
+      // app's own marks and no profile touches it. Anything else is a user
+      // mark: auto when no pen key was held.
+      const user = !forced, auto = !held;
+      // Redrawing a mark removes it when it is the same mark. In Default
+      // that means the same color, as always; with a profile on, a keyless
+      // mark only matches a keyless one (its shown color is derived).
+      const prof = user && !marks.noProfile && annoProfile()!=='default';
+      const sameAs = (exColor, exAuto)=> (prof && typeof exAuto==='boolean')
+        ? (exAuto===auto && exColor===color) : exColor===color;
+      if(toIdx===fromIdx){
+        if(!marks.sqMeta) marks.sqMeta = {};
+        const m = marks.sqMeta[toIdx];
+        const exColor = marks.squares[toIdx];
+        if(sameAs(exColor, m && m.color===exColor ? m.auto : undefined)){
+          delete marks.squares[toIdx]; delete marks.sqMeta[toIdx];
+        } else {
+          marks.squares[toIdx] = color;
+          if(user){ const st = annoStamp(marks); marks.sqMeta[toIdx] = { auto, color, seq:st.seq, seg:st.seg }; }
+          else delete marks.sqMeta[toIdx];
+        }
+      } else {
+        const make = ()=>{
+          const a = {from:fromIdx, to:toIdx, color};
+          if(user){ const st = annoStamp(marks); a.auto = auto; a.seq = st.seq; a.seg = st.seg; }
+          return a;
+        };
+        const i = marks.arrows.findIndex(a=> a.from===fromIdx && a.to===toIdx);
+        if(i>=0){
+          const existing = marks.arrows[i];
+          marks.arrows.splice(i,1);
+          if(!sameAs(existing.color, existing.auto)) marks.arrows.push(make());
+        } else {
+          marks.arrows.push(make());
+        }
+      }
+    }
     boardEl.addEventListener('contextmenu', (e)=> e.preventDefault());
     boardEl.addEventListener('mousedown', (e)=>{
       if(e.button!==2) return;
@@ -8651,50 +8742,97 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const sqEl = e.target.closest('.sq');
       const toIdx = sqEl ? Number(sqEl.dataset.idx) : null;
       if(toIdx!=null){
-        const marks = getMarks();
-        const forced = (typeof forceColor==='function' ? forceColor() : forceColor);
-        const held = forced ? null : heldPenColor();
-        const color = forced || held || DEFAULT_PEN_COLOR;   // the same color as ever
-        // A forced color is the drill's, so it is stored plain like the
-        // app's own marks and no profile touches it. Anything else is a user
-        // mark: auto when no pen key was held.
-        const user = !forced, auto = !held;
-        // Redrawing a mark removes it when it is the same mark. In Default
-        // that means the same color, as always; with a profile on, a keyless
-        // mark only matches a keyless one (its shown color is derived).
-        const prof = user && !marks.noProfile && annoProfile()!=='default';
-        const sameAs = (exColor, exAuto)=> (prof && typeof exAuto==='boolean')
-          ? (exAuto===auto && exColor===color) : exColor===color;
-        if(toIdx===fromIdx){
-          if(!marks.sqMeta) marks.sqMeta = {};
-          const m = marks.sqMeta[toIdx];
-          const exColor = marks.squares[toIdx];
-          if(sameAs(exColor, m && m.color===exColor ? m.auto : undefined)){
-            delete marks.squares[toIdx]; delete marks.sqMeta[toIdx];
-          } else {
-            marks.squares[toIdx] = color;
-            if(user){ const st = annoStamp(marks); marks.sqMeta[toIdx] = { auto, color, seq:st.seq, seg:st.seg }; }
-            else delete marks.sqMeta[toIdx];
-          }
-        } else {
-          const make = ()=>{
-            const a = {from:fromIdx, to:toIdx, color};
-            if(user){ const st = annoStamp(marks); a.auto = auto; a.seq = st.seq; a.seg = st.seg; }
-            return a;
-          };
-          const i = marks.arrows.findIndex(a=> a.from===fromIdx && a.to===toIdx);
-          if(i>=0){
-            const existing = marks.arrows[i];
-            marks.arrows.splice(i,1);
-            if(!sameAs(existing.color, existing.auto)) marks.arrows.push(make());
-          } else {
-            marks.arrows.push(make());
-          }
-        }
+        applyMark(getMarks(), fromIdx, toIdx);
         onChange();
       }
       fromIdx = null;
     });
+
+    // Hold to draw: a finger or a pencil has no right button, so one held
+    // on a square for a moment stands in for it (the Private Student
+    // Planner's gesture, as in Repertoire Lab). Hold, then drag to another
+    // square for an arrow, or lift where it is for a highlight; what the
+    // lift will do shows as the finger goes, drawn from a copy of the marks
+    // so nothing (a drill's answer check) hears about it until the lift.
+    // A finger that moves first is a piece drag or a scroll, and a quick tap
+    // is the click below, which clears.
+    let hold = null;
+    function sqIdxAt(x, y){
+      const el = document.elementFromPoint(x, y);
+      const sq = el && el.closest ? el.closest('.sq') : null;
+      return sq && boardEl.contains(sq) ? Number(sq.dataset.idx) : null;
+    }
+    function holdPreview(){
+      const ab = annoBoards.get(boardEl);
+      if(!hold || !ab) return;
+      const real = getMarks();
+      const copy = Object.assign({}, real, {
+        arrows: real.arrows.slice(), squares: Object.assign({}, real.squares),
+        sqMeta: real.sqMeta ? Object.assign({}, real.sqMeta) : undefined,
+        segs: real.segs ? real.segs.slice() : undefined,
+      });
+      applyMark(copy, hold.from, hold.to);
+      renderMarks(boardEl, ab.svgEl, copy, null, ab.cols);
+    }
+    function onHoldMove(e){
+      if(!hold || e.pointerId!==hold.id) return;
+      if(!hold.held){
+        if(Math.hypot(e.clientX-hold.x, e.clientY-hold.y) >= ANNO_HOLD_SLOP) endHold(false);
+        return;
+      }
+      const to = sqIdxAt(e.clientX, e.clientY);
+      if(to!=null && to!==hold.to){ hold.to = to; holdPreview(); }
+    }
+    function onHoldUp(e){
+      if(!hold || e.pointerId!==hold.id) return;
+      endHold(true, e);
+    }
+    function onHoldCancel(e){
+      if(!hold || e.pointerId!==hold.id) return;
+      endHold(false);
+    }
+    function endHold(commit, e){
+      const h = hold;
+      if(!h) return;
+      hold = null;
+      clearTimeout(h.timer);
+      window.removeEventListener('pointermove', onHoldMove, true);
+      window.removeEventListener('pointerup', onHoldUp, true);
+      window.removeEventListener('pointercancel', onHoldCancel, true);
+      if(!h.held) return;
+      annoHoldActive = false;
+      annoHoldEndedAt = performance.now();
+      if(commit && e){
+        annoSwallowClickNear(e.clientX, e.clientY);
+        applyMark(getMarks(), h.from, h.to);
+        onChange();
+      } else {
+        // Given up: back to the marks as they are.
+        const ab = annoBoards.get(boardEl);
+        if(ab) renderMarks(boardEl, ab.svgEl, getMarks(), null, ab.cols);
+      }
+    }
+    boardEl.addEventListener('pointerdown', (e)=>{
+      if(e.pointerType==='mouse' || !e.isPrimary || e.button!==0) return;
+      if(shouldSkip && shouldSkip(e)) return;
+      const from = sqIdxAt(e.clientX, e.clientY);
+      if(from==null) return;
+      endHold(false);
+      const h = { id:e.pointerId, from, to:from, x:e.clientX, y:e.clientY, held:false, timer:0 };
+      hold = h;
+      h.timer = setTimeout(()=>{
+        // A piece already on its way (dragged past wireDrag's own slop) is
+        // a move, not a drawing.
+        if(hold!==h || boardEl.querySelector('.dragging-from') || (shouldSkip && shouldSkip(e))){ endHold(false); return; }
+        h.held = true;
+        annoHoldActive = true;
+        holdPreview();
+      }, ANNO_HOLD_MS);
+      window.addEventListener('pointermove', onHoldMove, true);
+      window.addEventListener('pointerup', onHoldUp, true);
+      window.addEventListener('pointercancel', onHoldCancel, true);
+    });
+
     // Capture phase so this runs before a drill's own bubble-phase click
     // handling — a click that lands on marks just dismisses them, exactly
     // like lichess/chess.com.
@@ -9256,6 +9394,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
     boardEl.addEventListener('pointermove', (e)=>{
       if(!drag) return;
+      // A finger held to draw an arrow (wireAnnotations): not a piece drag.
+      if(annoHoldActive){ teardown(); return; }
       if(!drag.started){
         if(Math.hypot(e.clientX-drag.startX, e.clientY-drag.startY) < DRAG_SLOP) return;
         drag.started = true;
@@ -9368,6 +9508,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.addEventListener('pointerup', (e)=>{
       const d = down; down = null;
       if(!d || (e.pointerType!=='touch' && e.pointerType!=='pen')) return;
+      // The lift that ends a held-finger drawing (wireAnnotations) isn't a tap.
+      if(annoHoldActive || performance.now()-annoHoldEndedAt < 100) return;
       if(Math.hypot(e.clientX-d.x, e.clientY-d.y) >= TAP_SLOP || e.timeStamp-d.t > TAP_MAX_MS) return;
       const target = document.elementFromPoint(e.clientX, e.clientY);
       if(!target || !target.closest || !target.closest('.board')) return;
