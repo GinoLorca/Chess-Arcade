@@ -4166,26 +4166,37 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @keyframes wlCallIn{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
   /* The move call-out (wlCalloutShow): each new move flashes over the board
      in the shared announce's overlay and punch-in, sized from the squares,
-     but the SAN keeps its case (Bb5, never BB5) and it holds 2.4 s, then
-     fades over 0.6 s (WL_CALLOUT_HOLD / WL_CALLOUT_FADE), long enough to
-     take in. The move number rides above it on a small plate in the HUD
-     card's own pairing (brass text on the surface), so it reads on every
-     skin. Fill both: it stays faded until the timer takes the overlay down. */
+     but the SAN keeps its case (Bb5, never BB5). About a second in all: a
+     quick 0.15 s punch-in, held to 0.65 s, then a 0.35 s fade. The hold and
+     the fade come from WL_CALLOUT_HOLD / WL_CALLOUT_FADE (the script sets
+     --wl-co-hold / --wl-co-fade from them), so tuning those two retimes
+     both the CSS and the timer. The fade fills forwards (not backwards, so
+     it leaves the punch-in alone while it waits): it stays faded until the
+     timer takes the overlay down. The move number rides above it on a
+     small plate in the HUD card's own pairing (brass text on the surface),
+     so it reads on every skin. */
   #wl-announce.wl-callout #wl-announce-text{ display:flex; flex-direction:column; align-items:center; gap:.1em;
     line-height:1; text-transform:none; font-size:clamp(52px, calc(var(--sq) * 1.75), 124px);
-    animation:wlCallout 3s linear both; }
+    animation:wlCalloutIn .15s cubic-bezier(.16,1,.3,1) both,
+      wlCalloutOut var(--wl-co-fade, 350ms) ease-in-out var(--wl-co-hold, 650ms) forwards; }
   #wl-announce .wl-co-san{ font-style:inherit; }
   #wl-announce .wl-co-num{ font-size:max(13px, .19em); font-style:normal; letter-spacing:.16em; text-transform:uppercase;
     color:var(--brass-text); background:color-mix(in srgb, var(--surface) 92%, transparent);
     padding:.34em .8em .28em; border-radius:999px; box-shadow:0 2px 10px rgba(0,0,0,.35);
     -webkit-text-stroke-width:0; text-shadow:none; }
-  @keyframes wlCallout{
-    0%{ opacity:0; transform:skewX(-8deg) scale(2.4); animation-timing-function:cubic-bezier(.16,1,.3,1); }
-    6.25%{ opacity:1; transform:skewX(-8deg) scale(1); }
-    80%{ opacity:1; transform:skewX(-8deg) scale(1); animation-timing-function:ease-in-out; }
-    100%{ opacity:0; transform:skewX(-8deg) scale(1.04); }
+  @keyframes wlCalloutIn{
+    from{ opacity:0; transform:skewX(-8deg) scale(2.4); }
+    to{ opacity:1; transform:skewX(-8deg) scale(1); }
   }
-  @keyframes wlCalloutFade{ 0%, 80%{ opacity:1; } 100%{ opacity:0; } }
+  @keyframes wlCalloutOut{
+    from{ opacity:1; transform:skewX(-8deg) scale(1); }
+    to{ opacity:0; transform:skewX(-8deg) scale(1.04); }
+  }
+  @keyframes wlCalloutFade{ from{ opacity:1; } to{ opacity:0; } }
+  /* The step's "solved it" words for the Next box only (wlStepBoxShow): the
+     side panel already shows the verdict and its own Next move button, so
+     this banner is never drawn; the box reads it and clicks its button. */
+  #wl-step-banner{ display:none !important; }
   /* the called move in words, for the HUD's live region */
   #view-play-wl .wl-sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
     clip-path:inset(50%); white-space:nowrap; }
@@ -4359,7 +4370,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   @media (prefers-reduced-motion:reduce){
     .wl-call.is-fresh{ animation:none; }
-    #wl-announce.wl-callout #wl-announce-text{ animation:wlCalloutFade 3s linear both; }
+    #wl-announce.wl-callout #wl-announce-text{ animation:wlCalloutFade var(--wl-co-fade, 350ms) linear var(--wl-co-hold, 650ms) forwards; }
     .wl-chip{ transition:none; }
     .wl-chip:active:not(:disabled){ transform:none; }
   }
@@ -5519,6 +5530,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
             </div>
             <div class="wl-keys"><span><span class="kbd">Q</span><span class="kbd">R</span> queen guards rook</span><span><span class="kbd">Enter</span> check</span><span>hold <span class="kbd">Space</span> peek</span></div>
           </div>
+        </div>
+      </div>
+
+      <!-- Never drawn (see #wl-step-banner): the words and the button of the
+           centred Next box after a correct Check on a move with one to come. -->
+      <div class="result-banner" id="wl-step-banner" style="display:none;" data-box-only data-fresh-enter aria-hidden="true">
+        <div class="result-line" id="wl-step-line">Excellent</div>
+        <div class="result-sub" id="wl-step-sub"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="wl-step-next" tabindex="-1">Next move</button>
         </div>
       </div>
 
@@ -11555,6 +11576,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const bestValWL = document.getElementById('wl-stat-best');
   const bestLabelWL = document.getElementById('wl-stat-best-label');
   const nextOverlayWL = document.getElementById('next-overlay');
+  const stepBannerWL = document.getElementById('wl-step-banner');
+  const stepLineWL = document.getElementById('wl-step-line');
+  const stepSubWL = document.getElementById('wl-step-sub');
 
   const marksWL = newMarks();
   marksWL.noProfile = true;          // the colors are the grading, never a profile's
@@ -11813,12 +11837,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   // The move call-out: each new move flashes big over the board (the
-  // Coordinates call-out, held longer: the move has to be taken in), the
-  // board blurred under it as under the shared announce, while the HUD
-  // card above keeps it. Nothing waits for it: the sheet works at once,
-  // and a chip, Clear, Check, Peek, Reveal, List, Restart, Esc or leaving
-  // ends it early. A timed step's countdown starts when it ends.
-  const WL_CALLOUT_HOLD = 2400, WL_CALLOUT_FADE = 600;   // the CSS wlCallout: 3 s, fading from 80%
+  // Coordinates call-out), the board blurred under it as under the shared
+  // announce, while the HUD card above keeps it. Nothing waits for it: the
+  // sheet works at once, and a chip, Clear, Check, Peek, Reveal, List,
+  // Restart, Esc or leaving ends it early. A timed step's countdown starts
+  // when it ends.
+  // About a second in all: held 0.65 s (the 0.15 s punch-in inside it),
+  // then a 0.35 s fade. These two are the only knobs: the CSS reads them
+  // as --wl-co-hold / --wl-co-fade.
+  const WL_CALLOUT_HOLD = 650, WL_CALLOUT_FADE = 350;
+  announceElWL.style.setProperty('--wl-co-hold', WL_CALLOUT_HOLD+'ms');
+  announceElWL.style.setProperty('--wl-co-fade', WL_CALLOUT_FADE+'ms');
   function wlCalloutShow(){
     const k = runWL.k, mv = lineWL.moves[k];
     wlCalloutEnd(true);                    // a new move restarts it
@@ -11838,6 +11867,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     boardElWL.classList.remove('pre-round');
     if(!quiet && runWL && runWL.time && runWL.phase==='answer') wlStartClock();
   }
+
+  // The centred Next box after a correct Check on a move with one to come
+  // (Endless too; the end of a line has its own result box). wireNextBox
+  // opens it from the never-drawn #wl-step-banner as it does every drill's
+  // result banner: the same card, Enter = Next move (a fresh press, not the
+  // Check's Enter held down), Esc = look at the board. Its Next move is the
+  // side panel's, which stays. The banner goes with the step, so the box
+  // closes with it: Next move, Restart, a new line, leaving.
+  function wlStepBoxShow(){
+    const k = runWL.k;
+    stepLineWL.textContent = runWL.note.text;
+    stepSubWL.textContent = (k ? 'After '+k+'. '+lineWL.moves[k].san : 'Start position')+' \u00B7 '+verdictWL.textContent;
+    stepBannerWL.style.display = 'flex';
+  }
+  function wlStepBoxHide(){ if(stepBannerWL.style.display!=='none') stepBannerWL.style.display = 'none'; }
 
   // S 1 2 ... N: colored by result, never in a fixed order. Endless shows
   // the last ten and the live one.
@@ -11927,6 +11971,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     for(let i=0;i<=(L.endless ? 0 : L.len);i++) runWL.steps.push(wlNewStep());
     bannerWL.style.display='none';
+    wlStepBoxHide();
     resultAnswerWL.innerHTML='';
     viewElWL.style.setProperty('--wl-rows', L.n);
     wlSetVerdict('', '');
@@ -11948,6 +11993,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   function wlEnterStep(k){
     const r = runWL, L = lineWL;
+    wlStepBoxHide();
     if(L.endless){
       while(L.moves.length<=k){
         if(!wlExtend(L)){ r.over = true; wlFinish(); return; }
@@ -12014,6 +12060,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     wlResolve(result);
     playSolvedSound();
     wlRenderAll();
+    if(!wlIsLast()) wlStepBoxShow();
   }
 
   // Reveal, a timeout or an Endless strike: grade the sheet and show the
@@ -12062,6 +12109,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const r = runWL, L = lineWL;
     if(!r || (r.phase!=='solved' && r.phase!=='revealed')) return;
     wlPeekEnd(true);
+    wlStepBoxHide();
     clearInterval(r.timerId);
     if(r.phase==='solved'){
       const now = L.pos[r.k];
@@ -12193,6 +12241,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function wlTick(){
     const r = runWL;
     if(!r || r.phase==='intro' || r.phase==='done') return;
+    if(nextOverlayWL.classList.contains('active')) return;    // the clock holds while the Next box is up
     r.elapsed++;
     if(r.time && r.phase==='answer' && !calloutTimerWL){      // held under the call-out
       r.left = Math.max(0, r.left-1);
@@ -12336,12 +12385,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   onLeavePlay(()=>{
     if(runWL){ clearInterval(runWL.timerId); wlPeekEnd(true); wlBankRecord(); }
+    wlStepBoxHide();                       // its Next box closes with it
     wlCalloutEnd(true);
     clearAnnounce(announceElWL, boardElWL, announceTimerWL);
     announceTimerWL = null;
   });
 
   document.getElementById('wl-next-line').addEventListener('click', ()=> wlStartLine(true));
+  // the Next box's Next move: the side panel's Next move (wlPrimary when solved)
+  document.getElementById('wl-step-next').addEventListener('click', ()=>{
+    if(runWL && runWL.phase==='solved') wlPrimary();
+  });
   document.getElementById('start-wl-drill').addEventListener('click', ()=>{
     statsWL.positions = 0; statsWL.clean = 0; statsWL.streak = 0; statsWL.best = 0;
     lineWL = null;
@@ -22794,7 +22848,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const settingsBtn = document.getElementById('next-settings');
     const saveBtn = document.getElementById('next-save');
     const linkBtn = document.getElementById('next-link');
-    const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner', 'wl-result-banner']
+    const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner', 'wl-result-banner', 'wl-step-banner']
       .map(id => document.getElementById(id)).filter(Boolean);
     // dismissed: the banner whose box was closed to look at the board, so it
     // stays closed until that round is over.
@@ -22804,7 +22858,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let afterSave = null;
     const saveOv = document.getElementById('save-overlay');
     nextBoxAfterSave = () => { const b = afterSave; afterSave = null; if(b && shown(b) && dismissed !== b) open(b); };
-    const shown = el => el.style.display !== 'none' && el.offsetParent !== null;
+    // A box-only banner (data-box-only, never drawn) counts as shown while
+    // its display says so and its view is on screen.
+    const shown = el => el.style.display !== 'none'
+      && (el.hasAttribute('data-box-only') ? !!el.closest('.view.active') : el.offsetParent !== null);
     const bannerButtons = b => {
       const btns = b.querySelectorAll('.btn-row button');
       return { next: btns[0] || null, settings: btns[1] || null };
@@ -22861,7 +22918,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // control's own; anywhere else it's Next.
       else if(e.key === 'Enter' && ![reviewBtn, settingsBtn, saveBtn, linkBtn].includes(document.activeElement)
               && !(document.activeElement && document.activeElement.classList.contains('ph-url'))){
-        e.preventDefault(); act('next');
+        e.preventDefault();
+        // data-fresh-enter: an Enter still held from the press before the
+        // box (Check, then the key repeats) is not a Next.
+        if(e.repeat && current && current.hasAttribute('data-fresh-enter')) return;
+        act('next');
       }
     }, true);
     // A short pause first, so the move that finished the round is seen
