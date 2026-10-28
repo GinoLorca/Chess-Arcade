@@ -22540,13 +22540,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       clock: tcm ? { initial:Number(tcm[1]), increment:Number(tcm[2]) } : null, daysPerTurn: cm ? Number(cm[1]) : undefined,
       lastFen:s.fen, moves:s.san, players };
   }
+  // Game History lists games against people only: Lichess AI (aiLevel) and
+  // BOT accounts never show, nor count. They're still read from Lichess, so
+  // paging and the 200/2,000 limits are unchanged, and their notes are kept.
+  function ghVsComputer(g){
+    const P = g.players || {};
+    return ['white','black'].some(c=>{ const p = P[c] || {}; return p.aiLevel!=null || !!(p.user && p.user.title==='BOT'); });
+  }
   function ghBaseList(){
-    const out = GH_STATE.games.slice();
+    const out = GH_STATE.games.filter(g=> !ghVsComputer(g));
+    GH_STATE.humans = out.length;
     if(typeof GN==='object' && GN && (GH_FILTERS.notes || GH_STATE.offline)){
       let added = false;
       Object.values(GN.notes).forEach(n=>{
         if(!(n.text || n.conflict) || !n.g || GH_STATE.ids.has(n.id)) return;
-        out.push(GH_STATE.extras.get(n.id) || ghGameFromSummary(n));
+        const g = GH_STATE.extras.get(n.id) || ghGameFromSummary(n);
+        if(ghVsComputer(g)) return;
+        out.push(g);
         added = true;
       });
       if(added) out.sort((a, b)=> (Number(b.createdAt)||0) - (Number(a.createdAt)||0));
@@ -22779,7 +22789,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       : (active ? rows.length+' of '+total+' game'+plural : total+' game'+plural);
     if(active && !GH_STATE.exhausted && GH_STATE.games.length){
       cnt.appendChild(document.createTextNode(' '));
-      cnt.appendChild(ghEl('span', 'gh-count-hint', 'Filters search the '+GH_STATE.games.length+' games loaded so far.'));
+      cnt.appendChild(ghEl('span', 'gh-count-hint', 'Filters search the '+GH_STATE.humans+' game'+(GH_STATE.humans===1 ? '' : 's')+' loaded so far.'));
     }
     document.getElementById('gh-list-note').hidden = !(GH_STATE.offline && base.some(g=> g._summary));
     // The rows are rebuilt (a page loaded, a sync finished): the keyboard
@@ -22821,7 +22831,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(!GH_STATE.exhausted && GH_STATE.games.length) empty.appendChild(ghEl('div', 'gh-empty-more', 'Load more games to search further back.'));
         empty.style.display = 'block';
       } else if(GH_STATE.exhausted){
-        empty.textContent = 'No games found.';
+        empty.textContent = 'No games against people found.';
+        empty.style.display = 'block';
+      } else if(GH_STATE.games.length && !filling){
+        empty.textContent = 'No games against people in your newest '+GH_STATE.games.length+' games. Load more games to look further back.';
         empty.style.display = 'block';
       }
     }
