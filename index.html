@@ -3247,10 +3247,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   /* ---- Game History ---- */
   .history-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-  .history-filters{ display:flex; gap:8px; flex-wrap:wrap; }
   .history-list{ display:flex; flex-direction:column; margin-top:14px; }
   .history-row{
-    display:grid; grid-template-columns:auto 1fr auto auto; align-items:center;
+    display:grid; grid-template-columns:auto minmax(0,1fr) minmax(110px,180px) auto auto auto; align-items:center;
     gap:14px; padding:10px 6px; border-bottom:1px solid var(--line);
   }
   .history-row:last-child{ border-bottom:none; }
@@ -3390,9 +3389,167 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   .history-footer{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:16px; }
   .history-loading, .history-empty{ font-size:13px; color:var(--ink-soft); }
+  /* ---- Game History: opening column, notes, filters (tokens only, so every
+     skin dresses them; Uptown/Bauhaus corners follow their .toggle/.pz-save-btn
+     rules). On a phone the row folds into thumb | details | note button. ---- */
+  #view-history [hidden], #gn-overlay [hidden]{ display:none !important; }
+  #view-history > .gh-panel{ position:relative; z-index:3; }   /* the combobox lists open over the rows */
+  .gh-when{ display:contents; }
+  /* The rows sit on a surface, like the filters: on a textured page (Felt,
+     the Uptown map) bare row text can't be read. */
+  .gh-list{ gap:0; padding:2px 16px; }
+  .gh-list:empty{ display:none; }
+  .gh-open{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .gh-open-name{
+    font-size:13px; font-weight:700; color:var(--ink); line-height:1.25; overflow-wrap:anywhere;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .gh-open-eco{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-soft); }
+  .gh-open.is-unknown .gh-open-name{ color:var(--ink-soft); font-weight:600; }
+  .gh-note-btn{
+    width:34px; height:34px; padding:0; flex:0 0 auto; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--surface); color:var(--ink-soft); border:1px solid var(--line); border-radius:999px;
+  }
+  .gh-note-btn:hover{ border-color:var(--brass-soft); color:var(--ink); }
+  /* Noted: filled in the text colour, which reads on every skin (brass on
+     brass-ink is under 3:1 on some light palettes, and the light-yellow
+     brasses barely show against the surface). */
+  .gh-note-btn.has-note{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .gh-note-btn.has-note:hover{ color:var(--surface); opacity:.88; }
+  .gh-note-btn:focus-visible, .gh-note-line:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .history-row:focus{ outline:none; }
+  .history-row:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; border-radius:6px; }
+  :root[data-skin="bauhaus"] .gh-note-btn{ border-radius:0; }
+  .gh-note-line{
+    display:block; max-width:100%; margin-top:2px; padding:0 0 0 7px; cursor:pointer; text-align:left;
+    background:none; border:none; border-left:2px solid var(--brass-soft); border-radius:0;
+    font:inherit; font-size:12.5px; font-style:italic; color:var(--ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .gh-list-note{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); }
+  .gh-foot-note{ font-size:12.5px; color:var(--ink-soft); text-align:center; }
+  .gh-filters{ display:flex; flex-direction:column; gap:10px; }
+  .gh-fbar{ display:flex; align-items:center; gap:8px 14px; flex-wrap:wrap; }
+  .gh-filter-toggle{ display:none; align-items:center; gap:7px; padding:8px 14px; font-size:13.5px; }
+  .gh-count{ flex:1 1 auto; min-width:0; font-size:12.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .gh-count-hint{ display:inline-block; }
+  .gh-count-hint::before{ content:"\00b7\00a0"; }
+  .gh-badge{
+    display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px;
+    margin-left:6px; border-radius:9px; background:var(--ink); color:var(--surface);
+    font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:800; line-height:1; letter-spacing:0;
+    text-transform:none; vertical-align:middle;
+  }
+  :root[data-skin="bauhaus"] .gh-badge{ border-radius:0; }
+  .gh-fprimary, .gh-fmore{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .gh-fmore{ display:none; margin-top:10px; }
+  .gh-fpanel.more-open .gh-fmore{ display:flex; }
+  .gh-more-toggle{ display:inline-flex; align-items:center; margin-top:10px; }
+  .gh-fpanel .select-input{ width:auto; flex:0 1 auto; min-width:0; max-width:220px; padding:7px 9px; font-size:12.5px; }
+  .gh-seg{ gap:4px; flex-wrap:nowrap; }
+  .gh-seg .toggle, .gh-chip{ padding:7px 11px; font-size:12.5px; white-space:nowrap; }
+  .gh-combo{ position:relative; flex:0 1 220px; min-width:0; }
+  .gh-combo-input{ padding:7px 30px 7px 9px; font-size:12.5px; }
+  .gh-combo-clear{
+    position:absolute; right:3px; top:50%; transform:translateY(-50%); width:28px; height:28px; padding:0;
+    background:none; border:none; cursor:pointer; color:var(--ink-soft); font-size:18px; line-height:1;
+  }
+  .gh-combo-clear:hover{ color:var(--ink); }
+  .gh-combo-list{
+    position:absolute; left:0; top:calc(100% + 4px); z-index:30; box-sizing:border-box;
+    min-width:100%; width:max-content; max-width:min(380px, calc(100vw - 32px)); max-height:280px; overflow-y:auto;
+    background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow); padding:4px;
+  }
+  .gh-opt{ display:flex; align-items:baseline; gap:8px; padding:7px 9px; border-radius:6px; cursor:pointer; color:var(--ink); font-size:13px; }
+  .gh-opt:hover, .gh-opt[aria-selected="true"]{ background:var(--surface-2); }
+  .gh-opt[aria-selected="true"]{ box-shadow:inset 0 0 0 1px var(--brass-soft); }
+  .gh-opt-l{ min-width:0; overflow-wrap:anywhere; }
+  .gh-opt-sub{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-soft); white-space:nowrap; }
+  .gh-opt-n{ margin-left:auto; padding-left:10px; font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .gh-opt-empty{ padding:7px 9px; font-size:12.5px; color:var(--ink-soft); }
   @media (max-width:640px){
-    .history-row{ grid-template-columns:auto 1fr; }
-    .history-tc, .history-date{ grid-column:2; text-align:left; }
+    .history-row{ grid-template-columns:auto minmax(0,1fr) auto; column-gap:12px; row-gap:4px; align-items:start; }
+    .history-thumb{ grid-column:1; grid-row:1 / span 3; align-self:center; }
+    .history-main{ grid-column:2; grid-row:1; }
+    .gh-note-btn{ grid-column:3; grid-row:1; }
+    .gh-open{ grid-column:2 / span 2; grid-row:2; flex-direction:row; align-items:baseline; gap:6px; }
+    .gh-open-name{ -webkit-line-clamp:1; display:block; white-space:nowrap; text-overflow:ellipsis; min-width:0; }
+    .gh-open-eco{ flex:0 0 auto; }
+    .gh-when{ display:flex; grid-column:2 / span 2; grid-row:3; align-items:baseline; gap:8px; flex-wrap:wrap; }
+    .history-tc{ display:flex; align-items:baseline; gap:6px; text-align:left; }
+    .gh-filter-toggle{ display:inline-flex; }
+    .gh-list{ padding:2px 12px; }
+    .gh-count-hint{ display:block; }
+    .gh-count-hint::before{ content:none; }
+    .gh-fpanel .select-input{ max-width:none; }
+    .gh-fpanel{ display:none; }
+    .gh-fpanel.open{ display:block; animation:gh-panel-in .16s ease-out; }
+    /* One control per row: at 16px (below that iOS zooms in) most filter
+       labels ("All time controls", "Rated 100+ above me", "Correspondence")
+       don't fit half a phone. .more-open, remembered from a wide screen, must
+       not turn the secondary filters back into the desktop's flex row. */
+    .gh-fprimary, .gh-fpanel .gh-fmore, .gh-fpanel.more-open .gh-fmore{ display:grid; grid-template-columns:minmax(0,1fr); gap:8px; }
+    .gh-fpanel .gh-fmore{ margin-top:8px; }
+    .gh-more-toggle{ display:none; }
+    .gh-fpanel .select-input, .gh-combo{ width:100%; flex:none; }
+    .gh-seg .toggle{ flex:1 1 auto; min-width:0; padding-left:6px; padding-right:6px; }   /* by content: "Rated and casual" is the long one */
+    .gh-chip{ justify-self:start; }
+  }
+  @keyframes gh-panel-in{ from{ opacity:0; transform:translateY(-4px); } to{ opacity:1; transform:none; } }
+  /* Every row shares the list's column tracks (subgrid), so Opening, time
+     control and date start at the same x on every row. 641-820px (iPad
+     split view) folds time control and date into one column, so the
+     opponent and note line keep their room. */
+  @supports (grid-template-columns:subgrid){
+    @media (min-width:641px){
+      .history-list.gh-list{ display:grid; grid-template-columns:auto minmax(0,1fr) minmax(110px,180px) auto auto auto; column-gap:14px; }   /* over .panel's flex */
+      .gh-list > .history-row{ grid-column:1 / -1; grid-template-columns:subgrid; }
+    }
+  }
+  @media (min-width:641px) and (max-width:820px){
+    .history-row, .history-list.gh-list{ grid-template-columns:auto minmax(0,1fr) minmax(96px,150px) auto auto; }
+    .gh-when{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+  }
+  @media (pointer:coarse){
+    .gh-note-btn{ width:44px; height:44px; }
+    .gh-combo-input, .gh-fpanel .select-input{ font-size:16px; }   /* iOS zooms into anything smaller */
+    .gh-combo-clear{ width:36px; height:36px; }
+  }
+  /* The note editor (#gn-overlay) and the review's Notes field. */
+  .gn-card{ max-width:640px; }
+  .gn-head-actions{ display:flex; align-items:center; gap:10px; }
+  .gn-done{ padding:8px 18px; font-size:13.5px; }
+  .gn-sum{ font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .gn-ta{ font-family:inherit; font-size:15px; font-weight:400; line-height:1.5; resize:vertical; }
+  @media (pointer:coarse){ .gn-ta{ font-size:16px; } }   /* after the 15px: iOS zooms into anything smaller */
+  .gn-text{ min-height:300px; }
+  .hv-note{ min-height:96px; }
+  /* The review's Notes and PGN fields sit on the move list's surface: their
+     labels and the save status can't be read bare on a textured page (Felt). */
+  #view-play-history > .side-panel > .field{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:10px 12px; box-shadow:var(--shadow); gap:6px;
+  }
+  .gn-status{ min-height:1.3em; font-size:12.5px; color:var(--ink-soft); }
+  .gn-status .btn-link{ margin-left:4px; }
+  .gn-conflict{ display:flex; flex-direction:column; gap:8px; padding:10px 12px; background:var(--surface-2); border:1px solid var(--line); border-radius:8px; }
+  :root[data-skin="bauhaus"] .gn-conflict{ border-radius:0; }
+  .gn-conflict-msg{ font-size:13px; font-weight:700; color:var(--ink); }
+  .gn-conflict-text{
+    font-size:12.5px; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .gn-conflict .btn{ padding:7px 12px; font-size:13px; }
+  .gn-foot .btn{ padding:8px 14px; font-size:13px; }
+  #gn-overlay{ z-index:56; }
+  #gn-overlay.active .gn-card{ animation:gn-card-in .16s ease-out; }
+  @keyframes gn-card-in{ from{ opacity:0; transform:scale(.98); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion:reduce){ #gn-overlay.active .gn-card, .gh-fpanel.open{ animation:none; } }
+  @media (max-width:640px){
+    #gn-overlay{ padding:0; align-items:stretch; }
+    #gn-overlay .gn-card{ max-width:none; max-height:none; height:auto; border-radius:0; overflow-y:auto; padding:16px; gap:12px; }   /* stretched to the overlay: the whole screen */
+    #gn-overlay .gn-text{ flex:1 1 auto; min-height:160px; resize:none; }
   }
   .eyebrow{
     font-family:"JetBrains Mono",monospace;
@@ -4611,6 +4768,33 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     </div>
   </div>
 </div>
+<!-- Game History: your own notes on one game. Autosaved; opened from a
+     row's note button without leaving the list. -->
+<div class="modal-overlay" id="gn-overlay" role="dialog" aria-modal="true" aria-labelledby="gn-title">
+  <div class="modal-card gn-card">
+    <div class="modal-head">
+      <div class="modal-title" id="gn-title">Game notes</div>
+      <div class="gn-head-actions">
+        <button type="button" class="btn btn-primary gn-done" id="gn-done">Done</button>
+        <button type="button" class="modal-close" id="gn-close" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div class="gn-sum" id="gn-sum"></div>
+    <textarea class="text-input gn-ta gn-text" id="gn-text" rows="12" maxlength="10000" aria-label="Your notes on this game" placeholder="Your analysis: key moments, mistakes, plans, what to try next time."></textarea>
+    <div class="gn-status" id="gn-status" aria-live="polite"></div>
+    <div class="gn-conflict" id="gn-conflict" hidden>
+      <div class="gn-conflict-msg" id="gn-conflict-msg"></div>
+      <div class="gn-conflict-text" id="gn-conflict-text"></div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" id="gn-use-other">Use that version</button>
+        <button type="button" class="btn-link" id="gn-keep">Keep mine</button>
+      </div>
+    </div>
+    <div class="btn-row gn-foot">
+      <button type="button" class="btn btn-ghost" id="gn-open-game">Open game</button>
+    </div>
+  </div>
+</div>
 <!-- Puzzle History: "Link copied" for screen readers, outside the views so
      it still announces in the play view. -->
 <div class="ph-sr" id="ph-live" role="status" aria-live="polite"></div>
@@ -4860,38 +5044,116 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   </header>
 
   <!-- ============ GAME HISTORY ============ -->
+  <!-- Rows: thumb | game | opening | time control | date | note button.
+       Filters: one DOM for every size (a "Filters" disclosure on a phone,
+       a wrapping bar on wider screens); see GAME HISTORY in the script. -->
   <section class="view" id="view-history">
     <button class="back-link" data-nav="menu">&larr; All drills</button>
-    <div class="panel">
+    <div class="panel gh-panel">
       <div class="history-head">
         <div>
           <div class="eyebrow">Chess Arcade</div>
           <h1 class="title" style="font-size:26px;">Game History</h1>
           <div class="subtitle" id="history-subtitle">Connect your Lichess account in Settings to see your games.</div>
         </div>
-        <div class="history-filters">
-          <select class="select-input" id="history-speed-filter">
-            <option value="">All speeds</option>
-            <option value="bullet">Bullet</option>
-            <option value="blitz">Blitz</option>
-            <option value="rapid">Rapid</option>
-            <option value="classical">Classical</option>
-            <option value="correspondence">Correspondence</option>
-          </select>
-          <select class="select-input" id="history-result-filter">
-            <option value="">All results</option>
-            <option value="win">Wins</option>
-            <option value="loss">Losses</option>
-            <option value="draw">Draws</option>
-          </select>
+      </div>
+      <div class="saved-sync gn-sync" id="gn-sync" data-state="off" style="display:none;">
+        <span class="saved-sync-dot" aria-hidden="true"></span>
+        <span class="saved-sync-text" id="gn-sync-text"></span>
+        <button class="btn-link" id="gn-sync-now" type="button">Sync now</button>
+      </div>
+      <div class="gh-filters">
+        <div class="gh-fbar">
+          <button type="button" class="btn btn-ghost gh-filter-toggle" id="gh-filter-toggle" aria-expanded="false" aria-controls="gh-fpanel">Filters<span class="gh-badge" id="gh-filter-badge" hidden></span></button>
+          <div class="gh-count" id="gh-count" aria-live="polite"></div>
+          <button type="button" class="btn-link gh-clear" id="gh-clear" hidden>Clear filters</button>
+        </div>
+        <div class="gh-fpanel" id="gh-fpanel">
+          <div class="gh-fprimary">
+            <div class="gh-combo" id="gh-opening-wrap">
+              <input type="text" class="text-input gh-combo-input" id="gh-opening" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="gh-opening-list" aria-label="Opening" placeholder="Any opening" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40">
+              <button type="button" class="gh-combo-clear" aria-label="Clear the opening filter" hidden>&times;</button>
+              <div class="gh-combo-list" id="gh-opening-list" role="listbox" aria-label="Openings" hidden></div>
+            </div>
+            <div class="toggle-row gh-seg" id="gh-color" role="group" aria-label="Color">
+              <button type="button" class="toggle active" data-val="" aria-pressed="true">Both colors</button>
+              <button type="button" class="toggle" data-val="white" aria-pressed="false">White</button>
+              <button type="button" class="toggle" data-val="black" aria-pressed="false">Black</button>
+            </div>
+            <select class="select-input" id="history-result-filter" aria-label="Result">
+              <option value="">All results</option>
+              <option value="win">Wins</option>
+              <option value="loss">Losses</option>
+              <option value="draw">Draws</option>
+            </select>
+            <select class="select-input" id="history-speed-filter" aria-label="Speed">
+              <option value="">All speeds</option>
+              <option value="ultraBullet">UltraBullet</option>
+              <option value="bullet">Bullet</option>
+              <option value="blitz">Blitz</option>
+              <option value="rapid">Rapid</option>
+              <option value="classical">Classical</option>
+              <option value="correspondence">Correspondence</option>
+            </select>
+            <select class="select-input" id="gh-tc" aria-label="Time control">
+              <option value="">All time controls</option>
+            </select>
+            <button type="button" class="toggle gh-chip" id="gh-notes" aria-pressed="false">Has notes</button>
+          </div>
+          <button type="button" class="btn-link gh-more-toggle" id="gh-more-toggle" aria-expanded="false" aria-controls="gh-fmore">More filters<span class="gh-badge" id="gh-more-badge" hidden></span></button>
+          <div class="gh-fmore" id="gh-fmore">
+            <div class="toggle-row gh-seg" id="gh-rated" role="group" aria-label="Rated or casual">
+              <button type="button" class="toggle active" data-val="" aria-pressed="true">Rated and casual</button>
+              <button type="button" class="toggle" data-val="rated" aria-pressed="false">Rated</button>
+              <button type="button" class="toggle" data-val="casual" aria-pressed="false">Casual</button>
+            </div>
+            <select class="select-input" id="gh-gap" aria-label="Rating gap">
+              <option value="">Any rating gap</option>
+              <option value="higher">Rated 100+ above me</option>
+              <option value="even">Within 100</option>
+              <option value="lower">Rated 100+ below me</option>
+            </select>
+            <select class="select-input" id="gh-end" aria-label="Ending">
+              <option value="">Any ending</option>
+              <option value="mate">Checkmate</option>
+              <option value="resign">Resignation</option>
+              <option value="time">Out of time</option>
+              <option value="draw">Draw</option>
+              <option value="other">Other endings</option>
+            </select>
+            <select class="select-input" id="gh-len" aria-label="Length">
+              <option value="">Any length</option>
+              <option value="short">Up to 25 moves</option>
+              <option value="medium">26 to 50 moves</option>
+              <option value="long">51+ moves</option>
+            </select>
+            <select class="select-input" id="gh-date" aria-label="Date">
+              <option value="">All dates</option>
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="year">This year</option>
+            </select>
+            <div class="gh-combo" id="gh-opp-wrap">
+              <input type="text" class="text-input gh-combo-input" id="gh-opp" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="gh-opp-list" aria-label="Opponent" placeholder="Any opponent" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40">
+              <button type="button" class="gh-combo-clear" aria-label="Clear the opponent filter" hidden>&times;</button>
+              <div class="gh-combo-list" id="gh-opp-list" role="listbox" aria-label="Opponents" hidden></div>
+            </div>
+            <select class="select-input" id="gh-variant" aria-label="Variant" hidden>
+              <option value="">All variants</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
-    <div class="history-list" id="history-list"></div>
+    <div class="gh-list-note" id="gh-list-note" hidden>Showing your noted games saved on this device.</div>
+    <div class="history-list panel gh-list" id="history-list"></div>
     <div class="history-footer">
       <div class="history-loading" id="history-loading" style="display:none;">Loading&#8230;</div>
       <div class="history-empty" id="history-empty" style="display:none;">No games found.</div>
-      <button class="btn btn-ghost" id="history-load-more" style="display:none;">Load more</button>
+      <button class="btn btn-ghost" id="gh-show-more" type="button" style="display:none;">Show more results</button>
+      <div class="gh-foot-note" id="gh-foot-note" role="status" hidden></div>
+      <button class="btn btn-ghost" id="history-load-more" type="button" style="display:none;">Load more games</button>
     </div>
   </section>
 
@@ -4982,6 +5244,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="ol-movelist-wrap" style="display:flex;">
         <div class="ol-movelist-title">Moves</div>
         <div class="ol-movelist" id="hv-movelist"></div>
+      </div>
+      <div class="field hv-note-field">
+        <label class="field-label" for="hv-note">Notes</label>
+        <textarea class="text-input gn-ta hv-note" id="hv-note" rows="6" maxlength="10000" placeholder="Your analysis: key moments, mistakes, plans, what to try next time."></textarea>
+        <div class="gn-status" id="hv-note-status" aria-live="polite"></div>
       </div>
       <div class="field">
         <div class="field-label">PGN</div>
@@ -8686,7 +8953,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function wireAnnotations(boardEl, getMarks, onChange, shouldSkip, forceColor){
     let fromIdx = null;
     // A mark from one square to another (the same square: a highlight) onto
-    // `marks` — a right button's release, or a held finger's lift.
+    // `marks` - a right button's release, or a held finger's lift.
     function applyMark(marks, fromIdx, toIdx){
       const forced = (typeof forceColor==='function' ? forceColor() : forceColor);
       const held = forced ? null : heldPenColor();
@@ -8947,7 +9214,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                              {param:'rated', type:'toggle', row:'online-rated-row'},
                              {param:'showRatings', type:'toggle', row:'online-ratings-row'},
                              {param:'time', param2:'increment', type:'timeinc', row:'online-time-row', timeInput:'online-time-custom', incInput:'online-inc-custom'} ] },
-    history:      { view:'history',          card:'card-history',     startBtn:null, fields:[] },
+    // Game History's filters ride in the link (lazy: their code runs later)
+    history:      { view:'history',          card:'card-history',     startBtn:null, fields:[],
+                    getParams:()=> ghFilterParams(), applyParams:p=> ghApplyFilterParams(p) },
     saved:        { view:'saved',            card:'card-saved',       startBtn:null, fields:[] },
     'puzzle-history': { view:'puzzle-history', card:'setup-ph-btn', startBtn:null,
                     fields:[ {param:'show', type:'toggle', row:'ph-show-row'} ] }
@@ -9058,7 +9327,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function dlSyncHash(slug, withStart){
     if(!slug){ history.replaceState(null, '', location.pathname+location.search); return; }
     const route = DEEP_LINKS[slug];
-    const params = route ? dlCurrentParamsForRoute(route) : new URLSearchParams();
+    const params = route ? (route.getParams ? route.getParams() : dlCurrentParamsForRoute(route)) : new URLSearchParams();
     if(withStart) params.set('start','1');
     const str = params.toString();
     history.replaceState(null, '', '#'+slug+(str?'?'+str:''));
@@ -9087,6 +9356,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // back on directly (mid-drill state isn't reconstructed from a link).
     if(!isPlay) dlSyncHash(VIEW_TO_SLUG[name]);
     if(name==='saved') spLibraryShown();     // name first: never touches the library before it exists
+    if(name==='history') ghShown();          // loads (first visit) and draws Game History
     // Puzzle History (all bail until its block has run: boot shows the menu first).
     if(PH) phSaveGen++;                      // a history Save still fetching won't open over the new screen
     if(name==='puzzle-history') phShown();
@@ -22016,8 +22286,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // API (GET /api/games/user/{username}) -- reverse-chronological, paged
   // with `until` (the oldest game's createdAt in the current batch minus
   // 1ms), and lastFen=true so each row's mini-board thumbnail comes for
-  // free without replaying the whole game.
-  const GH_STATE = { games:[], username:null, cursor:null, exhausted:false, loading:false, speedFilter:'', resultFilter:'' };
+  // free without replaying the whole game. The first page is 50 games; while
+  // the list is on screen the rest of the newest 200 load in the background
+  // (100 a request, one request at a time, never during a sync), then "Load
+  // more games" adds 100 a click, up to 2,000 kept in memory. Filtering is
+  // done here, over what's loaded; the filters are remembered and ride in
+  // the #history link. Each row also has the user's own notes (GAME NOTES,
+  // after Saved Puzzles), and noted games that aren't loaded can still show,
+  // built from the summary kept with each note.
+  const GH_STATE = { games:[], ids:new Set(), username:null, loadedFor:null, cursor:null, exhausted:false, loading:false,
+    error:'', offline:false, capped:false, shown:50, extras:new Map(), facets:null, gen:0, fillTimer:0 };
+  const GH_FIRST = 50, GH_PAGE = 100, GH_FILL_TO = 200, GH_CAP = 2000, GH_WINDOW = 50;
+  const GH_FILTERS_KEY = 'wavyChessPrepGameHistoryFilters';
+  const GH_THUMBS = new Map();     // id|lastFen -> built .plaque-board, reused across renders
+  let ghThumbStyle = null, ghFetching = false, ghTextTimer = 0, ghBackoffTimer = 0;
+  let ghComboForce = false;       // a filter set from outside the box (a pick, a link, Clear) rewrites it even while focused
 
   function ghPieceCode(entry){
     return entry ? (entry.color + entry.type.toUpperCase()) : null;
@@ -22040,11 +22323,27 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
     }
   }
-  function ghFormatClock(clock){
-    if(!clock) return 'Correspondence';
-    const mins = Math.round(clock.initial/60);
-    return clock.increment ? (mins+'+'+clock.increment) : (mins+' min');
+  // Time controls, keyed like the filter: '900-10', 'corr-3' (days a move),
+  // 'corr'. Labels: "15+10", "5 min", Lichess's 15/30/45-second starts as
+  // quarter/half/three-quarter minutes, "3 days".
+  function ghTcKey(g){
+    if(g && g.clock && g.clock.initial!=null) return Math.round(Number(g.clock.initial)||0)+'-'+Math.round(Number(g.clock.increment)||0);
+    return g && g.daysPerTurn ? 'corr-'+Math.round(Number(g.daysPerTurn)||0) : 'corr';
   }
+  function ghMinStr(sec){
+    if(sec % 60 === 0) return String(sec/60);
+    const f = { 15:'\u00bc', 30:'\u00bd', 45:'\u00be' }[sec];
+    return f || String(Math.round(sec/6)/10);
+  }
+  function ghTcLabelKey(key){
+    let m = /^(\d+)-(\d+)$/.exec(key||'');
+    if(m){ const ini = Number(m[1]), inc = Number(m[2]); return inc ? ghMinStr(ini)+'+'+inc : ghMinStr(ini)+' min'; }
+    m = /^corr-(\d+)$/.exec(key||'');
+    if(m && Number(m[1])) return m[1]==='1' ? '1 day' : m[1]+' days';
+    return 'Correspondence';
+  }
+  function ghTcLabel(g){ return ghTcLabelKey(ghTcKey(g)); }
+  function ghFormatClock(clock){ return clock ? ghTcLabelKey(ghTcKey({ clock })) : 'Correspondence'; }
   function ghFormatDate(ts){
     return new Date(ts).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
   }
@@ -22056,118 +22355,723 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const res = await fetch('https://lichess.org/api/account', { headers:{ Authorization:'Bearer '+token } });
       if(!res.ok) return null;
       const acct = await res.json();
+      if(getLichessToken()!==token) return null;     // the token changed while this was out
       GH_STATE.username = acct.username;
       return GH_STATE.username;
     }catch(e){ return null; }
   }
-  function ghGameResult(g, username){
-    const isWhiteMe = g.players.white.user && g.players.white.user.id === username.toLowerCase();
-    const myColor = isWhiteMe ? 'white' : 'black';
-    return !g.winner ? 'draw' : (g.winner===myColor ? 'win' : 'loss');
+  // The account the listed games belong to (also while a new token's account
+  // is being checked).
+  function ghMe(){ return GH_STATE.username || GH_STATE.loadedFor || null; }
+  // Whose game it is: a summary row (a noted game not loaded) says so itself.
+  function ghMyColor(g, username){
+    if(g._me) return g._me;
+    const u = String(username||'').toLowerCase();
+    return g.players && g.players.white && g.players.white.user && g.players.white.user.id===u ? 'white' : 'black';
   }
-  function ghGameMatchesFilters(g, username){
-    if(GH_STATE.speedFilter && g.speed !== GH_STATE.speedFilter) return false;
-    if(GH_STATE.resultFilter && ghGameResult(g, username) !== GH_STATE.resultFilter) return false;
+  function ghPlayers(g, username){
+    const me = ghMyColor(g, username), P = g.players || {};
+    return { me, mine:P[me] || {}, opp:P[me==='white' ? 'black' : 'white'] || {} };
+  }
+  function ghOppName(p){
+    return (p && p.user && p.user.name) || (p && p.aiLevel!=null ? 'Lichess AI level '+p.aiLevel : 'Anonymous');
+  }
+  function ghGameResult(g, username){
+    const me = ghMyColor(g, username);
+    return !g.winner ? 'draw' : (g.winner===me ? 'win' : 'loss');
+  }
+  // Opening family = Lichess's name before the colon ("Caro-Kann Defense");
+  // the variation is the rest. Accents are folded for slugs and searching.
+  function ghFold(s){
+    s = String(s==null ? '' : s);
+    try{ s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }catch(e){}
+    return s;
+  }
+  function ghSlug(s){ return ghFold(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60); }
+  function ghFamily(g){ const n = g.opening && g.opening.name ? String(g.opening.name) : ''; return n.split(':')[0].trim(); }
+  function ghVariation(g){ const n = g.opening && g.opening.name ? String(g.opening.name) : ''; const i = n.indexOf(':'); return i>=0 ? n.slice(i+1).trim() : ''; }
+  function ghOpeningSlug(g){ const f = ghFamily(g); return f ? ghSlug(f) : 'none'; }
+  const GH_VARIANTS = { standard:'Standard', chess960:'Chess960', fromPosition:'From position', kingOfTheHill:'King of the Hill',
+    threeCheck:'Three-check', antichess:'Antichess', atomic:'Atomic', horde:'Horde', racingKings:'Racing Kings', crazyhouse:'Crazyhouse' };
+  function ghVariantLabel(v){ return GH_VARIANTS[v] || String(v||''); }
+  function ghIsStd(g){ return !g.variant || g.variant==='standard'; }
+  function ghPlies(g){
+    if(g._plies!=null) return g._plies;
+    const m = String(g.moves||'').trim();
+    return m ? m.split(/\s+/).length : 0;
+  }
+  function ghEndGroup(st){
+    if(st==='mate') return 'mate';
+    if(st==='resign') return 'resign';
+    if(st==='outoftime') return 'time';
+    if(st==='draw' || st==='stalemate' || st==='insufficientMaterialClaim') return 'draw';
+    return 'other';
+  }
+  function ghPrettySlug(slug){
+    if(slug==='none') return 'Unknown';
+    return String(slug||'').split('-').filter(Boolean).map(w=> w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+  }
+
+  /* ---- Filters: state, validation, storage, the #history link ---- */
+  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', len:'', date:'', variant:'', notes:false };
+  const GH_F_SETS = { speed:['ultraBullet','bullet','blitz','rapid','classical','correspondence'], result:['win','loss','draw'],
+    color:['white','black'], rated:['rated','casual'], gap:['higher','even','lower'], end:['mate','resign','time','draw','other'],
+    len:['short','medium','long'], date:['7','30','90','year'] };
+  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','len','date','variant','notes'];
+  const GH_SECONDARY = ['rated','gap','end','len','date','opp','variant'];
+  let GH_FILTERS = Object.assign({}, GH_F_DEFAULT);
+  const GH_UI = { more:false, open:false };
+  // Typed text: what a link can carry safely (the hash is decoded twice).
+  function ghCleanText(s){ return ghFold(s).replace(/[^A-Za-z0-9 _.:'-]/g, '').replace(/\s{2,}/g, ' ').replace(/^\s+/, '').slice(0, 40); }
+  function ghValidFilters(f){
+    const o = Object.assign({}, GH_F_DEFAULT);
+    if(!f || typeof f!=='object') return o;
+    Object.keys(GH_F_SETS).forEach(k=>{ if(GH_F_SETS[k].includes(String(f[k]))) o[k] = String(f[k]); });
+    if(typeof f.opening==='string' && f.opening.length<=60 && /^(none|[a-z0-9]+(-[a-z0-9]+)*)$/.test(f.opening)) o.opening = f.opening;
+    if(typeof f.tc==='string' && /^(\d{1,5}-\d{1,3}|corr-\d{1,2}|corr)$/.test(f.tc)) o.tc = f.tc;
+    if(typeof f.variant==='string' && /^[A-Za-z0-9]{1,20}$/.test(f.variant)) o.variant = f.variant;
+    o.oq = o.opening ? '' : ghCleanText(f.oq).trim();
+    o.opp = ghCleanText(f.opp).trim();
+    o.notes = f.notes===true || f.notes==='1' || f.notes===1;
+    return o;
+  }
+  (function ghLoadFilters(){
+    try{
+      const d = JSON.parse(localStorage.getItem(GH_FILTERS_KEY) || 'null');
+      if(d && typeof d==='object'){ GH_FILTERS = ghValidFilters(d.f); GH_UI.more = !!(d.ui && d.ui.more); }
+    }catch(e){}
+  })();
+  function ghSaveFilters(){
+    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more } })); }catch(e){}
+  }
+  function ghIsOn(k){ return k==='oq' ? (!GH_FILTERS.opening && !!GH_FILTERS.oq) : !!GH_FILTERS[k]; }
+  function ghActiveCount(){ return GH_PARAM_KEYS.filter(ghIsOn).length; }
+  function ghSecondaryCount(){ return GH_SECONDARY.filter(ghIsOn).length; }
+  function ghFilterParams(){
+    const p = new URLSearchParams();
+    GH_PARAM_KEYS.forEach(k=>{ if(!ghIsOn(k)) return; p.set(k, k==='notes' ? '1' : GH_FILTERS[k]); });
+    return p;
+  }
+  // A link with any filter in it replaces the whole set (and is remembered);
+  // a bare #history keeps the remembered one.
+  function ghApplyFilterParams(params){
+    if(!params || !GH_PARAM_KEYS.some(k=> params.has(k))) return false;
+    const raw = {};
+    GH_PARAM_KEYS.forEach(k=>{ if(params.has(k)) raw[k] = params.get(k); });
+    GH_FILTERS = ghValidFilters(raw);
+    ghFiltersChanged(true);
     return true;
+  }
+  function ghSyncHash(){ if(currentView==='history') dlSyncHash('history'); }
+  function ghFiltersChanged(now){
+    GH_STATE.shown = GH_WINDOW;
+    ghSaveFilters();
+    clearTimeout(ghTextTimer);
+    if(now){ ghComboForce = true; try{ ghRender(); } finally{ ghComboForce = false; } ghSyncHash(); }
+    else { ghSyncFilterUI(); ghTextTimer = setTimeout(()=>{ ghRender(); ghSyncHash(); }, 120); }
+  }
+  function ghSetFilters(patch){
+    GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, patch));
+    ghFiltersChanged(true);
+  }
+  function ghSetFilterText(k, text){
+    const v = ghCleanText(text).trim();
+    const patch = { [k]:v };
+    if(k==='oq') patch.opening = '';
+    GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, patch));
+    ghFiltersChanged(false);
+  }
+  function ghClearFilters(){
+    GH_FILTERS = Object.assign({}, GH_F_DEFAULT);
+    ['gh-opening', 'gh-opp'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ''; });
+    ghFiltersChanged(true);
+  }
+  function ghOpeningMatchesText(g, q){
+    const t = ghFold(q).toLowerCase().trim();
+    if(!t) return true;
+    if(ghFold(g.opening && g.opening.name || '').toLowerCase().indexOf(t) >= 0) return true;
+    const eco = String(g.opening && g.opening.eco || '').toUpperCase();
+    return !!eco && /^[a-e]\d{0,2}$/i.test(t) && eco.indexOf(t.toUpperCase())===0;
+  }
+  function ghMatch(g, u, f){
+    if(f.speed && g.speed!==f.speed) return false;
+    if(f.result && ghGameResult(g, u)!==f.result) return false;
+    if(f.opening){ if(ghOpeningSlug(g)!==f.opening) return false; }
+    else if(f.oq && !ghOpeningMatchesText(g, f.oq)) return false;
+    if(f.color && ghMyColor(g, u)!==f.color) return false;
+    if(f.tc && ghTcKey(g)!==f.tc) return false;
+    if(f.rated && (f.rated==='rated')!==!!g.rated) return false;
+    if(f.opp || f.gap){
+      const P = ghPlayers(g, u);
+      if(f.opp && ghFold(ghOppName(P.opp)).toLowerCase().indexOf(ghFold(f.opp).toLowerCase())<0) return false;
+      if(f.gap){
+        if(P.opp.rating==null || P.mine.rating==null) return false;
+        const d = Number(P.opp.rating) - Number(P.mine.rating);
+        if(f.gap==='higher' ? d<100 : f.gap==='lower' ? d>-100 : Math.abs(d)>=100) return false;
+      }
+    }
+    if(f.end && ghEndGroup(g.status)!==f.end) return false;
+    if(f.len){
+      const mv = Math.ceil(ghPlies(g)/2);
+      if(f.len==='short' ? mv>25 : f.len==='medium' ? (mv<26 || mv>50) : mv<51) return false;
+    }
+    if(f.date){
+      const from = f.date==='year' ? new Date(new Date().getFullYear(), 0, 1).getTime() : Date.now() - Number(f.date)*86400e3;
+      if((Number(g.createdAt)||0) < from) return false;
+    }
+    if(f.variant && (g.variant || 'standard')!==f.variant) return false;
+    if(f.notes && !gnHasNote(g.id)) return false;
+    return true;
+  }
+
+  /* ---- What the list holds: loaded games, plus noted games from their
+     summaries when "Has notes" is on or the games couldn't load ---- */
+  function ghGameFromSummary(n){
+    const s = n.g, me = s.me==='black' ? 'black' : 'white', other = me==='white' ? 'black' : 'white';
+    const tcm = /^(\d+)-(\d+)$/.exec(s.tc||''), cm = /^corr-(\d+)$/.exec(s.tc||'');
+    const ai = /^Lichess AI level (\d)$/.exec(s.opp||'');
+    const players = {};
+    players[me] = { user:{ id:String(ghMe()||'').toLowerCase(), name:GH_STATE.username || 'You' }, rating:s.myRating };
+    players[other] = ai ? { aiLevel:Number(ai[1]) }
+      : (s.oppId ? { user:{ id:s.oppId, name:s.opp || s.oppId, title:s.oppTitle || undefined }, rating:s.oppRating } : { rating:s.oppRating });
+    return { id:n.id, _summary:true, _me:me, _plies:s.plies, rated:s.rated, speed:s.speed, variant:s.variant || 'standard',
+      status:s.status, createdAt:s.at, winner: s.res==='draw' ? undefined : (s.res==='win' ? me : other),
+      opening: s.opening ? { name:s.opening, eco:s.eco } : null,
+      clock: tcm ? { initial:Number(tcm[1]), increment:Number(tcm[2]) } : null, daysPerTurn: cm ? Number(cm[1]) : undefined,
+      lastFen:s.fen, moves:s.san, players };
+  }
+  function ghBaseList(){
+    const out = GH_STATE.games.slice();
+    if(typeof GN==='object' && GN && (GH_FILTERS.notes || GH_STATE.offline)){
+      let added = false;
+      Object.values(GN.notes).forEach(n=>{
+        if(!(n.text || n.conflict) || !n.g || GH_STATE.ids.has(n.id)) return;
+        out.push(GH_STATE.extras.get(n.id) || ghGameFromSummary(n));
+        added = true;
+      });
+      if(added) out.sort((a, b)=> (Number(b.createdAt)||0) - (Number(a.createdAt)||0));
+    }
+    return out;
+  }
+  const GH_SPEED_ORDER = ['ultraBullet','bullet','blitz','rapid','classical','correspondence'];
+  function ghTcSortKey(k){
+    let m = /^(\d+)-(\d+)$/.exec(k);
+    if(m) return [Number(m[1]), Number(m[2])];
+    m = /^corr-(\d+)$/.exec(k);
+    return m ? [1e9 + Number(m[1]), 0] : [2e9, 0];
+  }
+  // Option lists, counted over everything listed (not narrowed by the other filters).
+  function ghFacets(list){
+    const u = ghMe();
+    const op = new Map(), opp = new Map(), tc = new Map(), vr = new Map();
+    list.forEach(g=>{
+      const fam = ghFamily(g), slug = fam ? ghSlug(fam) : 'none';
+      let o = op.get(slug);
+      if(!o){ o = { slug, label:fam || 'Unknown', count:0, ecos:new Set() }; op.set(slug, o); }
+      o.count++;
+      if(g.opening && g.opening.eco) o.ecos.add(String(g.opening.eco).toUpperCase());
+      const on = ghOppName(ghPlayers(g, u).opp);
+      opp.set(on, (opp.get(on)||0) + 1);
+      const k = ghTcKey(g);
+      const t = tc.get(k) || { key:k, speed:g.speed, count:0 };
+      t.count++; tc.set(k, t);
+      const v = g.variant || 'standard';
+      vr.set(v, (vr.get(v)||0) + 1);
+    });
+    const byCount = (a, b)=> b.count - a.count || a.label.localeCompare(b.label);
+    const openings = Array.from(op.values()).map(o=>{
+      const ecos = Array.from(o.ecos).sort();
+      return { slug:o.slug, label:o.label, count:o.count, ecos, fold:ghFold(o.label).toLowerCase(),
+        sub: ecos.length > 3 ? ecos.slice(0, 3).join(', ')+'\u2026' : ecos.join(', ') };
+    }).sort((a, b)=> (a.slug==='none') - (b.slug==='none') || byCount(a, b));
+    const opponents = Array.from(opp.entries()).map(([label, count])=> ({ label, count, fold:ghFold(label).toLowerCase() })).sort(byCount);
+    const spIdx = s=>{ const i = GH_SPEED_ORDER.indexOf(s); return i<0 ? 9 : i; };
+    const tcs = Array.from(tc.values()).sort((a, b)=>{
+      const A = ghTcSortKey(a.key), B = ghTcSortKey(b.key);
+      return spIdx(a.speed) - spIdx(b.speed) || A[0] - B[0] || A[1] - B[1];
+    });
+    return { openings, opponents, tcs, variants:Array.from(vr.keys()) };
+  }
+  function ghOpeningLabel(slug){
+    if(slug==='none') return 'Unknown';
+    const o = GH_STATE.facets && GH_STATE.facets.openings.find(x=> x.slug===slug);
+    return o ? o.label : ghPrettySlug(slug);
+  }
+  function ghOpeningOptions(text){
+    const t = ghFold(text).toLowerCase().trim();
+    const eco = /^[a-e]\d{0,2}$/i.test(t) ? t.toUpperCase() : '';
+    const all = (GH_STATE.facets || ghFacets([])).openings;
+    return all.filter(o=> !t || o.fold.indexOf(t)>=0 || (eco && o.ecos.some(e=> e.indexOf(eco)===0)))
+      .slice(0, 80).map(o=> ({ value:o.slug, label:o.label, sub:o.sub, count:o.count }));
+  }
+  function ghOppOptions(text){
+    const t = ghFold(text).toLowerCase().trim();
+    const all = (GH_STATE.facets || ghFacets([])).opponents;
+    return all.filter(o=> !t || o.fold.indexOf(t)>=0).slice(0, 80).map(o=> ({ value:o.label, label:o.label, count:o.count }));
+  }
+
+  /* ---- Rendering ---- */
+  function ghEl(tag, cls, text){
+    const e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(text!=null) e.textContent = text;
+    return e;
+  }
+  const GH_NOTE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    + '<path d="M14.5 3h-8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8z"/><path d="M14.5 3v5h5"/><path d="M8.5 13h7M8.5 17h4.5"/></svg>';
+  function ghThumb(g){
+    if(ghThumbStyle!==PIECE_SVG){ GH_THUMBS.clear(); ghThumbStyle = PIECE_SVG; }   // a new piece set redraws them
+    const key = g.id+'|'+(g.lastFen||'');
+    let t = GH_THUMBS.get(key);
+    if(t) return t;
+    t = ghEl('div', 'plaque-board history-thumb');
+    t.setAttribute('aria-hidden', 'true');
+    if(g.lastFen){ try{ ghBuildMiniBoard(t, boardFromFENChecks(g.lastFen).board); }catch(e){} }
+    GH_THUMBS.set(key, t);
+    return t;
+  }
+  function ghRow(g, u){
+    const P = ghPlayers(g, u), result = ghGameResult(g, u);
+    const row = ghEl('div', 'history-row'+(g._summary ? ' gh-summary' : ''));
+    row.dataset.gid = g.id;
+    row.style.cursor = 'pointer';
+    if(g.opening && g.opening.name) row.title = String(g.opening.name);
+    row.addEventListener('click', ()=> ghOpenGame(g));
+    // reachable from the keyboard: Tab to the row, Enter or Space opens the review
+    row.tabIndex = 0;
+    row.addEventListener('keydown', e=>{
+      if(e.target!==row || (e.key!=='Enter' && e.key!==' ') || e.metaKey || e.ctrlKey || e.altKey) return;
+      e.preventDefault(); e.stopPropagation();
+      ghOpenGame(g);
+    });
+    row.appendChild(ghThumb(g));
+
+    const main = ghEl('div', 'history-main');
+    const l1 = ghEl('div', 'history-line1');
+    l1.appendChild(ghEl('span', 'history-result-pill history-result-'+result, result==='draw' ? 'DRAW' : (result==='win' ? 'WON' : 'LOST')));
+    const title = P.opp.user && P.opp.user.title;
+    if(title) l1.appendChild(ghEl('span', 'history-opp-title', String(title)));
+    l1.appendChild(ghEl('span', 'history-opp', ghOppName(P.opp)));
+    if(P.opp.rating!=null) l1.appendChild(ghEl('span', 'history-opp-rating', '('+P.opp.rating+')'));
+    main.appendChild(l1);
+    const bits = [];
+    const vn = ghVariation(g);
+    if(vn) bits.push(vn);
+    const mv = Math.ceil(ghPlies(g)/2);
+    bits.push(mv+' move'+(mv===1 ? '' : 's'));
+    if(g.status) bits.push(OL_STATUS_LABELS[g.status] || String(g.status));
+    main.appendChild(ghEl('div', 'history-line2', bits.join(' \u00b7 ')));
+    const note = gnNoteText(g.id), waiting = !note && gnWaiting(g.id);
+    if(note || waiting){
+      const line = waiting ? 'Another version of this note is waiting: open to choose.' : gnFirstLine(note);
+      const nl = ghEl('button', 'gh-note-line', line);
+      nl.type = 'button';
+      nl.dataset.gid = g.id;
+      nl.setAttribute('aria-label', 'Edit note: '+line);
+      nl.addEventListener('click', e=>{ e.stopPropagation(); gnOpenEditor(g); });
+      main.appendChild(nl);
+    }
+    row.appendChild(main);
+
+    const op = ghEl('div', 'gh-open');
+    const fam = ghFamily(g);
+    if(fam){
+      op.appendChild(ghEl('div', 'gh-open-name', fam));
+      if(g.opening.eco) op.appendChild(ghEl('div', 'gh-open-eco', String(g.opening.eco)));
+    } else if(!ghIsStd(g)){
+      op.appendChild(ghEl('div', 'gh-open-name', ghVariantLabel(g.variant)));
+    } else {
+      op.classList.add('is-unknown');
+      op.appendChild(ghEl('div', 'gh-open-name', 'Unknown'));
+    }
+    row.appendChild(op);
+
+    const when = ghEl('div', 'gh-when');
+    const tc = ghEl('div', 'history-tc');
+    tc.appendChild(ghEl('div', 'history-tc-label', ghTcLabel(g)));
+    tc.appendChild(ghEl('div', 'history-tc-tag', g.rated ? 'Rated' : 'Casual'));
+    when.appendChild(tc);
+    when.appendChild(ghEl('div', 'history-date', g.createdAt ? ghFormatDate(g.createdAt) : ''));
+    row.appendChild(when);
+
+    const nb = ghEl('button', 'gh-note-btn'+(note || waiting ? ' has-note' : ''));
+    nb.type = 'button';
+    nb.dataset.gid = g.id;
+    nb.title = note || waiting ? 'Edit note' : 'Add note';
+    nb.setAttribute('aria-label', nb.title);
+    nb.innerHTML = GH_NOTE_SVG;
+    nb.addEventListener('click', e=>{ e.stopPropagation(); gnOpenEditor(g); });
+    row.appendChild(nb);
+    return row;
+  }
+  function ghSyncCombo(id, text, picked){
+    const input = document.getElementById(id);
+    if(!input) return;
+    const wrap = input.parentElement;
+    if((ghComboForce || document.activeElement!==input) && input.value!==text) input.value = text;
+    wrap.dataset.picked = picked ? '1' : '';
+    wrap.querySelector('.gh-combo-clear').hidden = !input.value;
+  }
+  function ghBadge(id, n){ const b = document.getElementById(id); if(!b) return; b.hidden = !n; b.textContent = n ? String(n) : ''; }
+  function ghSyncFilterUI(){
+    const f = GH_FILTERS, fc = GH_STATE.facets || ghFacets([]);
+    const setSel = (id, v)=>{ const el = document.getElementById(id); if(el && el.value!==v) el.value = v; };
+    setSel('history-speed-filter', f.speed); setSel('history-result-filter', f.result);
+    setSel('gh-gap', f.gap); setSel('gh-end', f.end); setSel('gh-len', f.len); setSel('gh-date', f.date);
+    // the exact time controls listed (one that isn't loaded yet still shows while picked)
+    const tcEl = document.getElementById('gh-tc');
+    const tcs = fc.tcs.slice();
+    if(f.tc && !tcs.some(t=> t.key===f.tc)) tcs.push({ key:f.tc, count:0, pending:true });
+    const sig = tcs.map(t=> t.key+':'+t.count).join(',');
+    if(tcEl.dataset.sig!==sig){
+      tcEl.dataset.sig = sig;
+      tcEl.textContent = '';
+      tcEl.appendChild(new Option('All time controls', ''));
+      tcs.forEach(t=> tcEl.appendChild(new Option(ghTcLabelKey(t.key)+(t.pending ? '' : ' ('+t.count+')'), t.key)));
+    }
+    if(tcEl.value!==f.tc) tcEl.value = f.tc;
+    const vEl = document.getElementById('gh-variant');
+    const vars = fc.variants.slice();
+    if(f.variant && !vars.includes(f.variant)) vars.push(f.variant);
+    vEl.hidden = vars.length < 2 && !f.variant;
+    const vsig = vars.join(',');
+    if(vEl.dataset.sig!==vsig){
+      vEl.dataset.sig = vsig;
+      vEl.textContent = '';
+      vEl.appendChild(new Option('All variants', ''));
+      vars.forEach(v=> vEl.appendChild(new Option(ghVariantLabel(v), v)));
+    }
+    if(vEl.value!==f.variant) vEl.value = f.variant;
+    [['gh-color', f.color], ['gh-rated', f.rated]].forEach(([id, v])=>{
+      document.querySelectorAll('#'+id+' .toggle').forEach(b=>{
+        const on = b.dataset.val===v;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    });
+    const nb = document.getElementById('gh-notes');
+    nb.classList.toggle('active', !!f.notes);
+    nb.setAttribute('aria-pressed', f.notes ? 'true' : 'false');
+    ghSyncCombo('gh-opening', f.opening ? ghOpeningLabel(f.opening) : f.oq, !!f.opening);
+    ghSyncCombo('gh-opp', f.opp, false);
+    const n = ghActiveCount();
+    ghBadge('gh-filter-badge', n);
+    ghBadge('gh-more-badge', ghSecondaryCount());
+    document.getElementById('gh-clear').hidden = !n;
+    const panel = document.getElementById('gh-fpanel');
+    panel.classList.toggle('open', !!GH_UI.open);
+    panel.classList.toggle('more-open', !!GH_UI.more);
+    document.getElementById('gh-filter-toggle').setAttribute('aria-expanded', GH_UI.open ? 'true' : 'false');
+    document.getElementById('gh-more-toggle').setAttribute('aria-expanded', GH_UI.more ? 'true' : 'false');
   }
   function ghRender(){
     const listEl = document.getElementById('history-list');
-    const username = GH_STATE.username;
-    if(!username){ listEl.innerHTML = ''; return; }
-    const filtered = GH_STATE.games.filter(g=>ghGameMatchesFilters(g, username));
-    document.getElementById('history-empty').style.display = (filtered.length===0 && !GH_STATE.loading) ? 'block' : 'none';
-    document.getElementById('history-subtitle').textContent =
-      filtered.length + ' game' + (filtered.length===1?'':'s') + ' for ' + username
-      + (filtered.length!==GH_STATE.games.length ? ' (filtered from '+GH_STATE.games.length+')' : '');
-    listEl.innerHTML = '';
-    for(const g of filtered){
-      const isWhiteMe = g.players.white.user && g.players.white.user.id === username.toLowerCase();
-      const opp = isWhiteMe ? g.players.black : g.players.white;
-      const result = ghGameResult(g, username);
-      const resultLabel = result==='draw' ? 'DRAW' : (result==='win' ? 'WON' : 'LOST');
-      const oppName = (opp.user && opp.user.name) || (opp.aiLevel!=null ? ('AI level '+opp.aiLevel) : 'Anonymous');
-      const oppRating = opp.rating!=null ? opp.rating : null;
-      const oppTitle = opp.user && opp.user.title;
-      const moves = (g.moves||'').trim();
-      const moveCount = moves ? Math.ceil(moves.split(/\s+/).length/2) : 0;
-      const statusLabel = OL_STATUS_LABELS[g.status] || g.status;
-
-      const row = document.createElement('div');
-      row.className = 'history-row';
-      row.style.cursor = 'pointer';
-      row.addEventListener('click', ()=> hvOpen(g, username));
-
-      const thumb = document.createElement('div');
-      thumb.className = 'plaque-board history-thumb';
-      if(g.lastFen){
-        try{ ghBuildMiniBoard(thumb, boardFromFENChecks(g.lastFen).board); }catch(e){}
-      }
-      row.appendChild(thumb);
-
-      const main = document.createElement('div');
-      main.className = 'history-main';
-      main.innerHTML =
-        '<div class="history-line1">'
-        + '<span class="history-result-pill history-result-'+result+'">'+resultLabel+'</span>'
-        + (oppTitle ? '<span class="history-opp-title">'+escapeHtml(oppTitle)+'</span>' : '')
-        + '<span class="history-opp">'+escapeHtml(oppName)+'</span>'
-        + (oppRating!=null ? '<span class="history-opp-rating">('+oppRating+')</span>' : '')
-        + '</div>'
-        + '<div class="history-line2">'+escapeHtml(g.opening ? g.opening.name : 'Unknown opening')+' &middot; '+moveCount+' moves &middot; '+statusLabel+'</div>';
-      row.appendChild(main);
-
-      const tc = document.createElement('div');
-      tc.className = 'history-tc';
-      tc.innerHTML = '<div class="history-tc-label">'+ghFormatClock(g.clock)+'</div><div class="history-tc-tag">'+(g.rated?'Rated':'Casual')+'</div>';
-      row.appendChild(tc);
-
-      const date = document.createElement('div');
-      date.className = 'history-date';
-      date.textContent = ghFormatDate(g.createdAt);
-      row.appendChild(date);
-
-      listEl.appendChild(row);
+    if(!listEl) return;
+    const u = ghMe();
+    const base = ghBaseList();
+    GH_STATE.facets = ghFacets(base);
+    ghSyncFilterUI();
+    const active = ghActiveCount() > 0;
+    const rows = active ? base.filter(g=> ghMatch(g, u, GH_FILTERS)) : base;
+    const total = base.length, plural = total===1 ? '' : 's';
+    const cnt = document.getElementById('gh-count');
+    cnt.textContent = !total && !active && (GH_STATE.loading || !GH_STATE.exhausted) ? ''
+      : (active ? rows.length+' of '+total+' game'+plural : total+' game'+plural);
+    if(active && !GH_STATE.exhausted && GH_STATE.games.length){
+      cnt.appendChild(document.createTextNode(' '));
+      cnt.appendChild(ghEl('span', 'gh-count-hint', 'Filters search the '+GH_STATE.games.length+' games loaded so far.'));
     }
+    document.getElementById('gh-list-note').hidden = !(GH_STATE.offline && base.some(g=> g._summary));
+    // The rows are rebuilt (a page loaded, a sync finished): the keyboard
+    // stays on the same row, note line or note button instead of falling to <body>.
+    const fa = document.activeElement, fRow = fa && fa!==listEl && listEl.contains(fa) ? fa.closest('.history-row') : null;
+    const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : ''));
+    listEl.textContent = '';
+    const frag = document.createDocumentFragment();
+    rows.slice(0, GH_STATE.shown).forEach(g=> frag.appendChild(ghRow(g, u)));
+    listEl.appendChild(frag);
+    if(fRow && /^\w{8}$/.test(fRow.dataset.gid||'')){
+      const r = listEl.querySelector('.history-row[data-gid="'+fRow.dataset.gid+'"]');
+      const el = r && ((fSel && r.querySelector(fSel)) || r);
+      if(el) el.focus({ preventScroll:true });
+    }
+    ghRenderFooter(rows.length, active);
+    try{ ghOpeningCombo.refresh(); ghOppCombo.refresh(); }catch(e){}   // an open list follows newly loaded games
   }
-  async function ghLoadMore(){
-    if(GH_STATE.loading || GH_STATE.exhausted) return;
-    const token = getLichessToken();
-    const loadMoreBtn = document.getElementById('history-load-more');
-    const loadingEl = document.getElementById('history-loading');
-    if(!token){
-      document.getElementById('history-subtitle').textContent = 'Connect your Lichess account in Settings to see your games.';
-      return;
-    }
-    const username = await ghEnsureUsername();
-    if(!username){
-      document.getElementById('history-subtitle').textContent = 'Could not verify your Lichess account \u2014 check your token in Settings.';
-      return;
-    }
-    GH_STATE.loading = true;
-    loadMoreBtn.style.display = 'none';
-    loadingEl.style.display = 'block';
-    try{
-      let url = 'https://lichess.org/api/games/user/'+encodeURIComponent(username)+'?max=20&opening=true&moves=true&lastFen=true&pgnInJson=true&clocks=true&sort=dateDesc';
-      if(GH_STATE.cursor) url += '&until='+GH_STATE.cursor;
-      const res = await fetch(url, { headers:{ Authorization:'Bearer '+token, Accept:'application/x-ndjson' } });
-      if(!res.ok) throw new Error('bad status');
-      const text = await res.text();
-      const newGames = text.split('\n').map(l=>l.trim()).filter(Boolean)
-        .map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).filter(Boolean);
-      if(newGames.length < 20) GH_STATE.exhausted = true;
-      if(newGames.length){
-        GH_STATE.cursor = newGames[newGames.length-1].createdAt - 1;
-        GH_STATE.games.push(...newGames);
+  function ghFilling(){
+    return !!getLichessToken() && !GH_STATE.error && !GH_STATE.exhausted && !GH_STATE.capped
+      && GH_STATE.games.length > 0 && GH_STATE.games.length < GH_FILL_TO;
+  }
+  function ghRenderFooter(n, active){
+    const loading = document.getElementById('history-loading'), empty = document.getElementById('history-empty');
+    const more = document.getElementById('gh-show-more'), load = document.getElementById('history-load-more'), note = document.getElementById('gh-foot-note');
+    const filling = ghFilling();
+    loading.style.display = GH_STATE.loading || filling ? 'block' : 'none';
+    loading.textContent = GH_STATE.games.length ? 'Loading more games\u2026' : 'Loading\u2026';
+    more.style.display = n > GH_STATE.shown ? '' : 'none';
+    empty.textContent = '';
+    empty.style.display = 'none';
+    if(!n && !GH_STATE.loading){
+      if(active){
+        empty.appendChild(document.createTextNode('No games match these filters. '));
+        const c = ghEl('button', 'btn-link', 'Clear filters');
+        c.type = 'button';
+        c.addEventListener('click', ghClearFilters);
+        empty.appendChild(c);
+        if(!GH_STATE.exhausted && GH_STATE.games.length) empty.appendChild(ghEl('div', 'gh-empty-more', 'Load more games to search further back.'));
+        empty.style.display = 'block';
+      } else if(GH_STATE.exhausted){
+        empty.textContent = 'No games found.';
+        empty.style.display = 'block';
       }
+    }
+    const backoff = Date.now() < spBackoffUntil;
+    let msg = '';
+    if(backoff && GH_STATE.error==='429') msg = 'Lichess asked to slow down. Try again in a minute.';
+    else if(GH_STATE.error==='load' && GH_STATE.games.length) msg = 'Couldn\u2019t load more games. Try again in a moment.';
+    else if(GH_STATE.capped) msg = 'Showing your newest '+GH_CAP.toLocaleString('en-US')+' games.';
+    note.textContent = msg;
+    note.hidden = !msg;
+    const showLoad = !!getLichessToken() && !GH_STATE.loading && !filling && !GH_STATE.exhausted && !GH_STATE.capped
+      && (GH_STATE.games.length > 0 || !!GH_STATE.error);
+    load.style.display = showLoad ? '' : 'none';
+    load.textContent = GH_STATE.games.length ? 'Load more games' : 'Try again';
+    load.disabled = backoff;
+    clearTimeout(ghBackoffTimer);
+    if(backoff && showLoad) ghBackoffTimer = setTimeout(()=>{ if(currentView==='history') ghRender(); }, spBackoffUntil - Date.now() + 100);
+  }
+
+  /* ---- Loading ---- */
+  function ghReset(){
+    GH_STATE.gen++;
+    clearTimeout(GH_STATE.fillTimer);
+    Object.assign(GH_STATE, { games:[], ids:new Set(), loadedFor:null, cursor:null, exhausted:false, loading:false,
+      error:'', offline:false, capped:false, shown:GH_WINDOW, extras:new Map(), facets:null });
+    GH_THUMBS.clear();
+  }
+  function ghSetSub(t){ const el = document.getElementById('history-subtitle'); if(el) el.textContent = t; }
+  // A load the user asked for waits for a running sync to finish its turn
+  // (one request at a time); give up waiting after 20 s.
+  async function ghWaitIdle(){
+    const t0 = Date.now();
+    while((spSyncRunning || gnSyncRunning) && Date.now() - t0 < 20000) await new Promise(r=> setTimeout(r, 250));
+  }
+  async function ghLoadPage(max, background){
+    if(GH_STATE.loading || GH_STATE.exhausted || GH_STATE.capped || ghVerifying) return false;
+    if(!getLichessToken()){
+      GH_STATE.offline = true;
+      ghSetSub('Connect your Lichess account in Settings to see your games.');
       ghRender();
+      return false;
+    }
+    if(Date.now() < spBackoffUntil){ if(!background){ GH_STATE.error = '429'; ghRender(); } return false; }
+    const gen = GH_STATE.gen;
+    GH_STATE.loading = true;
+    ghRender();
+    let ok = false;
+    try{
+      if(!background) await ghWaitIdle();
+      else if(spSyncRunning || gnSyncRunning){ ghScheduleFill(1500); return false; }
+      if(gen!==GH_STATE.gen) return false;
+      let text, username;
+      ghFetching = true;      // nothing else talks to Lichess until this page is read
+      try{
+        username = await ghEnsureUsername();
+        if(!username){ if(gen===GH_STATE.gen){ GH_STATE.error = 'account'; GH_STATE.offline = !GH_STATE.games.length; ghSetSub('Could not verify your Lichess account \u2014 check your token in Settings.'); } return false; }
+        const uid = username.toLowerCase();
+        if(gen===GH_STATE.gen && GH_STATE.loadedFor && GH_STATE.loadedFor!==uid){
+          // another account's games: start over for this one
+          GH_STATE.games = []; GH_STATE.ids = new Set(); GH_STATE.cursor = null; GH_STATE.extras = new Map(); GH_THUMBS.clear();
+        }
+        const want = Math.max(1, Math.min(max, GH_CAP - GH_STATE.games.length));
+        let path = '/api/games/user/'+encodeURIComponent(username)+'?max='+want+'&opening=true&moves=true&lastFen=true&pgnInJson=true&clocks=true&sort=dateDesc';
+        if(GH_STATE.cursor) path += '&until='+GH_STATE.cursor;
+        const res = await spApi(path, { headers:{ Accept:'application/x-ndjson' } });
+        if(!res.ok){ const err = new Error('status '+res.status); err.status = res.status; throw err; }
+        text = await res.text();
+        if(gen!==GH_STATE.gen) return false;
+        GH_STATE.loadedFor = uid;
+        const page = text.split('\n').map(l=> l.trim()).filter(Boolean)
+          .map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).filter(g=> g && typeof g.id==='string' && g.players);
+        if(page.length < want) GH_STATE.exhausted = true;
+        page.forEach(g=>{ if(GH_STATE.ids.has(g.id)) return; GH_STATE.ids.add(g.id); GH_STATE.games.push(g); });
+        const oldest = page.reduce((m, g)=> Math.min(m, Number(g.createdAt) || Infinity), Infinity);
+        if(isFinite(oldest)) GH_STATE.cursor = oldest - 1;
+        if(GH_STATE.games.length >= GH_CAP) GH_STATE.capped = true;
+        GH_STATE.error = ''; GH_STATE.offline = false;
+        ghSetSub('Games for '+username+', newest first.');
+        ok = true;
+      } finally { ghFetching = false; }
+      return true;
     }catch(e){
-      document.getElementById('history-subtitle').textContent = 'Could not load games \u2014 try again in a moment.';
+      if(gen!==GH_STATE.gen) return false;
+      if(e && e.status===429){ spBackoffUntil = Math.max(spBackoffUntil, Date.now() + 65000); GH_STATE.error = '429'; }
+      else GH_STATE.error = 'load';
+      if(!GH_STATE.games.length){
+        GH_STATE.offline = true;
+        ghSetSub(GH_STATE.error==='429' ? 'Lichess asked to slow down. Try again in a minute.' : 'Could not load games \u2014 try again in a moment.');
+      }
+      return false;
     }finally{
-      GH_STATE.loading = false;
-      loadingEl.style.display = 'none';
-      loadMoreBtn.style.display = GH_STATE.exhausted ? 'none' : 'block';
+      if(gen===GH_STATE.gen){ GH_STATE.loading = false; ghRender(); }
+      if(ok && gen===GH_STATE.gen) ghScheduleFill(400);
     }
   }
+  // The rest of the newest 200, only while the list is on screen and the
+  // tab is visible; it stops on an error and picks up when shown again.
+  function ghScheduleFill(ms){
+    clearTimeout(GH_STATE.fillTimer);
+    GH_STATE.fillTimer = setTimeout(ghFillStep, ms==null ? 400 : ms);
+  }
+  function ghFillStep(){
+    if(currentView!=='history' || document.hidden || !ghFilling() || GH_STATE.loading) return;
+    if(spSyncRunning || gnSyncRunning || ghFetching){ ghScheduleFill(1500); return; }
+    ghLoadPage(Math.min(GH_PAGE, GH_FILL_TO - GH_STATE.games.length), true);
+  }
+  function ghLoadMoreClick(){
+    if(Date.now() < spBackoffUntil) return;
+    GH_STATE.error = '';
+    ghLoadPage(GH_STATE.games.length ? GH_PAGE : GH_FIRST, false);
+  }
+  // After a token change: whose games are listed? One /api/account read (or
+  // none, when a sync already resolved it), one request at a time.
+  let ghVerifying = false;
+  async function ghVerifyAccount(){
+    if(ghVerifying) return;
+    ghVerifying = true;
+    let u = null;
+    try{
+      if(!GH_STATE.username) await ghWaitIdle();
+      if(!GH_STATE.username && !ghFetching){ ghFetching = true; try{ await ghEnsureUsername(); } finally{ ghFetching = false; } }
+      u = GH_STATE.username;
+    } finally { ghVerifying = false; }
+    if(!u) return;                       // unknown for now: checked again next time
+    if(GH_STATE.loadedFor && u.toLowerCase()!==GH_STATE.loadedFor) ghReset();
+    if(currentView==='history') ghShown();
+  }
+  function ghShown(){
+    ghRender();
+    if(GH_STATE.games.length && GH_STATE.loadedFor && getLichessToken() && String(GH_STATE.username||'').toLowerCase()!==GH_STATE.loadedFor){
+      ghVerifyAccount(); gnViewShown(); return;
+    }
+    if(!GH_STATE.games.length && !GH_STATE.loading && !GH_STATE.exhausted && Date.now() >= spBackoffUntil){
+      GH_STATE.error = '';
+      ghLoadPage(GH_FIRST, false);
+    } else ghScheduleFill(400);
+    gnViewShown();
+  }
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && currentView==='history') ghScheduleFill(400); });
+  // A noted game that isn't loaded opens from Lichess when it can (moves,
+  // clocks, PGN), else from the summary kept with the note.
+  async function ghOpenGame(g){
+    const u = ghMe();
+    if(!g._summary) return hvOpen(g, u);
+    const have = GH_STATE.extras.get(g.id);
+    if(have) return hvOpen(have, u);
+    if(getLichessToken() && Date.now() >= spBackoffUntil){
+      await ghWaitIdle();
+      ghFetching = true;
+      try{
+        const res = await spApi('/api/games/export/_ids?moves=true&pgnInJson=true&clocks=true&opening=true&lastFen=true',
+          { method:'POST', headers:{ Accept:'application/x-ndjson', 'Content-Type':'text/plain' }, body:g.id });
+        if(res.ok){
+          const full = (await res.text()).split('\n').map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).find(x=> x && x.id===g.id && x.players);
+          if(full){
+            full._me = g._me;
+            GH_STATE.extras.set(g.id, full);
+            ghFetching = false;
+            return hvOpen(full, ghMe() || u);
+          }
+        }
+      }catch(e){ if(e && e.status===429) spBackoffUntil = Math.max(spBackoffUntil, Date.now() + 65000); }
+      finally{ ghFetching = false; }
+    }
+    hvOpen(g, u);
+  }
+
+  /* ---- Combobox (opening, opponent): an input with a listbox popover ---- */
+  function ghCombo(wrap, getOptions, onPick, onText){
+    const input = wrap.querySelector('input'), list = wrap.querySelector('[role="listbox"]'), clear = wrap.querySelector('.gh-combo-clear');
+    let opts = [], act = -1, open = false;
+    const base = list.id+'-o';
+    function render(){
+      list.textContent = '';
+      opts = getOptions(wrap.dataset.picked ? '' : input.value);
+      if(act >= opts.length) act = opts.length - 1;
+      opts.forEach((o, i)=>{
+        const d = ghEl('div', 'gh-opt');
+        d.id = base+i;
+        d.setAttribute('role', 'option');
+        d.setAttribute('aria-selected', i===act ? 'true' : 'false');
+        d.appendChild(ghEl('span', 'gh-opt-l', o.label));
+        if(o.sub) d.appendChild(ghEl('span', 'gh-opt-sub', o.sub));
+        if(o.count!=null) d.appendChild(ghEl('span', 'gh-opt-n', String(o.count)));
+        d.addEventListener('mousedown', e=> e.preventDefault());    // keeps the focus in the input
+        d.addEventListener('click', ()=> pick(i));
+        list.appendChild(d);
+      });
+      if(!opts.length) list.appendChild(ghEl('div', 'gh-opt-empty', 'No matches in the loaded games'));
+      if(act >= 0) input.setAttribute('aria-activedescendant', base+act); else input.removeAttribute('aria-activedescendant');
+    }
+    function show(){ open = true; act = -1; list.hidden = false; input.setAttribute('aria-expanded', 'true'); render(); }
+    function hide(){ open = false; list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+    function move(d){
+      if(!open) show();
+      if(!opts.length) return;
+      act = act < 0 ? (d > 0 ? 0 : opts.length - 1) : (act + d + opts.length) % opts.length;
+      render();
+      const el = document.getElementById(base+act);
+      if(el) el.scrollIntoView({ block:'nearest' });
+    }
+    function pick(i){
+      const o = opts[i];
+      if(!o) return;
+      hide();
+      input.value = o.label;
+      wrap.dataset.picked = '1';
+      onPick(o.value, o.label);
+    }
+    input.addEventListener('focus', ()=>{ if(wrap.dataset.picked) input.select(); show(); });
+    input.addEventListener('input', ()=>{
+      const v = ghCleanText(input.value);
+      if(v!==input.value) input.value = v;
+      wrap.dataset.picked = '';
+      clear.hidden = !input.value;
+      onText(v);
+      if(!open) show(); else { act = -1; render(); }
+    });
+    input.addEventListener('keydown', e=>{
+      if(e.key==='ArrowDown'){ e.preventDefault(); move(1); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); move(-1); }
+      else if(e.key==='Enter'){
+        e.preventDefault();
+        if(open && act >= 0) pick(act);
+        else if(open && opts.length===1 && input.value.trim()) pick(0);
+        else hide();
+      }
+      else if(e.key==='Escape'){ if(open){ e.preventDefault(); e.stopPropagation(); hide(); } else input.blur(); }
+    });
+    input.addEventListener('blur', ()=> setTimeout(()=>{ if(document.activeElement!==input) hide(); }, 120));
+    clear.addEventListener('click', ()=>{ input.value = ''; wrap.dataset.picked = ''; clear.hidden = true; onPick(null, ''); input.focus(); });
+    return { refresh(){ if(open) render(); }, hide };
+  }
+  const ghOpeningCombo = ghCombo(document.getElementById('gh-opening-wrap'), ghOpeningOptions,
+    v=> ghSetFilters({ opening:v || '', oq:'' }), t=> ghSetFilterText('oq', t));
+  const ghOppCombo = ghCombo(document.getElementById('gh-opp-wrap'), ghOppOptions,
+    v=> ghSetFilters({ opp:v || '' }), t=> ghSetFilterText('opp', t));
+  [['history-speed-filter','speed'], ['history-result-filter','result'], ['gh-tc','tc'], ['gh-gap','gap'],
+   ['gh-end','end'], ['gh-len','len'], ['gh-date','date'], ['gh-variant','variant']].forEach(([id, k])=>{
+    document.getElementById(id).addEventListener('change', e=> ghSetFilters({ [k]:e.target.value }));
+  });
+  [['gh-color','color'], ['gh-rated','rated']].forEach(([id, k])=>{
+    document.getElementById(id).addEventListener('click', e=>{ const b = e.target.closest('.toggle'); if(b) ghSetFilters({ [k]:b.dataset.val }); });
+  });
+  document.getElementById('gh-notes').addEventListener('click', ()=> ghSetFilters({ notes:!GH_FILTERS.notes }));
+  document.getElementById('gh-clear').addEventListener('click', ghClearFilters);
+  document.getElementById('gh-filter-toggle').addEventListener('click', ()=>{ GH_UI.open = !GH_UI.open; ghSyncFilterUI(); });
+  document.getElementById('gh-more-toggle').addEventListener('click', ()=>{ GH_UI.more = !GH_UI.more; ghSaveFilters(); ghSyncFilterUI(); });
+  document.getElementById('gh-show-more').addEventListener('click', ()=>{ GH_STATE.shown += GH_WINDOW; ghRender(); });
+  document.getElementById('history-load-more').addEventListener('click', ghLoadMoreClick);
 
   /* ---- Game History: open a row to replay it, with the real PGN ---- */
   // The games-export API gives moves as SAN ("e4 e5 Nf3 ..."), not UCI, and
@@ -22335,12 +23239,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
   }
   function hvOpen(game, username){
+    try{ hvNoteFlush(); }catch(e){}      // the previous game's note, if one was open
     const tokens = (game.moves||'').trim().length ? game.moves.trim().split(/\s+/) : [];
     const { plyStates, sanMoves } = hvBuildPlyStates(tokens);
-    const isWhiteMe = !!(username && game.players.white.user && game.players.white.user.id === username.toLowerCase());
+    const knowMe = !!(game._me || username);
+    const isWhiteMe = knowMe && ghMyColor(game, username)==='white';
     const whiteName = game.players.white.user ? game.players.white.user.name : (game.players.white.aiLevel!=null ? 'AI level '+game.players.white.aiLevel : 'White');
     const blackName = game.players.black.user ? game.players.black.user.name : (game.players.black.aiLevel!=null ? 'AI level '+game.players.black.aiLevel : 'Black');
-    HV_STATE = { game, plyStates, sanMoves, viewPly:null, flipped: username ? !isWhiteMe : false, whiteName, blackName };
+    HV_STATE = { game, plyStates, sanMoves, viewPly:null, flipped: knowMe ? !isWhiteMe : false, whiteName, blackName };
     document.getElementById('hv-title').textContent = whiteName+' vs '+blackName;
     hvUpdateNameRows();
     const metaBits = [];
@@ -22349,7 +23255,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(game.opening && game.opening.name) metaBits.push(game.opening.name);
     if(game.createdAt) metaBits.push(new Date(game.createdAt).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}));
     document.getElementById('hv-meta').textContent = metaBits.join(' \u00b7 ');
-    document.getElementById('hv-pgn').value = game.pgn || '(PGN not available for this game)';
+    document.getElementById('hv-pgn').value = game.pgn || (game._summary && sanMoves.length ? gnMovetext(sanMoves.join(' ')) : '(PGN not available for this game)');
+    hvNoteLoad(game);
     clearMarksObj(marksHv);
     hvBuildLabels(HV_STATE.flipped);
     hvRenderBoard();
@@ -22392,23 +23299,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else if(e.key==='x' || e.key==='X'){ e.preventDefault(); document.getElementById('hv-flip').click(); }
     else if(e.key==='Escape'){ e.preventDefault(); showView('history'); }
   });
+  onLeavePlay(()=>{ try{ hvNoteFlush(); }catch(e){} });   // before HV_STATE goes
   onLeavePlay(()=>{ HV_STATE = null; });
 
   views['history'] = document.getElementById('view-history');
   views['play-history'] = document.getElementById('view-play-history');
-  document.getElementById('card-history').addEventListener('click', ()=>{
-    showView('history');
-    if(GH_STATE.games.length===0 && !GH_STATE.loading) ghLoadMore();
-  });
-  document.getElementById('history-load-more').addEventListener('click', ghLoadMore);
-  document.getElementById('history-speed-filter').addEventListener('change', (e)=>{
-    GH_STATE.speedFilter = e.target.value;
-    ghRender();
-  });
-  document.getElementById('history-result-filter').addEventListener('change', (e)=>{
-    GH_STATE.resultFilter = e.target.value;
-    ghRender();
-  });
+  document.getElementById('card-history').addEventListener('click', ()=> showView('history'));   // ghShown loads and draws it
 
   // Every drill's "how to annotate this board" hint row (.anno-hint) gets a
   // small collapse toggle -- one shared, persisted preference across all of
@@ -22552,9 +23448,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return Object.values(SP.collections).filter(c=> c.id!==SP_UNSORTED).sort((a,b)=> a.name.localeCompare(b.name));
   }
   function spDesired(p){ return p.collections.length ? p.collections.slice() : [SP_UNSORTED]; }
+  // "Game notes" is Game History's study ("Chess Arcade \u00b7 Game notes").
+  function spReservedName(name){ return String(name||'').trim().toLowerCase()==='game notes'; }
   function spCreateCollection(name){
     name = spCleanName(name);
-    if(!name) return null;
+    if(!name || spReservedName(name)) return null;
     if(name.toLowerCase()==='unsorted') return SP_UNSORTED;
     const existing = Object.values(SP.collections).find(c=> c.name.toLowerCase()===name.toLowerCase());
     if(existing) return existing.id;
@@ -22597,6 +23495,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!c || cid===SP_UNSORTED) return 'That one can\u2019t be renamed.';
     name = spCleanName(name);
     if(!name) return 'Give it a name.';
+    if(spReservedName(name)) return 'That name is used for Game History notes.';
     if(name.toLowerCase()==='unsorted' || Object.values(SP.collections).some(o=> o.id!==cid && o.name.toLowerCase()===name.toLowerCase())) return 'There\u2019s already a collection with that name.';
     if(name===c.name) return '';
     c.name = name;
@@ -22817,6 +23716,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function spModalAddCol(){
     const input = document.getElementById('save-new-col');
+    const hint = saveOverlay.querySelector('.field-hint');
+    if(spReservedName(spCleanName(input.value))){ if(hint) hint.textContent = 'That name is used for Game History notes.'; return; }
+    if(hint) hint.textContent = 'Pick any number. With none picked it stays in Unsorted.';
     const cid = spCreateCollection(input.value);
     input.value = '';
     if(!cid || cid===SP_UNSORTED) return;
@@ -23067,7 +23969,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     input.type = 'text'; input.maxLength = 60; input.placeholder = 'New collection, e.g. Counterattacking';
     input.setAttribute('aria-label', 'New collection name');
     const add = spMake('button', 'btn btn-ghost', 'Add');
-    const go = ()=>{ const cid = spCreateCollection(input.value); if(!cid) return; spFilter.col = cid; spColFocus = 'input'; spPersist(); spRenderLibrary(); };
+    const go = ()=>{
+      if(spReservedName(spCleanName(input.value))){ if(!box.querySelector('.sp-reserved')) box.appendChild(spMake('div', 'field-hint sp-reserved', 'That name is used for Game History notes.')); return; }
+      const cid = spCreateCollection(input.value); if(!cid) return; spFilter.col = cid; spColFocus = 'input'; spPersist(); spRenderLibrary(); };
     add.addEventListener('click', go);
     input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } });
     box.append(input, add);
@@ -23116,6 +24020,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function spTokenChanged(){
     spScopeCache = { token:'', ok:null };
     GH_STATE.username = null;
+    // Loaded games stay while the new token's account is checked (the same
+    // account keeps them all); another account's are cleared then, by
+    // ghVerifyAccount. Notes are kept and re-filed by the notes sync.
+    if(!getLichessToken()) ghReset();
+    if(currentView==='history') ghShown();
+    gnTokenChanged();
     spSetSync(getLichessToken() ? 'idle' : 'off');
     if(getLichessToken()) spScheduleSync(800);
   }
@@ -23176,6 +24086,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function spParseStudyName(name){
     if(typeof name!=='string' || name.indexOf(SP_STUDY_PREFIX)!==0) return null;
     let rest = name.slice(SP_STUDY_PREFIX.length).trim(), part = 1;
+    if(/^game notes(?: \(\d+\))?$/i.test(rest)) return null;   // Game History's notes study: never a collection
     const m = rest.match(/^(.*?) \((\d+)\)$/);
     if(m){ rest = m[1].trim(); part = Number(m[2]) || 1; }
     return rest ? { name:spCleanName(rest), part } : null;
@@ -23196,7 +24107,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // the solution as written, kept for filing a puzzle not yet filled in
       const after = cm ? body.slice(body.indexOf(cm[0]) + cm[0].length) : body;
       const san = after.replace(/\{[^}]*\}/g, ' ').replace(/\s+/g, ' ').replace(/\s*\*\s*$/, '').trim();
-      if(url) out.push({ studyId:url[1], chapterId:url[2], pid, tags, meta, san });
+      if(url) out.push({ studyId:url[1], chapterId:url[2], pid, tags, meta, san, body });   // body: Game notes reads its own comment
     });
     return out;
   }
@@ -23501,6 +24412,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   async function spSync(){
     clearTimeout(spSyncTimer);
     if(spSyncRunning){ spSyncAgain = true; return; }
+    if(gnSyncRunning || ghFetching){ spScheduleSync(1500); return; }   // Game notes / Game History: one request at a time
     if(Date.now() < spBackoffUntil){ spScheduleSync(0); return; }
     if(!getLichessToken()){ spSetSync('off'); return; }
     spSyncRunning = true;
@@ -23592,6 +24504,864 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // First sync a few seconds after the app opens, once everything is up.
   spRenderSync();
   if(getLichessToken()) setTimeout(()=> spSync(), 5000);
+
+  /* ================= GAME NOTES =================
+     The user's own analysis notes on their games, written from Game History
+     (a note button on every row) and from the game review (a Notes field).
+     Kept in this browser (wavyChessPrepGameNotes) and synced across the
+     user's devices through ONE private Lichess study, "Chess Arcade \u00b7
+     Game notes" (rolling over to "(2)" past 64 chapters), one chapter per
+     noted game: the game's moves plus a single opening comment holding a
+     machine line (game id, updated-at, a hash and length of the text, the
+     text itself, encoded, and a summary of the game) and a readable copy for
+     lichess.org. Lichess's own per-game private notes can't be reached with
+     a personal token (lila serves /game/{id}/note to a logged-in browser
+     session only), so they aren't used.
+     The rules are the Saved Puzzles sync's, and so are its helpers: one
+     request at a time, never alongside that sync or a games load; the notes
+     are tied to one Lichess account; the newest edit wins per game and the
+     losing text is kept as a "conflict" the editor offers; a missing chapter
+     or study never deletes a note; nothing is deleted after a failed or
+     partial read; a cleared note is a tombstone that reaches the other
+     devices and is collected after 30 days.
+     Everything here is a var: Game History and the Saved Puzzles sync, both
+     earlier in the file, look at these names. */
+  var GN_KEY = 'wavyChessPrepGameNotes';
+  var GN_STUDY_NAME = SP_STUDY_PREFIX + 'Game notes';
+  var GN_MAX = 10000, GN_TOMB_TTL = 30*86400e3;
+  var gnSyncTimer = 0, gnSyncRunning = false, gnSyncAgain = false, gnOtherTabValue = null;
+  var gnSyncState = { status:'idle', detail:'' };
+  var gnStore = 'ok';            // 'ok' | 'full' | 'blocked' (localStorage refused)
+  var GN = gnLoad();
+  var gnEd = null, hvNote = null;
+
+  function gnBlank(){ return { v:1, notes:{}, sync:{ user:'', studies:[], deletes:[], lastSync:0 } }; }
+  function gnStr(v, max, re){
+    v = typeof v==='string' ? v : (v==null ? '' : String(v));
+    v = v.replace(/[\u0000-\u001f]/g, '').slice(0, max);
+    return re && !re.test(v) ? '' : v;
+  }
+  function gnNum(v){ return v==null || v==='' || !isFinite(Number(v)) ? null : Math.round(Number(v)); }
+  function gnCleanSan(s){
+    s = typeof s==='string' ? s.replace(/[^A-Za-z0-9+#=@\- ]/g, ' ').replace(/\s+/g, ' ').trim() : '';
+    if(s.length > 6000) s = s.slice(0, 6001).replace(/\s+\S*$/, '');
+    return s;
+  }
+  // The game summary kept with a note: enough to list it, filter it, open it
+  // (from the SAN moves) and file it, with the game not loaded or offline.
+  function gnCleanG(s){
+    if(!s || typeof s!=='object') return null;
+    return {
+      me: s.me==='black' ? 'black' : 'white',
+      res: ['win','loss','draw'].includes(s.res) ? s.res : 'draw',
+      speed: gnStr(s.speed, 20, /^[A-Za-z]*$/),
+      rated: !!s.rated,
+      tc: gnStr(s.tc, 12, /^(\d{1,5}-\d{1,3}|corr-\d{1,2}|corr)?$/),
+      status: gnStr(s.status, 30, /^[A-Za-z]*$/),
+      at: gnNum(s.at) || 0,
+      eco: gnStr(s.eco, 3, /^([A-E]\d\d)?$/),
+      opening: gnStr(s.opening, 120),
+      opp: gnStr(s.opp, 40),
+      oppId: gnStr(s.oppId, 30, /^[\w-]*$/),
+      oppTitle: gnStr(s.oppTitle, 4, /^[A-Za-z]*$/),
+      oppRating: gnNum(s.oppRating), myRating: gnNum(s.myRating),
+      plies: Math.max(0, gnNum(s.plies) || 0),
+      variant: gnStr(s.variant, 20, /^[A-Za-z0-9]*$/) || 'standard',
+      fen: gnStr(s.fen, 100, /^([1-8pnbrqkPNBRQK\/\[\]~]+( [ -~]{0,60})?)?$/),
+      san: gnCleanSan(s.san)
+    };
+  }
+  function gnCleanNote(n, id){
+    if(!n || typeof n!=='object' || !/^\w{8}$/.test(String(id||''))) return null;
+    const link = n.link && /^\w{8}$/.test(String(n.link.s)) && /^\w{8}$/.test(String(n.link.c)) ? { s:String(n.link.s), c:String(n.link.c) } : null;
+    const c = n.conflict;
+    const conflict = c && typeof c.text==='string' && c.text ? { text:c.text.slice(0, GN_MAX), at:Number(c.at)||0, mine:!!c.mine, lost:!!c.lost } : null;
+    return { id:String(id), text: typeof n.text==='string' ? n.text.slice(0, GN_MAX) : '',
+      createdAt:Number(n.createdAt)||0, updatedAt:Number(n.updatedAt)||0, pushedAt:Number(n.pushedAt)||0, base:Number(n.base)||0,
+      link, conflict, g:gnCleanG(n.g), seen:gnSeenList(n.seen) };
+  }
+  function gnLoad(raw){
+    const out = gnBlank();
+    let d = null;
+    if(raw!=null){ try{ d = JSON.parse(raw); }catch(e){ d = null; } }
+    else {
+      let stored = null;
+      try{ stored = localStorage.getItem(GN_KEY); }catch(e){ gnStore = 'blocked'; }
+      // Unreadable notes are set aside, never overwritten by the next save.
+      if(stored){ try{ d = JSON.parse(stored); }catch(e){ d = null; try{ localStorage.setItem(GN_KEY+'Unreadable', stored); }catch(e2){} } }
+    }
+    if(!d || typeof d!=='object') return out;
+    const N = d.notes && typeof d.notes==='object' ? d.notes : {};
+    Object.keys(N).forEach(id=>{ const n = gnCleanNote(N[id], id); if(n) out.notes[n.id] = n; });
+    const S = d.sync && typeof d.sync==='object' ? d.sync : {};
+    out.sync.user = typeof S.user==='string' ? S.user.slice(0, 30) : '';
+    out.sync.studies = Array.isArray(S.studies) ? S.studies.filter(x=> x && /^\w{8}$/.test(String(x.id)))
+      .map(x=>({ id:String(x.id), part:Math.max(1, Number(x.part)||1), count:Math.max(0, Number(x.count)||0) })) : [];
+    out.sync.deletes = Array.isArray(S.deletes) ? S.deletes.filter(x=> x && /^\w{8}$/.test(String(x.s)) && /^\w{8}$/.test(String(x.c)) && /^\w{8}$/.test(String(x.gid)))
+      .map(x=>({ s:String(x.s), c:String(x.c), gid:String(x.gid) })) : [];
+    out.sync.lastSync = Number(S.lastSync)||0;
+    return out;
+  }
+  // Reports failure: the notes share this browser's storage with uploaded
+  // backgrounds and sounds, so a save can run out of room.
+  // gnUnsaved: the last save failed, so this device's storage is behind
+  // what is on screen (the sync line and the editor say so).
+  var gnUnsaved = false;
+  function gnPersist(){
+    let json;
+    if(gnOtherTabValue!=null){
+      // Another tab saved while this one syncs (its copy is merged when the
+      // sync ends): what this tab writes meanwhile includes its notes, so
+      // closing this tab mid-sync can't lose them.
+      const keep = GN;
+      try{ GN = JSON.parse(JSON.stringify(keep)); gnMergeFrom(gnOtherTabValue); json = JSON.stringify(GN); }
+      catch(e){ json = JSON.stringify(keep); }
+      finally{ GN = keep; }
+    } else json = JSON.stringify(GN);
+    const was = gnUnsaved;
+    let ok = true;
+    try{ localStorage.setItem(GN_KEY, json); gnStore = 'ok'; }
+    catch(e){
+      const full = e && (e.name==='QuotaExceededError' || e.name==='NS_ERROR_DOM_QUOTA_REACHED' || e.code===22 || e.code===1014);
+      gnStore = full ? 'full' : 'blocked';
+      ok = false;
+    }
+    gnUnsaved = !ok;
+    if(was!==gnUnsaved) gnRenderSync();
+    return ok;
+  }
+  function gnNoteText(id){ const n = typeof GN==='object' && GN && GN.notes[id]; return n ? n.text : ''; }
+  function gnHasNote(id){ return !!gnNoteText(id) || gnWaiting(id); }
+  function gnFirstLine(t){ const l = String(t||'').split('\n').find(x=> x.trim()); return l ? l.trim() : ''; }
+  function gnHasPending(){ return Object.values(GN.notes).some(n=> n.updatedAt > n.pushedAt && (n.link || n.text)); }
+  // A note deleted here while another version waits in its conflict box
+  // still counts as a note: it is listed, filtered and never collected.
+  function gnWaiting(id){ const n = typeof GN==='object' && GN && GN.notes[id]; return !!(n && !n.text && n.conflict); }
+  /* Texts this device has had on Lichess for a note (sent or received), as
+     FNV-1a hashes, newest last. A copy on Lichess whose text is one of them
+     is nothing new here: it raises no conflict, and a delete made here after
+     seeing it applies. Kept across an account switch, which resets pushedAt. */
+  function gnSeenList(a){ return Array.isArray(a) ? a.filter(h=> /^[0-9a-f]{8}$/.test(String(h))).map(String).slice(-12) : []; }
+  function gnSeen(n, t){ return !!t && !!n.seen && n.seen.indexOf(gnFnv(t)) >= 0; }
+  function gnSaw(n, t){
+    if(!t) return;
+    const h = gnFnv(t);
+    n.seen = (n.seen || []).filter(x=> x!==h).concat(h).slice(-12);
+  }
+  function gnSeenUnion(a, b){ const out = (a || []).slice(); (b || []).forEach(h=>{ if(out.indexOf(h) < 0) out.push(h); }); return out.slice(-12); }
+  function gnSummary(g){
+    const u = ghMe(), P = ghPlayers(g, u);
+    const san = String(g.moves||'').trim();
+    return gnCleanG({ me:P.me, res:ghGameResult(g, u), speed:g.speed, rated:!!g.rated, tc:ghTcKey(g), status:g.status, at:g.createdAt,
+      eco:g.opening && g.opening.eco, opening:g.opening && g.opening.name, opp:ghOppName(P.opp),
+      oppId:P.opp.user ? P.opp.user.id : '', oppTitle:P.opp.user && P.opp.user.title, oppRating:P.opp.rating, myRating:P.mine.rating,
+      plies:ghPlies(g), variant:g.variant, fen:g.lastFen, san });
+  }
+  // The one way a note changes on this device. '' (after a trim) is a
+  // tombstone. Returns whether the text changed.
+  function gnSetNote(gid, text, game){
+    if(!/^\w{8}$/.test(String(gid||''))) return false;
+    let t = String(text==null ? '' : text).replace(/\r\n?/g, '\n').slice(0, GN_MAX);
+    if(!t.trim()) t = '';
+    let n = GN.notes[gid];
+    const g = game ? gnSummary(game) : null;
+    if(n && n.text===t){ if(g && !n.g){ n.g = g; gnPersist(); } return false; }
+    if(!n){
+      if(!t) return false;
+      n = GN.notes[gid] = { id:gid, text:'', createdAt:Date.now(), updatedAt:0, pushedAt:0, base:0, link:null, conflict:null, g:null, seen:[] };
+    }
+    n.base = n.updatedAt;
+    n.text = t;
+    n.updatedAt = Math.max(Date.now(), n.updatedAt + 1, n.pushedAt + 1);
+    if(g) n.g = g;
+    if(n.conflict && n.conflict.text===t) n.conflict = null;
+    gnPersist();
+    gnAfterChange(true, false);
+    return true;
+  }
+  function gnAfterChange(sync, outside){
+    gnRenderSync();
+    if(outside){
+      gnRefreshFields();
+      if(typeof currentView!=='undefined' && currentView==='history' && !gnEd) ghRender();
+    }
+    if(sync && getLichessToken()) gnScheduleSync(4000);
+  }
+
+  /* ---- Another tab of the app saved: merge its copy (deferred while a sync
+     runs). Per game the newer edit wins; a losing text that the winner never
+     saw is kept as the conflict; links and push marks come from either copy.
+     This tab writes back only when it held something the other didn't. ---- */
+  function gnMergeFrom(raw){
+    const o = gnLoad(raw==null ? 'null' : raw);
+    let localNewer = false, switched = false;
+    if(o.sync.user && GN.sync.user && o.sync.user!==GN.sync.user){
+      if(o.sync.lastSync > GN.sync.lastSync){ GN.sync = o.sync; switched = true; }
+      else localNewer = true;
+    } else {
+      if(!GN.sync.user && o.sync.user) GN.sync.user = o.sync.user;
+      o.sync.studies.forEach(st=>{
+        const m = GN.sync.studies.find(x=> x.id===st.id);
+        if(!m) GN.sync.studies.push(st); else m.count = Math.max(m.count, st.count);
+      });
+      if(GN.sync.studies.some(st=> !o.sync.studies.some(x=> x.id===st.id))) localNewer = true;
+      o.sync.deletes.forEach(d=>{ if(!GN.sync.deletes.some(x=> x.s===d.s && x.c===d.c)) GN.sync.deletes.push(d); });
+      if(o.sync.lastSync > GN.sync.lastSync) GN.sync.lastSync = o.sync.lastSync;
+      else if(GN.sync.lastSync > o.sync.lastSync) localNewer = true;
+    }
+    Object.keys(o.notes).forEach(id=>{
+      const on = o.notes[id], n = GN.notes[id];
+      if(!n){ GN.notes[id] = on; return; }
+      const seen = gnSeenUnion(n.seen, on.seen);
+      n.seen = on.seen = seen;
+      if(on.updatedAt > n.updatedAt){
+        const lost = n.text && n.text!==on.text && on.base < n.updatedAt;    // the other tab never saw this edit
+        if(lost && !on.text){
+          // The other tab deleted an older version: this text stays, as a
+          // newer edit (a delete only removes text it was shown).
+          n.base = n.updatedAt;
+          n.updatedAt = on.updatedAt + 1;
+          if(switched) n.link = on.link;
+          else { if(!n.link && on.link) n.link = on.link; n.pushedAt = Math.max(n.pushedAt, on.pushedAt); }
+          n.g = n.g || on.g;
+          localNewer = true;
+          return;
+        }
+        // this tab's own text lost: kept, and labeled as this device's version
+        on.conflict = lost ? { text:n.text, at:n.updatedAt, mine:true, lost:true } : on.conflict;
+        if(!on.link && !switched) on.link = n.link;
+        if(!switched) on.pushedAt = Math.max(on.pushedAt, n.pushedAt);
+        on.g = on.g || n.g;
+        GN.notes[id] = on;
+        if(lost) localNewer = true;
+      } else if(on.updatedAt < n.updatedAt){
+        localNewer = true;
+        if(switched) n.link = on.link;
+        else { if(!n.link && on.link) n.link = on.link; n.pushedAt = Math.max(n.pushedAt, on.pushedAt); }
+        n.g = n.g || on.g;
+      } else {
+        if(switched) n.link = on.link;
+        else if(on.link && !n.link) n.link = on.link;
+        else if(n.link && !on.link) localNewer = true;
+        if(on.pushedAt > n.pushedAt) n.pushedAt = on.pushedAt; else if(n.pushedAt > on.pushedAt) localNewer = true;
+        n.conflict = on.conflict;
+        n.g = n.g || on.g;
+      }
+    });
+    Object.keys(GN.notes).forEach(id=>{ if(!o.notes[id]){ localNewer = true; if(switched) GN.notes[id].link = null; } });
+    return localNewer;
+  }
+  window.addEventListener('storage', e=>{
+    if(e.key!==GN_KEY) return;
+    if(gnSyncRunning){ gnOtherTabValue = e.newValue==null ? 'null' : e.newValue; return; }
+    if(gnMergeFrom(e.newValue)) gnPersist();
+    gnAfterChange(false, true);
+  });
+
+  /* ---- Chapters: one per noted game. The opening comment is ONE comment
+     (Lichess merges a node's comments by the same author, strips [%...]
+     and braces): the machine line first, then a readable copy. ---- */
+  function gnFnv(s){
+    let h = 0x811c9dc5;
+    for(let i=0; i<s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return (h >>> 0).toString(16).padStart(8, '0');
+  }
+  function gnEnc(v){ return encodeURIComponent(String(v==null ? '' : v)); }
+  function gnDec(v){ try{ return decodeURIComponent(String(v==null ? '' : v)); }catch(e){ return ''; } }
+  function gnStudyName(part){ return GN_STUDY_NAME + (part > 1 ? ' ('+part+')' : ''); }
+  function gnStudyPart(name){
+    if(name===GN_STUDY_NAME) return 1;
+    const m = typeof name==='string' && name.indexOf(GN_STUDY_NAME+' (')===0 ? /^ \((\d+)\)$/.exec(name.slice(GN_STUDY_NAME.length)) : null;
+    return m ? Math.max(1, Number(m[1])||1) : 0;
+  }
+  function gnMovetext(san){
+    const toks = String(san||'').trim() ? String(san).trim().split(/\s+/) : [];
+    return toks.map((t, i)=> i%2===0 ? (i/2+1)+'. '+t : t).join(' ');
+  }
+  function gnResultTag(g){ return g.res==='draw' ? '1/2-1/2' : ((g.res==='win')===(g.me==='white') ? '1-0' : '0-1'); }
+  function gnFamilyOf(g){ return g.opening ? g.opening.split(':')[0].trim() : (g.variant && g.variant!=='standard' ? ghVariantLabel(g.variant) : ''); }
+  function gnChapterName(n){
+    const g = n.g || {}, fam = gnFamilyOf(g);
+    return (n.id+' \u00b7 vs '+(g.opp || '?')+(fam ? ' \u00b7 '+fam : '')).slice(0, 100);
+  }
+  function gnReadable(t){
+    let r = String(t||'').replace(/\r/g, '').replace(/\{/g, '(').replace(/\}/g, ')').replace(/\[%/g, '[ %').replace(/\n[ \t]*(\n[ \t]*)+/g, '\n');
+    if(r.length > 2000) r = r.slice(0, 2000)+'...';
+    return r.trim();
+  }
+  function gnMeta(n){
+    const g = n.g || gnCleanG({});
+    const kv = [['v',1], ['game',n.id], ['up',n.updatedAt], ['cr',n.createdAt||n.updatedAt], ['del',n.text ? 0 : 1], ['h',gnFnv(n.text)], ['n',n.text.length],
+      ['me',g.me==='black' ? 'b' : 'w'], ['res',g.res], ['sp',g.speed], ['ra',g.rated ? 1 : 0], ['tc',g.tc], ['st',g.status], ['at',g.at||0],
+      ['eco',g.eco], ['op',gnEnc(g.opening)], ['opp',gnEnc(g.opp)], ['oid',g.oppId], ['ot',g.oppTitle],
+      ['or',g.oppRating==null ? '' : g.oppRating], ['mr',g.myRating==null ? '' : g.myRating], ['pl',g.plies||0], ['var',g.variant],
+      ['fen',gnEnc(g.fen)], ['tx',gnEnc(n.text)], ['end',1]];
+    return 'arcade-note '+kv.map(([k, v])=> k+'='+(v==null ? '' : v)).join(' ');
+  }
+  function gnChapterPgn(n){
+    const g = n.g || gnCleanG({});
+    const t = [];
+    const tag = (k, v)=>{ if(v!=null && v!=='') t.push('['+k+' "'+spTagVal(v)+'"]'); };
+    const mine = GH_STATE.username || GN.sync.user || 'Me', opp = g.opp || '?';
+    const pad = x=> String(x).padStart(2, '0');
+    tag('Event', GN_STUDY_NAME);
+    tag('Site', 'https://lichess.org/'+n.id);
+    if(g.at){ const d = new Date(g.at); tag('Date', d.getUTCFullYear()+'.'+pad(d.getUTCMonth()+1)+'.'+pad(d.getUTCDate())); }
+    tag('White', g.me==='white' ? mine : opp);
+    tag('Black', g.me==='white' ? opp : mine);
+    tag('WhiteElo', g.me==='white' ? g.myRating : g.oppRating);
+    tag('BlackElo', g.me==='white' ? g.oppRating : g.myRating);
+    const result = gnResultTag(g);
+    tag('Result', result);
+    const tcm = /^(\d+)-(\d+)$/.exec(g.tc||'');
+    if(tcm) tag('TimeControl', tcm[1]+'+'+tcm[2]);
+    tag('ECO', g.eco);
+    tag('Opening', g.opening);
+    tag('ChapterName', gnChapterName(n));
+    // Moves only for standard chess: another variant's moves need its own
+    // start position, which the summary doesn't keep.
+    const moves = (!g.variant || g.variant==='standard') ? gnMovetext(g.san) : '';
+    return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? gnReadable(n.text) : '(note deleted)')+' } '+(moves ? moves+' ' : '')+result;
+  }
+  function gnSanFromMovetext(s){
+    return gnCleanSan(String(s||'').replace(/\$\d+/g, ' ').replace(/\([^)]*\)/g, ' ').replace(/\d+\.(\.\.)?/g, ' ').replace(/(1-0|0-1|1\/2-1\/2|\*)\s*$/, ''));
+  }
+  // A chapter of ours: { s, c, gid, ok, up, cr, del, text, g }. ok=false is
+  // damaged (the text fails its hash or length): never applied. A chapter
+  // without the machine line isn't ours (null): never touched.
+  function gnParseChapter(ch){
+    const m = /arcade-note\s+((?:\w+=\S*\s+)*?)end=1/.exec(ch.body || '');
+    if(!m) return null;
+    const kv = {};
+    m[1].trim().split(/\s+/).forEach(p=>{ const i = p.indexOf('='); if(i>0) kv[p.slice(0, i)] = p.slice(i+1); });
+    if(!/^\w{8}$/.test(kv.game||'')) return null;
+    const out = { s:ch.studyId, c:ch.chapterId, gid:kv.game, ok:false };
+    if(!/^\d+$/.test(kv.up||'') || kv.tx==null) return out;
+    let tx = null;
+    try{ tx = decodeURIComponent(kv.tx); }catch(e){ tx = null; }
+    if(tx==null || gnFnv(tx)!==kv.h || String(tx.length)!==kv.n || tx.length > GN_MAX) return out;
+    out.ok = true;
+    out.up = Number(kv.up);
+    out.cr = Number(kv.cr) || out.up;
+    out.del = kv.del==='1' || !tx;
+    out.text = out.del ? '' : tx;
+    out.g = gnCleanG({ me:kv.me==='b' ? 'black' : 'white', res:kv.res, speed:kv.sp, rated:kv.ra==='1', tc:kv.tc, status:kv.st, at:kv.at,
+      eco:kv.eco, opening:gnDec(kv.op), opp:gnDec(kv.opp), oppId:kv.oid, oppTitle:kv.ot, oppRating:kv.or, myRating:kv.mr,
+      plies:kv.pl, variant:kv.var, fen:gnDec(kv.fen), san:gnSanFromMovetext(ch.san) });
+    return out;
+  }
+
+  /* ---- Sync ---- */
+  function gnScheduleSync(ms){
+    clearTimeout(gnSyncTimer);
+    gnSyncTimer = setTimeout(()=> gnSync(), Math.max(ms==null ? 4000 : ms, spBackoffUntil - Date.now()));
+  }
+  function gnSetSync(status, detail){ gnSyncState = { status, detail:detail||'' }; gnRenderSync(); gnRefreshFields(); }
+  function gnRenderSync(){
+    const box = document.getElementById('gn-sync'), t = document.getElementById('gn-sync-text');
+    if(!box || !t || typeof GN!=='object' || !GN) return;
+    const tok = !!getLichessToken();
+    const any = Object.values(GN.notes).some(n=> n.text);
+    box.style.display = !tok && !any ? 'none' : '';
+    let st = tok ? gnSyncState.status : 'off';
+    let msg;
+    if(gnUnsaved && any && st!=='busy'){
+      const safe = tok && st==='ok' && !gnHasPending();
+      msg = (gnStore==='blocked' ? 'This browser isn\u2019t letting the app save notes on this device.' : 'Couldn\u2019t save notes on this device: its storage is full.')
+        + (safe ? ' They\u2019re synced with Lichess, so they\u2019re safe there.'
+          : ' Copy any new note somewhere safe'+(gnStore==='full' ? ', or free up space (uploaded backgrounds and sounds take the most).' : '.'));
+      st = 'error';
+    }
+    else if(st==='off') msg = 'Notes are saved on this device. Connect Lichess in Settings to keep them on all your devices.';
+    else if(st==='scope') msg = 'Notes are saved on this device. To sync them, make a new Lichess token that also has study:read and study:write, and paste it in Settings.';
+    else if(st==='busy') msg = 'Syncing notes with Lichess\u2026';
+    else if(st==='error') msg = 'Couldn\u2019t sync notes'+(gnSyncState.detail ? ' ('+gnSyncState.detail+')' : '')+'. They\u2019re saved on this device; it\u2019ll try again.';
+    else if(GN.sync.lastSync && GN.sync.studies.length) msg = 'Notes synced with Lichess '+relTime(GN.sync.lastSync)+', in a private study named \u201c'+GN_STUDY_NAME+'\u201d.';
+    else if(GN.sync.lastSync) msg = 'Notes you write here sync to your other devices, in a private Lichess study named \u201c'+GN_STUDY_NAME+'\u201d.';
+    else msg = 'Notes are saved on this device.';
+    t.textContent = msg;
+    box.dataset.state = st;
+    document.getElementById('gn-sync-now').style.display = st==='off' || st==='busy' ? 'none' : '';
+  }
+  function gnTokenChanged(){
+    gnSetSync(getLichessToken() ? 'idle' : 'off');
+    if(getLichessToken()) gnScheduleSync(2500);
+  }
+  function gnViewShown(){
+    gnRenderSync();
+    if(getLichessToken() && !gnSyncRunning && Date.now() - GN.sync.lastSync > 120000) gnScheduleSync(600);
+  }
+  async function gnImport(studyId, notes, initial, color){
+    const body = new URLSearchParams({ pgn:notes.map(gnChapterPgn).join('\n\n'), orientation:color });
+    if(initial) body.set('initial', 'true');    // drops the empty chapter a new study starts with
+    const res = await spApi('/api/study/'+studyId+'/import-pgn', { method:'POST', body });
+    if(!res.ok){ const err = new Error('couldn\u2019t add notes to the study ('+res.status+')'); if(res.status===429) err.status = 429; throw err; }
+    const data = await res.json();
+    const got = {};
+    ((data && data.chapters) || []).forEach(ch=>{
+      const m = String(ch.name||'').match(/^(\w{8}) /);
+      if(m && /^\w{8}$/.test(String(ch.id||''))) got[m[1]] = String(ch.id);
+    });
+    return got;
+  }
+  // Every device keeps the same copy of a game's note: the lowest chapter id.
+  function gnReconcile(remote, readSet, readAll){
+    const by = new Map();
+    remote.forEach(p=>{ if(!by.has(p.gid)) by.set(p.gid, []); by.get(p.gid).push(p); });
+    const ids = new Set(Object.keys(GN.notes));
+    by.forEach((v, k)=> ids.add(k));
+    const dels = [];
+    ids.forEach(gid=>{
+      const copies = (by.get(gid) || []).slice().sort((a, b)=> a.c < b.c ? -1 : a.c > b.c ? 1 : 0);
+      const usable = copies.filter(p=> p.ok), damaged = copies.filter(p=> !p.ok);
+      let n = GN.notes[gid];
+      if(!usable.length){
+        if(!n) return;                      // a damaged copy of a note this device doesn't have: left alone
+        if(damaged.length){
+          // repair: this device's text goes back into the chapter
+          const keep = (n.link && damaged.find(d=> d.s===n.link.s && d.c===n.link.c)) || damaged[0];
+          n.link = { s:keep.s, c:keep.c };
+          n.pushedAt = 0;
+          damaged.forEach(d=>{ if(d!==keep) dels.push({ s:d.s, c:d.c, gid }); });
+        } else if(n.link && readSet.has(n.link.s)) n.link = null;   // gone: filed again (never deleted)
+        return;
+      }
+      const canon = usable[0];
+      let best = canon;
+      usable.forEach(p=>{ if(p.up > best.up) best = p; });
+      const rt = best.del ? '' : best.text;
+      if(!n){
+        n = GN.notes[gid] = gnCleanNote({ text:rt, createdAt:best.cr, updatedAt:best.up, pushedAt:best.up, link:{ s:canon.s, c:canon.c }, g:best.g }, gid);
+        gnSaw(n, rt);
+      } else {
+        // A delete only removes text the deleting device was shown: text that
+        // never reached Lichess (here) or that this device never had (there)
+        // outlives it, as a new edit that goes out with this sync.
+        if(best.up > n.updatedAt){
+          const unsent = !!n.text && n.text!==rt && n.updatedAt > n.pushedAt && !gnSeen(n, n.text);
+          if(unsent && !rt){
+            n.base = n.updatedAt;
+            n.updatedAt = Math.max(Date.now(), best.up + 1);
+          } else {
+            // this device's unsent edit lost to a newer one: kept, as its own
+            if(unsent) n.conflict = { text:n.text, at:n.updatedAt, mine:true, lost:true };
+            n.base = n.updatedAt;
+            n.text = rt; n.updatedAt = best.up; n.pushedAt = best.up;
+            gnSaw(n, rt);
+            if(!n.g && best.g) n.g = best.g;
+            if(!n.createdAt) n.createdAt = best.cr;
+          }
+        } else if(best.up < n.updatedAt){
+          // this device's edit wins; a remote change made since this device
+          // last wrote, that it never had, is kept
+          const news = !!rt && rt!==n.text && best.up > n.pushedAt && !gnSeen(n, rt);
+          if(news && !n.text){
+            n.base = n.updatedAt;
+            n.text = rt;
+            n.updatedAt = Math.max(Date.now(), n.updatedAt + 1);
+            n.pushedAt = Math.min(n.pushedAt, best.up);
+            gnSaw(n, rt);
+            if(!n.g && best.g) n.g = best.g;
+          } else {
+            if(news) n.conflict = { text:rt, at:best.up, mine:false };
+            n.pushedAt = Math.min(n.pushedAt, best.up);
+          }
+        } else { n.pushedAt = Math.max(n.pushedAt, best.up); if(n.text===rt) gnSaw(n, rt); }
+        if(n.conflict && n.conflict.text===n.text) n.conflict = null;
+        n.link = { s:canon.s, c:canon.c };
+      }
+      if(best!==canon) n.pushedAt = 0;      // canon is rewritten with the winning text
+      usable.slice(1).concat(damaged).forEach(p=> dels.push({ s:p.s, c:p.c, gid }));
+    });
+    if(readAll) GN.sync.deletes = dels;
+  }
+  async function gnPushNew(){
+    let list = Object.values(GN.notes).filter(n=> n.text && !n.link).sort((a, b)=> (a.g && a.g.me==='black') - (b.g && b.g.me==='black') || a.updatedAt - b.updatedAt);
+    while(list.length){
+      let st = GN.sync.studies.filter(x=> x.count < SP_MAX_CHAPTERS).sort((a, b)=> a.part - b.part)[0];
+      let initial = false;
+      if(!st){
+        const part = GN.sync.studies.reduce((m, x)=> Math.max(m, x.part), 0) + 1;
+        const id = await spCreateStudy(gnStudyName(part));
+        st = { id, part, count:1 };
+        GN.sync.studies.push(st);
+        initial = true;
+        gnPersist();
+      }
+      // one board orientation per request: a batch is all one color
+      const color = list[0].g && list[0].g.me==='black' ? 'black' : 'white';
+      const room = SP_MAX_CHAPTERS - (initial ? 0 : st.count);
+      const same = list.filter(n=> (n.g && n.g.me==='black' ? 'black' : 'white')===color);
+      const batch = same.slice(0, Math.max(1, Math.min(room, 20)));
+      const ups = batch.map(n=> n.updatedAt), txs = batch.map(n=> n.text);
+      const got = await gnImport(st.id, batch, initial, color);
+      if(initial) st.count = 0;
+      let added = 0;
+      batch.forEach((n, i)=>{
+        if(!got[n.id]) return;
+        n.link = { s:st.id, c:got[n.id] };
+        n.pushedAt = Math.max(n.pushedAt, ups[i]);
+        gnSaw(n, txs[i]);
+        st.count++; added++;
+      });
+      gnPersist();
+      if(!added){
+        st.count = SP_MAX_CHAPTERS;      // Lichess took none (the study may be full): next part
+        if(GN.sync.studies.length > 50) throw new Error('Lichess didn\u2019t take the notes');
+        continue;
+      }
+      const done = new Set(batch);
+      list = list.filter(n=> !done.has(n));
+    }
+  }
+  // Chapters that answered 400/404 to an update in this session. A 400 also
+  // means "invalid PGN": a chapter that is still listed and refuses again is
+  // not gone, so it isn't re-filed in a 1.5 s loop; the sync reports an error
+  // and retries on its 90 s timer instead.
+  var gnRefused = new Set();
+  async function gnPushEdits(){
+    let refused = 0;
+    for(const n of Object.values(GN.notes)){
+      if(!n.link || !(n.updatedAt > n.pushedAt)) continue;
+      const l = n.link, up = n.updatedAt, tx = n.text, key = l.s+'/'+l.c;
+      const res = await spApi('/api/study/'+l.s+'/'+l.c+'/moves', { method:'POST', body:new URLSearchParams({ pgn:gnChapterPgn(n) }) });
+      if(res.status===400 || res.status===404){
+        if(gnRefused.has(key)){ refused = res.status; continue; }
+        gnRefused.add(key);
+        if(n.link===l) n.link = null;       // the chapter is gone: filed again next time
+        gnSyncAgain = true;
+        gnPersist();
+        continue;
+      }
+      if(res.status===401 || res.status===403) throw new Error('Lichess refused a change ('+res.status+')');
+      if(!res.ok){ const err = new Error('couldn\u2019t update a note ('+res.status+')'); if(res.status===429) err.status = 429; throw err; }
+      gnRefused.delete(key);
+      n.pushedAt = Math.max(n.pushedAt, up);
+      gnSaw(n, tx);
+      gnPersist();
+    }
+    if(refused) throw new Error('Lichess didn\u2019t take a note\u2019s update ('+refused+')');
+  }
+  // Only after a complete read and after the pushes: duplicates (gid-guarded:
+  // the note must be filed in another chapter) and tombstones past 30 days.
+  async function gnRunDeletes(remote){
+    const now = Date.now(), jobs = [];
+    GN.sync.deletes.forEach(d=>{
+      const n = GN.notes[d.gid];
+      if(n && n.link && !(n.link.s===d.s && n.link.c===d.c)) jobs.push({ s:d.s, c:d.c, gid:d.gid, tomb:false });
+    });
+    remote.forEach(p=>{
+      if(!p.ok || !p.del || now - p.up <= GN_TOMB_TTL) return;
+      const n = GN.notes[p.gid];
+      if(n && !n.text && !n.conflict && n.updatedAt <= p.up && !jobs.some(j=> j.s===p.s && j.c===p.c)) jobs.push({ s:p.s, c:p.c, gid:p.gid, tomb:true });
+    });
+    for(const j of jobs){
+      const res = await spApi('/api/study/'+j.s+'/'+j.c, { method:'DELETE' });
+      if(res.ok || res.status===404){
+        GN.sync.deletes = GN.sync.deletes.filter(x=> !(x.s===j.s && x.c===j.c));
+        const st = GN.sync.studies.find(x=> x.id===j.s);
+        if(st && st.count > 0) st.count--;
+        const n = GN.notes[j.gid];
+        if(j.tomb && n && !n.text && !n.conflict && n.link && n.link.s===j.s && n.link.c===j.c) delete GN.notes[j.gid];
+      } else if(res.status===401 || res.status===403) throw new Error('Lichess refused a change ('+res.status+')');
+      else if(res.status===429){ const err = new Error('Lichess asked to slow down'); err.status = 429; throw err; }
+      gnPersist();
+    }
+    Object.values(GN.notes).forEach(n=>{ if(!n.text && !n.link && !n.conflict && now - n.updatedAt > GN_TOMB_TTL) delete GN.notes[n.id]; });
+  }
+  async function gnSync(){
+    clearTimeout(gnSyncTimer);
+    if(gnSyncRunning){ gnSyncAgain = true; return; }
+    if(spSyncRunning || ghFetching){ gnScheduleSync(1500); return; }     // one request at a time
+    if(Date.now() < spBackoffUntil){ gnScheduleSync(0); return; }
+    if(!getLichessToken()){ gnSetSync('off'); return; }
+    gnSyncRunning = true;
+    gnSetSync('busy');
+    try{
+      const access = await spStudyAccess();
+      if(access!=='ok'){ gnSetSync(access); return; }
+      const user = await ghEnsureUsername();
+      if(!user) throw new Error('couldn\u2019t read your Lichess account');
+      const uid = String(user).toLowerCase();
+      if(GN.sync.user && GN.sync.user!==uid){
+        // Another Lichess account: keep every note and file it afresh in this
+        // account's study, instead of reading the old one's as deleted.
+        Object.values(GN.notes).forEach(n=>{ n.link = null; n.pushedAt = 0; });
+        GN.sync.studies = []; GN.sync.deletes = [];
+      }
+      GN.sync.user = uid;
+      gnPersist();
+      const listRes = await spApi('/api/study/by/'+encodeURIComponent(user), { headers:{ Accept:'application/x-ndjson' } });
+      if(!listRes.ok) throw new Error('couldn\u2019t list your studies ('+listRes.status+')');
+      const studies = (await listRes.text()).split('\n').map(l=> l.trim()).filter(Boolean)
+        .map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).filter(x=> x && /^\w{8}$/.test(String(x.id||'')));
+      const listed = new Set(studies.map(x=> x.id));
+      const spIds = new Set();
+      Object.values(SP.collections).forEach(c=> c.studies.forEach(st=> spIds.add(st.id)));
+      const known = new Set(GN.sync.studies.map(x=> x.id));
+      let readAll = true;
+      const gone = new Set();
+      // A known study missing from the list is gone only when Lichess says so.
+      for(const st of GN.sync.studies){
+        if(listed.has(st.id)) continue;
+        const h = await spApi('/api/study/'+st.id+'.pgn', { method:'HEAD', auth:false });
+        if(h.status===404) gone.add(st.id); else readAll = false;
+      }
+      GN.sync.studies = GN.sync.studies.filter(st=> !gone.has(st.id));
+      const ours = studies.filter(st=> !spIds.has(st.id) && (gnStudyPart(st.name) > 0 || known.has(st.id)));
+      const remote = [], readSet = new Set(gone);
+      for(const st of ours){
+        const res = await spApi('/api/study/'+st.id+'.pgn?clocks=false&comments=true&variations=false');
+        if(!res.ok){ readAll = false; continue; }
+        const chapters = spParseExport(await res.text());
+        readSet.add(st.id);
+        let entry = GN.sync.studies.find(x=> x.id===st.id);
+        if(!entry){ entry = { id:st.id, part:gnStudyPart(st.name) || 1, count:0 }; GN.sync.studies.push(entry); }
+        entry.count = chapters.length;
+        chapters.forEach(ch=>{ const p = gnParseChapter(ch); if(p) remote.push(p); });
+      }
+      gnReconcile(remote, readSet, readAll);
+      gnPersist();
+      // New chapters first, then edits, deletions last (and only after a
+      // complete read): a note is never missing from every study.
+      await gnPushNew();
+      await gnPushEdits();
+      if(readAll) await gnRunDeletes(remote);
+      GN.sync.lastSync = Date.now();
+      gnPersist();
+      gnSetSync('ok');
+    }catch(err){
+      if(err && err.status===429) spBackoffUntil = Math.max(spBackoffUntil, Date.now() + 65000);
+      gnSetSync('error', (err && err.message) || '');
+      gnScheduleSync(err && err.status===429 ? 65000 : 90000);
+    }finally{
+      gnSyncRunning = false;
+      if(gnOtherTabValue!=null){ const v = gnOtherTabValue; gnOtherTabValue = null; gnMergeFrom(v); gnPersist(); gnSyncAgain = true; }
+      gnAfterChange(false, true);
+      if(gnSyncAgain){ gnSyncAgain = false; gnScheduleSync(1500); }
+    }
+  }
+  document.getElementById('gn-sync-now').addEventListener('click', ()=> gnSync());
+
+  /* ---- Editing: the editor over the list, and the review's Notes field.
+     Both autosave; a textarea the user is typing in is never overwritten
+     (if the stored note changed underneath, that text is kept as the
+     conflict when this one is saved). ---- */
+  function gnField(ta){ return { ta, gid:null, game:null, saved:'', base:'', timer:0, undo:null, undoTimer:0 }; }
+  function gnFieldLoad(F, game){
+    F.gid = game.id; F.game = game;
+    F.base = F.saved = gnNoteText(game.id);
+    F.ta.value = F.saved;
+    F.undo = null;
+  }
+  function gnFieldSave(F){
+    if(!F || !F.gid) return;
+    clearTimeout(F.timer);
+    const v = F.ta.value;
+    if(v===F.saved) return;
+    const nv = v.trim() ? v : '';
+    const n = GN.notes[F.gid], cur = n ? n.text : '';
+    const stash = cur && cur!==F.base && cur!==nv ? { text:cur, at:n.updatedAt, mine:false } : null;
+    gnSetNote(F.gid, v, F.game);
+    if(stash && GN.notes[F.gid]){ GN.notes[F.gid].conflict = stash; gnPersist(); }
+    F.saved = v;
+    F.base = gnNoteText(F.gid);
+    if(cur && !F.base){
+      F.undo = cur;
+      clearTimeout(F.undoTimer);
+      F.undoTimer = setTimeout(()=>{ F.undo = null; gnRenderField(F); }, 10000);
+    } else if(F.base) F.undo = null;
+  }
+  function gnFieldRefresh(F){
+    if(!F || !F.gid) return;
+    const cur = gnNoteText(F.gid);
+    if(F.ta.value===F.saved && cur!==F.base){ F.ta.value = cur; F.saved = cur; F.base = cur; }
+  }
+  function gnStatusText(gid){
+    const again = gnEd && gnEd.warned && gnUnsaved ? ' Close again to leave it unsaved on this device.' : '';
+    if(gnStore==='blocked') return 'This browser isn\u2019t letting the app save. Copy your note somewhere safe.'+again;
+    if(gnStore==='full') return 'Couldn\u2019t save on this device: its storage is full.'+(again ? ' Copy your note somewhere safe, or free up space (uploaded backgrounds and sounds take the most) and try again.'+again : '');
+    const n = GN.notes[gid], tok = !!getLichessToken();
+    if(!n || (!n.text && !n.link)) return tok ? '' : 'Notes are saved on this device. Connect Lichess in Settings to keep them on all your devices.';
+    if(!tok) return 'Saved on this device. Connect Lichess in Settings to keep your notes on all your devices.';
+    if(n.link && n.pushedAt >= n.updatedAt) return 'Saved \u00b7 synced with Lichess '+relTime(GN.sync.lastSync || Date.now())+'.';
+    if(gnSyncState.status==='scope') return 'Saved on this device. To sync notes, the Lichess token needs study:read and study:write.';
+    if(gnSyncState.status==='error') return 'Saved on this device. Couldn\u2019t reach Lichess to sync; it\u2019ll try again.';
+    return 'Saved on this device.';
+  }
+  function gnRenderField(F){
+    if(!F || !F.gid) return;
+    const st = document.getElementById(F===hvNote ? 'hv-note-status' : 'gn-status');
+    if(!st) return;
+    const n = GN.notes[F.gid];
+    const msg = F.undo ? '' : gnStatusText(F.gid) + (F===hvNote && n && n.conflict ? ' There\u2019s another version of this note: open it from Game History to choose.' : '');
+    const sig = F.undo ? 'undo:'+F.gid : 'msg:'+msg;
+    if(st.dataset.sig!==sig){         // unchanged: left alone, so a click on Undo can't lose its button
+      st.dataset.sig = sig;
+      st.textContent = msg;
+      if(F.undo){
+        st.appendChild(document.createTextNode('Note deleted. '));
+        const b = ghEl('button', 'btn-link', 'Undo');
+        b.type = 'button';
+        b.addEventListener('mousedown', e=> e.preventDefault());    // keeps the focus (and the caret) in the note
+        b.addEventListener('click', ()=>{ if(!F.undo) return; F.ta.value = F.undo; F.undo = null; gnFieldSave(F); gnRenderField(F); F.ta.focus(); });
+        st.appendChild(b);
+      }
+    }
+    if(F===(gnEd && gnEd.F)) gnRenderConflict(F.gid);
+  }
+  function gnRenderConflict(gid){
+    const box = document.getElementById('gn-conflict'), n = GN.notes[gid], c = n && n.conflict;
+    box.hidden = !c;
+    if(!c) return;
+    // The box holds either this device's own text (mine) or another
+    // device's; the buttons say which one they keep.
+    let msg, use, keep;
+    if(c.mine){
+      msg = c.lost ? 'Your version, saved here '+relTime(c.at)+', was replaced by a newer one from another device or tab. It\u2019s kept below.'
+        : 'Your previous version, from '+relTime(c.at)+', is kept below.';
+      use = 'Use my version'; keep = 'Discard mine';
+    } else if(!n.text){
+      msg = 'You deleted this note, but another device had saved a version '+relTime(c.at)+' that you hadn\u2019t seen.';
+      use = 'Restore it'; keep = 'Keep it deleted';
+    } else {
+      msg = 'Another device saved a different version '+relTime(c.at)+'.';
+      use = 'Use that version'; keep = 'Keep mine';
+    }
+    document.getElementById('gn-conflict-msg').textContent = msg;
+    document.getElementById('gn-conflict-text').textContent = c.text;
+    document.getElementById('gn-use-other').textContent = use;
+    document.getElementById('gn-keep').textContent = keep;
+  }
+  function gnRefreshFields(){
+    if(gnEd){ gnFieldRefresh(gnEd.F); gnRenderField(gnEd.F); }
+    if(hvNote){ gnFieldRefresh(hvNote); gnRenderField(hvNote); }
+  }
+  var gnOverlay = document.getElementById('gn-overlay');
+  var gnTextEl = document.getElementById('gn-text');
+  function gnSumText(g){
+    const u = ghMe(), P = ghPlayers(g, u), r = ghGameResult(g, u);
+    const bits = ['vs '+ghOppName(P.opp)+(P.opp.rating!=null ? ' ('+P.opp.rating+')' : ''), r==='win' ? 'WON' : (r==='loss' ? 'LOST' : 'DRAW')];
+    const fam = ghFamily(g), eco = g.opening && g.opening.eco;
+    if(fam) bits.push((eco ? eco+' ' : '')+fam);
+    else if(!ghIsStd(g)) bits.push(ghVariantLabel(g.variant));
+    bits.push(ghTcLabel(g)+' '+(g.rated ? 'Rated' : 'Casual'));
+    if(g.createdAt) bits.push(ghFormatDate(g.createdAt));
+    return bits.join(' \u00b7 ');
+  }
+  function gnOpenEditor(game){
+    if(!game || !/^\w{8}$/.test(String(game.id||''))) return;
+    if(gnEd) gnCloseEditor(true);
+    gnEd = { F:gnField(gnTextEl) };
+    gnFieldLoad(gnEd.F, game);
+    document.getElementById('gn-sum').textContent = gnSumText(game);
+    gnRenderField(gnEd.F);
+    gnOverlay.classList.add('active');
+    gnOverlay.querySelector('.modal-card').scrollTop = 0;
+    gnTextEl.focus({ preventScroll:true });
+    const L = gnTextEl.value.length;
+    try{ gnTextEl.setSelectionRange(L, L); }catch(e){}
+    gnTextEl.scrollTop = gnTextEl.scrollHeight;
+  }
+  function gnCloseEditor(quiet){
+    if(!gnEd) return;
+    const F = gnEd.F;
+    gnFieldSave(F);
+    if(gnUnsaved) gnPersist();          // try again: space may have been freed
+    if(gnUnsaved && !quiet && !gnEd.warned && gnHasNote(F.gid)){
+      // Nothing is saved on this device: the text stays open, with the
+      // warning, until the user closes again.
+      gnEd.warned = true;
+      gnRenderField(F);
+      F.ta.focus({ preventScroll:true });
+      return;
+    }
+    clearTimeout(F.undoTimer);
+    gnEd = null;
+    gnOverlay.classList.remove('active');
+    if(currentView==='history') ghRender();
+    if(!quiet){
+      const b = document.querySelector('#history-list .gh-note-btn[data-gid="'+F.gid+'"]');
+      if(b) b.focus({ preventScroll:true });
+    }
+    if(getLichessToken() && gnHasPending()) gnScheduleSync(800);
+  }
+  gnTextEl.addEventListener('input', ()=>{
+    if(!gnEd) return;
+    const F = gnEd.F;
+    clearTimeout(F.timer);
+    F.timer = setTimeout(()=>{ gnFieldSave(F); gnRenderField(F); }, 600);
+    if(F.undo && gnTextEl.value.trim()){ F.undo = null; gnRenderField(F); }
+  });
+  gnTextEl.addEventListener('blur', ()=>{ if(gnEd){ gnFieldSave(gnEd.F); gnRenderField(gnEd.F); } });
+  document.getElementById('gn-done').addEventListener('click', ()=> gnCloseEditor());
+  document.getElementById('gn-close').addEventListener('click', ()=> gnCloseEditor());
+  gnOverlay.addEventListener('click', e=>{ if(e.target===gnOverlay) gnCloseEditor(); });
+  document.getElementById('gn-open-game').addEventListener('click', ()=>{
+    if(!gnEd) return;
+    const g = gnEd.F.game;
+    gnCloseEditor(true);
+    ghOpenGame(g);
+  });
+  document.getElementById('gn-use-other').addEventListener('click', ()=>{
+    if(!gnEd) return;
+    const F = gnEd.F;
+    gnFieldSave(F);
+    const n = GN.notes[F.gid];
+    if(!n || !n.conflict) return;
+    const other = n.conflict.text, cur = n.text, at = n.updatedAt, wasMine = !!n.conflict.mine;
+    gnSetNote(F.gid, other, F.game);
+    // the text it replaces goes into the box, owned by whoever owned it
+    n.conflict = cur && cur!==other ? { text:cur, at, mine:!wasMine } : null;
+    gnPersist();
+    F.ta.value = F.saved = F.base = n.text;
+    gnRenderField(F);
+  });
+  document.getElementById('gn-keep').addEventListener('click', ()=>{
+    if(!gnEd) return;
+    const n = GN.notes[gnEd.F.gid];
+    if(n && n.conflict){ n.conflict = null; gnPersist(); }
+    gnRenderField(gnEd.F);
+  });
+  // While the editor is open it has the keyboard: Escape and Cmd/Ctrl+Enter
+  // save and close, and nothing reaches the shortcuts underneath.
+  document.addEventListener('keydown', e=>{
+    if(!gnOverlay.classList.contains('active')) return;
+    if(e.key==='Escape' || (e.key==='Enter' && (e.metaKey || e.ctrlKey))){ e.preventDefault(); e.stopImmediatePropagation(); gnCloseEditor(); return; }
+    e.stopImmediatePropagation();
+  }, true);
+  // The review's Notes field (#hv-note): hvOpen loads it, leaving the review
+  // (or opening another game) flushes it.
+  function hvNoteLoad(game){
+    hvNote = gnField(document.getElementById('hv-note'));
+    gnFieldLoad(hvNote, game);
+    gnRenderField(hvNote);
+  }
+  function hvNoteFlush(){
+    if(!hvNote) return;
+    gnFieldSave(hvNote);
+    clearTimeout(hvNote.undoTimer);
+    hvNote = null;
+    if(getLichessToken() && gnHasPending()) gnScheduleSync(800);
+  }
+  (function(){
+    const ta = document.getElementById('hv-note');
+    ta.addEventListener('input', ()=>{
+      if(!hvNote) return;
+      const F = hvNote;
+      clearTimeout(F.timer);
+      F.timer = setTimeout(()=>{ gnFieldSave(F); gnRenderField(F); }, 600);
+      if(F.undo && ta.value.trim()){ F.undo = null; gnRenderField(F); }
+    });
+    ta.addEventListener('blur', ()=>{ if(hvNote){ gnFieldSave(hvNote); gnRenderField(hvNote); } });
+  })();
+  // Whatever is being typed is saved before the page goes away.
+  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden) gnFlushAll(); });
+  window.addEventListener('pagehide', gnFlushAll);
+  // First sync a few seconds after the Saved Puzzles one.
+  gnRenderSync();
+  if(getLichessToken()) setTimeout(()=> gnSync(), 8000);
 
   /* ================= PUZZLE HISTORY =================
      Every puzzle the Puzzles drill puts on screen is logged on this device
@@ -24266,7 +26036,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   annoMountLabels();
   (function wireAnnoHintCollapse(){
     const KEY = 'annoHintCollapsed';
-    let collapsed = localStorage.getItem(KEY) === '1';
+    let collapsed = false;
+    try{ collapsed = localStorage.getItem(KEY) === '1'; }catch(e){}   // blocked storage must not stop the app booting
     const hints = [...document.querySelectorAll('.anno-hint')];
     hints.forEach(hint=>{
       const keepFirst = hint.dataset.dynamic === 'true';
@@ -24286,7 +26057,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       own.forEach(k=> hint.appendChild(k));
       toggle.addEventListener('click', ()=>{
         collapsed = !collapsed;
-        localStorage.setItem(KEY, collapsed?'1':'0');
+        try{ localStorage.setItem(KEY, collapsed?'1':'0'); }catch(e){}
         applyState();
       });
     });
@@ -24409,7 +26180,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const btn = document.getElementById(route.card);
     if(!btn) return;
     btn.click();
-    dlApplyFields(route, params);
+    if(route.applyParams) route.applyParams(params);
+    else dlApplyFields(route, params);
     if(route.startBtn && params.get('start')==='1'){
       const startBtn = document.getElementById(route.startBtn);
       if(startBtn) startBtn.click();
