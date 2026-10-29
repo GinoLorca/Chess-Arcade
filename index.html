@@ -3053,6 +3053,29 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .token-status{ font-size:12.5px; color:var(--ink-soft); font-family:"JetBrains Mono",monospace; }
   .token-status.connected{ color:var(--good); }
   .token-status.error{ color:var(--bad); }
+  /* Settings > Repertoire Lab (rl*): sign in once, what was read, an on/off box per opening */
+  #rl-field [hidden]{ display:none !important; }
+  .rl-form{ display:flex; flex-direction:column; gap:8px; margin:0; }
+  .rl-form .btn{ align-self:flex-start; }
+  .rl-form .btn:disabled{ opacity:.65; cursor:progress; }
+  .rl-signed{ display:flex; flex-direction:column; gap:8px; }
+  .rl-who{ font-size:13.5px; font-weight:700; color:var(--ink); overflow-wrap:anywhere; }
+  .rl-sum{ font-size:12.5px; line-height:1.45; color:var(--ink-soft); }
+  .rl-list{ display:flex; flex-direction:column; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .rl-op{ display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:10px; row-gap:1px; align-items:center; padding:8px 11px; cursor:pointer; }
+  .rl-op + .rl-op{ border-top:1px solid var(--line); }
+  .rl-op input{ grid-column:1; grid-row:1 / span 2; width:16px; height:16px; margin:0; accent-color:var(--brass); cursor:pointer; }
+  .rl-op-name{ grid-column:2; font-size:13.5px; font-weight:600; color:var(--ink); overflow-wrap:anywhere; }
+  .rl-op-sub{ grid-column:2; font-size:12px; color:var(--ink-soft); font-family:"JetBrains Mono",monospace; }
+  .rl-op.is-off .rl-op-name{ color:var(--ink-soft); font-weight:500; }
+  .rl-msg{ font-size:12.5px; line-height:1.45; color:var(--ink); overflow-wrap:anywhere; }
+  .rl-msg:empty{ display:none; }
+  .rl-msg.is-error{ border-left:3px solid var(--bad); padding-left:9px; }
+  /* the status in --ink on every skin (--good / --bad text is under 4.5:1 on some); an error carries the --bad rule */
+  #rl-status.connected{ color:var(--ink); font-weight:700; }
+  #rl-status.error{ color:var(--ink); border-left:3px solid var(--bad); padding-left:8px; }
+  :root[data-skin="bauhaus"] .rl-list{ border-radius:0; border-width:2px; }
+  @media (pointer:coarse){ .rl-op{ min-height:44px; } .rl-form .btn, .rl-signed .btn, .rl-form .text-input{ min-height:44px; } .rl-form .text-input{ font-size:16px; } }
 
   /* Puzzle theme picker: a scrollable panel of icon+name+description cards,
      replacing what used to be a plain <select> where every option was just
@@ -3485,6 +3508,226 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .gh-combo-input, .gh-fpanel .select-input{ font-size:16px; }   /* iOS zooms into anything smaller */
     .gh-combo-clear{ width:36px; height:36px; }
   }
+  /* ---- Game History: Games | Openings (gho*). The Openings view: your
+     games by your Repertoire Lab repertoire (or Lichess's names when
+     you're signed out). Everything sits on a surface (Felt and the Uptown
+     map are textured). Tokens only; Bauhaus corners square. A wide grid
+     from 960px (the page widens to 1180px for it), a folded one from
+     641px, cards on a phone. ---- */
+  @media (min-width:960px){ .wrap:has(#view-history.active.is-gho){ max-width:1180px; } }
+  .history-head > .gh-view{ align-self:center; }
+  #gh-view .toggle{ min-width:92px; }
+  #gh-view .toggle.active{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .gh-rep-chip{ display:inline-flex; align-items:center; gap:7px; min-width:0; max-width:100%; text-align:left; }
+  .gh-rep-l{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gh-rep-x{ flex:0 0 auto; font-size:16px; line-height:1; font-weight:700; }
+  .gh-rep-chip.is-idle .gh-rep-l{ font-style:italic; }
+  .gh-rep-chip:disabled{ cursor:default; }
+  .gh-combo.is-off{ opacity:.6; }
+  .gh-open.is-rep{ border-left:2px solid var(--brass-soft); padding-left:7px; }
+  .gh-rp-part{ display:inline-block; max-width:100%; }
+  /* Phone: the path gets its own line (two at most) and the ECO + prep depth
+     the next, so the chapter isn't cut to "Jobava Lo..." beside them. */
+  @media (max-width:640px){
+    .gh-open.is-rep{ flex-wrap:wrap; row-gap:2px; }
+    .gh-open.is-rep .gh-open-name{ flex:1 1 100%; white-space:normal; display:-webkit-box; -webkit-line-clamp:2; }
+    .gh-open.is-rep .gh-open-eco{ flex:1 1 100%; min-width:0; overflow-wrap:anywhere; }
+  }
+  .gho{ display:flex; flex-direction:column; gap:14px; }
+  .gho-note, .gho-status, .gho-tools, .gho-foot{
+    background:var(--surface); border:1px solid var(--line); border-radius:8px; color:var(--ink); box-shadow:var(--shadow);
+  }
+  .gho-note{ display:flex; align-items:center; gap:10px 14px; flex-wrap:wrap; padding:10px 14px; border-left:3px solid var(--brass-soft); font-size:13px; line-height:1.4; }
+  .gho-note > span{ flex:1 1 260px; min-width:0; }
+  .gho-note .btn{ padding:8px 14px; font-size:13px; }
+  .gho-status{ padding:8px 12px; font-size:12.5px; line-height:1.45; }
+  .gho-status.is-error{ border-left:3px solid var(--bad); }
+  .gho-status-btn{ margin-left:2px; }
+  .gho-status-btn, .gho-out-all{ color:var(--ink); }   /* --brass-text is 3:1 on Hustler light */
+  .gho-ins{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; }
+  .gho-lp{ white-space:nowrap; }
+  /* From 680px "Left first" is three columns of counts under the header's
+     "you / opp / end" (always on screen, touch screens included); the words
+     stay in each cell for screen readers. A card (up to 679px) writes them out. */
+  @media (min-width:680px){
+    .gho-c-left .gho-v{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); column-gap:3px; font-size:11.5px; }
+    .gho-c-left .gho-lp{ min-width:0; }
+    .gho-ls{ display:none; }
+    .gho-lw{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); border:0; }
+    .gho-head .gho-c-left{ display:flex; flex-direction:column; align-items:stretch; gap:1px; }
+    .gho-hl{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); column-gap:3px; font-size:9.5px; font-weight:600; letter-spacing:0; text-transform:none; }
+  }
+  .gho-card{
+    display:flex; flex-direction:column; align-items:flex-start; gap:3px; min-width:0; padding:11px 13px; cursor:pointer; text-align:left; font:inherit;
+    background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow);
+  }
+  @media (hover:hover){ .gho-card:hover{ border-color:var(--brass-soft); } }
+  .gho-card:focus-visible, .gho-dis:focus-visible, .gho-name:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .gho-card-k{ font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .gho-card-t{ font-size:14px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
+  .gho-card-d{ font-size:12px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .gho-tools{ align-self:flex-end; display:flex; align-items:center; gap:8px; padding:5px 6px 5px 12px; }
+  .gho-tools .field-label{ margin:0; }
+  .gho-tools .select-input{ width:auto; padding:6px 9px; font-size:12.5px; }
+  .gho-side{ gap:10px; padding:16px 18px; }
+  .gho-h{ margin:0; font-size:18px; font-weight:800; line-height:1.2; color:var(--ink); }
+  .gho-sum{ font-size:12.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums; margin-top:-4px; }
+  .gho-empty{ font-size:13px; color:var(--ink); }
+  .gho-tree{ display:flex; flex-direction:column; min-width:0; }
+  .gho-row{
+    display:grid; grid-template-columns:minmax(0,1fr) 62px 118px 44px 66px 50px 96px 42px 70px 50px; column-gap:8px; align-items:center;
+    padding:6px 2px; border-bottom:1px solid var(--line); font-size:12.5px; color:var(--ink); min-width:0;
+  }
+  .gho.is-lichess .gho-row{ grid-template-columns:minmax(0,1fr) 62px 118px 44px 66px 42px 70px 50px; }
+  .gho-tree > .gho-row:last-child{ border-bottom:none; }
+  .gho-head{ padding-top:2px; padding-bottom:5px; font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); }
+  .gho-head .gho-c{ cursor:default; }
+  .gho-c{ min-width:0; font-family:"JetBrains Mono",monospace; font-variant-numeric:tabular-nums; text-align:right; }
+  .gho-c-name{ font-family:inherit; text-align:left; padding-left:calc(var(--lvl, 0) * 14px); }
+  .gho-head .gho-c-name{ font-family:"JetBrains Mono",monospace; padding-left:30px; }
+  .gho-head .gho-c-score{ text-align:left; }
+  .gho-nm{ display:flex; align-items:center; flex-wrap:wrap; gap:2px 6px; min-width:0; }
+  .gho-dis, .gho-dis-sp{ flex:0 0 auto; width:24px; height:24px; }
+  .gho-dis{ position:relative; padding:0; margin:0; cursor:pointer; background:none; border:1px solid transparent; border-radius:6px; color:var(--ink); }
+  @media (hover:hover){ .gho-dis:hover{ border-color:var(--line); } }
+  .gho-dis::before{
+    content:""; position:absolute; left:50%; top:50%; width:6px; height:6px; margin:-4px 0 0 -4px;
+    border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(-45deg); transition:transform .12s ease;
+  }
+  .gho-dis[aria-expanded="true"]::before{ transform:rotate(45deg); margin-left:-3px; margin-top:-5px; }
+  .gho-name{
+    min-width:0; padding:2px 0; margin:0; background:none; border:none; cursor:pointer; text-align:left;
+    font:inherit; font-size:13px; font-weight:700; line-height:1.3; color:var(--ink); overflow-wrap:anywhere;
+  }
+  @media (hover:hover){ .gho-name:hover{ text-decoration:underline; text-underline-offset:3px; } .gho-name.is-plain:hover{ text-decoration:none; } }
+  .gho-name.is-plain{ cursor:default; }
+  /* The name starts where the padding ends (the disclosure button is pulled
+     into it), so a wrapped "small sample" tag lines up with the name and the
+     line under it, not under the button. */
+  .gho-nm{ position:relative; min-height:24px; padding-left:30px; }
+  /* out of the flow: a long name wraps inside its own box instead of
+     dropping to a second line under the disclosure (an empty line above it) */
+  .gho-nm > .gho-dis, .gho-nm > .gho-dis-sp{ position:absolute; left:0; top:0; margin:0; }
+  .gho-t-o > .gho-c-name .gho-name{ font-size:14px; font-weight:800; }
+  .gho-t-l .gho-name, .gho-t-s .gho-name, .gho-t-lv .gho-name, .gho-t-x .gho-name{ font-weight:600; }
+  .gho-t-f > .gho-c-name .gho-name, .gho-t-k > .gho-c-name .gho-name{ font-weight:800; }
+  .gho-t-t .gho-name{ font-style:italic; }
+  .gho-tag{
+    flex:0 0 auto; padding:1px 6px; border:1px solid var(--line); border-radius:999px; cursor:help;
+    font-family:"JetBrains Mono",monospace; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .gho-sub, .gho-pre, .gho-mid{ margin-left:30px; font-size:12px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .gho-pre{ font-family:"JetBrains Mono",monospace; font-size:11px; }
+  .gho-mid{ display:none; font-family:"JetBrains Mono",monospace; font-size:11px; }
+  .gho-row.is-none .gho-name{ color:var(--ink-soft); font-weight:600; }
+  .gho-v{ color:var(--ink); }
+  .gho-lab{ display:none; }
+  .gho-c-n{ display:flex; flex-direction:column; align-items:flex-end; line-height:1.2; }
+  .gho-c-n .gho-v{ font-weight:700; }
+  .gho-share, .gho-vs{ font-size:10.5px; color:var(--ink-soft); }
+  .gho-c-perf{ display:flex; flex-direction:column; align-items:flex-end; line-height:1.2; }
+  .gho-c-score{ display:flex; align-items:center; gap:7px; }
+  .gho-bar{ flex:1 1 auto; display:flex; gap:1px; height:8px; min-width:30px; }
+  .gho-seg{ display:block; min-width:2px; flex:1 1 0; }
+  .gho-seg-w{ background:var(--gho-win, var(--good)); }
+  /* Game Boy light: its green is 2.6:1 on the screen colour; a darker one for the bar */
+  :root[data-skin="gameboy"]{ --gho-win:#22753a; }
+  @media (prefers-color-scheme: dark){ :root[data-skin="gameboy"]:not([data-theme="light"]){ --gho-win:var(--good); } }
+  :root[data-skin="gameboy"][data-theme="dark"]{ --gho-win:var(--good); }
+  .gho-seg-d{ background:var(--ink-soft); }
+  .gho-seg-l{ background:var(--bad); }
+  .gho-pct{ flex:0 0 34px; text-align:right; font-weight:700; }
+  .gho-row.is-small .gho-pct, .gho-row.is-small .gho-c-win .gho-v, .gho-row.is-small .gho-share{ color:var(--ink-soft); }
+  .gho-c-form{ display:flex; justify-content:flex-end; }
+  .gho-form{ display:inline-flex; gap:2px; }
+  .gho-fq{
+    display:inline-flex; align-items:center; justify-content:center; width:12px; height:14px; border-radius:2px;
+    font-size:9.5px; font-weight:800; line-height:1; color:var(--ink);
+  }
+  .gho-fq-w{ background:var(--good-soft); }
+  .gho-fq-d{ background:var(--surface-2); }
+  .gho-fq-l{ background:var(--bad-soft); }
+  .gho-lbl{
+    padding:9px 2px 3px calc(var(--lvl, 0) * 14px + 30px); border-bottom:1px solid var(--line);
+    font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .gho-lbl.is-note{ padding-top:5px; padding-bottom:5px; text-transform:none; letter-spacing:0; font-weight:600; font-size:11.5px; }
+  .gho-out{ display:flex; flex-direction:column; gap:6px; margin-top:6px; padding-top:12px; border-top:1px dashed var(--line); }
+  .gho-oh{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin:0; font-size:15px; font-weight:800; color:var(--ink); }
+  .gho-oh-n{ font-size:12px; font-weight:600; color:var(--ink-soft); }
+  .gho-out-sub{ margin-left:0; }
+  .gho-out-all{ align-self:flex-start; }
+  .gho-foot{ padding:8px 12px; font-size:12px; line-height:1.45; color:var(--ink-soft); }
+  :root[data-skin="bauhaus"] .gho-note, :root[data-skin="bauhaus"] .gho-status, :root[data-skin="bauhaus"] .gho-tools, :root[data-skin="bauhaus"] .gho-foot,
+  :root[data-skin="bauhaus"] .gho-card, :root[data-skin="bauhaus"] .gho-tag, :root[data-skin="bauhaus"] .gho-fq, :root[data-skin="bauhaus"] .gho-dis{ border-radius:0; }
+  /* 641-959px: Win, Acc. and Last fold into a line under the name */
+  @media (max-width:959px){
+    .gho-row{ grid-template-columns:minmax(0,1fr) 48px 100px 56px 40px 86px 72px; column-gap:8px; }
+    .gho.is-lichess .gho-row{ grid-template-columns:minmax(0,1fr) 48px 100px 56px 72px; }
+    .gho-ins{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+    .gho-c-win, .gho-c-acc, .gho-c-last{ display:none; }
+    .gho-mid{ display:block; }
+  }
+  /* a phone (and a narrow split view up to 679px): every row is a card */
+  @media (max-width:679px){
+    .gho-side{ padding:14px 12px; }
+    .gho-head{ display:none; }
+    .gho-row, .gho.is-lichess .gho-row{
+      grid-template-columns:repeat(3, minmax(0,1fr)); grid-template-areas:"name name n" "score score score" "win perf prep" "left left acc" "last form form";
+      row-gap:7px; column-gap:10px; padding:10px 2px 10px calc(var(--lvl, 0) * 10px + 2px); align-items:start;
+    }
+    .gho.is-lichess .gho-row{ grid-template-areas:"name name n" "score score score" "win perf acc" "last form form"; }
+    .gho-row.is-none{ grid-template-areas:"name name n"; }
+    .gho-c-name{ grid-area:name; padding-left:0; }
+    .gho-c-n{ grid-area:n; }
+    .gho-c-score{ grid-area:score; }
+    .gho-c-win{ grid-area:win; display:block; }
+    .gho-c-perf{ grid-area:perf; }
+    .gho-c-prep{ grid-area:prep; }
+    .gho-c-left{ grid-area:left; }
+    .gho-c-acc{ grid-area:acc; display:block; }
+    .gho-c-form{ grid-area:form; }
+    .gho-c-last{ grid-area:last; display:block; }
+    .gho-c-empty{ grid-area:n; }
+    .gho-c{ text-align:left; }
+    .gho-c-n, .gho-c-perf{ align-items:flex-start; }
+    .gho-c-n{ align-items:flex-end; text-align:right; }
+    .gho-c-form{ justify-content:flex-start; flex-direction:column; gap:3px; }
+    .gho-lab{ display:block; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:2px; }
+    .gho-c-score .gho-lab{ display:none; }
+    .gho-c-n .gho-lab{ order:3; margin:1px 0 0; }
+    .gho-lw{ display:inline; color:var(--ink-soft); }
+    .gho-mid{ display:none; }
+    .gho-sub, .gho-pre{ margin-left:30px; }
+    .gho-lbl{ padding-left:calc(var(--lvl, 0) * 10px + 32px); }
+    .gho-bar{ height:10px; }
+    .gho-fq{ width:16px; height:18px; font-size:10.5px; }
+    .gho-ins{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+    .gho-card{ padding:10px 11px; }
+    .gho-card-t{ font-size:13.5px; }
+    .gho-tools{ align-self:stretch; justify-content:space-between; min-width:0; }
+    .gho-tools .select-input{ flex:0 1 auto; min-width:0; max-width:100%; }    /* 320px: the longest option would push the page sideways */
+    .gho-c-left .gho-v{ white-space:normal; }
+  }
+  @media (max-width:640px){
+    .history-head > .gh-view{ width:100%; }
+    .history-head > .gh-view .toggle{ flex:1 1 0; }
+  }
+  @media (pointer:coarse){
+    .gho-dis, .gho-dis-sp{ width:44px; height:44px; }
+    .gho-nm{ min-height:44px; }
+    .gho-name:not(.is-plain){ min-height:44px; }
+    .gho-sub, .gho-pre, .gho-mid{ margin-left:28px; }
+    #gho-sort{ min-height:44px; font-size:16px; }
+    #gh-view .toggle, .gh-rep-chip{ min-height:44px; }
+    .gho-status-btn, .gho-out-all{ min-height:44px; }
+    .gho-note .btn{ min-height:44px; }
+  }
+  @media (max-width:679px), (pointer:coarse){
+    .gho-nm{ padding-left:34px; }
+    .gho-nm > .gho-dis, .gho-nm > .gho-dis-sp{ left:-10px; }   /* the 44px button keeps its place (-10px) */
+    .gho-sub, .gho-pre, .gho-mid{ margin-left:34px; }
+  }
   /* The note editor (#gn-overlay) and the review's Notes field. */
   .gn-card{ max-width:640px; }
   .gn-head-actions{ display:flex; align-items:center; gap:10px; }
@@ -3896,6 +4139,29 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-opening{ font-size:12.5px; color:var(--ink); overflow-wrap:anywhere; }
   .hv-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
   .hv-act{ padding:6px 12px; font-size:12.5px; text-decoration:none; display:inline-flex; align-items:center; }
+  /* ---- Review prep (hp*): which of your Repertoire Lab lines the game
+     followed, in the header card, and your prep in the move list. Ink and
+     ink-soft on the card's surface (the brass texts are under 4.5:1 on some
+     skins); the brass-soft rule is the one the Games list puts on its
+     repertoire labels. The marks: a dotted underline (not a box-shadow:
+     .mv-viewed uses that) and a dashed outline on the move that left. ---- */
+  .hv-prep{ display:flex; flex-direction:column; gap:2px; min-width:0; margin-top:5px; padding:1px 0 1px 9px; border-left:2px solid var(--brass-soft); font-size:12.5px; line-height:1.42; overflow-wrap:anywhere; }
+  .hv-prep[hidden], .hv-prep [hidden]{ display:none !important; }
+  .hv-prep-name{ color:var(--ink); font-weight:700; }
+  .hv-prep-sub{ color:var(--ink-soft); font-weight:400; }
+  .hv-prep-text{ color:var(--ink-soft); }
+  .hv-prep-acts{ display:flex; flex-wrap:wrap; align-items:center; gap:2px 16px; margin-top:3px; }
+  .hv-prep-acts .btn-link{ color:var(--ink); text-transform:none; letter-spacing:0; font-size:12.5px; line-height:1.4; text-align:left; overflow-wrap:anywhere; }
+  .hv-prep-acts .btn-link:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
+  .hv-prep-key{ color:var(--ink-soft); font-size:11.5px; margin-top:2px; }
+  #view-play-history .hv-movelist .mv-san.is-prep{ text-decoration:underline dotted var(--ink-soft); text-decoration-thickness:1.5px; text-underline-offset:3px; }
+  #view-play-history .hv-movelist .mv-san.is-prep.mv-viewed{ text-decoration-color:currentColor; }
+  #view-play-history .hv-movelist .mv-san.is-dev{ outline:1.5px dashed var(--ink-soft); outline-offset:-1px; border-radius:4px; }
+  #view-play-history .hv-movelist .mv-san.is-dev.mv-viewed{ outline-color:currentColor; }
+  @media (pointer:coarse){
+    .hv-prep-acts{ gap:0 18px; }
+    .hv-prep-acts .btn-link{ min-height:34px; display:inline-flex; align-items:center; }
+  }
 
   .hv-engine{ padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
   .hv-eng-head{ display:flex; align-items:center; gap:10px; min-width:0; }
@@ -5455,6 +5721,27 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
     <div class="modal-sep"></div>
 
+    <div class="field" id="rl-field">
+      <div class="field-label">Repertoire Lab</div>
+      <div class="token-status" id="rl-status" role="status" aria-live="polite">Not connected</div>
+      <form class="rl-form" id="rl-form" novalidate>
+        <input type="email" class="text-input" id="rl-email" autocomplete="username" placeholder="Repertoire Lab email" spellcheck="false" autocapitalize="off" aria-label="Repertoire Lab email">
+        <input type="password" class="text-input" id="rl-password" autocomplete="current-password" placeholder="Password" aria-label="Repertoire Lab password">
+        <button type="submit" class="btn btn-ghost" id="rl-signin">Sign in</button>
+      </form>
+      <div class="rl-signed" id="rl-signed" hidden>
+        <div class="rl-who" id="rl-who" tabindex="-1"></div>
+        <div class="rl-sum" id="rl-sum"></div>
+        <div class="rl-list" id="rl-openings" role="group" aria-label="Openings used to sort your games"></div>
+        <div class="field-hint" id="rl-list-hint">Turn an opening off to leave it out when your games are sorted.</div>
+        <div class="btn-row"><button type="button" class="btn btn-ghost" id="rl-refresh">Refresh</button><button type="button" class="btn btn-ghost" id="rl-signout">Sign out</button></div>
+      </div>
+      <div class="rl-msg" id="rl-msg" role="status" aria-live="polite"></div>
+      <div class="field-hint" id="rl-hint">Sign in with your Repertoire Lab account to sort your games by your own repertoire, chapter by chapter. Chess Arcade only reads your openings and never changes anything in Repertoire Lab. Your password isn&rsquo;t kept: this device stays signed in until you sign out.</div>
+    </div>
+
+    <div class="modal-sep"></div>
+
     <div class="field">
       <div class="field-label">Spotify</div>
       <div class="token-status" id="spotify-status">Not connected</div>
@@ -5540,6 +5827,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <h1 class="title" style="font-size:26px;">Game History</h1>
           <div class="subtitle" id="history-subtitle">Connect your Lichess account in Settings to see your games.</div>
         </div>
+        <div class="toggle-row gh-seg gh-view" id="gh-view" role="group" aria-label="Show"><button type="button" class="toggle active" data-val="games" aria-pressed="true">Games</button><button type="button" class="toggle" data-val="openings" aria-pressed="false">Openings</button></div>
       </div>
       <div class="saved-sync gn-sync" id="gn-sync" data-state="off" style="display:none;">
         <span class="saved-sync-dot" aria-hidden="true"></span>
@@ -5550,6 +5838,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="gh-fbar">
           <button type="button" class="btn btn-ghost gh-filter-toggle" id="gh-filter-toggle" aria-expanded="false" aria-controls="gh-fpanel">Filters<span class="gh-badge" id="gh-filter-badge" hidden></span></button>
           <div class="gh-count" id="gh-count" aria-live="polite"></div>
+          <button type="button" class="toggle gh-chip gh-rep-chip" id="gh-rep-chip" hidden></button>
           <button type="button" class="btn-link gh-clear" id="gh-clear" hidden>Clear filters</button>
         </div>
         <div class="gh-fpanel" id="gh-fpanel">
@@ -5632,6 +5921,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     </div>
     <div class="gh-list-note" id="gh-list-note" hidden>Showing your noted games saved on this device.</div>
     <div class="history-list panel gh-list" id="history-list"></div>
+    <section class="gho" id="gho" hidden aria-label="Your games by opening">
+      <div class="gho-note" id="gho-connect" hidden>
+        <span id="gho-connect-text">Grouped by Lichess&rsquo;s opening names. Connect Repertoire Lab to see your games by your own repertoire, chapter by chapter.</span>
+        <button type="button" class="btn btn-ghost" id="gho-connect-btn">Connect Repertoire Lab</button>
+      </div>
+      <div class="gho-status" id="gho-status" role="status" aria-live="polite" tabindex="-1" hidden></div>
+      <div class="gho-ins" id="gho-ins" hidden></div>
+      <div class="gho-tools"><label class="field-label" for="gho-sort">Sort by</label><select class="select-input" id="gho-sort"></select></div>
+      <div class="gho-side panel" id="gho-white"></div>
+      <div class="gho-side panel" id="gho-black"></div>
+      <div class="gho-foot" id="gho-foot" hidden></div>
+    </section>
     <div class="history-footer">
       <div class="history-loading" id="history-loading" style="display:none;">Loading&#8230;</div>
       <div class="history-empty" id="history-empty" style="display:none;">No games found.</div>
@@ -5783,6 +6084,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="hv-result" id="hv-result"></div>
         <div class="subtitle hv-meta" id="hv-meta"></div>
         <div class="hv-opening" id="hv-opening"></div>
+        <div class="hv-prep" id="hv-prep" hidden>
+          <div class="hv-prep-name" id="hv-prep-name"></div>
+          <div class="hv-prep-text" id="hv-prep-line" hidden></div>
+          <div class="hv-prep-text" id="hv-prep-depth"></div>
+          <div class="hv-prep-text" id="hv-prep-left"></div>
+          <div class="hv-prep-text" id="hv-prep-also" hidden></div>
+          <div class="hv-prep-acts" id="hv-prep-acts"><button type="button" class="btn-link" id="hv-prep-go"></button><button type="button" class="btn-link" id="hv-prep-show">Show my line</button><button type="button" class="btn-link" id="hv-prep-games">Games in this chapter</button></div>
+          <div class="hv-prep-key" id="hv-prep-key"></div>
+        </div>
         <div class="hv-actions">
           <button class="btn btn-ghost hv-act" id="hv-copy-pgn" type="button">Copy PGN</button>
           <a class="btn btn-ghost hv-act" id="hv-lichess" target="_blank" rel="noopener noreferrer">Open on Lichess</a>
@@ -9741,7 +10051,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                              {param:'time', param2:'increment', type:'timeinc', row:'online-time-row', timeInput:'online-time-custom', incInput:'online-inc-custom'} ] },
     // Game History's filters ride in the link (lazy: their code runs later)
     history:      { view:'history',          card:'card-history',     startBtn:null, fields:[],
-                    getParams:()=> ghFilterParams(), applyParams:p=> ghApplyFilterParams(p) },
+                    getParams:()=> ghViewParams(), applyParams:p=> ghApplyViewParams(p) },
     saved:        { view:'saved',            card:'card-saved',       startBtn:null, fields:[] },
     'puzzle-history': { view:'puzzle-history', card:'setup-ph-btn', startBtn:null,
                     fields:[ {param:'show', type:'toggle', row:'ph-show-row'} ] }
@@ -22939,14 +23249,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   /* ---- Filters: state, validation, storage, the #history link ---- */
-  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', len:'', date:'', variant:'', notes:false };
+  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', len:'', date:'', variant:'', notes:false, rep:'' };
   const GH_F_SETS = { speed:['ultraBullet','bullet','blitz','rapid','classical','correspondence'], result:['win','loss','draw'],
     color:['white','black'], rated:['rated','casual'], gap:['higher','even','lower'], end:['mate','resign','time','draw','other'],
     len:['short','medium','long'], date:['7','30','90','year'] };
-  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','len','date','variant','notes'];
+  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','len','date','variant','notes','rep'];
+  // the repertoire filter (gho*, SPEC B.7): opening / trunk / course / chapter / line, outside, or a spot
+  const GH_REP_RE = /^(?:[ot]\.[A-Za-z0-9_-]{1,64}|[kc]\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|l(?:\.[A-Za-z0-9_-]{1,64}){3}|x\.[wb](?:\.(?:none|[a-z0-9]+(?:-[a-z0-9]+)*))?|s\.[0-9a-f]{8}(?:\.(?:t\.[A-Za-z0-9_-]{1,64}|c\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|x\.[wb]))?)$/;
   const GH_SECONDARY = ['rated','gap','end','len','date','opp','variant'];
   let GH_FILTERS = Object.assign({}, GH_F_DEFAULT);
-  const GH_UI = { more:false, open:false };
+  const GH_UI = { more:false, open:false, view:'games', osort:'games' };
   // Typed text: what a link can carry safely (the hash is decoded twice).
   function ghCleanText(s){ return ghFold(s).replace(/[^A-Za-z0-9 _.:'-]/g, '').replace(/\s{2,}/g, ' ').replace(/^\s+/, '').slice(0, 40); }
   function ghValidFilters(f){
@@ -22959,16 +23271,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     o.oq = o.opening ? '' : ghCleanText(f.oq).trim();
     o.opp = ghCleanText(f.opp).trim();
     o.notes = f.notes===true || f.notes==='1' || f.notes===1;
+    if(typeof f.rep==='string' && f.rep.length<=200 && GH_REP_RE.test(f.rep)) o.rep = f.rep;
     return o;
   }
   (function ghLoadFilters(){
     try{
       const d = JSON.parse(localStorage.getItem(GH_FILTERS_KEY) || 'null');
-      if(d && typeof d==='object'){ GH_FILTERS = ghValidFilters(d.f); GH_UI.more = !!(d.ui && d.ui.more); }
+      if(d && typeof d==='object'){
+        GH_FILTERS = ghValidFilters(d.f); GH_UI.more = !!(d.ui && d.ui.more);
+        GH_UI.view = d.ui && d.ui.view==='openings' ? 'openings' : 'games';
+        if(d.ui && typeof d.ui.osort==='string' && /^[a-z]{1,8}$/.test(d.ui.osort)) GH_UI.osort = d.ui.osort;
+      }
     }catch(e){}
   })();
   function ghSaveFilters(){
-    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more } })); }catch(e){}
+    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more, view:GH_UI.view, osort:GH_UI.osort } })); }catch(e){}
   }
   function ghIsOn(k){ return k==='oq' ? (!GH_FILTERS.opening && !!GH_FILTERS.oq) : !!GH_FILTERS[k]; }
   function ghActiveCount(){ return GH_PARAM_KEYS.filter(ghIsOn).length; }
@@ -23047,6 +23364,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     if(f.variant && (g.variant || 'standard')!==f.variant) return false;
     if(f.notes && !gnHasNote(g.id)) return false;
+    if(f.rep && rpReady() && !rpRepMatch(g, f.rep)) return false;     // kept but ignored until your repertoire is here
     return true;
   }
 
@@ -23172,13 +23490,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     row.dataset.gid = g.id;
     row.style.cursor = 'pointer';
     if(g.opening && g.opening.name) row.title = String(g.opening.name);
-    row.addEventListener('click', ()=> ghOpenGame(g));
+    row.addEventListener('click', ()=> ghOpenGame(g, ghoOpenOpts(g)));
     // reachable from the keyboard: Tab to the row, Enter or Space opens the review
     row.tabIndex = 0;
     row.addEventListener('keydown', e=>{
       if(e.target!==row || (e.key!=='Enter' && e.key!==' ') || e.metaKey || e.ctrlKey || e.altKey) return;
       e.preventDefault(); e.stopPropagation();
-      ghOpenGame(g);
+      ghOpenGame(g, ghoOpenOpts(g));
     });
     row.appendChild(ghThumb(g));
 
@@ -23211,7 +23529,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
     const op = ghEl('div', 'gh-open');
     const fam = ghFamily(g);
-    if(fam){
+    const rr = rpReady() ? rpResult(g) : null;
+    if(rr && (rr.kind==='chapter' || rr.kind==='trunk') && rpPathLabel(rr)){
+      op.classList.add('is-rep');
+      // one span per part ("Jobava London System \u203a", "vs. 3.Bf5"): a narrow column breaks the path after a \u203a, not inside a name
+      const pn = ghEl('div', 'gh-open-name'), pp = rpPathLabel(rr).split(' \u203a ');
+      pp.forEach((t, i)=>{ if(i) pn.appendChild(document.createTextNode(' ')); pn.appendChild(ghEl('span', 'gh-rp-part', i < pp.length - 1 ? t+' \u203a' : t)); });
+      op.appendChild(pn);
+      // under it: ECO, Lichess's name when it says more than yours ("A40 Englund Gambit"), how deep in prep
+      const li = fam && rpLiNew(fam, [rpFullLabel(rr) || '', rpPathLabel(rr)]) ? fam : '';
+      const head = [g.opening && g.opening.eco ? String(g.opening.eco) : '', li].filter(Boolean).join(' ');
+      op.appendChild(ghEl('div', 'gh-open-eco', (head ? head+' \u00b7 ' : '')+(rr.kind==='chapter' ? 'prep to move '+Math.ceil(rr.prepPly/2) : 'before the chapters split')));
+      row.title = 'Your repertoire: '+(rpFullLabel(rr) || rpPathLabel(rr))+(rr.kind==='trunk' ? ' (before the chapters split)' : '')
+        +(g.opening && g.opening.name ? ' \u2014 Lichess: '+String(g.opening.name) : '');
+    } else if(fam){
       op.appendChild(ghEl('div', 'gh-open-name', fam));
       if(g.opening.eco) op.appendChild(ghEl('div', 'gh-open-eco', String(g.opening.eco)));
     } else if(!ghIsStd(g)){
@@ -23299,6 +23630,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     panel.classList.toggle('more-open', !!GH_UI.more);
     document.getElementById('gh-filter-toggle').setAttribute('aria-expanded', GH_UI.open ? 'true' : 'false');
     document.getElementById('gh-more-toggle').setAttribute('aria-expanded', GH_UI.more ? 'true' : 'false');
+    ghoSyncControls();
   }
   function ghRender(){
     const listEl = document.getElementById('history-list');
@@ -23306,7 +23638,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const u = ghMe();
     const base = ghBaseList();
     GH_STATE.facets = ghFacets(base);
+    if(typeof rpEnsure==='function') rpEnsure();     // games waiting to be sorted (a note synced for an older game) get sorted
     ghSyncFilterUI();
+    const ov = ghoOn();
+    document.getElementById('gho').hidden = !ov;
+    listEl.hidden = ov;
+    document.getElementById('view-history').classList.toggle('is-gho', ov);
+    if(ov){
+      document.getElementById('gh-list-note').hidden = true;
+      ghoRender(base);
+      ghRenderFooter(0, false);
+      try{ ghOpeningCombo.refresh(); ghOppCombo.refresh(); }catch(e){}
+      return;
+    }
     const active = ghActiveCount() > 0;
     const rows = active ? base.filter(g=> ghMatch(g, u, GH_FILTERS)) : base;
     const total = base.length, plural = total===1 ? '' : 's';
@@ -23317,6 +23661,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       cnt.appendChild(document.createTextNode(' '));
       cnt.appendChild(ghEl('span', 'gh-count-hint', 'Filters search the '+GH_STATE.humans+' game'+(GH_STATE.humans===1 ? '' : 's')+' loaded so far.'));
     }
+    ghoCountHint(cnt);
     document.getElementById('gh-list-note').hidden = !(GH_STATE.offline && base.some(g=> g._summary));
     // The rows are rebuilt (a page loaded, a sync finished): the keyboard
     // stays on the same row, note line or note button instead of falling to <body>.
@@ -23376,6 +23721,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     load.style.display = showLoad ? '' : 'none';
     load.textContent = GH_STATE.games.length ? 'Load more games' : 'Try again';
     load.disabled = backoff;
+    if(ghoOn()){ more.style.display = 'none'; empty.style.display = 'none'; }
     clearTimeout(ghBackoffTimer);
     if(backoff && showLoad) ghBackoffTimer = setTimeout(()=>{ if(currentView==='history') ghRender(); }, spBackoffUntil - Date.now() + 100);
   }
@@ -23434,6 +23780,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           .map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).filter(g=> g && typeof g.id==='string' && g.players);
         if(page.length < want) GH_STATE.exhausted = true;
         page.forEach(g=>{ if(GH_STATE.ids.has(g.id)) return; GH_STATE.ids.add(g.id); GH_STATE.games.push(g); });
+        rpQueue();
         const oldest = page.reduce((m, g)=> Math.min(m, Number(g.createdAt) || Infinity), Infinity);
         if(isFinite(oldest)) GH_STATE.cursor = oldest - 1;
         if(GH_STATE.games.length >= GH_CAP) GH_STATE.capped = true;
@@ -23489,6 +23836,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(currentView==='history') ghShown();
   }
   function ghShown(){
+    rlShown();
     ghRender();
     if(GH_STATE.games.length && GH_STATE.loadedFor && getLichessToken() && String(GH_STATE.username||'').toLowerCase()!==GH_STATE.loadedFor){
       ghVerifyAccount(); gnViewShown(); return;
@@ -23612,6 +23960,1889 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.getElementById('gh-more-toggle').addEventListener('click', ()=>{ GH_UI.more = !GH_UI.more; ghSaveFilters(); ghSyncFilterUI(); });
   document.getElementById('gh-show-more').addEventListener('click', ()=>{ GH_STATE.shown += GH_WINDOW; ghRender(); });
   document.getElementById('history-load-more').addEventListener('click', ghLoadMoreClick);
+
+  /* ---- Repertoire Lab: your repertoire, read only ----
+     Builder A of "your repertoire in Game History" (rl*, rp*). You sign in
+     to Repertoire Lab once in Settings (Firebase email + password over
+     REST, no SDK). Chess Arcade keeps only the uid, the email and the
+     refresh token (never the password, never the id token, which lives in
+     memory), reads your openings, chapters and lines with GETs (nothing is
+     ever written to Repertoire Lab), keeps a compact copy, and files every
+     game against it the way Repertoire Lab's own matcher does: by position,
+     so transpositions count. Requests go to Google's three hosts only;
+     nothing here ever reaches Lichess, the notes sync or a URL.
+     Contracts for Game History's Openings view (gho*) and the review's prep
+     header (hp*): RP, rlState, rpReady, rpResult, rpResultNow, rpCounted,
+     rpOnChange, rpPathLabel, rpMoveText, rpMovesList, rpSanToMove,
+     rpLineFrom, rlOpenSettings, rpRepMatch, plus rpProgress, rlMessage,
+     rlRefresh, rpLookup, rpChapterPath, rpFullLabel, rpBookAt. */
+  var RL_API_KEY = 'AIzaSyC7de4rfDdDbdndJplT-O6HbabI7CeVJrk';
+  var RL_PROJECT = 'repertoire-lab';
+  var RL_ID_HOST = 'https://identitytoolkit.googleapis.com', RL_ST_HOST = 'https://securetoken.googleapis.com', RL_FS_HOST = 'https://firestore.googleapis.com';
+  var RL_AUTH_KEY = 'wavyChessPrepRLAuth', RL_CACHE_KEY = 'wavyChessPrepRepertoire', RL_PREFS_KEY = 'wavyChessPrepRepertoirePrefs';
+  var RL_STALE_MS = 20*3600e3, RL_RETRY_MS = 10*60e3, RL_TIMEOUT_MS = 20000;
+  var RL_ID_RE = /^[A-Za-z0-9_-]{1,64}$/, RL_UID_RE = /^[A-Za-z0-9_-]{1,128}$/;
+  var RL_SAN_RE = /^(?:[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=?[QRBN])?|O-O(?:-O)?)[+#]?$/;
+  var RL_FEN_RE = /^[1-8pnbrqkPNBRQK]{1,8}(\/[1-8pnbrqkPNBRQK]{1,8}){7} [wb] (-|(?=[KQkq])K?Q?k?q?) (-|[a-h][36]) \d{1,3} \d{1,4}$/;
+  var RL_START4 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -';
+  var RL_AUTHOR_RE = /\s*\(([^()]{3,60})\)\s*$/;
+  var RL_MSG = {
+    creds:'That email and password don\u2019t match a Repertoire Lab account.',
+    email:'That doesn\u2019t look like an email address.',
+    password:'Enter your password.',
+    noemail:'Enter your Repertoire Lab email.',
+    disabled:'This Repertoire Lab account is turned off.',
+    many:'Too many attempts. Wait a few minutes and try again.',
+    expired:'Your Repertoire Lab sign-in has expired. Sign in again.',
+    denied:'Repertoire Lab didn\u2019t let this account read its openings. Sign out, then sign in again.',
+    quota:'Repertoire Lab is over its daily limit for now. Try again later.',
+    timeout:'Repertoire Lab didn\u2019t answer. Try again in a moment.',
+    offline:'No connection. Try again when you\u2019re online.',
+    blocked:'This copy of Chess Arcade can\u2019t reach Repertoire Lab. Sign in on the Chess Arcade site: wavychessarcade.netlify.app',
+    empty:'Signed in. This account has no openings yet.',
+    full:'Couldn\u2019t keep a copy on this device (storage is full), so it\u2019s read again next time.',
+    out:'Signed out. Your repertoire was removed from this device.'
+  };
+  var rlAuth = null;          // {v:1, uid, email, rt, at} as stored (rt '' = the sign-in expired)
+  var rlId = null;            // {tok, uid, exp}: the id token, memory only
+  var rlIdP = null;           // a token refresh in flight (callers share it)
+  var rlGen = 0;              // bumped by sign-in / sign-out: late answers of an older one are dropped
+  var rlPhase = '';           // '' | 'signing' | 'reading'
+  var rlExpired = false, rlBlocked = false, rlCspAt = 0;
+  var rlMsgText = '', rlMsgKind = '', rlSignErr = '';
+  var rlReadP = null, rlReadG = -1, rlAutoAt = 0, rlMemOnly = false, rlListFor = '';
+  var rlPrefs = { v:1, uid:null, off:[] };
+  var RP = null;              // the repertoire in use (SPEC 1), or null
+  var RP_RES = new Map();     // game id -> classification, for RP.hash
+  var RP_LS = [], RP_JOB = null, RP_NONE = [];
+  var RP_STATS = { builds:0, buildMs:0, classified:0, slices:0, maxSliceMs:0 };
+
+  // ---- storage (every access may throw: private mode, quota, blocked) ----
+  function rlGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function rlSet(k, v){ try{ localStorage.setItem(k, v); return true; }catch(e){ return false; } }
+  function rlDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  function rlJson(k){ const s = rlGet(k); if(!s) return null; try{ return JSON.parse(s); }catch(e){ return null; } }
+  function rlReadAuth(){
+    const a = rlJson(RL_AUTH_KEY);
+    if(!a || typeof a!=='object' || a.v!==1 || typeof a.uid!=='string' || !RL_UID_RE.test(a.uid) || typeof a.email!=='string' || typeof a.rt!=='string') return null;
+    return { v:1, uid:a.uid, email:a.email.slice(0, 200), rt:a.rt.slice(0, 4096), at:Number(a.at) || 0 };
+  }
+  function rlWriteAuth(){ if(rlAuth) rlSet(RL_AUTH_KEY, JSON.stringify({ v:1, uid:rlAuth.uid, email:rlAuth.email, rt:rlAuth.rt, at:rlAuth.at })); }
+  function rlReadPrefs(uid){
+    const p = rlJson(RL_PREFS_KEY);
+    if(!p || typeof p!=='object' || p.v!==1 || p.uid!==uid || !Array.isArray(p.off)) return { v:1, uid, off:[] };
+    return { v:1, uid, off:p.off.filter(x=> typeof x==='string' && RL_ID_RE.test(x)).slice(0, 500) };
+  }
+
+  // ---- requests: Google's three hosts only, no cookies, 20 s each ----
+  function rlErr(kind, status){ const e = new Error('rl '+kind); e.rl = kind; e.status = status; return e; }
+  function rlErrText(e, signIn){
+    if(e && e.rl && RL_MSG[e.rl]) return RL_MSG[e.rl];
+    const s = e && e.status!=null ? e.status : '?';
+    return signIn ? 'Couldn\u2019t sign in to Repertoire Lab (error '+s+'). Try again in a moment.' : 'Couldn\u2019t read your repertoire (error '+s+'). Try again in a moment.';
+  }
+  async function rlNetErr(e, timedOut){
+    if(timedOut || (e && e.name==='AbortError')) return rlErr('timeout');
+    await new Promise(r=> setTimeout(r, 150));      // a CSP report is its own task, just after the refusal
+    if(rlCspAt && Date.now() - rlCspAt < 1500) return rlErr('blocked');
+    return rlErr('offline');
+  }
+  async function rlReq(url, opts){
+    const ac = typeof AbortController==='function' ? new AbortController() : null;
+    let timedOut = false;
+    const timer = setTimeout(()=>{ timedOut = true; if(ac) ac.abort(); }, RL_TIMEOUT_MS);
+    try{
+      const o = { method:(opts && opts.method) || 'GET', headers:(opts && opts.headers) || {}, cache:'no-store', credentials:'omit' };
+      if(opts && opts.body!=null) o.body = opts.body;
+      if(ac) o.signal = ac.signal;
+      let res, text = '';
+      try{ res = await fetch(url, o); text = await res.text(); }
+      catch(e){ throw await rlNetErr(e, timedOut); }
+      let data = null;
+      try{ data = text ? JSON.parse(text) : {}; }catch(e){ data = null; }
+      return { ok:res.ok, status:res.status, data };
+    } finally { clearTimeout(timer); }
+  }
+  // Google's error code: the message up to ' : ' ("TOO_MANY_ATTEMPTS_TRY_LATER : Access to ...")
+  function rlCode(d){ const m = d && d.error && typeof d.error.message==='string' ? d.error.message : ''; return m.split(' : ')[0].trim(); }
+
+  // ---- sign in, token refresh ----
+  async function rlSignIn(email, password){
+    if(rlPhase) return false;
+    const gen = ++rlGen;
+    rlPhase = 'signing'; rlBlocked = false; rlSignErr = ''; rlSay('', '');
+    rlChanged();
+    let r;
+    try{
+      r = await rlReq(RL_ID_HOST+'/v1/accounts:signInWithPassword?key='+encodeURIComponent(RL_API_KEY),
+        { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify({ email, password, returnSecureToken:true }) });
+    }catch(e){
+      password = '';
+      if(gen===rlGen){ rlPhase = ''; if(e.rl==='blocked') rlBlocked = true; rlSignErr = e.rl || 'http'; rlSay(rlErrText(e, true), 'error'); rlChanged(); }
+      return false;
+    }
+    password = '';
+    if(gen!==rlGen) return false;
+    const d = r.data || {};
+    if(!r.ok || typeof d.idToken!=='string' || typeof d.refreshToken!=='string' || typeof d.localId!=='string' || !RL_UID_RE.test(d.localId)){
+      const k = { INVALID_LOGIN_CREDENTIALS:'creds', EMAIL_NOT_FOUND:'creds', INVALID_PASSWORD:'creds', INVALID_EMAIL:'email',
+        MISSING_PASSWORD:'password', MISSING_EMAIL:'noemail', USER_DISABLED:'disabled', TOO_MANY_ATTEMPTS_TRY_LATER:'many' }[rlCode(d)];
+      rlPhase = ''; rlSignErr = k || 'http';
+      rlSay(k ? RL_MSG[k] : rlErrText({ status:r.status }, true), 'error');
+      rlChanged();
+      return false;
+    }
+    const uid = d.localId;
+    if((rlAuth && rlAuth.uid!==uid) || (RP && RP.uid!==uid)) rlForget();     // another account: its copy, prefs and results go first
+    rlAuth = { v:1, uid, email: typeof d.email==='string' && d.email ? d.email.slice(0, 200) : email, rt:d.refreshToken, at:Date.now() };
+    rlWriteAuth();
+    rlId = { tok:d.idToken, uid, exp:Date.now() + (Number(d.expiresIn) || 3600)*1000 };
+    rlExpired = false;
+    if(rlPrefs.uid!==uid) rlPrefs = rlReadPrefs(uid);
+    rlPhase = '';
+    rlRead('signin');
+    return true;
+  }
+  // The id token: the one in memory while it has a minute left, else one
+  // refresh (concurrent callers share it).
+  function rlIdToken(force){
+    if(!force && rlId && rlAuth && rlId.uid===rlAuth.uid && rlId.exp - Date.now() > 60000) return Promise.resolve(rlId.tok);
+    if(rlIdP) return rlIdP;
+    const gen = rlGen;
+    const p = (async()=>{
+      if(!rlAuth || !rlAuth.rt) throw rlErr('expired');
+      const r = await rlReq(RL_ST_HOST+'/v1/token?key='+encodeURIComponent(RL_API_KEY),
+        { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(rlAuth.rt) });
+      if(gen!==rlGen || !rlAuth) throw rlErr('stale');
+      const d = r.data || {};
+      if(!r.ok){
+        const c = rlCode(d);
+        if(r.status===401 || ['TOKEN_EXPIRED','INVALID_REFRESH_TOKEN','USER_NOT_FOUND','USER_DISABLED','INVALID_GRANT_TYPE','MISSING_REFRESH_TOKEN','INVALID_ID_TOKEN','CREDENTIAL_TOO_OLD_LOGIN_AGAIN'].indexOf(c)>=0) throw rlErr('expired');
+        throw rlErr(r.status===429 ? 'quota' : 'http', r.status);
+      }
+      if(typeof d.id_token!=='string' || (d.user_id!=null && String(d.user_id)!==rlAuth.uid)) throw rlErr('expired');
+      rlId = { tok:d.id_token, uid:rlAuth.uid, exp:Date.now() + (Number(d.expires_in) || 3600)*1000 };
+      if(typeof d.refresh_token==='string' && d.refresh_token && d.refresh_token!==rlAuth.rt){ rlAuth.rt = d.refresh_token.slice(0, 4096); rlWriteAuth(); }
+      return rlId.tok;
+    })();
+    rlIdP = p;
+    p.then(()=>{ if(rlIdP===p) rlIdP = null; }, ()=>{ if(rlIdP===p) rlIdP = null; });
+    return p;
+  }
+  function rlSetExpired(){
+    rlExpired = true; rlId = null;
+    if(rlAuth){ rlAuth.rt = ''; rlWriteAuth(); }      // a dead token isn't kept; the email and uid are (the copy still sorts games)
+    rlSay(RL_MSG.expired, 'error');
+  }
+
+  // ---- Firestore REST: GET only ----
+  async function rlFsGet(path, gen){
+    const url = RL_FS_HOST+'/v1/projects/'+RL_PROJECT+'/databases/(default)/documents/users/'+encodeURIComponent(rlAuth.uid)+path;
+    for(let attempt = 0; ; attempt++){
+      const tok = await rlIdToken(attempt > 0);
+      if(gen!==rlGen) throw rlErr('stale');
+      const r = await rlReq(url, { headers:{ Authorization:'Bearer '+tok } });
+      if(gen!==rlGen) throw rlErr('stale');
+      const st = r.data && r.data.error && r.data.error.status;
+      if(r.status===401 || st==='UNAUTHENTICATED'){ rlId = null; if(attempt===0) continue; throw rlErr('expired'); }
+      if(r.status===403 || st==='PERMISSION_DENIED') throw rlErr('denied');
+      if(r.status===429 || st==='RESOURCE_EXHAUSTED') throw rlErr('quota');
+      return r;
+    }
+  }
+  async function rlFsList(coll, size, fields, gen){
+    const mask = fields.map(f=> '&mask.fieldPaths='+f).join('');
+    const out = [], seen = new Set();
+    let tok = '';
+    for(let page = 0; page < 1000; page++){
+      const r = await rlFsGet('/'+coll+'?pageSize='+size+mask+(tok ? '&pageToken='+encodeURIComponent(tok) : ''), gen);
+      if(r.status===404) return out;
+      if(!r.ok || !r.data || typeof r.data!=='object') throw rlErr('http', r.status);
+      (Array.isArray(r.data.documents) ? r.data.documents : []).forEach(d=> out.push(d));
+      tok = typeof r.data.nextPageToken==='string' ? r.data.nextPageToken : '';
+      if(!tok || seen.has(tok)) break;
+      seen.add(tok);
+    }
+    return out;
+  }
+  // Firestore's typed values -> plain values (A.3)
+  function rlVal(v){
+    if(!v || typeof v!=='object') return null;
+    if('nullValue' in v) return null;
+    if('booleanValue' in v) return !!v.booleanValue;
+    if('integerValue' in v) return Number(v.integerValue);
+    if('doubleValue' in v) return Number(v.doubleValue);
+    if('stringValue' in v) return String(v.stringValue);
+    if('timestampValue' in v) return String(v.timestampValue);
+    if('arrayValue' in v){ const a = v.arrayValue && v.arrayValue.values; return Array.isArray(a) ? a.map(rlVal) : []; }
+    if('mapValue' in v){
+      const f = (v.mapValue && v.mapValue.fields) || {}, o = {};
+      Object.keys(f).forEach(k=>{ if(k!=='__proto__') o[k] = rlVal(f[k]); });
+      return o;
+    }
+    return null;
+  }
+  // Repertoire Lab's own boxes (shape.js decodeFromStore): {__json} and {__arr}
+  function rlUnbox(x){
+    if(Array.isArray(x)) return x.map(rlUnbox);
+    if(x && typeof x==='object'){
+      if(typeof x.__json==='string'){ try{ return JSON.parse(x.__json); }catch(e){ return null; } }
+      if(Array.isArray(x.__arr)) return rlUnbox(x.__arr);
+      const o = {};
+      Object.keys(x).forEach(k=>{ if(k!=='__proto__') o[k] = rlUnbox(x[k]); });
+      return o;
+    }
+    return x;
+  }
+  function rlDoc(d){
+    if(!d || typeof d!=='object') return null;
+    const o = rlUnbox(rlVal({ mapValue:{ fields:d.fields || {} } }));
+    const name = typeof d.name==='string' ? d.name : '';
+    if(typeof o.id!=='string' || !o.id) o.id = name.slice(name.lastIndexOf('/') + 1);
+    return o;
+  }
+  // shape.js fromCloud, minus pictures: chapters by opening (an orphan is
+  // dropped), each opening's chapters in its chapterOrder (unknown ids last,
+  // in read order), openings in lists.order (unknown last), yours only.
+  function rlAssemble(opDocs, chDocs, lists){
+    const by = new Map();
+    chDocs.forEach(c=>{ const k = c.openingId; if(!by.has(k)) by.set(k, []); by.get(k).push(c); });
+    let ops = opDocs.map(d=>{
+      const ord = new Map((Array.isArray(d.chapterOrder) ? d.chapterOrder : []).map((id, i)=> [id, i]));
+      const at = (c)=> ord.has(c.id) ? ord.get(c.id) : 1e9;
+      return { d, chapters:(by.get(d.id) || []).slice().sort((a, b)=> at(a) - at(b)) };
+    });
+    const ids = lists && lists.order && Array.isArray(lists.order.openings) ? lists.order.openings : null;
+    if(ids){
+      const pos = new Map(ids.map((id, i)=> [id, i]));
+      const at = (x)=> pos.has(x.d.id) ? pos.get(x.d.id) : 1e9;
+      ops = ops.slice().sort((a, b)=> at(a) - at(b));
+    }
+    return ops.filter(x=> x.d.ownerId==null);
+  }
+
+  // ---- the compact copy (A.5) ----
+  function rlName(s){ s = typeof s==='string' ? s.trim().slice(0, 200) : ''; return s || 'Untitled'; }
+  function rlText(s){ return typeof s==='string' ? s.trim().slice(0, 200) : ''; }
+  function rlMoves(a){
+    const out = [];
+    if(!Array.isArray(a)) return out;
+    for(let i = 0; i < a.length && i < 600; i++){
+      if(typeof a[i]!=='string') break;
+      const t = a[i].trim().replace(/^0-0-0/, 'O-O-O').replace(/^0-0/, 'O-O');
+      if(!RL_SAN_RE.test(t)) break;          // a bad move ends the line (as in Repertoire Lab)
+      out.push(t);
+    }
+    return out;
+  }
+  function rlValidFen(f){
+    if(typeof f!=='string' || f.length > 100 || !RL_FEN_RE.test(f)) return false;
+    let wk = 0, bk = 0;
+    for(const r of f.split(' ')[0].split('/')){
+      let n = 0;
+      for(const ch of r){ if(ch >= '1' && ch <= '8') n += Number(ch); else { n++; if(ch==='K') wk++; else if(ch==='k') bk++; } }
+      if(n!==8) return false;
+    }
+    return wk===1 && bk===1;
+  }
+  function rlStartFen(f){
+    if(typeof f!=='string') return null;
+    f = f.trim();
+    return rlValidFen(f) && f.split(' ').slice(0, 4).join(' ')!==RL_START4 ? f : null;
+  }
+  // plain = { v, uid, email, at, o:[{ i, n, c, k:[[id,name]], ch:[{ i, n, k, s, ss, l:[[id, name, moves[], fen|null]] }] }] }
+  function rlPlainFrom(own, uid, email, at){
+    const o = [];
+    own.forEach(x=>{
+      const d = x.d;
+      if(typeof d.id!=='string' || !RL_ID_RE.test(d.id)) return;
+      const k = (Array.isArray(d.courses) ? d.courses : []).filter(c=> c && typeof c.id==='string' && RL_ID_RE.test(c.id)).map(c=> [c.id, rlName(c.name)]);
+      const ch = [];
+      x.chapters.forEach(c=>{
+        if(typeof c.id!=='string' || !RL_ID_RE.test(c.id)) return;
+        const l = [];
+        (Array.isArray(c.variations) ? c.variations : []).forEach(v=>{
+          if(!v || typeof v!=='object' || typeof v.id!=='string' || !RL_ID_RE.test(v.id)) return;
+          const m = rlMoves(v.moves), f = rlStartFen(v.startFen);
+          if(m.length || f) l.push([v.id, rlName(v.name), m, f]);
+        });
+        ch.push({ i:c.id, n:rlName(c.name), k: typeof c.courseId==='string' && RL_ID_RE.test(c.courseId) ? c.courseId : '', s:rlText(c.section), ss:rlText(c.subsection), l });
+      });
+      const op = { i:d.id, n:rlName(d.name), c: d.color==='black' ? 'b' : 'w', k, ch };
+      if(d.freeChapterOrder===true) op.f = 1;        // arranged by hand in RL: folders sit where they were put
+      o.push(op);
+    });
+    return { v:1, uid, email, at, o };
+  }
+  // front coding: "N|rest", N = moves shared with the previous line of the chapter (same start)
+  function rlEncode(p){
+    const o = p.o.map(x=> Object.assign({ i:x.i, n:x.n, c:x.c }, x.f===1 ? { f:1 } : {}, { k:x.k.map(a=> [a[0], a[1]]), ch:x.ch.map(y=>{
+      let prev = [], prevF = '';
+      return { i:y.i, n:y.n, k:y.k, s:y.s, ss:y.ss, l:y.l.map(r=>{
+        const m = r[2], f = r[3] || '';
+        let s = 0;
+        if(f===prevF) while(s < m.length && s < prev.length && m[s]===prev[s]) s++;
+        const row = [r[0], r[1], s+'|'+m.slice(s).join(' ')];
+        if(f) row.push(f);
+        prev = m; prevF = f;
+        return row;
+      }) };
+    }) }));
+    return { v:1, uid:p.uid, email:p.email, at:p.at, h:gnFnv(JSON.stringify(o)), o };
+  }
+  // A stored copy -> plain, dropping whatever fails (never throws).
+  function rlDecode(c, uid){
+    try{
+      if(!c || typeof c!=='object' || c.v!==1 || c.uid!==uid || !Array.isArray(c.o)) return null;
+      const o = [];
+      c.o.forEach(x=>{
+        if(!x || typeof x!=='object' || typeof x.i!=='string' || !RL_ID_RE.test(x.i)) return;
+        const k = (Array.isArray(x.k) ? x.k : []).filter(a=> Array.isArray(a) && typeof a[0]==='string' && RL_ID_RE.test(a[0])).map(a=> [a[0], rlName(a[1])]);
+        const ch = [];
+        (Array.isArray(x.ch) ? x.ch : []).forEach(y=>{
+          if(!y || typeof y!=='object' || typeof y.i!=='string' || !RL_ID_RE.test(y.i)) return;
+          const l = [];
+          let prev = [];
+          (Array.isArray(y.l) ? y.l : []).forEach(r=>{
+            const m = Array.isArray(r) && typeof r[2]==='string' ? /^(\d{1,4})\|(.*)$/.exec(r[2]) : null;
+            if(!m){ return; }
+            const N = Number(m[1]), rest = m[2] ? m[2].split(' ') : [];
+            const full = N ? prev.slice(0, N).concat(rest) : rest, bad = N > prev.length;
+            prev = full;
+            if(bad || typeof r[0]!=='string' || !RL_ID_RE.test(r[0])) return;
+            const mv = rlMoves(full), f = r.length > 3 ? rlStartFen(r[3]) : null;
+            if(mv.length || f) l.push([r[0], rlName(r[1]), mv, f]);
+          });
+          ch.push({ i:y.i, n:rlName(y.n), k: typeof y.k==='string' && RL_ID_RE.test(y.k) ? y.k : '', s:rlText(y.s), ss:rlText(y.ss), l });
+        });
+        const op = { i:x.i, n:rlName(x.n), c: x.c==='b' ? 'b' : 'w', k, ch };
+        if(x.f===1) op.f = 1;
+        o.push(op);
+      });
+      const at = Number(c.at) || 0;
+      // h from what is stored, never trusted from the copy: an edited copy is a different repertoire
+      return { v:1, uid, email: typeof c.email==='string' ? c.email.slice(0, 200) : '', at, o, h:gnFnv(JSON.stringify(c.o)) };
+    }catch(e){ return null; }
+  }
+  // storage is full and something kept for good (a note) needs the room: the
+  // copy (re-readable) goes first; this visit keeps using it from memory
+  function rlDropCache(){
+    if(rlGet(RL_CACHE_KEY)==null) return false;
+    rlDel(RL_CACHE_KEY);
+    if(rlGet(RL_CACHE_KEY)!=null) return false;
+    rlMemOnly = true;
+    if(!rlMsgText) rlSay(RL_MSG.full, 'info');
+    try{ rlRenderSettings(); }catch(e){}
+    return true;
+  }
+  function rlStore(enc){
+    if(rlSet(RL_CACHE_KEY, JSON.stringify(enc))){ rlMemOnly = false; return true; }
+    rlMemOnly = true;          // storage full: kept in memory, read again next visit (nothing else is evicted for it)
+    return false;
+  }
+
+  // ---- the repertoire in use ----
+  function rpPlyOffset(fen){
+    const p = String(fen || '').trim().split(/\s+/);
+    const full = Math.max(1, parseInt(p[5], 10) || 1);
+    return (full - 1)*2 + (p[1]==='b' ? 1 : 0);
+  }
+  function rpMoveSeq(start, sans){
+    return sans.map((s, j)=>{ const ply = start + j, no = Math.floor(ply/2) + 1; return ply % 2===0 ? no+'.'+s : (j===0 ? no+'...'+s : s); }).join(' ');
+  }
+  function rpDropShared(s, base){
+    const a = s.split(/\s+/), b = String(base || '').split(/\s+/);
+    let k = 0;
+    while(k < a.length && k < b.length && a[k].toLowerCase()===b[k].toLowerCase()) k++;
+    return k >= 2 && k < a.length ? a.slice(k).join(' ') : s;
+  }
+  // A.11: your names minus what repeats (full names stay in titles)
+  function rpNames(o){
+    const chs = o.chapters;
+    const m0 = chs.length ? RL_AUTHOR_RE.exec(chs[0].name) : null;
+    const dropAuthor = !!m0 && chs.every(c=>{ const m = RL_AUTHOR_RE.exec(c.name); return !!m && m[1]===m0[1]; });
+    chs.forEach(c=>{
+      let s = c.name;
+      if(dropAuthor) s = s.replace(RL_AUTHOR_RE, '');
+      s = s.replace(/^\d{1,3}[.)]\s+/, '');
+      s = rpDropShared(s, c.section || o.name);
+      s = s.replace(/^[\s:\-\u2013\u2014]+/, '').trim();
+      c.short = s || c.name;
+      const L = c.lines, words = L.map(l=> l.name.split(/\s+/));
+      let k = 0;
+      if(L.length > 1){
+        k = words[0].length;
+        words.forEach(w=>{ let j = 0; while(j < k && j < w.length && w[j]===words[0][j]) j++; k = j; });
+        if(k < 2) k = 0;
+      }
+      L.forEach((l, i)=>{
+        let t = words[i].slice(k).join(' ').replace(/^[\s:;,.\-\u2013\u2014]+/, '').trim();
+        if(!t || /^\(alt\.? ?\d+\)$/i.test(t)){
+          const ref = i ? L[0] : L[1];
+          let p = 0;
+          if(ref && (ref.fen || '')===(l.fen || '')) while(p < l.moves.length && p < ref.moves.length && l.moves[p]===ref.moves[p]) p++;
+          const seq = l.moves.slice(p, p + 6);
+          t = seq.length ? rpMoveSeq(l.off + p, seq) + (l.moves.length > p + 6 ? '\u2026' : '') : '';
+        }
+        l.short = t || l.name;
+      });
+    });
+  }
+  function rpSideOf(R, color, prev){
+    const ops = R.openings.filter(o=> o.color===color && R.on.has(o.id));
+    let maxPly = 0, has = false;
+    ops.forEach(o=> o.chapters.forEach(c=> c.lines.forEach(l=>{ has = true; if(l.len + l.off > maxPly) maxPly = l.len + l.off; })));
+    const sig = ops.map(o=> o.id).join(',');
+    // the same openings in use as before: keep that side's index (and its games' results)
+    const reuse = !!prev && prev.h===R.h && prev.side[color].sig===sig && !!prev.side[color].idx;
+    return { idx: reuse ? prev.side[color].idx : null, maxPly, has, openings:ops, sig, reused:reuse };
+  }
+  function rpMake(p, prev){
+    const off = rlPrefs.uid===p.uid ? rlPrefs.off.slice() : [];
+    const ops = [], OPS = new Map(), CHS = new Map(), LNS = new Map(), ORDER = new Map();
+    p.o.forEach(x=>{
+      const o = { id:x.i, name:x.n, color: x.c==='b' ? 'black' : 'white', courses:x.k.map(a=> ({ id:a[0], name:a[1] })), chapters:[], lines:0, short:x.n, free:x.f===1 };
+      x.ch.forEach(y=>{
+        const ch = { id:y.i, name:y.n, short:y.n, courseId:y.k || null, section:y.s || null, subsection:y.ss || null, lines:[], openingId:o.id };
+        y.l.forEach(r=>{
+          const fen = r[3] || null;
+          const l = { id:r[0], name:r[1], short:r[1], moves:r[2], fen, off: fen ? rpPlyOffset(fen) : 0, chapterId:ch.id, openingId:o.id, len:r[2].length };
+          ch.lines.push(l); LNS.set(l.id, l);
+        });
+        o.lines += ch.lines.length; o.chapters.push(ch); CHS.set(ch.id, ch);
+      });
+      rpNames(o);
+      ORDER.set(o.id, ops.length); ops.push(o); OPS.set(o.id, o);
+    });
+    const R = { uid:p.uid, email:p.email, at:p.at, h:p.h, hash:p.h+':'+gnFnv(off.slice().sort().join(',')),
+      openings:ops, on:new Set(ops.filter(o=> off.indexOf(o.id)<0).map(o=> o.id)), side:null,
+      ops:OPS, chs:CHS, lns:LNS, order:ORDER, plain:p, built:false, buildP:null, job:null };
+    R.side = { white:rpSideOf(R, 'white', prev), black:rpSideOf(R, 'black', prev) };
+    R.built = !!(R.side.white.idx && R.side.black.idx);
+    const old = RP_RES;
+    RP_RES = new Map();
+    if(prev) old.forEach((r, id)=>{ if(R.side[r.color] && R.side[r.color].reused) RP_RES.set(id, r); });
+    RP = R;
+    return R;
+  }
+
+  // ---- moves: SAN -> CA's move objects, position keys ----
+  var RP_SAN_RE = /^([KQRBN])?([a-h])?([1-8])?x?([a-h][1-8])(?:=?([QRBN]))?$/;
+  function rpSanToMove(state, san){
+    if(!state || !state.board || typeof san!=='string') return null;
+    let s = san.trim().replace(/[+#!?]+$/, '');
+    if(s==='0-0') s = 'O-O'; else if(s==='0-0-0') s = 'O-O-O';
+    const turn = state.turn, B = state.board;
+    const legal = (mv)=> !pzIsInCheck(pzApplyMoveRaw(state, mv), turn);
+    if(s==='O-O' || s==='O-O-O'){
+      const want = s==='O-O' ? 'K' : 'Q', k = turn==='w' ? 4 : 60, p = B[k];
+      if(p && p.type==='k' && p.color===turn){ const mv = pzPseudoMovesFor(state, k).find(m=> m.isCastle===want); if(mv && legal(mv)) return mv; }
+      return null;
+    }
+    const m = RP_SAN_RE.exec(s);
+    if(m){
+      const piece = m[1] ? m[1].toLowerCase() : 'p', to = (m[4].charCodeAt(1) - 49)*8 + (m[4].charCodeAt(0) - 97);
+      const ff = m[2] ? m[2].charCodeAt(0) - 97 : -1, fr = m[3] ? m[3].charCodeAt(0) - 49 : -1, pr = m[5] ? m[5].toLowerCase() : null;
+      let found = null, count = 0;
+      for(let i = 0; i < 64; i++){
+        const p = B[i];
+        if(!p || p.color!==turn || p.type!==piece || (ff>=0 && (i & 7)!==ff) || (fr>=0 && (i >> 3)!==fr)) continue;
+        const ms = pzPseudoMovesFor(state, i);
+        for(let j = 0; j < ms.length; j++){
+          const mv = ms[j];
+          if(mv.to!==to || (pr ? mv.promotion!==pr : !!mv.promotion) || !legal(mv)) continue;
+          found = mv; count++;
+        }
+      }
+      if(count===1) return found;
+    }
+    const f = hvFindMoveBySan(state, san);       // anything odd: the review's own resolver
+    return f ? f.move : null;
+  }
+  // fen4, as chess.js writes it: the en passant square only when the capture is legal
+  // (CA's FEN has it whenever a pawn stands beside it, even a pinned one)
+  function rpKey(st){
+    const f = pzStateToFEN(st, 0).split(' ', 4);
+    if(f[3] && f[3]!=='-' && !pzAllLegalMoves(st).some(mv=> mv.isEP)) f[3] = '-';
+    return f.join(' ');
+  }
+
+  // ---- the index (A.8): a move trie per start, fen4 -> [{o, c, l, ply}] ----
+  function rpAddLine(j, e){
+    const l = e.l, rk = l.fen || '';
+    let node = j.roots.get(rk);
+    if(!node){ const st = l.fen ? hvStateFromFen(l.fen) : pzStartPosition(); node = { st, key:rpKey(st), kids:new Map() }; j.roots.set(rk, node); }
+    const put = (key, ply)=>{ const a = j.idx.get(key); const en = { o:e.o, c:e.c, l, ply }; if(a) a.push(en); else j.idx.set(key, [en]); };
+    put(node.key, 0);
+    for(let i = 0; i < l.moves.length; i++){
+      const san = l.moves[i].replace(/[+#!?]+$/, '');
+      let nx = node.kids.get(san);
+      if(nx===undefined){
+        const mv = rpSanToMove(node.st, l.moves[i]);
+        if(mv){ const st = pzApplyMoveRaw(node.st, mv); nx = { st, key:rpKey(st), kids:new Map() }; } else nx = null;
+        node.kids.set(san, nx);
+      }
+      if(!nx) break;                     // a bad move ends the line
+      node = nx;
+      put(node.key, i + 1);
+    }
+  }
+  function rpBuild(sync){
+    const R = RP;
+    if(!R) return Promise.resolve(false);
+    if(R.built) return Promise.resolve(true);
+    if(!R.job){
+      R.job = ['white', 'black'].filter(c=> !R.side[c].idx).map(color=>{
+        const S = R.side[color], lines = [];
+        S.openings.forEach(o=> o.chapters.forEach(c=> c.lines.forEach(l=> lines.push({ o, c, l }))));
+        return { S, idx:new Map(), roots:new Map(), lines, i:0 };
+      });
+      R.job.t0 = performance.now(); R.job.ms = 0;
+    }
+    const step = (budget)=>{
+      const t = performance.now();
+      try{
+        for(const j of R.job){ while(j.i < j.lines.length){ rpAddLine(j, j.lines[j.i++]); if(budget && performance.now() - t > budget) return false; } }
+        return true;
+      } finally { R.job.ms += performance.now() - t; }
+    };
+    const finish = ()=>{
+      if(R.built) return;
+      R.job.forEach(j=>{ j.S.idx = j.idx; j.roots = null; });
+      R.built = true; R.job = null; RP_STATS.builds++;
+    };
+    if(sync){ step(0); RP_STATS.buildMs = R.job.ms; finish(); return Promise.resolve(true); }
+    if(!R.buildP){
+      R.buildP = new Promise(res=>{
+        const tick = ()=>{
+          if(RP!==R){ res(false); return; }
+          if(R.built){ res(true); return; }
+          if(step(12)){ RP_STATS.buildMs = R.job.ms; finish(); res(true); return; }
+          setTimeout(tick, 0);
+        };
+        setTimeout(tick, 0);
+      });
+    }
+    return R.buildP;
+  }
+  function rpBookMoves(hs){
+    const out = [];
+    for(let i = 0; i < hs.length; i++){ const nx = hs[i].l.moves[hs[i].ply]; if(nx && out.indexOf(nx)<0) out.push(nx); }
+    return out;
+  }
+  // hits that say something: a from-start line's start says nothing; set-up
+  // (model) lines count only where no from-start line is
+  function rpUseful(hs){
+    const h = hs.filter(x=> !(x.ply===0 && !x.l.fen));
+    const fs = h.filter(x=> !x.l.fen);
+    return fs.length ? fs : h;
+  }
+  function rpHasUseful(hs){ for(let i = 0; i < hs.length; i++) if(!(hs[i].ply===0 && !hs[i].l.fen)) return true; return false; }
+  function rpBookAt(color, key){ const S = RP && RP.side[color]; if(!S) return []; if(!S.idx) rpBuild(true); return rpBookMoves(S.idx.get(key) || RP_NONE); }
+
+  // ---- classification (A.9) ----
+  function rpCounted(g){ return !!g && typeof g.id==='string' && !ghVsComputer(g) && ghIsStd(g) && !!String(g.moves || '').trim(); }
+  function rpClassify(g){
+    if(!RP || !rpCounted(g)) return null;
+    const color = ghMyColor(g, ghMe())==='white' ? 'white' : 'black';
+    const S = RP.side[color];
+    const toks = String(g.moves || '').trim().split(/\s+/);
+    const res = { kind:'norep', color, openingId:null, chapterId:null, courseId:null, lineId:null, split:[], alsoIn:[], depth:0, prepPly:0,
+      transposed:false, enteredAt:null, left:{ who:'none', atPly:null, played:null, expected:[], spot:null, key:null }, marks:[], n:toks.length };
+    if(!S || !S.has) return res;
+    if(!S.idx) rpBuild(true);
+    const idx = S.idx, cap = S.maxPly + 16;
+    let st = pzStartPosition();
+    const keys = [rpKey(st)];
+    for(let i = 0; i < toks.length && i < cap; i++){
+      const mv = rpSanToMove(st, toks[i]);
+      if(!mv) break;
+      st = pzApplyMoveRaw(st, mv); keys.push(rpKey(st));
+    }
+    const m = keys.length - 1, n = m >= cap && m < toks.length ? toks.length : m;
+    const hits = (i)=> idx.get(keys[i]) || RP_NONE;
+    // M: matchGameToRepertoire (contiguous)
+    let D = 0, dev = null;
+    for(let i = 0; i < m; i++){
+      if(hits(i + 1).length){ D = i + 1; continue; }
+      const ex = rpBookMoves(hits(i));
+      if(ex.length) dev = { atPly:i, played:toks[i], expected:ex };
+      break;
+    }
+    // C: classifyGame (deepest hit anywhere: re-entry after a transposition)
+    let best = null, bestScore = -1, bestPly = 0;
+    for(let i = 0; i <= m; i++){
+      const hs = hits(i);
+      for(let j = 0; j < hs.length; j++){
+        const h = hs[j];
+        if(h.ply===0 && !h.l.fen) continue;
+        const sc = (h.ply + h.l.off)*1000 + h.l.len;
+        if(!best || sc > bestScore){ best = h; bestScore = sc; bestPly = i; }
+      }
+    }
+    let at = null, transposed = false;
+    if(D > 0 && !(best && bestPly > D)) at = D;
+    else if(best){ at = bestPly; transposed = true; }
+    // who left first. A game that reached your line by another move order is
+    // judged from there on (M's walk, from the deepest point): the move-order
+    // choice before it isn't where the game left the line it's filed under.
+    const mover = (i)=> i % 2===0 ? 'white' : 'black';
+    let E = D;
+    if(transposed){
+      dev = null;
+      for(E = at; E < m; E++){
+        if(hits(E + 1).length) continue;
+        const ex = rpBookMoves(hits(E));
+        if(ex.length) dev = { atPly:E, played:toks[E], expected:ex };
+        break;
+      }
+    }
+    let left;
+    if(E > 0){
+      if(dev) left = { who: mover(dev.atPly)===color ? 'you' : 'opp', atPly:dev.atPly, played:dev.played, expected:dev.expected };
+      else if(E >= n) left = { who:'inbook', atPly:null, played:null, expected:[] };
+      else left = { who:'end', atPly:E, played:toks[E] || null, expected:[] };
+    } else {
+      const ex = rpBookMoves(hits(0));
+      left = ex.length && n > 0 ? { who: color==='white' ? 'you' : 'opp', atPly:0, played:toks[0], expected:ex } : { who:'none', atPly:null, played:null, expected:[] };
+    }
+    left.key = left.atPly!=null && left.atPly <= m ? keys[left.atPly] : null;
+    left.spot = (left.who==='you' || left.who==='opp') ? gnFnv(color+'|'+left.who+'|'+left.key+'|'+left.played) : null;
+    res.left = left; res.n = n; res.depth = D;
+    for(let i = 1; i <= m; i++) if(rpHasUseful(hits(i))) res.marks.push(i);
+    if(at==null){ res.kind = 'outside'; res.depth = 0; return res; }
+    const u = rpUseful(hits(at));
+    if(!u.length){ res.kind = 'outside'; res.depth = 0; return res; }
+    let first = u[0].o;
+    u.forEach(h=>{ if(RP.order.get(h.o.id) < RP.order.get(first.id)) first = h.o; });
+    const mine = u.filter(h=> h.o===first), chs = [];
+    mine.forEach(h=>{ if(chs.indexOf(h.c)<0) chs.push(h.c); });
+    u.forEach(h=>{ if(h.o!==first && res.alsoIn.indexOf(h.o.name)<0) res.alsoIn.push(h.o.name); });
+    res.openingId = first.id; res.prepPly = at; res.transposed = transposed; res.enteredAt = transposed ? at : null;
+    if(chs.length===1){
+      let bl = mine[0];
+      mine.forEach(h=>{ if(h.l.len > bl.l.len) bl = h; });      // the longest line (index order on a tie)
+      res.kind = 'chapter'; res.chapterId = chs[0].id; res.courseId = chs[0].courseId || null; res.lineId = bl.l.id;
+      // the chapter's lines that reach that position: the count, and up to three of them (the one above first) for the review
+      const ls = [];
+      mine.forEach(h=>{ if(ls.indexOf(h.l)<0) ls.push(h.l); });
+      res.nLines = ls.length;
+      res.lineIds = [bl.l.id].concat(ls.filter(l=> l!==bl.l).slice(0, 2).map(l=> l.id));
+    } else {
+      res.kind = 'trunk';                                        // left book before the chapters split
+      res.split = chs.slice().sort((a, b)=> first.chapters.indexOf(a) - first.chapters.indexOf(b)).map(c=> c.id);
+    }
+    return res;
+  }
+
+  // ---- per-game results (A.10) ----
+  function rpReady(){ return !!RP; }
+  function rpResult(g){
+    if(!RP || !g) return null;
+    const r = RP_RES.get(g.id);
+    return r && r.color===(ghMyColor(g, ghMe())==='white' ? 'white' : 'black') ? r : null;
+  }
+  function rpResultNow(g){
+    if(!RP || !rpCounted(g)) return null;
+    const have = rpResult(g);
+    if(have) return have;
+    const r = rpClassify(g);
+    if(r){ RP_RES.set(g.id, r); RP_STATS.classified++; }
+    return r;
+  }
+  // every counted game Game History has: the loaded ones and noted ones not loaded
+  function rpGames(){
+    const out = GH_STATE.games.filter(rpCounted);
+    if(typeof GN==='object' && GN && GN.notes){
+      Object.values(GN.notes).forEach(n=>{
+        if(!n || !n.g || GH_STATE.ids.has(n.id)) return;
+        let g = GH_STATE.extras.get(n.id);
+        if(!g){ try{ g = ghGameFromSummary(n); }catch(e){ g = null; } }
+        if(g && rpCounted(g)) out.push(g);
+      });
+    }
+    return out;
+  }
+  function rpProgress(){
+    if(!RP) return { done:0, total:0, running:false, building:false };
+    const all = rpGames();
+    let done = 0;
+    all.forEach(g=>{ if(rpResult(g)) done++; });
+    return { done, total:all.length, running:!!RP_JOB, building:!RP.built };
+  }
+  function rpQueue(){
+    if(!RP) return;
+    if(RP_JOB && RP_JOB.R===RP){ RP_JOB.more = true; return; }
+    const R = RP, job = RP_JOB = { R, more:true, list:[], i:0 };
+    rpBuild().then(ok=>{
+      if(!ok || RP!==R){ if(RP_JOB===job) RP_JOB = null; return; }
+      const tick = ()=>{
+        if(RP!==R || RP_JOB!==job){ if(RP_JOB===job) RP_JOB = null; return; }
+        if(job.more){
+          job.more = false;
+          job.list = rpGames().filter(g=> !rpResult(g)).sort((a, b)=> (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
+          job.i = 0;
+        }
+        const t = performance.now();
+        let did = 0;
+        while(job.i < job.list.length && performance.now() - t < 10){
+          const g = job.list[job.i++];
+          if(!rpResult(g)){ const r = rpClassify(g); if(r){ RP_RES.set(g.id, r); RP_STATS.classified++; did++; } }
+        }
+        const ms = performance.now() - t;
+        RP_STATS.slices++; if(ms > RP_STATS.maxSliceMs) RP_STATS.maxSliceMs = ms;
+        const more = job.i < job.list.length || job.more;
+        if(!more) RP_JOB = null;
+        if(did || !more) rpFire('batch');
+        if(more) setTimeout(tick, 0);
+      };
+      setTimeout(tick, 0);
+    });
+  }
+  // Game History drew: games without a result and nothing sorting them (a note
+  // from another device for a game that isn't loaded) are queued
+  function rpEnsure(){
+    if(!RP || (RP_JOB && RP_JOB.R===RP)) return;
+    const p = rpProgress();
+    if(p.done < p.total) rpQueue();
+  }
+  function rpOnChange(fn){
+    if(typeof fn==='function') RP_LS.push(fn);
+    return ()=>{ const i = RP_LS.indexOf(fn); if(i>=0) RP_LS.splice(i, 1); };
+  }
+  function rpFire(kind){ RP_LS.slice().forEach(fn=>{ try{ fn({ kind }); }catch(e){ console.error(e); } }); }
+
+  // ---- names and helpers for Game History and the review ----
+  function rpLookup(r){
+    if(!RP || !r) return null;
+    return { opening:RP.ops.get(r.openingId) || null, chapter:RP.chs.get(r.chapterId) || null, line:RP.lns.get(r.lineId) || null,
+      split:(r.split || []).map(id=> RP.chs.get(id)).filter(Boolean) };
+  }
+  function rpChapterPath(o, c){ return o.name+' \u203a '+(c.section ? c.section+' \u203a ' : '')+c.short; }
+  function rpPathLabel(r){
+    if(!RP || !r || (r.kind!=='chapter' && r.kind!=='trunk')) return null;
+    const o = RP.ops.get(r.openingId);
+    if(!o) return null;
+    const c = r.kind==='chapter' ? RP.chs.get(r.chapterId) : null;
+    return c ? rpChapterPath(o, c) : o.name;
+  }
+  function rpFullLabel(r){
+    const L = rpLookup(r);
+    if(!L || !L.opening) return null;
+    return [L.opening.name, L.chapter ? L.chapter.name : '', L.line ? L.line.name : ''].filter(Boolean).join(' \u203a ');
+  }
+  // Lichess's family name when it says something your own names don't (the
+  // Englund Gambit filed under "vs Sub-Sidelines"): none of its words of 4+
+  // letters, other than generic ones, is in your names
+  var RP_GENERIC = /^(?:defen[cs]e|game|system|variation|opening|attack|gambit|countergambit|pawn|queens?|kings?|lines?|main|mainline|sidelines?|with|declined|accepted|other)$/;
+  function rpWords(s){ return ghFold(String(s || '')).toLowerCase().replace(/'s\b/g, 's').split(/[^a-z]+/).filter(w=> w.length >= 4 && !RP_GENERIC.test(w)); }
+  function rpLiNew(fam, names){
+    const w = rpWords(fam);
+    if(!w.length) return false;
+    const have = new Set();
+    names.forEach(n=> rpWords(n).forEach(x=> have.add(x)));
+    return !w.some(x=> have.has(x));
+  }
+  function rpMoveText(i, san){ return (Math.floor(i/2) + 1)+(i % 2 ? '...' : '.')+san; }
+  function rpMovesList(i, sans){
+    const t = (sans || []).map(s=> rpMoveText(i, s));
+    if(t.length < 2) return t[0] || '';
+    if(t.length===2) return t[0]+' or '+t[1];
+    if(t.length===3) return t[0]+', '+t[1]+' or '+t[2];
+    return t.slice(0, 3).join(', ')+' or '+(t.length - 3)+' more';
+  }
+  // C.4: for a you-left game, the line to show from the deviation
+  function rpLineFrom(r){
+    if(!RP || !r || !r.left || r.left.who!=='you' || !r.left.key) return null;
+    const S = RP.side[r.color];
+    if(!S) return null;
+    if(!S.idx) rpBuild(true);
+    const want = (r.left.expected || [])[0];
+    if(!want) return null;
+    const all = S.idx.get(r.left.key) || RP_NONE, u = rpUseful(all);
+    const pick = (hs)=>{ let b = null; hs.forEach(h=>{ if(h.l.moves[h.ply]===want && (!b || h.l.len > b.l.len)) b = h; }); return b; };
+    const b = pick(u.filter(h=> h.o.id===r.openingId)) || pick(u) || pick(all);
+    return b ? { line:b.l, from:b.ply, moves:b.l.moves.slice(b.ply, b.ply + 24) } : null;
+  }
+  // B.7: is game g in the repertoire filter value rep?
+  function rpRepMatch(g, rep){
+    const r = rpResult(g);
+    if(!r || typeof rep!=='string') return false;
+    const p = rep.split('.'), t = p[0], inRep = r.kind==='chapter' || r.kind==='trunk';
+    if(t==='o') return inRep && r.openingId===p[1];
+    if(t==='t') return r.kind==='trunk' && r.openingId===p[1];
+    if(t==='k') return r.kind==='chapter' && r.openingId===p[1] && r.courseId===p[2];
+    if(t==='c') return r.kind==='chapter' && r.openingId===p[1] && r.chapterId===p[2];
+    if(t==='l') return r.kind==='chapter' && r.openingId===p[1] && r.chapterId===p[2] && r.lineId===p[3];
+    if(t==='x') return !inRep && r.color===(p[1]==='b' ? 'black' : 'white') && (p.length < 3 || ghOpeningSlug(g)===p[2]);
+    if(t==='s') return (r.left.who==='you' || r.left.who==='opp') && r.left.spot===p[1] && (p.length < 3 || rpRepMatch(g, p.slice(2).join('.')));
+    return false;
+  }
+
+  // ---- reading (A.3, A.4) ----
+  function rlRead(why){
+    if(!rlAuth || !rlAuth.rt) return Promise.resolve(false);
+    if(rlReadP && rlReadG===rlGen) return rlReadP;
+    const gen = rlReadG = rlGen;
+    rlPhase = 'reading';
+    if(why!=='auto') rlSay('', '');
+    rlChanged();
+    const p = (async()=>{
+      try{
+        const ops = await rlFsList('openings', 100, ['id', 'name', 'color', 'ownerId', 'chapterOrder', 'courses', 'freeChapterOrder'], gen);
+        const chs = await rlFsList('chapters', 20, ['id', 'name', 'openingId', 'section', 'subsection', 'courseId', 'variations'], gen);
+        const lr = await rlFsGet('/singletons/lists?mask.fieldPaths=order', gen);
+        let lists = null;
+        if(lr.ok && lr.data) lists = rlDoc(lr.data);
+        else if(lr.status!==404) throw rlErr('http', lr.status);
+        const plain = rlPlainFrom(rlAssemble(ops.map(rlDoc).filter(Boolean), chs.map(rlDoc).filter(Boolean), lists), rlAuth.uid, rlAuth.email, Date.now());
+        if(gen!==rlGen) return false;
+        const enc = rlEncode(plain);
+        plain.h = enc.h;
+        rlStore(enc);
+        if(RP && RP.uid===plain.uid && RP.h===plain.h){ RP.at = plain.at; RP.plain = plain; }     // nothing changed: no re-sorting
+        else { rpMake(plain, null); rpFire('rep'); rpQueue(); }
+        rlSay(!plain.o.length ? RL_MSG.empty : (rlMemOnly ? RL_MSG.full : ''), 'info');
+        return true;
+      }catch(e){
+        if(gen!==rlGen || (e && e.rl==='stale')) return false;
+        if(e && e.rl==='expired') rlSetExpired();
+        else {
+          if(e && e.rl==='blocked') rlBlocked = true;
+          const t = rlErrText(e, false);
+          rlSay(RP ? 'Couldn\u2019t update your repertoire. '+t+' The copy from '+relTime(RP.at)+' is still in use.' : t, 'error');
+        }
+        return false;
+      }finally{
+        if(gen===rlGen){ rlPhase = ''; rlChanged(); }
+      }
+    })();
+    rlReadP = p;
+    p.then(()=>{ if(rlReadP===p) rlReadP = null; });
+    return p;
+  }
+  function rlRefresh(){ return rlRead('refresh'); }
+  // Game History came on screen: a copy older than 20 h is read again in the background
+  function rlShown(){
+    if(rlAuth && rlAuth.rt && !rlExpired && !rlPhase && !rlReadP){
+      const age = Date.now() - (RP ? RP.at : 0);
+      if(age > RL_STALE_MS && Date.now() - rlAutoAt > RL_RETRY_MS){ rlAutoAt = Date.now(); rlRead('auto'); }
+    }
+    rpQueue();
+  }
+  function rlState(){
+    if(rlPhase) return 'reading';
+    if(rlBlocked) return 'blocked';
+    if(!rlAuth) return 'off';
+    if(rlExpired) return 'expired';
+    return 'in';
+  }
+  function rlMessage(){ return { text:rlMsgText, kind:rlMsgKind }; }
+  function rlSay(text, kind){ rlMsgText = text || ''; rlMsgKind = text ? (kind || 'info') : ''; }
+  function rlChanged(){ rlRenderSettings(); rpFire('state'); }
+  function rlDropRepFilter(){ try{ if(GH_FILTERS && GH_FILTERS.rep) ghSetFilters({ rep:'' }); }catch(e){} }
+  function rlForget(){
+    rlDel(RL_CACHE_KEY); rlDel(RL_PREFS_KEY);
+    RP = null; RP_RES = new Map(); RP_JOB = null; rlMemOnly = false; rlListFor = '';
+    rlPrefs = { v:1, uid:null, off:[] };
+  }
+  // A.6: nothing is sent (a refresh token can't be revoked over REST); this device forgets it
+  function rlSignOut(){
+    rlGen++;
+    rlDel(RL_AUTH_KEY); rlForget();
+    rlAuth = null; rlId = null; rlIdP = null; rlReadP = null; rlPhase = ''; rlExpired = false; rlBlocked = false; rlSignErr = '';
+    rlDropRepFilter();
+    rlSay(RL_MSG.out, 'info');
+    rlChanged();
+    rpFire('rep');
+  }
+  // boot, and another tab's change (storage event on the three keys)
+  function rlFromStorage(live){
+    const before = RP ? RP.hash : '';
+    const a = rlReadAuth();
+    if(!a){
+      if(rlAuth || RP){
+        rlGen++;
+        rlAuth = null; rlId = null; rlIdP = null; rlReadP = null; rlPhase = ''; rlExpired = false;
+        RP = null; RP_RES = new Map(); RP_JOB = null; rlMemOnly = false; rlPrefs = { v:1, uid:null, off:[] };
+        rlDropRepFilter();
+        if(live) rlSay(RL_MSG.out, 'info');
+      }
+    } else {
+      if(rlAuth && rlAuth.uid!==a.uid){ rlGen++; rlId = null; rlIdP = null; rlReadP = null; rlPhase = ''; RP = null; RP_RES = new Map(); RP_JOB = null; }
+      rlAuth = a;
+      rlExpired = !a.rt;
+      if(rlExpired){ rlId = null; if(live) rlSay(RL_MSG.expired, 'error'); }
+      rlPrefs = rlReadPrefs(a.uid);
+      const p = rlDecode(rlJson(RL_CACHE_KEY), a.uid);
+      if(p){
+        const hash = p.h+':'+gnFnv(rlPrefs.off.slice().sort().join(','));
+        if(!RP || RP.hash!==hash) rpMake(p, RP && RP.h===p.h ? RP : null);
+        else RP.at = p.at;
+      } else if(RP && (RP.uid!==a.uid || !rlMemOnly)) { RP = null; RP_RES = new Map(); RP_JOB = null; }
+    }
+    if(!live) return;          // boot: the index is built when Game History or a review first needs it
+    if((RP ? RP.hash : '')!==before){ rpFire('rep'); rpQueue(); }
+    rlChanged();
+  }
+  function rlToggleOpening(id, on){
+    if(!RP || !RP.ops.has(id)) return;
+    const off = rlPrefs.off.filter(x=> x!==id);
+    if(!on) off.push(id);
+    rlPrefs = { v:1, uid:RP.uid, off };
+    rlSet(RL_PREFS_KEY, JSON.stringify(rlPrefs));
+    rpMake(RP.plain, RP);
+    rpFire('rep'); rpQueue();
+    rlRenderSettings();
+  }
+
+  // ---- Settings > Repertoire Lab (A.1) ----
+  function rlCount(n, w){ return n.toLocaleString('en-US')+' '+w+(n===1 ? '' : 's'); }
+  function rlSummary(){
+    if(!RP) return '';
+    const W = RP.openings.filter(o=> o.color==='white').length, Bk = RP.openings.length - W;
+    let ch = 0, ln = 0;
+    RP.openings.forEach(o=>{ ch += o.chapters.length; ln += o.lines; });
+    return W+' White opening'+(W===1 ? '' : 's')+', '+Bk+' Black \u00b7 '+rlCount(ch, 'chapter')+', '+rlCount(ln, 'line');
+  }
+  function rlRenderList(box){
+    const key = RP ? RP.h+'|'+RP.openings.length : '';
+    if(rlListFor!==key){
+      rlListFor = key;
+      box.textContent = '';
+      if(RP) RP.openings.forEach(o=>{
+        const lab = document.createElement('label'); lab.className = 'rl-op';
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.id = o.id;
+        cb.addEventListener('change', ()=> rlToggleOpening(o.id, cb.checked));
+        const nm = document.createElement('span'); nm.className = 'rl-op-name'; nm.textContent = o.name;
+        const sub = document.createElement('span'); sub.className = 'rl-op-sub';
+        sub.textContent = (o.color==='black' ? 'Black' : 'White')+' \u00b7 '+(o.lines ? rlCount(o.chapters.length, 'chapter')+' \u00b7 '+rlCount(o.lines, 'line') : 'no lines yet');
+        lab.append(cb, ' ', nm, ' ', sub);
+        box.appendChild(lab);
+      });
+    }
+    box.querySelectorAll('input[type=checkbox]').forEach(cb=>{ const on = !!RP && RP.on.has(cb.dataset.id); cb.checked = on; cb.closest('.rl-op').classList.toggle('is-off', !on); });
+  }
+  // does a Content-Security-Policy let fetch() reach https://<host>? (connect-src, else default-src)
+  var RL_HOSTS = ['identitytoolkit.googleapis.com', 'securetoken.googleapis.com', 'firestore.googleapis.com'];
+  function rlCspAllows(policy, host){
+    const dirs = {};
+    String(policy || '').split(';').forEach(d=>{ const t = d.trim().split(/\s+/); if(t[0] && !(t[0].toLowerCase() in dirs)) dirs[t[0].toLowerCase()] = t.slice(1); });
+    const src = dirs['connect-src'] || dirs['default-src'];
+    if(!src) return true;
+    return src.some(x=>{
+      x = x.toLowerCase();
+      if(x==='*' || x==='https:') return true;
+      const m = /^(?:https:\/\/)?(\*\.)?([a-z0-9.-]+)(?::(?:\d+|\*))?(?:\/.*)?$/.exec(x);
+      if(!m) return false;
+      return m[1] ? host.slice(-(m[2].length + 1))==='.'+m[2] : host===m[2];
+    });
+  }
+  function rlRenderSettings(){
+    const $ = (id)=> document.getElementById(id);
+    const status = $('rl-status');
+    if(!status) return;
+    const fa = document.activeElement, field = $('rl-field'), hadFocus = !!fa && fa!==document.body && !!field && field.contains(fa);
+    const s = rlState(), signing = rlPhase==='signing', reading = rlPhase==='reading';
+    const label = signing ? 'Signing in\u2026' : reading ? 'Reading your repertoire\u2026' : s==='blocked' ? 'Can\u2019t connect here'
+      : s==='expired' ? 'Sign-in expired' : s==='in' ? 'Connected' : 'Not connected';
+    status.textContent = label;
+    status.classList.toggle('connected', s==='in' && !rlPhase);
+    status.classList.toggle('error', !rlPhase && (s==='blocked' || s==='expired'));
+    const showForm = signing || !rlAuth || rlExpired;
+    $('rl-form').hidden = !showForm;
+    $('rl-hint').hidden = !showForm;
+    const btn = $('rl-signin');
+    btn.disabled = signing;
+    btn.textContent = signing ? 'Signing in\u2026' : 'Sign in';
+    const em = $('rl-email');
+    if(rlExpired && rlAuth && !em.value) em.value = rlAuth.email;
+    const signed = $('rl-signed');
+    signed.hidden = !(rlAuth && !signing);
+    $('rl-who').hidden = rlExpired;
+    $('rl-who').textContent = rlAuth ? 'Signed in as '+rlAuth.email : '';
+    const sum = $('rl-sum');
+    sum.textContent = RP ? rlSummary()+(rlExpired ? ' (still using the copy from '+relTime(RP.at)+')' : ' \u00b7 updated '+relTime(RP.at)) : '';
+    sum.hidden = !RP;
+    const list = $('rl-openings');
+    list.hidden = !RP || rlExpired || !RP.openings.length;
+    $('rl-list-hint').hidden = list.hidden;
+    if(!list.hidden) rlRenderList(list);
+    $('rl-refresh').hidden = rlExpired;
+    $('rl-refresh').disabled = reading;
+    const msg = $('rl-msg');
+    msg.textContent = rlMsgText;
+    msg.classList.toggle('is-error', rlMsgKind==='error');
+    // the control that had the keyboard was hidden or turned off (signed in, Refresh, signed out):
+    // it goes to "Signed in as ..." or the email field, not to the page behind the dialog
+    if(hadFocus && (!fa.isConnected || fa.disabled || fa.closest('[hidden]'))){
+      const t = !$('rl-signed').hidden && !$('rl-who').hidden ? $('rl-who') : !$('rl-form').hidden ? $('rl-email') : null;
+      if(t) try{ t.focus({ preventScroll:true }); }catch(e){}
+    }
+  }
+  function rlOpenSettings(){
+    const ov = document.getElementById('settings-overlay');
+    if(ov) ov.classList.add('active');
+    rlRenderSettings();
+    const f = document.getElementById('rl-field');
+    if(f && f.scrollIntoView) f.scrollIntoView({ block:'start' });
+    const t = document.getElementById(rlAuth && !rlExpired ? (rlPhase ? 'rl-signout' : 'rl-refresh') : 'rl-email');
+    if(t){ try{ t.focus({ preventScroll:true }); }catch(e){ t.focus(); } }
+  }
+  document.getElementById('rl-form').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if(rlPhase==='signing') return;
+    const em = document.getElementById('rl-email'), pw = document.getElementById('rl-password');
+    const email = em.value.trim();
+    if(!email){ rlSay(RL_MSG.noemail, 'error'); rlRenderSettings(); em.focus(); return; }
+    if(!pw.value){ rlSay(RL_MSG.password, 'error'); rlRenderSettings(); pw.focus(); return; }
+    em.value = email;
+    const ok = await rlSignIn(email, pw.value);
+    if(ok) pw.value = '';
+    else if(rlSignErr){
+      const f = (rlSignErr==='email' || rlSignErr==='noemail') ? em : pw;
+      const ov = document.getElementById('settings-overlay');
+      if(ov && ov.classList.contains('active')) f.focus();
+    }
+  });
+  document.getElementById('rl-refresh').addEventListener('click', ()=> rlRead('refresh'));
+  document.getElementById('rl-signout').addEventListener('click', rlSignOut);
+  document.getElementById('settings-fab').addEventListener('click', ()=> rlRenderSettings());
+  document.addEventListener('securitypolicyviolation', (e)=>{
+    try{ if(/^https:\/\/[a-z]+\.googleapis\.com/.test(String(e.blockedURI || '')) || /connect-src/.test(String(e.violatedDirective || e.effectiveDirective || ''))) rlCspAt = Date.now(); }catch(x){}
+    // any refused request (a Lichess call in the hosted copy) carries the page's policy: when it
+    // wouldn't let Repertoire Lab's hosts through either, say so before anyone types a password
+    try{
+      if(!rlBlocked && !rlPhase && e.originalPolicy && RL_HOSTS.some(h=> !rlCspAllows(e.originalPolicy, h))){
+        rlBlocked = true;
+        if(!rlMsgText) rlSay(RL_MSG.blocked, 'error');
+        rlChanged();
+      }
+    }catch(x){}
+  });
+  window.addEventListener('storage', (e)=>{
+    if(e.key===null || e.key===RL_AUTH_KEY || e.key===RL_CACHE_KEY || e.key===RL_PREFS_KEY) rlFromStorage(true);
+  });
+  rlFromStorage(false);
+  rlRenderSettings();
+
+  /* ---- Game History: your games by opening (gho*) ----
+     Builder B of "your repertoire in Game History". A Games | Openings
+     switch over the same filters. The Openings view breaks the games down
+     by your Repertoire Lab repertoire (opening -> course / folder ->
+     chapter -> line, plus where games left your prep): games, score,
+     win %, performance, prep depth, who left first, accuracy where a
+     review is kept on this device, recent form and last played; an
+     insights strip; and what you face outside your repertoire. Signed
+     out (or in a copy that can't reach Repertoire Lab) it groups by
+     Lichess's opening names. People only (ghBaseList), standard chess
+     with moves (rpCounted). Every row and card filters the Games list
+     (GH_FILTERS.rep, or opening/oq when signed out). Names from RL and
+     Lichess go in with textContent only. */
+  var GHO_MIN = 5;
+  var GHO_DP = [0,7,14,21,29,36,43,50,57,65,72,80,87,95,102,110,117,125,133,141,149,158,166,175,184,193,202,211,220,230,240,251,262,273,284,296,309,322,336,351,366,383,401,422,444,470,501,538,589,677,800];
+  var GHO_SORTS = [['games','Most games'], ['best','Best score'], ['worst','Worst score'], ['win','Win %'], ['perf','Performance'],
+    ['prep','Deepest prep'], ['you','Left most by you'], ['opp','Left most by opponents'], ['last','Last played'], ['rep','Repertoire order']];
+  var GHO_TOG = new Map();      // row key -> expanded (memory only); openings start expanded, the rest collapsed
+  var GHO_LAST = null;          // the model last drawn (focus, tests)
+  var GHO_STATS = { renders:0, ms:0 };
+  var ghoTimer = 0, ghoLastAt = 0;
+  var GHO_Y = null;             // where the Openings view was scrolled when you left it for the Games list
+
+  function ghoOn(){ return GH_UI.view==='openings'; }
+  function ghoSortKey(){ return GHO_SORTS.some(s=> s[0]===GH_UI.osort) ? GH_UI.osort : 'games'; }
+  function ghoN(n, w){ return n.toLocaleString('en-US')+' '+w+(n===1 ? '' : 's'); }
+  function ghoPct(v){ return v==null ? '\u2014' : Math.round(v)+'%'; }
+  function ghoDp(p){ const q = Math.round(p*100); return q >= 50 ? GHO_DP[Math.min(50, q - 50)] : -GHO_DP[Math.min(50, 50 - q)]; }
+  function ghoAgo(ts){
+    if(!ts) return '';
+    const ms = Math.max(0, Date.now() - ts), h = Math.floor(ms/3600e3), d = Math.floor(ms/86400e3);
+    if(h < 1) return 'now';
+    if(d < 1) return h+'h';
+    if(d < 30) return d+'d';
+    const mo = Math.floor(d/30.4375);
+    return mo < 12 ? Math.max(1, mo)+'mo' : Math.max(1, Math.floor(d/365.25))+'y';
+  }
+  function ghoPush(m, k, v){ const a = m.get(k); if(a) a.push(v); else m.set(k, [v]); }
+
+  // B.3: every row's numbers, over the row's games after the filters
+  function ghoMetrics(list){
+    const n = list.length, left = { you:0, opp:0, end:0, inbook:0 };
+    let W = 0, D = 0, rn = 0, rsum = 0, rpts = 0, prep = 0, pn = 0, an = 0, asum = 0, last = 0;
+    list.forEach(e=>{
+      const pt = e.res==='win' ? 1 : e.res==='draw' ? 0.5 : 0;
+      if(e.res==='win') W++; else if(e.res==='draw') D++;
+      if(e.opp!=null){ rn++; rsum += e.opp; rpts += pt; }
+      const r = e.r;
+      if(r && (r.kind==='chapter' || r.kind==='trunk')){ prep += r.prepPly; pn++; }
+      if(r && r.left && r.left.who in left) left[r.left.who]++;
+      if(e.acc!=null){ an++; asum += e.acc; }
+      if(e.at > last) last = e.at;
+    });
+    const avg = rn ? rsum/rn : null;
+    const form = list.slice().sort((a, b)=> b.at - a.at).slice(0, 5).reverse().map(e=> e.res);
+    return { n, W, D, L:n - W - D, score: n ? Math.round((W + D/2)/n*1000)/10 : null, win: n ? Math.round(W/n*1000)/10 : null,
+      avgOpp: avg==null ? null : Math.round(avg), perf: avg==null ? null : Math.round(avg + ghoDp(rpts/rn)),
+      prep: pn ? Math.round(prep/pn/2*10)/10 : null, left, acc: an ? Math.round(asum/an) : null, accN:an, form, last: last || null, small: n < GHO_MIN };
+  }
+  // one record per counted game: the facts every row needs
+  function ghoEntries(games, u, rep){
+    let acc = {};
+    try{ acc = hrReadStore().g || {}; }catch(e){ acc = {}; }
+    return games.map(g=>{
+      const color = ghMyColor(g, u)==='white' ? 'white' : 'black';
+      const P = ghPlayers(g, u), or = P.opp && P.opp.rating!=null ? Number(P.opp.rating) : NaN;
+      const h = acc[g.id], a = h && Array.isArray(h.a) ? h.a[color==='white' ? 0 : 1] : null;
+      return { g, color, res:ghGameResult(g, u), opp: isFinite(or) ? or : null, at:Number(g.createdAt) || 0,
+        acc: typeof a==='number' && isFinite(a) ? a : null, r: rep ? rpResult(g) : null };
+    });
+  }
+  function ghoNode(key, type, name, ord, rep){ return { key, type, name, ord, rep, list:[], kids:[], sub:'', pre:'', full:'', m:null }; }
+  // what a spot row says (B.4)
+  function ghoSpotName(s){ return rpMoveText(s.atPly, s.played)+(s.who==='opp' ? ' by your opponent' : ' by you'); }
+  function ghoSpotDetail(s){
+    const ex = s.expected || [];
+    if(!ex.length) return '';
+    return s.who==='opp' ? 'you prepared '+rpMovesList(s.atPly, ex) : (ex.length > 1 ? 'your lines have ' : 'your line has ')+rpMovesList(s.atPly, ex);
+  }
+  // games grouped by where they left your prep (you / your opponent), most games first
+  function ghoSpots(list, where){
+    const m = new Map();
+    list.forEach(e=>{
+      const L = e.r && e.r.left;
+      if(!L || !(L.who==='you' || L.who==='opp') || !L.spot) return;
+      let s = m.get(L.spot);
+      if(!s){ s = { spot:L.spot, who:L.who, atPly:L.atPly, played:L.played, expected:L.expected || [], list:[], where }; m.set(L.spot, s); }
+      s.list.push(e);
+    });
+    return Array.from(m.values()).sort((a, b)=> b.list.length - a.list.length || a.atPly - b.atPly);
+  }
+  // "Lichess: Englund Gambit (3), Polish Defense (1)": the Lichess families of a row's games that your names don't say
+  function ghoLiHint(list, names){
+    const m = new Map();
+    list.forEach(e=>{ const f = ghFamily(e.g); if(f) m.set(f, (m.get(f) || 0) + 1); });
+    const out = Array.from(m.entries()).filter(x=> rpLiNew(x[0], names)).sort((a, b)=> b[1] - a[1] || a[0].localeCompare(b[0]));
+    if(!out.length) return '';
+    if(out.length===1 && out[0][1]===list.length) return 'Lichess: '+out[0][0];
+    return 'Lichess: '+out.slice(0, 2).map(x=> x[0]+' ('+x[1]+')').join(', ')+(out.length > 2 ? ', \u2026' : '');
+  }
+  // a line's moves from just before it parts from every other line of its chapter
+  function ghoPreview(l, lines){
+    let dp = 0;
+    lines.forEach(x=>{
+      if(x===l || (x.fen || '')!==(l.fen || '')) return;
+      let j = 0;
+      while(j < l.moves.length && j < x.moves.length && l.moves[j]===x.moves[j]) j++;
+      if(j > dp) dp = j;
+    });
+    const from = Math.max(0, Math.min(dp - 2, l.moves.length - 6)), seq = l.moves.slice(from, from + 8);
+    return seq.length ? rpMoveSeq(l.off + from, seq)+(l.moves.length > from + 8 ? ' \u2026' : '') : '';
+  }
+
+  // ---- the model: per side, the tree of rows (repertoire or Lichess names) ----
+  function ghoRepSide(color, E){
+    const S = RP.side[color], c1 = color==='white' ? 'w' : 'b';
+    const ops = S ? S.openings : [];
+    const byO = new Map(), byC = new Map(), byL = new Map(), byK = new Map(), byT = new Map(), outside = [];
+    E.forEach(e=>{
+      const r = e.r;
+      if(!r) return;
+      if(r.kind==='chapter' || r.kind==='trunk'){
+        ghoPush(byO, r.openingId, e);
+        if(r.kind==='trunk') ghoPush(byT, r.openingId, e);
+        else {
+          ghoPush(byC, r.openingId+'.'+r.chapterId, e);
+          ghoPush(byL, r.openingId+'.'+r.chapterId+'.'+r.lineId, e);
+          if(r.courseId) ghoPush(byK, r.openingId+'.'+r.courseId, e);
+        }
+      } else outside.push(e);
+    });
+    // a spot row's filter is scoped to its row (s.<spot>.<row's filter>): the list it opens = the games it counts
+    const spotNodes = (spots, pk)=> spots.slice(0, 5).map(s=>{
+      const x = ghoNode(pk+'|s.'+s.spot, 's', ghoSpotName(s), s.atPly, 's.'+s.spot+'.'+pk);
+      x.list = s.list; x.sub = ghoSpotDetail(s); x.spot = s;
+      return x;
+    });
+    const tops = [], allSpots = [];
+    ops.forEach((o, oi)=>{
+      const on = ghoNode('o.'+o.id, 'o', o.name, oi, 'o.'+o.id);
+      on.list = byO.get(o.id) || [];
+      on.full = o.name;
+      const tl = byT.get(o.id);
+      if(tl){
+        const t = ghoNode('t.'+o.id, 't', 'Before the chapters split', -1, 't.'+o.id);
+        t.list = tl; t.sub = 'Left book while still in the moves your chapters share'; t.pin = true;
+        const sp = ghoSpots(tl, { kind:'trunk', o });
+        sp.forEach(s=> allSpots.push(s));
+        t.kids = spotNodes(sp, t.key); t.kidsAreSpots = true;
+        on.kids.push(t);
+      }
+      const chNode = (c, ci)=>{
+        const n = ghoNode('c.'+o.id+'.'+c.id, 'c', (c.subsection ? c.subsection+': ' : '')+c.short, ci, 'c.'+o.id+'.'+c.id);
+        n.full = c.name; n.list = byC.get(o.id+'.'+c.id) || []; n.ch = c; n.op = o;
+        if(!n.list.length) n.sub = c.lines.length ? 'not played yet' : 'no lines yet';
+        else n.sub = ghoLiHint(n.list, [o.name, c.section || '', c.name]);
+        if(n.list.length){
+          c.lines.forEach((l, li)=>{
+            const ll = byL.get(o.id+'.'+c.id+'.'+l.id);
+            if(!ll) return;
+            const x = ghoNode('l.'+o.id+'.'+c.id+'.'+l.id, 'l', l.short, li, 'l.'+o.id+'.'+c.id+'.'+l.id);
+            x.list = ll; x.full = l.name; x.pre = ghoPreview(l, c.lines); x.sub = ghoLiHint(ll, [o.name, c.section || '', c.name, l.name]);
+            n.kids.push(x);
+          });
+          const sp = ghoSpots(n.list, { kind:'chapter', o, c });
+          sp.forEach(s=> allSpots.push(s));
+          n.spots = spotNodes(sp, n.key);
+          n.ends = { end:n.list.filter(e=> e.r.left.who==='end').length, inbook:n.list.filter(e=> e.r.left.who==='inbook').length };
+        }
+        return n;
+      };
+      // chapters inside a course or the opening, folders (RL sections) grouped, in
+      // RL's order (chapterOrder.js topItems): folders first unless the opening
+      // was arranged by hand (freeChapterOrder), each where its first chapter is
+      const place = (chs, parent, pk)=>{
+        const folders = new Map();
+        const list = o.free ? chs : chs.filter(c=> c.section).concat(chs.filter(c=> !c.section));
+        list.forEach((c, ci)=>{
+          const n = chNode(c, ci);
+          if(!c.section){ parent.kids.push(n); return; }
+          let f = folders.get(c.section);
+          if(!f){
+            f = ghoNode('f.'+o.id+'.'+pk+gnFnv(c.section), 'f', c.section, n.ord, null);
+            f.sub = 'Folder'; folders.set(c.section, f); parent.kids.push(f);
+          }
+          f.kids.push(n); f.list = f.list.concat(n.list);
+        });
+        folders.forEach(f=>{ const k = f.kids.length; f.sub = 'Folder \u00b7 '+ghoN(k, 'chapter'); });
+      };
+      const courses = (o.courses || []).filter(k=> o.chapters.some(c=> c.courseId===k.id && c.lines.length));
+      if(courses.length >= 2){
+        const known = new Set((o.courses || []).map(k=> k.id));
+        (o.courses || []).forEach((k, ki)=>{
+          const chs = o.chapters.filter(c=> c.courseId===k.id);
+          if(!chs.length) return;
+          const kn = ghoNode('k.'+o.id+'.'+k.id, 'k', k.name, ki, 'k.'+o.id+'.'+k.id);
+          kn.list = byK.get(o.id+'.'+k.id) || []; kn.full = o.name+' \u203a '+k.name;
+          kn.sub = 'Course \u00b7 '+ghoN(chs.length, 'chapter');
+          place(chs, kn, k.id+'.');
+          on.kids.push(kn);
+        });
+        const rest = o.chapters.filter(c=> !c.courseId || !known.has(c.courseId));
+        const before = on.kids.length;
+        place(rest, on, '');
+        on.kids.slice(before).forEach(n=>{ n.ord += 1000; });
+      } else place(o.chapters, on, '');
+      if(!on.list.length) on.sub = o.lines ? 'not played yet' : 'no lines yet';
+      tops.push(on);
+    });
+    // outside your repertoire, by Lichess family
+    const fam = new Map();
+    outside.forEach(e=>{
+      const slug = ghOpeningSlug(e.g);
+      let f = fam.get(slug);
+      if(!f){ f = ghoNode('x.'+c1+'.'+slug, 'x', slug==='none' ? 'Unknown' : ghFamily(e.g), 0, 'x.'+c1+'.'+slug); fam.set(slug, f); }
+      f.list.push(e);
+    });
+    const oSpots = ghoSpots(outside, { kind:'outside' });
+    oSpots.forEach(s=> allSpots.push(s));
+    const all = RP.openings.filter(o=> o.color===color);
+    const norep = !S || !S.has;
+    const outSub = !all.length ? 'You have no '+(color==='white' ? 'White' : 'Black')+' openings in Repertoire Lab.'
+      : !ops.length ? 'Your '+(color==='white' ? 'White' : 'Black')+' openings are turned off in Settings.'
+      : norep ? 'Your '+(color==='white' ? 'White' : 'Black')+' openings have no lines yet.'
+      : color==='white' ? 'You opened with another first move.' : 'Your opponent opened with a move you have no line for.';
+    return { color, tops, out:Array.from(fam.values()), outList:outside, outSub, spots:allSpots, norep };
+  }
+  // Lichess's names: family -> variation (signed out, or no repertoire here)
+  // Lichess's name up to its first comma, whole (the filter value is cut to 40 characters: ghValidFilters)
+  function ghoCut(name){
+    const f = ghFold(String(name || ''));
+    const m = /^[A-Za-z0-9 _.:'-]*/.exec(f);
+    return (m ? m[0] : '').replace(/\s{2,}/g, ' ').trim().slice(0, 120);
+  }
+  function ghoLiSide(color, E){
+    const c1 = color==='white' ? 'w' : 'b', fam = new Map();
+    E.forEach(e=>{
+      const slug = ghOpeningSlug(e.g);
+      let f = fam.get(slug);
+      if(!f){ f = ghoNode('f.'+c1+'.'+slug, 'lf', slug==='none' ? 'Unknown' : ghFamily(e.g), 0, null); f.li = { opening:slug, color }; f.vm = new Map(); fam.set(slug, f); }
+      f.list.push(e);
+      if(slug==='none' || !ghVariation(e.g)) return;
+      const q = ghoCut(e.g.opening.name), i = q.indexOf(':');
+      if(i < 0 || !q.slice(i+1).trim()) return;
+      let v = f.vm.get(q);
+      if(!v){ v = ghoNode('v.'+c1+'.'+slug+'.'+gnFnv(q), 'lv', q.slice(i+1).trim(), 0, null); v.li = { oq:ghCleanText(q).trim(), color }; v.full = q; f.vm.set(q, v); f.kids.push(v); }
+      v.list.push(e);
+    });
+    return { color, tops:Array.from(fam.values()), out:[], outList:[], spots:[], lichess:true };
+  }
+  function ghoMeasure(nd){
+    nd.m = ghoMetrics(nd.list);
+    nd.kids.forEach(ghoMeasure);
+    if(nd.spots) nd.spots.forEach(ghoMeasure);
+  }
+  // B.11: siblings sorted at every level, ties by repertoire order; "before the chapters split" first, unplayed last
+  function ghoSortNodes(nodes, key, byName){
+    const val = (m)=>{
+      switch(key){
+        case 'best': return m.score; case 'worst': return m.score==null ? null : -m.score; case 'win': return m.win;
+        case 'perf': return m.perf; case 'prep': return m.prep; case 'you': return m.left.you; case 'opp': return m.left.opp;
+        case 'last': return m.last; case 'rep': return 0; default: return m.n;
+      }
+    };
+    const tie = byName ? (a, b)=> b.m.n - a.m.n || a.name.localeCompare(b.name) : (a, b)=> a.ord - b.ord;
+    const out = nodes.slice().sort((a, b)=>{
+      if(!!a.pin!==!!b.pin) return a.pin ? -1 : 1;
+      if(key!=='rep' && (!a.m.n)!==(!b.m.n)) return a.m.n ? -1 : 1;
+      // a rate over 1-4 games is noise: by score, win % or performance the small samples go after the rest
+      if((key==='best' || key==='worst' || key==='win' || key==='perf') && !!a.m.small!==!!b.m.small) return a.m.small ? 1 : -1;
+      if(key==='rep') return byName ? tie(a, b) : a.ord - b.ord;
+      const x = val(a.m), y = val(b.m);
+      if(x==null || y==null){ if(x!=null) return -1; if(y!=null) return 1; return tie(a, b); }
+      return (y - x) || tie(a, b);
+    });
+    out.forEach(n=>{ if(n.kids.length && !n.kidsAreSpots) n.kids = ghoSortNodes(n.kids, key, n.type==='lf'); });
+    return out;
+  }
+  function ghoModel(base){
+    const u = ghMe(), f = GH_FILTERS;
+    const fo = Object.assign({}, f, { opening:'', oq:'', result:'', rep:'' });
+    const games = base.filter(g=> ghMatch(g, u, fo));
+    const counted = games.filter(rpCounted);
+    const rep = rpReady();
+    const E = ghoEntries(counted, u, rep);
+    const sides = {};
+    ['white', 'black'].forEach(color=>{
+      const SE = E.filter(e=> e.color===color);
+      const sd = rep ? ghoRepSide(color, SE) : ghoLiSide(color, SE);
+      sd.list = SE; sd.m = ghoMetrics(SE); sd.hidden = !!f.color && f.color!==color;
+      sd.tops.forEach(ghoMeasure); sd.out.forEach(ghoMeasure);
+      sd.outM = ghoMetrics(sd.outList);
+      sd.spots.forEach(s=>{ s.m = ghoMetrics(s.list); });
+      sd.tops = ghoSortNodes(sd.tops, ghoSortKey(), sd.lichess);
+      sd.out = ghoSortNodes(sd.out, ghoSortKey()==='rep' ? 'games' : ghoSortKey(), true);
+      sides[color] = sd;
+    });
+    const pending = rep ? E.filter(e=> !e.r).length : 0;
+    return { rep, sides, counted:counted.length, other:games.filter(g=> !ghIsStd(g)).length, pending, ins:ghoInsights(sides, rep) };
+  }
+
+  // ---- B.5 insights: up to six cards over both colors (after filters) ----
+  function ghoInsights(sides, rep){
+    const cards = [], rows = [], spots = [];
+    ['white', 'black'].forEach(color=>{
+      const sd = sides[color];
+      if(sd.hidden) return;
+      const walk = (n, top)=>{
+        if(rep ? n.type==='c' : n.type==='lf') rows.push({ n, color, top, sideN:sd.m.n });
+        n.kids.forEach(k=> walk(k, top));
+      };
+      sd.tops.forEach(n=> walk(n, n));
+      sd.spots.forEach(s=> spots.push({ s, color }));
+    });
+    const gOrd = (x)=> rep ? (RP.order.get(x.n.op ? x.n.op.id : '') || 0)*10000 + x.n.ord : 0;
+    const path = (x)=> rep ? rpChapterPath(x.n.op, x.n.ch) : x.n.name;
+    const sideWord = (c)=> c==='white' ? 'White' : 'Black';
+    const most = rows.filter(x=> x.n.m.n >= 3).sort((a, b)=> b.n.m.n - a.n.m.n || b.n.m.score - a.n.m.score || gOrd(a) - gOrd(b))[0];
+    if(most) cards.push({ k:'Most played', t:path(most), d:ghoN(most.n.m.n, 'game')+' \u00b7 '+Math.round(100*most.n.m.n/Math.max(1, most.sideN))+'% of your games as '+sideWord(most.color)+' \u00b7 score '+ghoPct(most.n.m.score), x:most });
+    const big = rows.filter(x=> x.n.m.n >= GHO_MIN);
+    const best = big.slice().sort((a, b)=> b.n.m.score - a.n.m.score || b.n.m.n - a.n.m.n || gOrd(a) - gOrd(b))[0];
+    if(best) cards.push({ k:'Best score', t:path(best), d:ghoPct(best.n.m.score)+' over '+ghoN(best.n.m.n, 'game'), x:best });
+    const worst = big.filter(x=> x!==best).sort((a, b)=> a.n.m.score - b.n.m.score || b.n.m.n - a.n.m.n || gOrd(a) - gOrd(b))[0];
+    if(worst) cards.push({ k:'Toughest', t:path(worst), d:ghoPct(worst.n.m.score)+' over '+ghoN(worst.n.m.n, 'game'), x:worst });
+    if(rep){
+      const pick = (f)=> spots.filter(y=> f(y.s) && y.s.list.length >= 2).sort((a, b)=> b.s.list.length - a.s.list.length || a.s.m.score - b.s.m.score || a.s.atPly - b.s.atPly)[0];
+      const sp = (y)=> ({ rep:'s.'+y.s.spot+'.'+ghoSpotScope(y.s.where, y.color) });
+      const opp = pick(s=> s.who==='opp' && s.where.kind==='chapter');
+      if(opp) cards.push({ k:'Opponents surprise you', t:rpMoveText(opp.s.atPly, opp.s.played)+' in '+opp.s.where.c.short,
+        d:ghoN(opp.s.list.length, 'game')+' \u00b7 score '+ghoPct(opp.s.m.score)+' \u00b7 '+ghoSpotDetail(opp.s), f:sp(opp) });
+      const you = pick(s=> s.who==='you' && s.where.kind==='chapter');
+      if(you) cards.push({ k:'You leave your prep', t:rpMoveText(you.s.atPly, you.s.played)+' instead of '+rpMovesList(you.s.atPly, you.s.expected),
+        d:you.s.where.c.short+' \u00b7 '+ghoN(you.s.list.length, 'game')+' \u00b7 score '+ghoPct(you.s.m.score), f:sp(you) });
+      const gap = pick(s=> s.who==='opp' && (s.where.kind==='trunk' || s.where.kind==='outside'));
+      if(gap) cards.push({ k:'Biggest gap', t:rpMoveText(gap.s.atPly, gap.s.played)+(gap.s.where.kind==='trunk' ? ' against your '+gap.s.where.o.name : ' when you have '+sideWord(gap.color)),
+        d:ghoN(gap.s.list.length, 'game')+' \u00b7 no line for it \u00b7 score '+ghoPct(gap.s.m.score), f:sp(gap) });
+    }
+    cards.forEach(c=>{ if(c.x) c.f = ghoNodeFilter(c.x.n); });
+    return cards;
+  }
+
+  // ---- what a row or card does: filter the Games list to its games (B.7) ----
+  function ghoNodeFilter(n){
+    if(n.li) return n.li.opening!=null ? { opening:n.li.opening, color:n.li.color } : { oq:n.li.oq, color:n.li.color };
+    return n.rep ? { rep:n.rep } : null;
+  }
+  function ghoApply(patch){
+    if(!patch) return;
+    if(ghoOn()) GHO_Y = window.scrollY;
+    GH_UI.view = 'games';
+    GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, { opening:'', oq:'', result:'', rep:'' }, patch));
+    ghFiltersChanged(true);
+    const bar = document.querySelector('#view-history .gh-fbar');
+    if(bar){
+      const top = bar.getBoundingClientRect().top;
+      if(top < 0 || top > innerHeight*0.6) window.scrollTo({ top:Math.max(0, scrollY + top - 12) });
+    }
+    const first = document.querySelector('#history-list .history-row');
+    const chip = document.getElementById('gh-rep-chip');
+    try{ (first || (chip && !chip.hidden ? chip : null) || document.getElementById('gh-count')).focus({ preventScroll:true }); }catch(e){}
+  }
+  function ghoSetView(v){
+    v = v==='openings' ? 'openings' : 'games';
+    if(GH_UI.view===v) return;
+    if(v==='games') GHO_Y = window.scrollY;
+    GH_UI.view = v;
+    ghSaveFilters();
+    ghRender();
+    ghSyncHash();
+    if(v==='openings'){
+      rpQueue();
+      if(GHO_Y!=null){ const y = GHO_Y; GHO_Y = null; window.scrollTo({ top:y }); }     // back where you were in the tree
+    }
+  }
+  // #history?view=openings (then the filters, which a link replaces only when it has some)
+  function ghViewParams(){
+    const p = ghFilterParams();
+    if(ghoOn()) p.set('view', 'openings');
+    return p;
+  }
+  function ghApplyViewParams(p){
+    const v = p ? p.get('view') : null, hasF = !!p && GH_PARAM_KEYS.some(k=> p.has(k));
+    const want = v==='openings' ? 'openings' : (v==='games' || hasF) ? 'games' : GH_UI.view;
+    const changed = want!==GH_UI.view;
+    GH_UI.view = want;
+    if(changed) ghSaveFilters();
+    const applied = ghApplyFilterParams(p);
+    if(changed && !applied){ ghRender(); ghSyncHash(); }
+    return applied || changed;
+  }
+  // a row of the Games list filtered to a spot opens the review at that move
+  function ghoOpenOpts(g){
+    const rep = GH_FILTERS.rep;
+    if(!rep || rep.indexOf('s.')!==0 || !rpReady()) return undefined;
+    const r = rpResult(g);
+    return r && r.left && r.left.atPly!=null && r.left.spot===rep.split('.')[1] ? { at:{ ply:r.left.atPly + 1 } } : undefined;
+  }
+
+  // ---- the chip of the rep filter (B.7), and the controls the Openings view doesn't use (B.6) ----
+  function ghoSpotWhere(r){
+    if(r.kind==='chapter'){ const c = RP.chs.get(r.chapterId); return c ? c.short : ''; }
+    if(r.kind==='trunk'){ const o = RP.ops.get(r.openingId); return o ? o.name+', before the chapters split' : ''; }
+    return 'outside your repertoire';
+  }
+  // the rep filter a spot's games are counted under (ghoSpots' "where")
+  function ghoSpotScope(w, color){
+    if(w && w.kind==='chapter') return 'c.'+w.o.id+'.'+w.c.id;
+    if(w && w.kind==='trunk') return 't.'+w.o.id;
+    return 'x.'+(color==='black' ? 'b' : 'w');
+  }
+  function ghoRepLabel(rep){
+    if(!rep) return '';
+    if(!rpReady()) return null;
+    const p = rep.split('.'), t = p[0], o = RP.ops.get(p[1]);
+    if(t==='x') return 'Outside your repertoire as '+(p[1]==='b' ? 'Black' : 'White')+(p[2] ? ': '+ghOpeningLabel(p[2]) : '');
+    if(t==='s'){
+      let r = null;
+      const find = (g)=>{ const x = rpResult(g); if(x && x.left && rpRepMatch(g, rep)) r = x; return !!r; };
+      GH_STATE.games.some(find) || (typeof GN==='object' && GN && GN.notes && Object.values(GN.notes).some(n=> n && GH_STATE.extras.get(n.id) && find(GH_STATE.extras.get(n.id))));
+      if(!r) return 'Where games left your prep';
+      const w = ghoSpotWhere(r);
+      return ghoSpotName(r.left)+(w ? ' ('+w+')' : '');
+    }
+    if(!o) return 'Not in your repertoire any more';
+    if(t==='o') return o.name;
+    if(t==='t') return o.name+' \u203a before the chapters split';
+    if(t==='k'){ const k = (o.courses || []).find(x=> x.id===p[2]); return k ? o.name+' \u203a '+k.name : o.name; }
+    const c = RP.chs.get(p[2]);
+    if(!c) return 'Not in your repertoire any more';
+    if(t==='c') return rpChapterPath(o, c);
+    const l = RP.lns.get(p[3]);
+    return rpChapterPath(o, c)+(l ? ' \u203a '+l.short : '');
+  }
+  function ghoSyncControls(){
+    const on = ghoOn();
+    document.querySelectorAll('#gh-view .toggle').forEach(b=>{
+      const a = b.dataset.val===(on ? 'openings' : 'games');
+      b.classList.toggle('active', a);
+      b.setAttribute('aria-pressed', a ? 'true' : 'false');
+    });
+    const off = (el, wrap)=>{
+      if(!el) return;
+      el.disabled = on;
+      if(on) el.title = 'Not used in the Openings view'; else el.removeAttribute('title');
+      if(wrap) wrap.classList.toggle('is-off', on);
+    };
+    off(document.getElementById('gh-opening'), document.getElementById('gh-opening-wrap'));
+    off(document.getElementById('history-result-filter'));
+    const cl = document.querySelector('#gh-opening-wrap .gh-combo-clear');
+    if(cl) cl.disabled = on;
+    const chip = document.getElementById('gh-rep-chip');
+    if(!chip) return;
+    const rep = GH_FILTERS.rep;
+    chip.hidden = !rep;
+    if(!rep){ chip.textContent = ''; return; }
+    const label = ghoRepLabel(rep);
+    const text = label==null ? 'Repertoire filter: sign in to Repertoire Lab to use it' : label;
+    chip.textContent = '';
+    chip.appendChild(ghEl('span', 'gh-rep-l', text));
+    const x = ghEl('span', 'gh-rep-x', '\u00d7');
+    x.setAttribute('aria-hidden', 'true');
+    chip.appendChild(x);
+    chip.classList.toggle('is-idle', label==null);
+    chip.setAttribute('aria-label', 'Remove the filter: '+text);
+    chip.disabled = on;
+    if(on) chip.title = 'Not used in the Openings view'; else chip.title = label==null ? 'Kept for when you sign in' : 'Remove this filter';
+  }
+  // B.7 count line: a rep filter waits for the sorting
+  function ghoCountHint(cnt){
+    if(!GH_FILTERS.rep || !rpReady()) return;
+    const p = rpProgress();
+    if(p.done < p.total || p.running){
+      cnt.appendChild(document.createTextNode(' '));
+      cnt.appendChild(ghEl('span', 'gh-count-hint', 'still sorting games by your repertoire'));
+    }
+  }
+
+  // ---- drawing ----
+  function ghoIsOpen(n){ const t = GHO_TOG.get(n.key); return t==null ? (n.type==='o') : t; }
+  function ghoHasKids(n){ return n.kids.length > 0 || !!(n.spots && n.spots.length) || !!(n.ends && (n.ends.end || n.ends.inbook)); }
+  function ghoFormWords(form){ return form.map(r=> r==='win' ? 'won' : r==='draw' ? 'drew' : 'lost').join(', '); }
+  function ghoTitle(n, sideN, mode){
+    const m = n.m, b = [];
+    if(n.full && n.full!==n.name) b.push(n.full);
+    if(!m.n){ b.push('No games with these filters'); return b.join('\n'); }
+    b.push(ghoN(m.n, 'game')+' ('+Math.round(100*m.n/Math.max(1, sideN))+'% of this color)'
+      +' \u00b7 score '+ghoPct(m.score)+': '+m.W+' won, '+m.D+' drawn, '+m.L+' lost \u00b7 won '+ghoPct(m.win));
+    if(m.perf!=null) b.push('Performance '+m.perf+' against an average of '+m.avgOpp);
+    if(!mode.lichess && n.type!=='x'){
+      if(m.prep!=null) b.push(m.prep.toFixed(1)+' moves in your prep on average');
+      b.push('Left your prep first: you '+m.left.you+', your opponent '+m.left.opp+', ran past your line '+m.left.end
+        +(m.left.inbook ? ' \u00b7 the whole game stayed in your prep: '+m.left.inbook : ''));
+    }
+    b.push(m.accN ? 'Accuracy '+m.acc+' (average of the '+ghoN(m.accN, 'game')+' reviewed on this device)' : 'No reviews of these games on this device');
+    if(m.last) b.push('Last played '+ghFormatDate(m.last));
+    if(m.small) b.push('Fewer than '+GHO_MIN+' games: these numbers can swing a lot');
+    return b.join('\n');
+  }
+  function ghoCell(cls, label, value, extra){
+    const c = ghEl('div', 'gho-c '+cls);
+    if(label) c.appendChild(ghEl('span', 'gho-lab', label));
+    const v = ghEl('span', 'gho-v', value);
+    c.appendChild(v);
+    if(extra) c.appendChild(extra);
+    return c;
+  }
+  function ghoBar(m){
+    const b = ghEl('span', 'gho-bar');
+    b.setAttribute('aria-hidden', 'true');
+    [['w', m.W], ['d', m.D], ['l', m.L]].forEach(([k, v])=>{ if(!v) return; const s = ghEl('span', 'gho-seg gho-seg-'+k); s.style.flexGrow = String(v); b.appendChild(s); });
+    return b;
+  }
+  function ghoFormEl(form){
+    const f = ghEl('span', 'gho-form');
+    f.setAttribute('role', 'img');
+    f.setAttribute('aria-label', 'Last '+form.length+': '+ghoFormWords(form)+' (newest last)');
+    form.forEach(r=>{ const s = ghEl('span', 'gho-fq gho-fq-'+(r==='win' ? 'w' : r==='draw' ? 'd' : 'l'), r==='win' ? 'W' : r==='draw' ? 'D' : 'L'); s.setAttribute('aria-hidden', 'true'); f.appendChild(s); });
+    return f;
+  }
+  function ghoRow(n, lvl, sd, mode){
+    const m = n.m, kids = ghoHasKids(n), open = kids && ghoIsOpen(n);
+    const row = ghEl('div', 'gho-row gho-t-'+n.type+(m.small && m.n ? ' is-small' : '')+(!m.n ? ' is-none' : ''));
+    row.setAttribute('role', 'listitem');
+    row.setAttribute('aria-level', String(lvl + 1));
+    row.dataset.key = n.key;
+    row.style.setProperty('--lvl', String(lvl));
+    row.title = ghoTitle(n, sd.m.n, mode);
+    const nc = ghEl('div', 'gho-c gho-c-name');
+    const line = ghEl('div', 'gho-nm');
+    if(kids){
+      const d = ghEl('button', 'gho-dis');
+      d.type = 'button';
+      d.dataset.key = n.key;
+      d.setAttribute('aria-expanded', open ? 'true' : 'false');
+      d.setAttribute('aria-label', (open ? 'Hide' : 'Show')+' what\u2019s inside: '+n.name);
+      line.appendChild(d);
+    } else line.appendChild(ghEl('span', 'gho-dis-sp'));
+    const act = n.type==='f' ? 'fold' : (m.n ? ghoNodeFilter(n) : null);
+    if(act){
+      const b = ghEl('button', 'gho-name', n.name);
+      b.type = 'button';
+      b.dataset.key = n.key;
+      if(act==='fold'){ b.dataset.fold = '1'; b.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+      else b.title = 'Show '+(m.n===1 ? 'this game' : 'these '+m.n+' games')+' in the list';
+      line.appendChild(b);
+    } else line.appendChild(ghEl('span', 'gho-name is-plain', n.name));
+    if(m.small && m.n){
+      const t = ghEl('span', 'gho-tag', 'small sample');
+      t.title = 'Fewer than '+GHO_MIN+' games: these numbers can swing a lot';
+      line.appendChild(t);
+    }
+    nc.appendChild(line);
+    if(n.sub) nc.appendChild(ghEl('div', 'gho-sub', n.type==='s' ? n.sub.charAt(0).toUpperCase()+n.sub.slice(1) : n.sub));
+    if(n.pre) nc.appendChild(ghEl('div', 'gho-pre', n.pre));
+    if(m.n){
+      const mid = [ 'Win '+ghoPct(m.win) ];
+      if(m.acc!=null) mid.push('Acc. '+m.acc);
+      if(m.last) mid.push(ghoAgo(m.last));
+      nc.appendChild(ghEl('div', 'gho-mid', mid.join(' \u00b7 ')));
+    }
+    row.appendChild(nc);
+    if(!m.n){ row.appendChild(ghEl('div', 'gho-c gho-c-empty', '')); return row; }
+    const share = ghEl('span', 'gho-share', Math.round(100*m.n/Math.max(1, sd.m.n))+'%');
+    row.appendChild(ghoCell('gho-c-n', 'Games', String(m.n), share));
+    const sc = ghEl('div', 'gho-c gho-c-score');
+    sc.appendChild(ghEl('span', 'gho-lab', 'Score'));
+    sc.appendChild(ghoBar(m));
+    sc.appendChild(ghEl('span', 'gho-v gho-pct', ghoPct(m.score)));
+    row.appendChild(sc);
+    row.appendChild(ghoCell('gho-c-win gho-pctc', 'Win', ghoPct(m.win)));
+    row.appendChild(ghoCell('gho-c-perf', 'Perf.', m.perf==null ? '\u2014' : String(m.perf), m.avgOpp==null ? null : ghEl('span', 'gho-vs', 'vs '+m.avgOpp)));
+    if(!mode.lichess){
+      row.appendChild(ghoCell('gho-c-prep', 'Prep', n.type==='x' || m.prep==null ? '\u2014' : m.prep.toFixed(1)));
+      const lf = ghoCell('gho-c-left', 'Left first', '');
+      const v = lf.querySelector('.gho-v');
+      // from 680px a column per count under the header's "you / opp / end" (the words stay for screen readers); a card says them
+      [['you', m.left.you], ['opp', m.left.opp], ['end', m.left.end]].forEach(([w, k], i)=>{
+        if(i) v.appendChild(ghEl('span', 'gho-ls', ' \u00b7 '));
+        const p = ghEl('span', 'gho-lp');
+        p.appendChild(ghEl('span', 'gho-lw', w+' '));
+        p.appendChild(document.createTextNode(String(k)));
+        v.appendChild(p);
+      });
+      row.appendChild(lf);
+    }
+    row.appendChild(ghoCell('gho-c-acc', 'Acc.', m.acc==null ? '\u2014' : String(m.acc)));
+    const fc = ghEl('div', 'gho-c gho-c-form');
+    fc.appendChild(ghEl('span', 'gho-lab', 'Last 5'));
+    fc.appendChild(ghoFormEl(m.form));
+    row.appendChild(fc);
+    const lc = ghoCell('gho-c-last', 'Last', ghoAgo(m.last));
+    if(m.last) lc.title = ghFormatDate(m.last);
+    row.appendChild(lc);
+    return row;
+  }
+  function ghoLabel(text, lvl, cls){
+    const l = ghEl('div', 'gho-lbl'+(cls ? ' '+cls : ''), text);
+    l.setAttribute('role', 'listitem');
+    l.setAttribute('aria-level', String(lvl + 1));
+    l.style.setProperty('--lvl', String(lvl));
+    return l;
+  }
+  function ghoAddRows(box, nodes, lvl, sd, mode){
+    nodes.forEach(n=>{
+      box.appendChild(ghoRow(n, lvl, sd, mode));
+      if(!ghoHasKids(n) || !ghoIsOpen(n)) return;
+      if(n.kidsAreSpots && n.kids.length) box.appendChild(ghoLabel('Where games left it', lvl + 1));
+      ghoAddRows(box, n.kids, lvl + 1, sd, mode);
+      if(n.spots && n.spots.length){
+        box.appendChild(ghoLabel('Where games left it', lvl + 1));
+        ghoAddRows(box, n.spots, lvl + 1, sd, mode);
+      }
+      if(n.ends && n.ends.end) box.appendChild(ghoLabel('Ran past your line: '+ghoN(n.ends.end, 'game'), lvl + 1, 'is-note'));
+      if(n.ends && n.ends.inbook) box.appendChild(ghoLabel('Stayed in your prep to the end: '+ghoN(n.ends.inbook, 'game'), lvl + 1, 'is-note'));
+    });
+  }
+  function ghoHead(mode){
+    const h = ghEl('div', 'gho-row gho-head');
+    h.setAttribute('aria-hidden', 'true');
+    const cols = [['gho-c-name', mode.lichess || mode.outside ? 'Opening' : 'Line', ''], ['gho-c-n', 'Games', 'Games, and their share of this color'],
+      ['gho-c-score', 'Score', 'Won, drawn, lost; points scored'], ['gho-c-win', 'Win', 'Games won'], ['gho-c-perf', 'Perf.', 'Performance rating, and the average opponent']];
+    if(!mode.lichess) cols.push(['gho-c-prep', 'Prep', 'Moves in your prep, on average'], ['gho-c-left', 'Left first', 'Who left your prep first: you \u00b7 your opponent \u00b7 ran past your line']);
+    cols.push(['gho-c-acc', 'Acc.', 'Average accuracy of the games reviewed on this device'], ['gho-c-form', 'Form', 'The last five results, newest last'], ['gho-c-last', 'Last', 'Last played']);
+    cols.forEach(([c, t, ti])=>{
+      const e = ghEl('div', 'gho-c '+c, t);
+      if(ti) e.title = ti;
+      if(c==='gho-c-left'){
+        const k = ghEl('span', 'gho-hl');
+        ['you', 'opp', 'end'].forEach(w=> k.appendChild(ghEl('span', '', w)));
+        e.appendChild(k);
+      }
+      h.appendChild(e);
+    });
+    return h;
+  }
+  function ghoSideSum(sd){
+    const m = sd.m;
+    const b = [ghoN(m.n, 'game'), 'score '+ghoPct(m.score), m.W+' won, '+m.D+' drawn, '+m.L+' lost'];
+    if(m.perf!=null) b.push('performance '+m.perf);
+    return b.join(' \u00b7 ');
+  }
+  function ghoDrawSide(el, sd, mode, loading){
+    el.textContent = '';
+    el.hidden = sd.hidden || loading;
+    if(el.hidden) return;
+    const word = sd.color==='white' ? 'White' : 'Black';
+    el.appendChild(ghEl('h2', 'gho-h', 'As '+word));
+    if(!sd.m.n){
+      el.appendChild(ghEl('div', 'gho-empty', 'No games as '+word+' with these filters.'));
+      if(mode.rep && sd.norep) el.appendChild(ghEl('div', 'gho-sub', sd.outSub));
+      return;
+    }
+    el.appendChild(ghEl('div', 'gho-sum', ghoSideSum(sd)));
+    if(sd.tops.length){
+      const tree = ghEl('div', 'gho-tree');
+      tree.setAttribute('role', 'list');
+      tree.setAttribute('aria-label', (mode.lichess ? 'Your openings as ' : 'Your repertoire as ')+word);
+      tree.appendChild(ghoHead(mode));
+      ghoAddRows(tree, sd.tops, 0, sd, mode);
+      el.appendChild(tree);
+    }
+    if(mode.rep && (sd.outList.length || sd.norep)){
+      const out = ghEl('div', 'gho-out');
+      const h = ghEl('h3', 'gho-oh');
+      h.appendChild(ghEl('span', 'gho-oh-t', 'Outside your repertoire'));
+      h.appendChild(ghEl('span', 'gho-oh-n', ghoN(sd.outList.length, 'game')));
+      out.appendChild(h);
+      out.appendChild(ghEl('div', 'gho-sub gho-out-sub', sd.outSub));
+      if(sd.outList.length){
+        const all = ghEl('button', 'btn-link gho-out-all', 'Show these games');
+        all.type = 'button';
+        all.dataset.rep = 'x.'+(sd.color==='white' ? 'w' : 'b');
+        out.appendChild(all);
+        const tree = ghEl('div', 'gho-tree');
+        tree.setAttribute('role', 'list');
+        tree.setAttribute('aria-label', 'Outside your repertoire as '+word);
+        tree.appendChild(ghoHead({ lichess:false, outside:true }));
+        ghoAddRows(tree, sd.out, 0, { m:sd.m }, { lichess:false });
+        out.appendChild(tree);
+      }
+      el.appendChild(out);
+    }
+  }
+  function ghoStatus(model){
+    const el = document.getElementById('gho-status');
+    el.textContent = '';
+    const st = rlState(), msg = rlMessage();
+    const link = (text, fn)=>{ const b = ghEl('button', 'btn-link gho-status-btn', text); b.type = 'button'; b.addEventListener('click', fn); return b; };
+    let text = '', btn = null;
+    if(st==='off' || st==='blocked') text = '';
+    else if(model.rep){
+      const p = rpProgress();
+      if(p.running || p.done < p.total) text = 'Sorting '+p.done.toLocaleString('en-US')+' of '+p.total.toLocaleString('en-US')+' games by your repertoire\u2026';
+      else if(st==='reading') text = 'Checking Repertoire Lab for changes to your repertoire\u2026';
+      else if(msg.kind==='error'){ text = msg.text; btn = st==='expired' ? link('Sign in again', rlOpenSettings) : link('Try again', rlRefresh); }
+      else { text = 'Your repertoire from Repertoire Lab, updated '+relTime(RP.at)+'.'; btn = link('Refresh', rlRefresh); }
+    } else if(st==='reading') text = 'Reading your repertoire from Repertoire Lab\u2026';
+    else if(st==='expired'){ text = RL_MSG.expired; btn = link('Sign in again', rlOpenSettings); }
+    else { text = msg.text || 'Your repertoire isn\u2019t on this device yet.'; btn = link('Try again', rlRefresh); }
+    el.hidden = !text;
+    el.classList.toggle('is-error', !!btn && btn.textContent!=='Refresh');
+    if(!text) return;
+    el.appendChild(ghEl('span', 'gho-status-t', text));
+    if(btn){ el.appendChild(document.createTextNode(' ')); el.appendChild(btn); }
+  }
+  function ghoDrawInsights(model){
+    const box = document.getElementById('gho-ins');
+    box.textContent = '';
+    box.hidden = !model.ins.length;
+    model.ins.forEach((c, i)=>{
+      const b = ghEl('button', 'gho-card');
+      b.type = 'button';
+      b.dataset.ins = String(i);
+      b.title = 'Show these games in the list';
+      b.appendChild(ghEl('span', 'gho-card-k', c.k));
+      b.appendChild(ghEl('span', 'gho-card-t', c.t));
+      b.appendChild(ghEl('span', 'gho-card-d', c.d));
+      box.appendChild(b);
+    });
+  }
+  function ghoRender(base){
+    const sec = document.getElementById('gho');
+    if(!sec) return;
+    const t0 = performance.now();
+    if(!base) base = ghBaseList();
+    const model = ghoModel(base);
+    GHO_LAST = model;
+    GHO_STATS.renders++;
+    const mode = { rep:model.rep, lichess:!model.rep };
+    sec.classList.toggle('is-lichess', mode.lichess);
+    // focus stays on the same control across a redraw
+    const fa = document.activeElement, inSec = fa && sec.contains(fa);
+    const fKey = inSec && fa.dataset ? (fa.dataset.key || '') : '', fCls = inSec ? (fa.classList.contains('gho-dis') ? 'gho-dis' : fa.classList.contains('gho-name') ? 'gho-name' : '') : '';
+    const fIns = inSec && fa.dataset && fa.dataset.ins!=null ? fa.dataset.ins : null;
+    const fStat = inSec && (fa.classList.contains('gho-status-btn') || fa.id==='gho-status'), fOut = inSec && fa.classList.contains('gho-out-all') ? fa.dataset.rep : '';
+    const st = rlState();
+    const conn = document.getElementById('gho-connect');
+    conn.hidden = model.rep;
+    if(!model.rep){
+      document.getElementById('gho-connect-text').textContent = st==='blocked'
+        ? 'Your repertoire can\u2019t be read in this copy of Chess Arcade. Open the Chess Arcade site to see your games by your own repertoire.'
+        : st==='in' || st==='reading' ? 'Grouped by Lichess\u2019s opening names until your repertoire is read from Repertoire Lab.'
+        : 'Grouped by Lichess\u2019s opening names. Connect Repertoire Lab to see your games by your own repertoire, chapter by chapter.';
+      document.getElementById('gho-connect-btn').hidden = !(st==='off' || st==='expired');
+      document.getElementById('gho-connect-btn').textContent = st==='expired' ? 'Sign in to Repertoire Lab' : 'Connect Repertoire Lab';
+    }
+    ghoStatus(model);
+    const loading = !GH_STATE.games.length;
+    ghoDrawInsights(loading ? { ins:[] } : model);
+    const sel = document.getElementById('gho-sort');
+    if(sel.value!==ghoSortKey()) sel.value = ghoSortKey();
+    document.querySelector('#gho .gho-tools').hidden = loading || !model.counted;
+    ghoDrawSide(document.getElementById('gho-white'), model.sides.white, mode, loading);
+    ghoDrawSide(document.getElementById('gho-black'), model.sides.black, mode, loading);
+    const foot = document.getElementById('gho-foot');
+    let ft = '';
+    if(!loading){
+      ft = 'Games against the computer aren\u2019t counted.';
+      if(model.other) ft += ' '+(model.other===1 ? '1 game in another variant isn\u2019t' : model.other+' games in other variants aren\u2019t')+' counted either.';
+      if(!GH_STATE.exhausted) ft += ' Built from the '+GH_STATE.games.length.toLocaleString('en-US')+' games loaded so far: load more games for a longer view.';
+    }
+    foot.textContent = ft;
+    foot.hidden = !ft;
+    const cnt = document.getElementById('gh-count');
+    cnt.textContent = loading && (GH_STATE.loading || !GH_STATE.exhausted) ? '' : 'Built from '+ghoN(model.counted, 'game')+' against people';
+    if(fKey || fIns!=null){
+      const el = fIns!=null ? sec.querySelector('.gho-card[data-ins="'+fIns+'"]')
+        : Array.from(sec.querySelectorAll('.'+(fCls || 'gho-name'))).find(e=> e.dataset.key===fKey);
+      if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+    } else if(fStat || fOut){
+      // the link was rebuilt (or is gone while the repertoire is read): its new copy, else the line itself
+      const st2 = document.getElementById('gho-status');
+      const el = fOut ? Array.from(sec.querySelectorAll('.gho-out-all')).find(e=> e.dataset.rep===fOut) : (st2.hidden ? null : (st2.querySelector('.gho-status-btn') || st2));
+      if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+    }
+    GHO_STATS.ms = Math.round(performance.now() - t0);
+  }
+  // re-draw when the repertoire or a sorting batch changes (batches at most every 250 ms)
+  function ghoSoon(kind){
+    if(currentView!=='history') return;
+    const now = Date.now();
+    if(kind!=='batch'){ clearTimeout(ghoTimer); ghoTimer = setTimeout(()=>{ ghoTimer = 0; ghoLastAt = Date.now(); if(currentView==='history') ghRender(); }, 0); return; }
+    if(ghoTimer) return;
+    ghoTimer = setTimeout(()=>{ ghoTimer = 0; ghoLastAt = Date.now(); if(currentView==='history') ghRender(); }, Math.max(0, 250 - (now - ghoLastAt)));
+  }
+  rpOnChange(ev=> ghoSoon(ev && ev.kind));
+  (function ghoWire(){
+    const sel = document.getElementById('gho-sort');
+    GHO_SORTS.forEach(([v, t])=> sel.appendChild(new Option(t, v)));
+    sel.value = ghoSortKey();
+    sel.addEventListener('change', ()=>{ GH_UI.osort = sel.value; ghSaveFilters(); ghRender(); });
+    document.getElementById('gh-view').addEventListener('click', e=>{ const b = e.target.closest('.toggle'); if(b) ghoSetView(b.dataset.val); });
+    document.getElementById('gh-rep-chip').addEventListener('click', ()=>{ if(!ghoOn()) ghSetFilters({ rep:'' }); });
+    document.getElementById('gho-connect-btn').addEventListener('click', ()=> rlOpenSettings());
+    const sec = document.getElementById('gho');
+    sec.addEventListener('click', e=>{
+      const card = e.target.closest('.gho-card');
+      if(card){ const c = GHO_LAST && GHO_LAST.ins[Number(card.dataset.ins)]; if(c) ghoApply(c.f); return; }
+      const all = e.target.closest('.gho-out-all');
+      if(all){ ghoApply({ rep:all.dataset.rep }); return; }
+      const b = e.target.closest('.gho-dis, .gho-name[data-fold]');
+      if(b){
+        const n = ghoFind(b.dataset.key);
+        if(n){ GHO_TOG.set(n.key, !ghoIsOpen(n)); ghRender(); }
+        return;
+      }
+      const nb = e.target.closest('.gho-name');
+      if(nb && nb.dataset.key){ const n = ghoFind(nb.dataset.key); if(n) ghoApply(ghoNodeFilter(n)); }
+    });
+  })();
+  function ghoFind(key){
+    if(!GHO_LAST || !key) return null;
+    let hit = null;
+    const walk = (ns)=> ns.some(n=> (n.key===key && (hit = n)) || walk(n.kids) || (n.spots ? walk(n.spots) : false));
+    ['white', 'black'].some(c=> walk(GHO_LAST.sides[c].tops) || walk(GHO_LAST.sides[c].out));
+    return hit;
+  }
 
   /* ---- Game History: open a row to review it on an analysis board ----
      Builder A of the game review (hv*, engine hve*). The game is a move
@@ -24283,6 +26514,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     op.textContent = on ? (g.opening.eco ? String(g.opening.eco)+' \u00b7 ' : '')+on : '';
     op.hidden = !on;
     document.getElementById('hv-pgn').value = g.pgn || (g._summary && S.sanMoves.length ? gnMovetext(S.sanMoves.join(' ')) : (S.sanMoves.length ? gnMovetext(S.sanMoves.join(' ')) : '(PGN not available for this game)'));
+    if(typeof hpRender==='function') hpRender(S);     // review prep (hp*): your Repertoire Lab line
   }
   function hvUpdateLichessLink(){
     const S = HV_STATE, a = document.getElementById('hv-lichess');
@@ -24299,6 +26531,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const el = hvEl('div', 'mv-san'+(node===S.cur ? ' mv-viewed' : ''), node.san);
     el.dataset.node = node.id;
     hvAddBadge(el, node);
+    if(typeof hpMark==='function') hpMark(el, node);  // review prep: your prep, the move that left it
     return el;
   }
   function hvAddBadge(el, node){
@@ -26074,6 +28307,185 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   /* ---- end of the game review + explorer block ---- */
 
+  /* ---- Review prep (hp*): this game against your Repertoire Lab lines ----
+     Builder C of "your repertoire in Game History" (SPEC section C; kit
+     test-kits/chess-arcade/repertoire). In the header card (#hv-prep): the
+     line the game followed (opening > chapter, or the opening alone when it
+     left book before the chapters split), how deep it stayed in your prep,
+     who left it first and what your repertoire has there. In the move list
+     (main line only): a dotted underline on every move in your prep and a
+     dashed box on the move that left it. "Show my line" plays your line from
+     that spot as an ordinary variation (this session only, never in Copy
+     PGN; the line menu deletes it). Reads A's rp* contracts only; without a
+     repertoire (RP null) every entry point returns at once. ---- */
+  var HP = { S:null, R:null, r:null, marks:null, dev:0 };
+  // the open review's result (cached per review and per repertoire)
+  function hpFor(S){
+    if(HP && HP.S===(S || null) && HP.R===RP) return HP;
+    HP = { S:S || null, R:RP, r:null, marks:null, dev:0, line:undefined };
+    if(!S || !RP || !S.std || !S.me || !S.main || !S.main.length) return HP;
+    let r = null;
+    try{ r = rpResultNow(S.game); }catch(e){ r = null; }
+    if(!r || r.kind==='norep' || r.color!==S.me) return HP;
+    HP.r = r;
+    HP.marks = new Set(r.marks || []);
+    const L = r.left || {};
+    if((L.who==='you' || L.who==='opp') && L.atPly!=null && S.main[L.atPly]) HP.dev = L.atPly + 1;
+    return HP;
+  }
+  function hpJoin(a){ return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ')+' and '+a[a.length - 1]; }
+  // the header's words for result r (C.1)
+  function hpTexts(S, r){
+    const toks = String(S.game.moves || '').trim().split(/\s+/), L = r.left || {};
+    const mv = (i)=> i >= 0 && i < toks.length ? rpMoveText(i, toks[i]) : '';
+    const played = L.played ? rpMoveText(L.atPly, L.played) : '';
+    const ex = L.expected || [], side = r.color==='white' ? 'White' : 'Black';
+    const t = { name:'', sub:'', title:'', line:'', depth:'', left:'', also:'', go:'', show:false, games:null };
+    const youText = ()=> 'You played '+played+'. '+(ex.length > 1 ? 'Your lines have ' : 'Your line has ')+rpMovesList(L.atPly, ex)+'.';
+    const oppText = ()=> 'Your opponent\u2019s '+played+' isn\u2019t in your repertoire.'+(ex.length ? ' You prepared '+rpMovesList(L.atPly, ex)+'.' : '');
+    if(r.kind==='chapter' || r.kind==='trunk'){
+      const K = rpLookup(r) || {};
+      if(r.kind==='chapter'){
+        t.name = rpPathLabel(r) || '';
+        t.title = rpFullLabel(r) || t.name;
+        t.games = { rep:'c.'+r.openingId+'.'+r.chapterId, label:'Games in this chapter' };
+        // the lines that reach where the game was deepest in prep: all of them when there are up to three
+        // (two lines can share it: "Englund Gambit 1...e5 #2" beside a longer one), else the longest and how many
+        const L3 = (r.lineIds || []).map(id=> RP.lns.get(id)).filter(Boolean);
+        if(L3.length > 1 && r.nLines <= 3){ t.line = 'Your lines: '+hpJoin(L3.map(l=> l.short)); t.lineTitle = L3.map(l=> l.name).join('; '); }
+        else if(K.line){ t.line = 'Your line: '+K.line.short+(r.nLines > 1 ? ' (one of '+r.nLines+' that reach this position)' : ''); t.lineTitle = K.line.name; }
+      } else {
+        t.name = K.opening ? K.opening.name : '';
+        t.sub = ' \u00b7 left book before the chapters split';
+        t.title = t.name+': the game left your book while these chapters still share their moves: '+(K.split || []).map(c=> c.short).join(', ');
+        t.games = { rep:'t.'+r.openingId, label:'Games before the split' };
+      }
+      const at = mv(r.prepPly - 1);
+      t.depth = r.transposed ? 'Reached your line by another move order, at '+at+'.' : 'Your prep through '+at+'.';
+      if(L.who==='you') t.left = youText();
+      else if(L.who==='opp') t.left = oppText();
+      else if(L.who==='end') t.left = 'The game ran past the end of your line'+(r.transposed ? ' after '+mv(L.atPly - 1) : '')+'.';   // the depth line names the move
+      else if(L.who==='inbook') t.left = r.transposed ? 'From there, the game stayed in your prep to the end.' : 'The whole game stayed in your prep.';
+      if(r.alsoIn && r.alsoIn.length) t.also = 'Also in '+hpJoin(r.alsoIn)+'.';
+    } else {
+      t.name = 'Not in your repertoire';
+      if(L.who==='you') t.left = L.atPly===0 ? 'You played '+played+'. Your '+side+' repertoire starts '+rpMovesList(0, ex)+'.' : youText();
+      else if(L.who==='opp') t.left = L.atPly===0 ? 'Your opponent\u2019s '+played+' isn\u2019t covered by your '+side+' openings.' : oppText();
+    }
+    if((L.who==='you' || L.who==='opp') && played && S.main[L.atPly]) t.go = 'Go to '+played;
+    t.show = L.who==='you';
+    return t;
+  }
+  function hpSet(id, text){ const e = document.getElementById(id); e.textContent = text || ''; e.hidden = !text; }
+  // C.1: the header line; hidden (and nothing marked) without a repertoire,
+  // without your side, for a variant game or a game with no moves
+  function hpRender(S){
+    S = S || HV_STATE;
+    const box = document.getElementById('hv-prep');
+    if(!box) return;
+    const H = hpFor(S);
+    if(!H.r){ box.hidden = true; return; }
+    const t = hpTexts(S, H.r);
+    const nm = document.getElementById('hv-prep-name');
+    nm.textContent = t.name;
+    if(t.sub) nm.appendChild(hvEl('span', 'hv-prep-sub', t.sub));
+    nm.title = t.title || '';
+    hpSet('hv-prep-line', t.line);
+    const ln = document.getElementById('hv-prep-line');
+    ln.title = t.line ? t.lineTitle || '' : '';
+    hpSet('hv-prep-depth', t.depth);
+    hpSet('hv-prep-left', t.left);
+    hpSet('hv-prep-also', t.also);
+    const go = document.getElementById('hv-prep-go'), show = document.getElementById('hv-prep-show'), games = document.getElementById('hv-prep-games');
+    go.textContent = t.go; go.hidden = !t.go;
+    show.hidden = !(t.show && hpShowState(H));
+    hpSyncShow(H);
+    games.hidden = !t.games;
+    if(t.games){ games.textContent = t.games.label; games.dataset.rep = t.games.rep; }
+    document.getElementById('hv-prep-acts').hidden = go.hidden && show.hidden && games.hidden;
+    const m = H.marks.size > 0, d = H.dev > 0;
+    hpSet('hv-prep-key', m && d ? 'In the moves, a dotted underline marks your prep and a dashed box the move that left it.'
+      : m ? 'In the moves, a dotted underline marks your prep.' : d ? 'In the moves, a dashed box marks the move that left your prep.' : '');
+    box.hidden = false;
+  }
+  // C.2 / C.3: one hook line in hvMoveCell (main-line cells only; variations never)
+  function hpMark(el, node){
+    if(!RP || !node || !node.main || !node.parent) return;
+    const H = hpFor(HV_STATE);
+    if(!H.r) return;
+    if(H.marks.has(node.ply)){ el.classList.add('is-prep'); el.title = 'Your prep'; }
+    if(node.ply===H.dev){
+      const you = H.r.left.who==='you', t = you ? 'You left your prep here' : 'Your opponent left your prep here';
+      el.classList.add('is-dev');
+      el.title = t;
+      el.appendChild(hvEl('span', 'hv-sr', ', '+t.charAt(0).toLowerCase()+t.slice(1)));
+      hpSyncShow(H);          // the list was just redrawn: a deleted line reads "Show my line" again
+    }
+  }
+  // C.4: your line from the spot you left it: { L:{line, from, moves}, base, child }
+  function hpShowState(H){
+    const S = H.S, r = H.r;
+    if(!S || !r || !r.left || r.left.who!=='you') return null;
+    if(H.line===undefined){ try{ H.line = rpLineFrom(r) || null; }catch(e){ H.line = null; } }
+    const L = H.line, at = r.left.atPly;
+    if(!L || !L.moves || !L.moves.length || at==null) return null;
+    const base = at > 0 ? S.main[at - 1] : S.root;
+    const mv = base ? rpSanToMove(base.state, L.moves[0]) : null;
+    if(!mv) return null;
+    const u = hvUci(mv);
+    return { L, base, child: base.children.find(c=> c.uci===u) || null };
+  }
+  function hpSyncShow(H){
+    const b = document.getElementById('hv-prep-show');
+    if(!b || !H || !H.r || b.hidden) return;
+    const st = hpShowState(H);
+    const t = st && st.child && !st.child.main ? 'Go to my line' : 'Show my line';
+    if(b.textContent!==t) b.textContent = t;
+  }
+  function hpShowLine(){
+    const S = HV_STATE, H = hpFor(S), st = H.r ? hpShowState(H) : null;
+    if(!st) return;
+    let n = st.base, first = null;
+    for(let i = 0; i < st.L.moves.length; i++){
+      const mv = rpSanToMove(n.state, st.L.moves[i]);
+      const nx = mv ? hvPlay(n, mv) : null;
+      if(!nx) break;                      // not legal here: the line stops
+      if(!first) first = nx;
+      n = nx;
+    }
+    if(!first) return;
+    hvGoNode(first);
+    hvAnnounce(first);
+    hvRevealBoard();
+  }
+  function hpGoDev(){
+    const S = HV_STATE, H = hpFor(S);
+    if(!H.r || !H.dev || !S.main[H.dev - 1]) return;
+    hvGoNode(S.main[H.dev - 1]);
+    hvRevealBoard();
+  }
+  // "Games in this chapter": Game History's Games view filtered to it (B.7)
+  function hpGames(){
+    const H = hpFor(HV_STATE), r = H.r;
+    if(!r || (r.kind!=='chapter' && r.kind!=='trunk')) return;
+    const patch = { rep: r.kind==='chapter' ? 'c.'+r.openingId+'.'+r.chapterId : 't.'+r.openingId };
+    if(GH_FILTERS.color && GH_FILTERS.color!==r.color) patch.color = '';
+    GH_UI.view = 'games';
+    showView('history');
+    if(typeof ghoApply==='function') ghoApply(patch); else ghSetFilters(patch);
+  }
+  document.getElementById('hv-prep-go').addEventListener('click', hpGoDev);
+  document.getElementById('hv-prep-show').addEventListener('click', hpShowLine);
+  document.getElementById('hv-prep-games').addEventListener('click', hpGames);
+  // the repertoire was read, refreshed, toggled or signed out while a review is open
+  rpOnChange(()=>{
+    const S = HV_STATE;
+    if(!S || currentView!=='play-history' || (HP && HP.S===S && HP.R===RP)) return;
+    hpRender(S);
+    hvRenderMoveList();
+  });
+  /* ---- end of review prep ---- */
+
   // Every drill's "how to annotate this board" hint row (.anno-hint) gets a
   // small collapse toggle -- one shared, persisted preference across all of
   // them, since they're all the same control (right-click-drag/hold-key
@@ -27394,6 +29806,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       gnStore = full ? 'full' : 'blocked';
       ok = false;
       if(full && hrDropCache()){ try{ localStorage.setItem(GN_KEY, json); gnStore = 'ok'; ok = true; }catch(e2){} }   // notes first: the game reviews give way, then one more try
+      if(!ok && full && typeof rlDropCache==='function' && rlDropCache()){ try{ localStorage.setItem(GN_KEY, json); gnStore = 'ok'; ok = true; }catch(e3){} }   // then the Repertoire Lab copy (read again next visit)
     }
     gnUnsaved = !ok;
     if(was!==gnUnsaved) gnRenderSync();
@@ -30299,6 +32712,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(slug === 'settings'){
       const overlay = document.getElementById('settings-overlay');
       if(overlay) overlay.classList.add('active');
+      if(params.get('rl')==='1') rlOpenSettings();
       return;
     }
     // #puzzle/<id>: one Lichess puzzle as practice (never reported, so it
