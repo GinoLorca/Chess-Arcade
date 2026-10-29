@@ -3919,6 +3919,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-icon-btn svg{ width:16px; height:16px; display:block; }
   .hv-icon-btn[aria-pressed="true"]{ color:var(--ink); border-color:var(--ink-soft); background:var(--surface-2); }
   .hv-icon-btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .hv-icon-btn[aria-expanded="true"]{ color:var(--ink); border-color:var(--ink-soft); background:var(--surface-2); }
+  /* The cog's pop-up: which of the engine's top three moves get an arrow.
+     Each color is the dot beside its line, as in Repertoire Lab. */
+  #hv-engine{ position:relative; }
+  .hv-eng-pop{ right:8px; min-width:210px; }
+  .hv-pop-head{ padding:6px 10px 4px; font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .hv-pop-check{ display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:5px; cursor:pointer; font-size:13px; color:var(--ink); }
+  .hv-pop-check:hover{ background:var(--surface-2); }
+  .hv-pop-check:has(input:focus-visible){ outline:2px solid var(--focus); outline-offset:-2px; }
+  .hv-pop-check input{ width:15px; height:15px; margin:0; flex:0 0 auto; accent-color:var(--ink); }
+  .hv-arrow-dot, .hv-eng-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 auto; box-shadow:0 0 0 1px rgba(0,0,0,.3); }
+  .hv-eng-dot{ width:9px; height:9px; }
+  .hv-eng-dot.is-off{ visibility:hidden; }
+  .hv-eng-lines.no-dots .hv-eng-dot{ display:none; }
+  :root[data-skin="bauhaus"] .hv-pop-check{ border-radius:0; }
   .hv-eng-lines{ display:flex; flex-direction:column; gap:2px; }
   .hv-eng-line{
     display:flex; align-items:center; gap:8px; min-width:0; width:calc(100% + 12px); margin:0 -6px; padding:4px 6px;
@@ -4059,6 +4074,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #view-play-history .hr-count{ padding-top:8px; padding-bottom:8px; min-width:44px; }
     #view-play-history .hr-link{ padding:8px 2px; margin:-8px -2px; }
     #view-play-history .hv-switch{ padding:9px 6px; margin:-9px -6px; }
+    #view-play-history .hv-icon-btn{ width:36px; height:36px; }
+    #view-play-history .hv-pop-check{ min-height:44px; box-sizing:border-box; padding:10px; }
     #view-play-history .hv-act{ min-height:36px; }
     :is(#view-play-history, #gn-overlay) :is(.nb-dg-go, .nb-dg-open){ padding:8px 0; }
     :is(#view-play-history, #gn-overlay) .nb-dg-x{ width:34px; height:34px; }
@@ -5780,7 +5797,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
             <span class="hv-switch-text">Engine</span>
           </button>
           <div class="hv-eng-status" id="hv-eng-status" aria-live="polite"></div>
-          <button class="hv-icon-btn" id="hv-eng-arrow" type="button" aria-pressed="true" aria-label="Best-move arrow" title="Show the engine&rsquo;s best move as an arrow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 L16 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M10 6.5 H17.5 V14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="hv-icon-btn" id="hv-eng-arrow" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="hv-arrow-pop" aria-label="Engine arrows" title="Engine arrows: best, 2nd and 3rd best moves"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.19 5.24 L10.50 2.52 L13.50 2.52 L13.81 5.24 A7.0 7.0 0 0 1 15.50 5.94 L17.64 4.23 L19.77 6.36 L18.06 8.50 A7.0 7.0 0 0 1 18.76 10.19 L21.48 10.50 L21.48 13.50 L18.76 13.81 A7.0 7.0 0 0 1 18.06 15.50 L19.77 17.64 L17.64 19.77 L15.50 18.06 A7.0 7.0 0 0 1 13.81 18.76 L13.50 21.48 L10.50 21.48 L10.19 18.76 A7.0 7.0 0 0 1 8.50 18.06 L6.36 19.77 L4.23 17.64 L5.94 15.50 A7.0 7.0 0 0 1 5.24 13.81 L2.52 13.50 L2.52 10.50 L5.24 10.19 A7.0 7.0 0 0 1 5.94 8.50 L4.23 6.36 L6.36 4.23 L8.50 5.94 A7.0 7.0 0 0 1 10.19 5.24 Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.9"/></svg></button>
         </div>
         <div class="hv-eng-lines" id="hv-eng-lines"></div>
       </div>
@@ -23658,16 +23675,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return { plyStates, sanMoves: sanTokens.slice(0, appliedCount), moves };
   }
 
-  // ---- prefs: engine switch, best-move arrow, last tab, explorer database ----
+  // ---- prefs: engine switch, engine arrows (best, 2nd, 3rd), last tab, explorer database ----
   const HV_PREFS_KEY = 'wavyChessPrepReviewPrefs';
   const HV_TABS = ['moves', 'review', 'explorer', 'notes'];
   const hvPrefs = (function(){
-    const p = { v:1, engine:true, arrow:true, tab:'moves', exDb:'masters' };
+    const p = { v:1, engine:true, arrows:[true, true, true], tab:'moves', exDb:'masters' };
     try{
       const raw = JSON.parse(localStorage.getItem(HV_PREFS_KEY) || 'null');
       if(raw && typeof raw==='object'){
         if(typeof raw.engine==='boolean') p.engine = raw.engine;
-        if(typeof raw.arrow==='boolean') p.arrow = raw.arrow;
+        if(Array.isArray(raw.arrows) && raw.arrows.length===3 && raw.arrows.every(b=> typeof b==='boolean')) p.arrows = raw.arrows.slice();
+        else if(raw.arrow===false) p.arrows = [false, false, false];   // the earlier best-move switch, turned off
         if(HV_TABS.indexOf(raw.tab)>=0) p.tab = raw.tab;
         if(raw.exDb==='masters' || raw.exDb==='lichess') p.exDb = raw.exDb;
       }
@@ -24389,6 +24407,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvMenu = null;
     m.el.remove();
     document.removeEventListener('pointerdown', m.outside, true);
+    if(m.onClose) m.onClose();
     if(refocus && m.opener && document.contains(m.opener)) try{ m.opener.focus({ preventScroll:true }); }catch(e){}
   }
   function hvMenuOpen(node, anchor, x, y, opener){
@@ -24808,8 +24827,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     tog.setAttribute('aria-checked', hvPrefs.engine ? 'true' : 'false');
     tog.disabled = !S.std;
     const ar = document.getElementById('hv-eng-arrow');
-    ar.setAttribute('aria-pressed', hvPrefs.arrow ? 'true' : 'false');
     ar.disabled = !S.std || !hvPrefs.engine;
+    if(ar.disabled && hvMenu && hvMenu.kind==='arrows') hvMenuClose();
     const st = document.getElementById('hv-eng-status');
     const txt = hvEngineStatus();
     // announced when the engine's state changes, not at every new depth
@@ -24847,13 +24866,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     while(box.children.length < want){
       const b = hvEl('button', 'hv-eng-line');
       b.type = 'button';
+      b.appendChild(hvEl('span', 'hv-eng-dot'));
       b.appendChild(hvEl('span', 'hv-eng-pill'));
       b.appendChild(hvEl('span', 'hv-eng-pv'));
       box.appendChild(b);
     }
+    box.classList.toggle('no-dots', !hvPrefs.arrows.some(Boolean));
     [...box.children].forEach((b, k)=>{
-      const l = rows[k], pill = b.firstChild, pvEl = b.lastChild;
+      const l = rows[k], dot = b.firstChild, pill = b.children[1], pvEl = b.lastChild;
       if(!l){
+        dot.className = 'hv-eng-dot is-off'; dot.style.background = '';
         b.className = 'hv-eng-line is-wait'; b.setAttribute('aria-disabled', 'true');   // not disabled: a focused row keeps the focus
         delete b.dataset.uci; delete b.dataset.fen4; delete b.dataset.mp;
         b.removeAttribute('title'); b.removeAttribute('aria-label');
@@ -24863,11 +24885,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const sc = hvFormatScore(l.score), pv = hvSanLine(n, l.ucis, 12);
       b.className = 'hv-eng-line'; b.disabled = false; b.removeAttribute('aria-disabled');
       b.dataset.uci = l.firstUci; b.dataset.fen4 = hvFen4(l.fen); b.dataset.mp = String(l.multipv);
+      const on = !!hvPrefs.arrows[l.multipv-1];
+      dot.className = 'hv-eng-dot'+(on ? '' : ' is-off');
+      dot.style.background = HV_ARROW_COLORS[l.multipv-1] || '';
       pill.className = 'hv-eng-pill '+(hvWhiteAhead(l.score) ? 'is-w' : 'is-b');
       if(pill.textContent!==sc) pill.textContent = sc;
       if(pvEl.textContent!==pv) pvEl.textContent = pv;
       b.title = pv;
-      b.setAttribute('aria-label', 'Line '+l.multipv+', '+sc+': '+pv+'. Play the first move.');
+      b.setAttribute('aria-label', 'Line '+l.multipv+(on ? ' ('+HV_ARROW_HUES[l.multipv-1]+' arrow)' : '')+', '+sc+': '+pv+'. Play the first move.');
     });
     if(fIn && !fa.isConnected && box.firstElementChild) try{ box.firstElementChild.focus({ preventScroll:true }); }catch(e){}
   }
@@ -24877,12 +24902,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const n = hvPlay(HV_STATE.cur, b.dataset.uci);
     if(n){ hvGoNode(n, { sound:true }); hvRevealBoard(); }
   });
-  function hvBestLine(){
+  function hvEngLine(k){
     const S = HV_STATE;
     if(!S || !hvPrefs.engine || !S.std || hvTerminal(S.cur)) return null;
-    const c = hvLiveFor(S.cur), l = c && c.lines[1];
+    const c = hvLiveFor(S.cur), l = c && c.lines[k];
     return l && hvFen4(l.fen)===S.cur.fen4 ? l : null;
   }
+  function hvBestLine(){ return hvEngLine(1); }
   function hvPlayBest(){
     const l = hvBestLine();
     if(!l) return;
@@ -24976,32 +25002,81 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       triPoints: tipX+','+tipY+' '+(baseX+px*headHalf)+','+(baseY+py*headHalf)+' '+(baseX-px*headHalf)+','+(baseY-py*headHalf),
     };
   }
-  // Repertoire Lab's best-move green, thinner than a user arrow (70% of
-  // its shaft) and translucent, with a light halo: never mistaken for one.
+  // Repertoire Lab's engine arrows: the best move green, the 2nd blue, the
+  // 3rd amber (three hues, so three candidates don't read as one plan),
+  // each switched on its own from the cog. Thinner than a user arrow (70%
+  // of its shaft) and translucent, with a light halo: never mistaken for
+  // one. Drawn 3rd, 2nd, best, so the best move's arrow is on top.
+  const HV_ARROW_COLORS = ['rgb(56,176,120)', 'rgb(59,132,235)', 'rgb(226,142,46)'];
+  const HV_ARROW_HUES = ['green', 'blue', 'amber'];
+  const HV_ARROW_NAMES = ['Best move', '2nd best', '3rd best'];
   function hvDrawEngArrow(){
     while(hvEngSvg.firstChild) hvEngSvg.removeChild(hvEngSvg.firstChild);
     const S = HV_STATE;
-    if(!S || !hvPrefs.arrow) return;
-    const l = hvBestLine();
-    if(!l || !/^[a-h][1-8][a-h][1-8]/.test(l.firstUci || '')) return;
-    const from = pzAlgToIdx(l.firstUci.slice(0, 2)), to = pzAlgToIdx(l.firstUci.slice(2, 4));
+    if(!S) return;
     const cx = (i)=>{ const c = i%8; return (S.flipped ? 7-c : c) + 0.5; };
     const cy = (i)=>{ const r = Math.floor(i/8); return (S.flipped ? r : 7-r) + 0.5; };
-    const dr = Math.floor(to/8)-Math.floor(from/8), dc = to%8-from%8;
-    const shp = annoArrowShape(cx(from), cy(from), cx(to), cy(to), dr, dc, 1);
     const shaft = 0.26*0.7;
     const mk = (tag, attrs)=>{ const e = document.createElementNS(ARROW_SVG_NS, tag); Object.keys(attrs).forEach(k=> e.setAttribute(k, attrs[k])); return e; };
-    const g = mk('g', { 'class':'hv-eng-arrow', 'data-uci':l.firstUci, opacity:'.6' });
-    g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:'rgba(255,255,255,.5)', 'stroke-width':shaft+0.07, 'stroke-linecap':'butt' }));
-    g.appendChild(mk('polygon', { points:shp.triPoints, fill:'none', stroke:'rgba(255,255,255,.5)', 'stroke-width':0.07, 'stroke-linejoin':'round' }));
-    g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:'rgb(56,176,120)', 'stroke-width':shaft, 'stroke-linecap':'butt' }));
-    g.appendChild(mk('polygon', { points:shp.triPoints, fill:'rgb(56,176,120)' }));
-    hvEngSvg.appendChild(g);
+    for(let k=3;k>=1;k--){
+      if(!hvPrefs.arrows[k-1]) continue;
+      const l = hvEngLine(k);
+      if(!l || !/^[a-h][1-8][a-h][1-8]/.test(l.firstUci || '')) continue;
+      const from = pzAlgToIdx(l.firstUci.slice(0, 2)), to = pzAlgToIdx(l.firstUci.slice(2, 4));
+      const dr = Math.floor(to/8)-Math.floor(from/8), dc = to%8-from%8;
+      const shp = annoArrowShape(cx(from), cy(from), cx(to), cy(to), dr, dc, 1);
+      const color = HV_ARROW_COLORS[k-1];
+      const g = mk('g', { 'class':'hv-eng-arrow', 'data-uci':l.firstUci, 'data-mp':String(k), opacity:'.6' });
+      g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:'rgba(255,255,255,.5)', 'stroke-width':shaft+0.07, 'stroke-linecap':'butt' }));
+      g.appendChild(mk('polygon', { points:shp.triPoints, fill:'none', stroke:'rgba(255,255,255,.5)', 'stroke-width':0.07, 'stroke-linejoin':'round' }));
+      g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:color, 'stroke-width':shaft, 'stroke-linecap':'butt' }));
+      g.appendChild(mk('polygon', { points:shp.triPoints, fill:color }));
+      hvEngSvg.appendChild(g);
+    }
+  }
+  // ---- the cog: which engine arrows to draw ----
+  function hvArrowMenuOpen(){
+    hvMenuClose();
+    const S = HV_STATE, btn = document.getElementById('hv-eng-arrow'), card = document.getElementById('hv-engine');
+    if(!S || btn.disabled) return;
+    const el = hvEl('div', 'hv-pop hv-eng-pop');
+    el.id = 'hv-arrow-pop';
+    el.setAttribute('role', 'group');
+    el.setAttribute('aria-label', 'Engine arrows');
+    el.appendChild(hvEl('div', 'hv-pop-head', 'Engine arrows'));
+    HV_ARROW_NAMES.forEach((name, i)=>{
+      const row = hvEl('label', 'hv-pop-check');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!hvPrefs.arrows[i];
+      cb.dataset.k = String(i+1);
+      cb.addEventListener('change', ()=>{
+        hvPrefs.arrows[i] = cb.checked; hvSavePrefs();
+        hvRenderEngineNow();
+      });
+      const dot = hvEl('span', 'hv-arrow-dot');
+      dot.style.background = HV_ARROW_COLORS[i];
+      row.appendChild(cb); row.appendChild(dot); row.appendChild(hvEl('span', '', name));
+      el.appendChild(row);
+    });
+    card.appendChild(el);
+    el.style.top = (btn.offsetTop + btn.offsetHeight + 6)+'px';
+    const outside = (e)=>{ if(!el.contains(e.target) && !btn.contains(e.target)) hvMenuClose(); };
+    hvMenu = { el, node:null, opener:btn, outside, kind:'arrows', onClose: ()=> btn.setAttribute('aria-expanded', 'false') };
+    btn.setAttribute('aria-expanded', 'true');
+    setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
+    el.addEventListener('keydown', (e)=>{
+      const boxes = [...el.querySelectorAll('input')];
+      const i = boxes.indexOf(document.activeElement);
+      if(e.key==='ArrowDown'){ e.preventDefault(); e.stopPropagation(); boxes[(i+1) % boxes.length].focus(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); e.stopPropagation(); boxes[(i-1+boxes.length) % boxes.length].focus(); }
+      else if(e.key==='Tab' && ((e.shiftKey && i===0) || (!e.shiftKey && i===boxes.length-1))){ hvMenuClose(); }
+    });
+    try{ el.querySelector('input').focus({ preventScroll:true }); }catch(e){}
   }
   document.getElementById('hv-eng-toggle').addEventListener('click', ()=> hvToggleEngine());
   document.getElementById('hv-eng-arrow').addEventListener('click', ()=>{
-    hvPrefs.arrow = !hvPrefs.arrow; hvSavePrefs();
-    hvRenderEngineNow();
+    if(hvMenu && hvMenu.kind==='arrows') hvMenuClose(true); else hvArrowMenuOpen();
   });
   function hvToggleEngine(){
     if(!HV_STATE || !HV_STATE.std) return;
