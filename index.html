@@ -1983,6 +1983,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     padding:10px 12px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px;
   }
   .ol-movelist-title{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
+  .ol-opening{ display:flex; flex-direction:column; gap:3px; padding-bottom:8px; margin-bottom:2px; border-bottom:1px solid var(--line); }
+  .ol-opening[hidden]{ display:none; }
+  .ol-opening-name{ font-size:14px; font-weight:600; line-height:1.3; color:var(--ink); overflow-wrap:anywhere; }
   .ol-movelist{
     display:grid; grid-template-columns:28px 1fr 1fr; gap:2px 8px;
     font-family:"JetBrains Mono",monospace; font-size:13px; color:var(--ink);
@@ -8570,6 +8573,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
 
       <div class="ol-movelist-wrap" id="ol-movelist-wrap" style="display:none;">
+        <!-- the opening being played, by name only (olOpening*): never its theory, never your repertoire -->
+        <div class="ol-opening" id="ol-opening" hidden>
+          <div class="ol-movelist-title">Opening</div>
+          <div class="ol-opening-name" id="ol-opening-name"></div>
+        </div>
         <div class="ol-movelist-title">Moves</div>
         <div class="ol-movelist" id="ol-movelist"></div>
       </div>
@@ -22834,6 +22842,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ol-movelist-wrap').style.display='none';
     document.getElementById('ol-result-banner').style.display='none';
     document.getElementById('ol-error-banner').style.display='none';
+    clearTimeout(olOpenT); olOpeningShow(null);      // a new game: no opening yet
     document.getElementById('ol-hud-mode-text').textContent='SEEKING';
     document.getElementById('ol-side-dot').className='side-dot w';
     document.getElementById('ol-hud-round').textContent='Looking for an opponent\u2026';
@@ -23134,6 +23143,42 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   });
   onLeavePlay(()=> olEndClose(false));
 
+  /* ---- The opening being played: its name only, from Wikibooks' Chess Opening Theory (wbLookup,
+     the review's own): the deepest page the moves reach, kept once the game leaves the book. Never
+     the page's text (theory during a game is book help, which Lichess's fair-play rules don't
+     allow), and never your repertoire or your notes during a game. The first 24 plies of a
+     standard game; looked up when the moves pause. ---- */
+  let olOpenT = 0;
+  function olOpeningSoon(){
+    clearTimeout(olOpenT);
+    const R = roundOl;
+    if(!R || !R.sanMoves || !R.sanMoves.length) return;
+    if(R.sanMoves.length > WB_PLIES && R.openingTried) return;      // past the book: the name stays
+    olOpenT = setTimeout(()=> olOpening(R), 900);
+  }
+  async function olOpening(R){
+    if(roundOl!==R) return;
+    R.openingTried = true;
+    let r = null;
+    try{ r = await wbLookup(R.sanMoves.slice(0, WB_PLIES)); }catch(e){ r = null; }
+    if(roundOl!==R) return;
+    const name = olOpeningName(r);
+    if(name) R.openingName = name;
+    olOpeningShow(R);
+  }
+  // a page's heading without its move ("3. Bf4 \u00b7 Jobava London" -> "Jobava London"); a heading
+  // that is only a move names nothing
+  function olOpeningName(r){
+    if(!r || !r.head) return '';
+    const t = String(r.head).replace(/^\d+\.(?:\.\.)?\s*\S+\s*\u00b7\s*/, '').trim();
+    return !t || /^\d+\./.test(t) ? '' : t.slice(0, 80);
+  }
+  function olOpeningShow(R){
+    const box = document.getElementById('ol-opening');
+    box.hidden = !(R && R.openingName);
+    document.getElementById('ol-opening-name').textContent = (R && R.openingName) || '';
+  }
+
   function olShowError(line, sub){
     document.getElementById('ol-error-line').textContent = line;
     document.getElementById('ol-error-sub').textContent = sub;
@@ -23182,6 +23227,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olRenderClocksNow();
     olUpdateStatusText();
     olRenderMoveList();
+    olOpeningSoon();
 
     const isOver = st.status && st.status!=='created' && st.status!=='started';
     if(isOver) olFinishGame();
