@@ -2373,6 +2373,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     align-items:center; justify-content:center; padding:20px;
   }
   .modal-overlay.active{ display:flex; }
+  /* the end-of-game box (olEnd*) */
+  .ol-end-card{ position:relative; max-width:340px; align-items:center; text-align:center; gap:10px; padding:26px 24px 22px; }
+  .ol-end-close{ position:absolute; top:8px; right:10px; }
+  .ol-end-card .ol-end-title{ font-size:30px; line-height:1.05; }
+  .ol-end-sub{ font-size:14px; color:var(--ink-soft); }
+  .ol-end-players{ display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:4px 10px; font-size:13.5px; color:var(--ink); margin:2px 0 6px; }
+  .ol-end-players .ol-end-vs{ color:var(--ink-soft); font-size:12px; }
+  .ol-end-players .ol-end-r{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); }
+  .ol-end-acts{ display:flex; flex-direction:column; gap:8px; width:100%; }
+  .ol-end-acts .btn{ width:100%; min-height:44px; justify-content:center; }
 
   /* ---- Street-Fighter-style split-screen VS intro, before an online game ---- */
   /* Placed over the board's frame by JS (placeOverBoard), like Uptown's
@@ -5747,6 +5757,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 </div>
 <!-- Game History: your own notes on one game. Autosaved; opened from a
      row's note button without leaving the list. -->
+<!-- After a Play Online game, as on chess.com: the result, then review it here or play
+     another at the same time control (olEnd*) -->
+<div class="modal-overlay" id="ol-end" role="dialog" aria-modal="true" aria-labelledby="ol-end-title" aria-describedby="ol-end-sub">
+  <div class="modal-card ol-end-card">
+    <button type="button" class="modal-close ol-end-close" id="ol-end-close" aria-label="Close">&times;</button>
+    <div class="modal-title ol-end-title" id="ol-end-title">Game over</div>
+    <div class="ol-end-sub" id="ol-end-sub"></div>
+    <div class="ol-end-players" id="ol-end-players"></div>
+    <div class="ol-end-acts">
+      <button type="button" class="btn btn-primary" id="ol-end-review">Review game</button>
+      <button type="button" class="btn btn-ghost" id="ol-end-again">New game</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="gn-overlay" role="dialog" aria-modal="true" aria-labelledby="gn-title">
   <div class="modal-card gn-card">
     <div class="modal-head">
@@ -22277,9 +22301,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     showView('setup-bot');
   });
 
-  function startBotChallenge(){
+  function startBotChallenge(over){
     const gen = ++olGeneration;
     const token = getLichessToken();
+    const bot = over || settingsBot;
 
     roundOl = { phase:'seeking', gameId:null, color:null, state:null,
       wtime:0, btime:0, winc:0, binc:0, status:'created', winner:null,
@@ -22294,10 +22319,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olStatusEl.textContent = 'Challenging the Lichess AI\u2026';
 
     const body = new URLSearchParams();
-    body.set('level', String(settingsBot.level));
-    body.set('clock.limit', String(settingsBot.time*60));
-    body.set('clock.increment', String(settingsBot.increment));
-    if(settingsBot.color && settingsBot.color!=='random') body.set('color', settingsBot.color);
+    body.set('level', String(bot.level));
+    body.set('clock.limit', String(Math.round(bot.time*60)));
+    body.set('clock.increment', String(bot.increment));
+    if(bot.color && bot.color!=='random') body.set('color', bot.color);
 
     fetch('https://lichess.org/api/challenge/ai', {
       method:'POST',
@@ -22664,7 +22689,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olTeardown();
     showView('setup-online');
   });
-  document.getElementById('ol-again').addEventListener('click', ()=> showView('setup-online'));
+  document.getElementById('ol-again').addEventListener('click', ()=> olPlayAgain());
 
   function olSetPhaseSeeking(){
     document.getElementById('ol-seek-controls').style.display='flex';
@@ -22679,7 +22704,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ol-side-dot').className='side-dot w';
     document.getElementById('ol-hud-round').textContent='Looking for an opponent\u2026';
     document.getElementById('ol-prompt-hint').textContent='Waiting for a game to start\u2026';
-    olStatusEl.textContent = 'Searching for a '+settingsOnline.time+'+'+settingsOnline.increment+' opponent\u2026';
+    const sk = (roundOl && roundOl.seek) || settingsOnline;
+    olStatusEl.textContent = 'Searching for a '+olTcText(sk.time*60000, sk.increment*1000)+' opponent\u2026';
     olBoardEl.innerHTML='';
     buildLabelsOl(false);
   }
@@ -22881,7 +22907,98 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         celebrate(olBoardEl, 1);
       }
     }
+    olAgainLabel();
+    clearTimeout(olEndTimer);
+    const R = roundOl;
+    olEndTimer = setTimeout(()=>{ if(roundOl===R && R.phase==='ended' && currentView==='play-online') olEndOpen(); }, 1100);
   }
+
+  /* ---- The end of a game (as on chess.com): a box over the board with the result, "Review
+     game" (Chess Arcade's analysis board, the game fetched from Lichess when it can) and "New
+     game" at the same time control, seeking (or challenging the same AI level) at once. The
+     banner under the board keeps both choices once the box is closed. ---- */
+  let olEndTimer = 0;
+  // "5+3", "\u00bd+0" (the clock in ms)
+  function olTcText(initMs, incMs){
+    const m = Number(initMs)/60000, frac = { 0.25:'\u00bc', 0.5:'\u00bd', 0.75:'\u00be' };
+    return (frac[m] || String(Math.round(m*100)/100))+'+'+Math.round((Number(incMs)||0)/1000);
+  }
+  function olAgainLabel(){
+    const f = roundOl && roundOl.full, b = document.getElementById('ol-again');
+    const t = f && f.clock ? 'New game \u00b7 '+olTcText(f.clock.initial, f.clock.increment) : 'Find another game';
+    b.textContent = t;
+    document.getElementById('ol-end-again').textContent = f && f.clock ? t : 'New game';
+  }
+  function olEndOpen(){
+    const R = roundOl;
+    if(!R || R.phase!=='ended') return;
+    const ov = document.getElementById('ol-end');
+    document.getElementById('ol-end-title').textContent = document.getElementById('ol-result-line').textContent;
+    document.getElementById('ol-end-sub').textContent = document.getElementById('ol-result-sub').textContent;
+    const pl = document.getElementById('ol-end-players');
+    pl.textContent = '';
+    const side = (c)=>{
+      const p = R.full ? R.full[c] : null, nm = c==='white' ? R.whiteName : R.blackName, sp = ghEl('span', 'ol-end-p', nm);
+      if(p && p.rating!=null){ sp.appendChild(document.createTextNode(' ')); sp.appendChild(ghEl('span', 'ol-end-r', String(p.rating))); }
+      if(c===R.color) sp.style.fontWeight = '700';
+      return sp;
+    };
+    pl.appendChild(side('white')); pl.appendChild(ghEl('span', 'ol-end-vs', 'vs')); pl.appendChild(side('black'));
+    olAgainLabel();
+    ov.classList.add('active');
+    try{ document.getElementById('ol-end-review').focus({ preventScroll:true }); }catch(e){}
+  }
+  function olEndClose(refocus){
+    clearTimeout(olEndTimer);
+    const ov = document.getElementById('ol-end');
+    if(!ov.classList.contains('active')) return;
+    ov.classList.remove('active');
+    if(refocus) try{ document.getElementById('ol-again').focus({ preventScroll:true }); }catch(e){}
+  }
+  // the finished game as Game History knows a game; ghOpenGame fetches the whole one (opening,
+  // clocks, PGN) from Lichess when it can, else opens this
+  function olEndGame(){
+    const R = roundOl, f = R.full || {};
+    const P = (c)=>{
+      const p = f[c] || {}, out = { rating:p.rating };
+      if(p.ai!=null) out.aiLevel = p.ai; else out.user = { id:String(p.id || (c==='white' ? R.whiteName : R.blackName) || '').toLowerCase(), name:p.name || (c==='white' ? R.whiteName : R.blackName), title:p.title || undefined };
+      return out;
+    };
+    return { id:R.gameId, _summary:true, _me:R.color, moves:(R.sanMoves || []).join(' '), rated:!!f.rated, variant:'standard', speed:f.speed || '', perf:f.speed || '',
+      status:R.status, winner: R.winner ? (R.winner==='w' ? 'white' : 'black') : undefined, createdAt:Date.now(), lastMoveAt:Date.now(),
+      clock: f.clock ? { initial:Math.round(f.clock.initial/1000), increment:Math.round(f.clock.increment/1000) } : undefined,
+      players:{ white:P('white'), black:P('black') } };
+  }
+  function olReview(){
+    if(!roundOl || !roundOl.gameId) return;
+    const g = olEndGame();
+    olEndClose(false);
+    ghOpenGame(g);
+  }
+  // another game like the one that ended: the same clock (and AI level), the color setting as is
+  function olPlayAgain(){
+    const R = roundOl, f = R && R.full;
+    olEndClose(false);
+    if(!f || !f.clock){ showView('setup-online'); return; }
+    const time = f.clock.initial/60000, increment = Math.round(f.clock.increment/1000);
+    olTeardown();
+    if(f.ai!=null) startBotChallenge({ level:f.ai, time, increment, color:settingsBot.color });
+    else startOnlineSeek({ time, increment, rated:f.rated, color:settingsOnline.color });
+  }
+  document.getElementById('ol-end-review').addEventListener('click', olReview);
+  document.getElementById('ol-end-again').addEventListener('click', olPlayAgain);
+  document.getElementById('ol-end-close').addEventListener('click', ()=> olEndClose(true));
+  document.getElementById('ol-end').addEventListener('click', (e)=>{ if(e.target.id==='ol-end') olEndClose(true); });
+  document.getElementById('ol-end').addEventListener('keydown', (e)=>{
+    if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); olEndClose(true); }
+    else if(e.key==='Tab'){
+      const f = [...e.currentTarget.querySelectorAll('button')];
+      const i = f.indexOf(document.activeElement);
+      if(e.shiftKey && i<=0){ e.preventDefault(); f[f.length-1].focus(); }
+      else if(!e.shiftKey && i===f.length-1){ e.preventDefault(); f[0].focus(); }
+    }
+  });
+  onLeavePlay(()=> olEndClose(false));
 
   function olShowError(line, sub){
     document.getElementById('ol-error-line').textContent = line;
@@ -23278,6 +23395,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     roundOl.blackRating = full.black.rating;
     roundOl.whiteTitle = full.white.title || null;
     roundOl.blackTitle = full.black.title || null;
+    // what "New game" and "Review game" need when it ends (olEnd*)
+    roundOl.full = { clock: full.clock && full.clock.initial!=null ? { initial:Number(full.clock.initial), increment:Number(full.clock.increment)||0 } : null,
+      rated:!!full.rated, speed:full.speed || '', ai: full.white.aiLevel!=null ? full.white.aiLevel : (full.black.aiLevel!=null ? full.black.aiLevel : null),
+      white:{ id:full.white.id || '', name:full.white.name || '', rating:full.white.rating, title:full.white.title || null, ai:full.white.aiLevel },
+      black:{ id:full.black.id || '', name:full.black.name || '', rating:full.black.rating, title:full.black.title || null, ai:full.black.aiLevel } };
     olSetPhaseLive();
     olApplyState(full.state);
     // Every game stream connection -- a brand-new game or reconnecting to
@@ -23327,15 +23449,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olOpenGameStream(gen);
   }
 
-  function startOnlineSeek(){
+  // over: another game like the one that just ended (olPlayAgain), instead of the settings
+  function startOnlineSeek(over){
     const gen = ++olGeneration;
     const token = getLichessToken();
+    const seek = over || { time:settingsOnline.time, increment:settingsOnline.increment, rated:settingsOnline.rated, color:settingsOnline.color };
 
     roundOl = { phase:'seeking', gameId:null, color:null, state:null,
       wtime:0, btime:0, winc:0, binc:0, status:'created', winner:null,
       wdraw:false, bdraw:false, lastMoveCount:0, whiteName:'White', blackName:'Black',
       clockTimer:null, eventStreamHandle:null, seekHandle:null, gameStreamHandle:null,
-      manualFlip:false, viewPly:null, isResume:false };
+      manualFlip:false, viewPly:null, isResume:false, seek };
     clearMarksObj(marksOl);
 
     showView('play-online');
@@ -23355,10 +23479,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
 
     const body = new URLSearchParams();
-    body.set('rated', String(settingsOnline.rated));
-    body.set('time', String(settingsOnline.time));
-    body.set('increment', String(settingsOnline.increment));
-    if(settingsOnline.color && settingsOnline.color!=='random') body.set('color', settingsOnline.color);
+    body.set('rated', String(seek.rated));
+    body.set('time', String(seek.time));
+    body.set('increment', String(seek.increment));
+    if(seek.color && seek.color!=='random') body.set('color', seek.color);
 
     const seekHandle = readNDJSON('https://lichess.org/api/board/seek', {
       method:'POST',
