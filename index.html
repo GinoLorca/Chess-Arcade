@@ -3419,6 +3419,41 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      rules). On a phone the row folds into thumb | details | note button. ---- */
   #view-history [hidden], #gn-overlay [hidden]{ display:none !important; }
   /* ---- Groups (gp*): the index's cards and a group's page, its north star on top ---- */
+  /* ---- Positions (ghp*): the setup board and its tray, the match options, the results ---- */
+  .ghp{ display:flex; flex-direction:column; gap:16px; margin-top:16px; }
+  .ghp .panel.ghp-setup{ display:grid; grid-template-columns:minmax(240px, 360px) minmax(0, 1fr); gap:22px; align-items:start; padding:20px; }
+  .ghp-board-col{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .ghp-boardwrap{ width:100%; }
+  .ghp-board .sq{ position:relative; display:flex; align-items:center; justify-content:center; padding:0; border:0; margin:0; cursor:pointer; font:inherit; }
+  .ghp-board .sq:focus-visible{ outline:3px solid var(--focus); outline-offset:-3px; z-index:1; }
+  .ghp-board .sq.ghp-sel{ box-shadow:inset 0 0 0 3px var(--brass); }
+  .ghp-board .ghp-coord{ position:absolute; font:700 9px/1 "JetBrains Mono",monospace; opacity:.6; pointer-events:none; }
+  .ghp-board .ghp-coord.f{ right:2px; bottom:1px; } .ghp-board .ghp-coord.r{ left:2px; top:2px; }
+  .ghp-palette{ display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px; }
+  .ghp-tool{ aspect-ratio:1 / 1; display:flex; align-items:center; justify-content:center; padding:2px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; cursor:pointer; color:var(--ink); font:600 10.5px/1.1 "JetBrains Mono",monospace; min-width:0; }
+  .ghp-tool .piece-wrap{ width:86%; height:86%; }
+  .ghp-tool[aria-pressed="true"]{ border-color:var(--brass); box-shadow:inset 0 0 0 2px var(--brass); background:var(--surface); }
+  .ghp-tool:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .ghp-controls{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+  .ghp-hint{ margin:6px 0 0; font-size:13px; line-height:1.5; color:var(--ink-soft); max-width:56ch; }
+  .ghp-tools{ display:flex; flex-wrap:wrap; gap:8px; }
+  .ghp-field{ display:flex; flex-direction:column; gap:6px; }
+  .ghp-fen{ font-size:12.5px; }
+  .ghp-mode .toggle, .ghp-color .toggle{ flex:1 1 auto; }
+  .ghp-go{ align-self:flex-start; min-width:160px; }
+  .ghp .panel.ghp-results{ gap:10px; padding:16px 20px; }
+  .ghp-summary{ font-size:14px; color:var(--ink); }
+  .ghp-summary b{ font-family:"Big Shoulders Display",sans-serif; font-size:22px; margin-right:6px; }
+  .ghp-progress{ display:flex; align-items:center; gap:10px; }
+  .ghp-progress-bar{ display:block; flex:1 1 auto; height:6px; background:var(--surface-2); border-radius:3px; overflow:hidden; }
+  .ghp-pct{ flex:none; min-width:4ch; text-align:right; font-size:12px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .ghp-progress-fill{ display:block; height:100%; width:0; background:var(--brass); transition:width .2s; }
+  .ghp-list{ margin-top:0; }
+  .ghp-at{ grid-column:2 / -1; font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--brass-text); }
+  @media (max-width:760px){ .ghp .panel.ghp-setup{ grid-template-columns:1fr; } .ghp-board-col{ max-width:380px; width:100%; margin:0 auto; } }
+  @media (pointer:coarse){ .ghp-tool{ min-height:40px; } }
+  #view-history.is-ghp .gh-filters{ display:none !important; }
   /* the site tabs and chess.com's offer and progress don't apply to groups (you pick the games) */
   #view-history.is-ghg :is(.gh-sites, .cc-offer, .cc-progress){ display:none !important; }
   .ghg{ display:flex; flex-direction:column; gap:16px; margin-top:16px; }
@@ -3808,6 +3843,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (max-width:640px){
     .history-head > .gh-view{ width:100%; }
     .history-head > .gh-view .toggle{ flex:1 1 0; }
+    /* Games | Openings | Groups | Positions: two by two (four in a row don't fit a phone) */
+    #view-history .gh-view{ display:grid; grid-template-columns:1fr 1fr; }
+    #view-history .gh-view .toggle{ min-width:0; }
   }
   @media (pointer:coarse){
     .gho-dis, .gho-dis-sp{ width:44px; height:44px; }
@@ -6192,7 +6230,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <h1 class="title" style="font-size:26px;">Game History</h1>
           <div class="subtitle" id="history-subtitle">Connect your Lichess account in Settings to see your games.</div>
         </div>
-        <div class="toggle-row gh-seg gh-view" id="gh-view" role="group" aria-label="Show"><button type="button" class="toggle active" data-val="games" aria-pressed="true">Games</button><button type="button" class="toggle" data-val="openings" aria-pressed="false">Openings</button><button type="button" class="toggle" data-val="groups" aria-pressed="false">Groups</button></div>
+        <div class="toggle-row gh-seg gh-view" id="gh-view" role="group" aria-label="Show"><button type="button" class="toggle active" data-val="games" aria-pressed="true">Games</button><button type="button" class="toggle" data-val="openings" aria-pressed="false">Openings</button><button type="button" class="toggle" data-val="groups" aria-pressed="false">Groups</button><button type="button" class="toggle" data-val="positions" aria-pressed="false">Positions</button></div>
       </div>
       <div class="gh-sites" id="gh-site" role="tablist" aria-label="Games from">
         <button type="button" role="tab" id="gh-site-all" class="gh-site-tab" data-site="all" aria-selected="true" aria-controls="history-list gho cc-setup">All <span class="gh-site-n"></span></button>
@@ -6346,6 +6384,45 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="history-list ghg-list" id="ghg-list"></div>
           <div class="ghg-foot"><button type="button" class="btn-link ghg-delete" id="ghg-delete">Delete this group</button></div>
         </div>
+      </div>
+    </section>
+    <!-- Positions (ghp*): set up a position, find your games that reach it (or its pawn
+         structure, or one close to it), with how they went -->
+    <section class="ghp" id="ghp" hidden>
+      <div class="panel ghp-setup">
+        <div class="ghp-board-col">
+          <div class="nb-board-wrap ghp-boardwrap"><div class="nb-board ghp-board" id="ghp-board" role="group" aria-label="Set up a position"></div></div>
+          <div class="ghp-palette" id="ghp-palette" role="toolbar" aria-label="Pieces and tools"></div>
+        </div>
+        <div class="ghp-controls">
+          <div>
+            <div class="eyebrow">Find by position</div>
+            <p class="ghp-hint">Set up a position: pick a piece and tap squares to place it, or Move and tap a piece, then a square. Right-click (or Erase) takes one off.</p>
+          </div>
+          <div class="ghp-tools">
+            <button type="button" class="btn btn-ghost" id="ghp-start">Start position</button>
+            <button type="button" class="btn btn-ghost" id="ghp-clear">Clear</button>
+            <button type="button" class="btn btn-ghost" id="ghp-flip">Flip</button>
+          </div>
+          <div class="ghp-field">
+            <label class="field-label" for="ghp-fen">FEN</label>
+            <input class="text-input ghp-fen" id="ghp-fen" type="text" autocomplete="off" spellcheck="false" placeholder="Paste a FEN">
+          </div>
+          <div class="ghp-field">
+            <div class="field-label" id="ghp-mode-l">Match</div>
+            <div class="toggle-row gh-seg ghp-mode" id="ghp-mode" role="group" aria-labelledby="ghp-mode-l"><button type="button" class="toggle" data-val="exact" aria-pressed="false" title="The same pieces on the same squares">Exact position</button><button type="button" class="toggle" data-val="structure" aria-pressed="false" title="The same pawns, wherever the pieces are">Pawn structure</button><button type="button" class="toggle" data-val="similar" aria-pressed="false" title="Up to two pawns different, closest first">Similar structure</button></div>
+          </div>
+          <div class="ghp-field">
+            <div class="field-label" id="ghp-color-l">Your games as</div>
+            <div class="toggle-row gh-seg ghp-color" id="ghp-color" role="group" aria-labelledby="ghp-color-l"><button type="button" class="toggle" data-val="" aria-pressed="false">Either</button><button type="button" class="toggle" data-val="white" aria-pressed="false">White</button><button type="button" class="toggle" data-val="black" aria-pressed="false">Black</button></div>
+          </div>
+          <button type="button" class="btn btn-primary ghp-go" id="ghp-go">Find games</button>
+        </div>
+      </div>
+      <div class="panel ghp-results" id="ghp-results" hidden>
+        <div class="ghp-summary" id="ghp-summary" role="status" aria-live="polite"></div>
+        <div class="ghp-progress" id="ghp-progress" hidden><span class="ghp-progress-bar" id="ghp-progress-bar" role="progressbar" aria-label="Games read" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="ghp-progress-fill" id="ghp-progress-fill"></span></span><span class="ghp-pct" id="ghp-pct" aria-hidden="true"></span></div>
+        <div class="history-list ghp-list" id="ghp-list"></div>
       </div>
     </section>
     <section class="gho" id="gho" role="tabpanel" aria-labelledby="gh-site-all" hidden>
@@ -23922,7 +23999,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const d = JSON.parse(localStorage.getItem(GH_FILTERS_KEY) || 'null');
       if(d && typeof d==='object'){
         GH_FILTERS = ghValidFilters(d.f); GH_UI.more = !!(d.ui && d.ui.more);
-        GH_UI.view = d.ui && (d.ui.view==='openings' || d.ui.view==='groups') ? d.ui.view : 'games';
+        GH_UI.view = d.ui && (d.ui.view==='openings' || d.ui.view==='groups' || d.ui.view==='positions') ? d.ui.view : 'games';
         if(d.ui && typeof d.ui.osort==='string' && /^[a-z]{1,8}$/.test(d.ui.osort)) GH_UI.osort = d.ui.osort;
         if(d.ui && /^(all|lichess|chesscom)$/.test(String(d.ui.site))) GH_UI.site = d.ui.site;
       }
@@ -24379,13 +24456,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghShowSub();
     // the Chess.com tab with no account: the setup card instead of the list (chesscom SPEC B.4)
     const only = ghCcPanel(base);
-    const ov = ghoOn(), gv = ghgOn();
+    const ov = ghoOn(), gv = ghgOn(), pv = GH_UI.view==='positions';
     document.getElementById('gho').hidden = !ov || only;
     document.getElementById('ghg').hidden = !gv || only;
-    listEl.hidden = ov || gv || only;
-    ['.gh-filters', '.history-footer'].forEach(q=>{ const el = document.querySelector('#view-history '+q); if(el) el.hidden = only || gv; });
+    document.getElementById('ghp').hidden = !pv || only;
+    listEl.hidden = ov || gv || pv || only;
+    ['.gh-filters', '.history-footer'].forEach(q=>{ const el = document.querySelector('#view-history '+q); if(el) el.hidden = only || gv || (pv && q==='.gh-filters'); });
     document.getElementById('view-history').classList.toggle('is-gho', ov);
     document.getElementById('view-history').classList.toggle('is-ghg', gv);
+    document.getElementById('view-history').classList.toggle('is-ghp', pv);
     if(only){
       document.getElementById('gh-list-note').hidden = true;
       document.getElementById('gh-count').textContent = '';
@@ -24395,6 +24474,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       document.getElementById('gh-list-note').hidden = true;
       document.getElementById('gh-count').textContent = '';
       ghgRender(base);
+      return;
+    }
+    if(pv){
+      document.getElementById('gh-list-note').hidden = true;
+      document.getElementById('gh-count').textContent = '';
+      ghpRender(base);
+      ghRenderFooter(0, false);        // Loading more / Load more games: Positions searches what's loaded
       return;
     }
     if(ov){
@@ -24487,7 +24573,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     load.style.display = showLoad ? '' : 'none';
     load.textContent = GH_STATE.games.length ? (mix ? 'Load more Lichess games' : 'Load more games') : 'Try again';
     load.disabled = backoff;
-    if(ghoOn()){ more.style.display = 'none'; empty.style.display = 'none'; }
+    if(ghoOn() || GH_UI.view==='positions'){ more.style.display = 'none'; empty.style.display = 'none'; }
     clearTimeout(ghBackoffTimer);
     if(backoff && showLoad) ghBackoffTimer = setTimeout(()=>{ if(currentView==='history') ghRender(); }, spBackoffUntil - Date.now() + 100);
   }
@@ -26189,7 +26275,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ (first || (chip && !chip.hidden ? chip : null) || document.getElementById('gh-count')).focus({ preventScroll:true }); }catch(e){}
   }
   function ghoSetView(v){
-    v = v==='openings' || v==='groups' ? v : 'games';
+    v = v==='openings' || v==='groups' || v==='positions' ? v : 'games';
     if(v==='groups' && GH_UI.view==='groups' && GH_UI.group){ ghgOpen(''); return; }     // Groups again: back to all of them
     if(GH_UI.view===v) return;
     if(GH_UI.view==='groups') ghgLeave();
@@ -26449,6 +26535,295 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
   })();
 
+  /* ---- Positions (ghp*): set up a position on a board and find your games that reach it: the
+     exact position (every piece where it is), its pawn structure (the pawns only: a Carlsbad, an
+     IQP, the Advance chain), or a structure within two pawns of it, closest first. With how those
+     games went, so you can see the structures you play well and the ones you struggle in. Every
+     game of the list (the site tab) is read once a session, a few at a time, into a small index:
+     each ply's position as a hash and each new pawn structure as four 32-bit boards. ---- */
+  var GHP = { board:Array(64).fill(''), tool:'move', sel:-1, flip:false, mode:'structure', color:'', q:null, res:null, built:false };
+  var GHP_IX = new Map(), ghpJobT = 0, ghpJobDrawn = 0;
+  var GHP_CODES = { wP:1, wN:2, wB:3, wR:4, wQ:5, wK:6, bP:7, bN:8, bB:9, bR:10, bQ:11, bK:12 };
+  var GHP_START = ['wR','wN','wB','wQ','wK','wB','wN','wR'].concat(Array(8).fill('wP'), Array(32).fill(''), Array(8).fill('bP'), ['bR','bN','bB','bQ','bK','bB','bN','bR']);
+  var GHP_NAMES = { K:'king', Q:'queen', R:'rook', B:'bishop', N:'knight', P:'pawn' };
+  function ghpHash(get){ let h = 0x811c9dc5|0; for(let i=0; i<64; i++){ h ^= get(i); h = Math.imul(h, 16777619); } return h|0; }
+  function ghpPawns(get){
+    let wl = 0, wh = 0, bl = 0, bh = 0;
+    for(let i=0; i<64; i++){ const c = get(i); if(c===1){ if(i < 32) wl |= 1 << i; else wh |= 1 << (i-32); } else if(c===7){ if(i < 32) bl |= 1 << i; else bh |= 1 << (i-32); } }
+    return [wl|0, wh|0, bl|0, bh|0];
+  }
+  function ghpPop(x){ x = x - ((x >>> 1) & 0x55555555); x = (x & 0x33333333) + ((x >>> 2) & 0x33333333); return (((x + (x >>> 4)) & 0x0F0F0F0F) * 0x01010101) >>> 24; }
+  // a game's index: { pl:Int32Array (ply -> position hash), pw:[[ply, white lo, white hi, black lo, black hi], ...] (each new pawn structure) }
+  function ghpIndex(g){
+    let ix = GHP_IX.get(g.id);
+    if(ix) return ix;
+    const pl = [], pw = [];
+    if(ghIsStd(g) && !g.initialFen){
+      let st = pzStartPosition();
+      const add = (ply)=>{
+        const B = st.board, get = (i)=>{ const p = B[i]; return p ? GHP_CODES[p.color+p.type.toUpperCase()] : 0; };
+        pl.push(ghpHash(get));
+        const w = ghpPawns(get), last = pw[pw.length-1];
+        if(!last || last[1]!==w[0] || last[2]!==w[1] || last[3]!==w[2] || last[4]!==w[3]) pw.push([ply, w[0], w[1], w[2], w[3]]);
+      };
+      add(0);
+      const toks = String(g.moves || '').trim() ? String(g.moves).trim().split(/\s+/).slice(0, 400) : [];
+      for(let i=0; i<toks.length; i++){ const mv = rpSanToMove(st, toks[i]); if(!mv) break; st = pzApplyMoveRaw(st, mv); add(i+1); }
+    }
+    ix = { pl:Int32Array.from(pl), pw };
+    GHP_IX.set(g.id, ix);
+    return ix;
+  }
+  // how many of one side's pawns differ: a pawn moved counts once, as does one missing or extra
+  function ghpApart(al, ah, bl, bh){ return Math.max(ghpPop(al & ~bl) + ghpPop(ah & ~bh), ghpPop(bl & ~al) + ghpPop(bh & ~ah)); }
+  // where a game first matches the query: { ply, d (pawns apart) } or null
+  function ghpMatch(ix, q){
+    if(q.mode==='exact'){ const i = ix.pl.indexOf(q.place); return i >= 0 ? { ply:i, d:0 } : null; }
+    let best = null;
+    for(const p of ix.pw){
+      const d = ghpApart(p[1], p[2], q.pw[0], q.pw[1]) + ghpApart(p[3], p[4], q.pw[2], q.pw[3]);
+      if(d===0) return { ply:p[0], d:0 };
+      if(q.mode==='similar' && d <= 2 && (!best || d < best.d)) best = { ply:p[0], d };
+    }
+    return best;
+  }
+  // ---- the board you set up ----
+  function ghpPlacement(){
+    if(typeof GHP!=='object' || !GHP) return '8/8/8/8/8/8/8/8';     // a link written before this block ran
+    const rows = [];
+    for(let r=7; r>=0; r--){
+      let row = '', e = 0;
+      for(let c=0; c<8; c++){ const p = GHP.board[r*8+c]; if(!p){ e++; continue; } if(e){ row += e; e = 0; } row += p.charAt(0)==='w' ? p.charAt(1) : p.charAt(1).toLowerCase(); }
+      rows.push(row + (e ? e : ''));
+    }
+    return rows.join('/');
+  }
+  function ghpLoadFen(f){
+    if(typeof GHP!=='object' || !GHP) return false;
+    const place = String(f || '').trim().split(/\s+/)[0];
+    const rows = place.split('/');
+    if(rows.length!==8) return false;
+    const b = Array(64).fill('');
+    for(let r=0; r<8; r++){
+      let c = 0;
+      for(const ch of rows[r]){
+        if(/[1-8]/.test(ch)){ c += Number(ch); continue; }
+        const t = ch.toUpperCase();
+        if(!/[KQRBNP]/.test(t) || c > 7) return false;
+        b[(7-r)*8 + c] = (ch===t ? 'w' : 'b')+t;
+        c++;
+      }
+      if(c!==8) return false;
+    }
+    GHP.board = b; GHP.sel = -1;
+    if(GHP.built) ghpDraw();
+    return true;
+  }
+  function ghpPieceHtml(code){ const s = PIECE_SVG[code]; return s ? '<span class="piece-wrap">'+s+'</span>' : ''; }   // an app constant
+  function ghpBuild(){
+    if(GHP.built) return;
+    GHP.built = true;
+    const pal = document.getElementById('ghp-palette');
+    const tools = [['move', 'Move'], 'wK', 'wQ', 'wR', 'wB', 'wN', 'wP', ['erase', 'Erase'], 'bK', 'bQ', 'bR', 'bB', 'bN', 'bP'];
+    tools.forEach(t=>{
+      const b = ghEl('button', 'ghp-tool');
+      b.type = 'button';
+      if(Array.isArray(t)){ b.dataset.tool = t[0]; b.textContent = t[1]; b.setAttribute('aria-label', t[0]==='move' ? 'Move a piece' : 'Erase a piece'); }
+      else { b.dataset.tool = t; b.setAttribute('aria-label', 'Place a '+(t.charAt(0)==='w' ? 'white' : 'black')+' '+GHP_NAMES[t.charAt(1)]); }
+      pal.appendChild(b);
+    });
+    const bd = document.getElementById('ghp-board');
+    for(let k=0; k<64; k++){
+      const b = ghEl('button', 'sq');
+      b.type = 'button';
+      bd.appendChild(b);
+    }
+  }
+  function ghpDraw(){
+    ghpBuild();
+    const bd = document.getElementById('ghp-board');
+    [...bd.children].forEach((el, k)=>{
+      const row = Math.floor(k/8), col = k % 8;
+      const r = GHP.flip ? row : 7 - row, c = GHP.flip ? 7 - col : col, i = r*8 + c, p = GHP.board[i];
+      el.className = 'sq '+((r + c) % 2===0 ? 'dark' : 'light')+(GHP.sel===i ? ' ghp-sel' : '');
+      el.dataset.idx = i;
+      const sig = p+'|'+(col===0 ? r : '')+'|'+(row===7 ? c : '');
+      if(el.dataset.sig!==sig || el.dataset.set!==ghpSetKey()){
+        el.innerHTML = ghpPieceHtml(p)
+          +(col===0 ? '<span class="ghp-coord r">'+(r+1)+'</span>' : '')+(row===7 ? '<span class="ghp-coord f">'+'abcdefgh'.charAt(c)+'</span>' : '');
+        el.dataset.sig = sig; el.dataset.set = ghpSetKey();
+      }
+      el.setAttribute('aria-label', idxToAlg(i)+', '+(p ? (p.charAt(0)==='w' ? 'white ' : 'black ')+GHP_NAMES[p.charAt(1)] : 'empty')+(GHP.sel===i ? ', picked up: choose a square to move it to' : ''));
+    });
+    document.querySelectorAll('#ghp-palette .ghp-tool').forEach(b=>{
+      const t = b.dataset.tool;
+      if(GHP_CODES[t] && b.dataset.set!==ghpSetKey()){ b.innerHTML = ghpPieceHtml(t); b.dataset.set = ghpSetKey(); }
+      b.setAttribute('aria-pressed', GHP.tool===t ? 'true' : 'false');
+    });
+    const fen = document.getElementById('ghp-fen');
+    if(document.activeElement!==fen) fen.value = ghpPlacement()+' w - - 0 1';
+    const seg = (id, v)=> document.querySelectorAll('#'+id+' .toggle').forEach(b=>{ const on = b.dataset.val===v; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    seg('ghp-mode', GHP.mode); seg('ghp-color', GHP.color);
+    const empty = GHP.board.every(x=> !x);
+    const go = document.getElementById('ghp-go');
+    go.disabled = !ghpCanSearch();
+    go.title = empty ? 'Set up a position first' : (go.disabled ? 'A pawn structure needs pawns' : '');
+  }
+  function ghpSetKey(){ return typeof lookPrefs==='object' && lookPrefs ? String(lookPrefs.skin || '')+'|'+effectivePieceStyle(lookPrefs.skin) : ''; }
+  function ghpTap(i){
+    const p = GHP.board[i], t = GHP.tool;
+    if(t==='erase'){ GHP.board[i] = ''; }
+    else if(t==='move'){
+      if(GHP.sel < 0){ if(p) GHP.sel = i; }
+      else { if(GHP.sel!==i){ GHP.board[i] = GHP.board[GHP.sel]; GHP.board[GHP.sel] = ''; } GHP.sel = -1; }
+    } else GHP.board[i] = p===t ? '' : t;
+    ghpDraw();
+    ghSyncHash();
+  }
+  // ---- the search ----
+  // a position to search: not an empty board, and pawns for the pawn-structure modes
+  function ghpCanSearch(){ return GHP.board.some(x=> !!x) && (GHP.mode==='exact' || GHP.board.some(x=> x==='wP' || x==='bP')); }
+  function ghpSearch(){
+    clearTimeout(ghpJobT); ghpJobT = 0;
+    const list = document.getElementById('ghp-list');
+    list.textContent = ''; delete list.dataset.sig;            // the last answer's rows go (not under the new progress bar)
+    if(!ghpCanSearch()){ GHP.q = null; GHP.res = null; ghRender(); return; }
+    const get = (i)=> GHP_CODES[GHP.board[i]] || 0;
+    GHP.q = { mode:GHP.mode, color:GHP.color, place:ghpHash(get), pw:ghpPawns(get), fen:ghpPlacement() };
+    GHP.res = null;
+    clearTimeout(ghpJobT); ghpJobT = 0;
+    ghpStep();
+  }
+  function ghpStep(){
+    ghpJobT = 0;
+    if(currentView!=='history' || GH_UI.view!=='positions' || !GHP.q) return;
+    const base = ghBaseList(), t0 = performance.now();
+    let left = false;
+    for(const g of base){
+      if(GHP_IX.has(g.id)) continue;
+      if(performance.now() - t0 > 12){ left = true; break; }
+      ghpIndex(g);
+    }
+    if(left){
+      ghpJobT = setTimeout(ghpStep, 16);
+      if(performance.now() - ghpJobDrawn > 250){ ghpJobDrawn = performance.now(); ghpShowProgress(base); }
+      return;
+    }
+    const u = ghMe(), q = GHP.q, out = [];
+    base.forEach(g=>{
+      if(q.color && ghMyColor(g, u)!==q.color) return;
+      const m = ghpMatch(ghpIndex(g), q);
+      if(m) out.push({ g, m });
+    });
+    out.sort((a, b)=> a.m.d - b.m.d || (b.g.createdAt || 0) - (a.g.createdAt || 0));
+    GHP.res = { q, list:out, n:base.length, key:ghpBaseKey(base) };
+    ghRender();
+  }
+  function ghpBaseKey(base){ return base.length+'|'+(base[0] ? base[0].id : '')+'|'+(base.length ? base[base.length-1].id : ''); }
+  function ghpShowProgress(base){
+    let done = 0;
+    base.forEach(g=>{ if(GHP_IX.has(g.id)) done++; });
+    const pct = Math.floor(100*done/Math.max(1, base.length));
+    document.getElementById('ghp-results').hidden = false;
+    document.getElementById('ghp-progress').hidden = false;
+    document.getElementById('ghp-progress-fill').style.width = pct+'%';
+    document.getElementById('ghp-progress-bar').setAttribute('aria-valuenow', String(pct));
+    document.getElementById('ghp-pct').textContent = pct+'%';
+    ghpSay('', 'Reading your games\u2026 (once: then searches are instant)');
+  }
+  // the summary is a live region: written only when its words change, so a screen reader reads it once
+  function ghpSay(lead, rest){
+    const sum = document.getElementById('ghp-summary'), sig = lead+'|'+rest;
+    if(sum.dataset.sig===sig) return;
+    sum.dataset.sig = sig;
+    sum.textContent = '';
+    if(lead) sum.appendChild(ghEl('b', '', lead));
+    sum.appendChild(document.createTextNode(rest));
+  }
+  function ghpRender(base){
+    ghpDraw();
+    const R = GHP.res, box = document.getElementById('ghp-results');
+    // a search left half-read (you went to another view) picks up where it stopped
+    if(!R){ if(!GHP.q) box.hidden = true; else if(!ghpJobT) ghpJobT = setTimeout(ghpStep, 0); return; }
+    // more games loaded (or another site's tab): search them too, the old answer showing meanwhile
+    if(base && R.key!==ghpBaseKey(base) && !ghpJobT) ghpJobT = setTimeout(ghpStep, 0);
+    box.hidden = false;
+    document.getElementById('ghp-progress').hidden = true;
+    const u = ghMe(), games = R.list.map(x=> x.g), W = gpRecord(games, u), n = games.length;
+    const what = R.q.mode==='exact' ? 'this position' : (R.q.mode==='similar' ? 'this pawn structure or one close to it' : 'this pawn structure');
+    const as = R.q.color ? R.q.color.charAt(0).toUpperCase()+R.q.color.slice(1) : '';
+    const of = 'of your '+R.n.toLocaleString('en-US')+' game'+(R.n===1 ? '' : 's');
+    const busy = !R.n && (GH_UI.site==='chesscom' ? ghCcBusy() : (GH_STATE.loading || ghFilling() || (ghMixed() && ghCcBusy())));
+    if(busy) ghpSay('', 'Loading your games\u2026');
+    else if(!n) ghpSay('', 'None '+of+' here reach'+(R.n===1 ? 'es' : '')+' '+what+(as ? ' as '+as : '')+'.');
+    else ghpSay(String(n), ' '+of+' reach '+what+(as ? ' with you as '+as : '')+' \u00b7 '+W.w+' won \u00b7 '+W.d+' drawn \u00b7 '+W.l+' lost \u00b7 you scored '+Math.round(100*(W.w + W.d/2)/n)+'%');
+    // rebuilt when the games or what a row shows (its note, your analysis) change
+    const shown = R.list.slice(0, 200);
+    const list = document.getElementById('ghp-list');
+    const sig = R.q.fen+'|'+R.q.mode+'|'+R.q.color+'|'+R.list.length+'|'+shown.map(({ g, m })=> g.id+':'+m.ply+':'+m.d+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)).join('\u0001');
+    if(list.dataset.sig===sig) return;
+    list.dataset.sig = sig;
+    // the keyboard stays on the same row or button through a rebuild, as in the Games list
+    const fa = document.activeElement, fRow = fa && fa!==list && list.contains(fa) ? fa.closest('.history-row') : null;
+    const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-grp-btn') ? '.gh-grp-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : '')));
+    list.textContent = '';
+    const frag = document.createDocumentFragment();
+    shown.forEach(({ g, m })=>{
+      const row = ghRow(g, u);
+      const at = m.ply, mv = Math.ceil(at/2);
+      const where = at===0 ? 'From the start' : 'After '+mv+(at % 2 ? '.' : '...')+' (move '+mv+')';
+      row.appendChild(ghEl('div', 'ghp-at', where+' \u00b7 '+(R.q.mode==='exact' ? 'this position' : (m.d===0 ? 'same pawn structure' : m.d+' pawn'+(m.d===1 ? '' : 's')+' apart'))));
+      // a click opens the game at that move
+      row.addEventListener('click', (e)=>{ if(e.target.closest('button')) return; e.stopImmediatePropagation(); ghOpenGame(g, { at:{ ply:at } }); }, true);
+      row.addEventListener('keydown', (e)=>{ if(e.target===row && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); e.stopImmediatePropagation(); ghOpenGame(g, { at:{ ply:at } }); } }, true);
+      frag.appendChild(row);
+    });
+    list.appendChild(frag);
+    if(fRow && gnIdOk(fRow.dataset.gid || '')){
+      const r = list.querySelector('.history-row[data-gid="'+CSS.escape(fRow.dataset.gid)+'"]');
+      const el = r && ((fSel && r.querySelector(fSel)) || r);
+      if(el) el.focus({ preventScroll:true });
+    }
+    if(R.list.length > 200) list.appendChild(ghEl('div', 'ghp-more', 'And '+(R.list.length - 200)+' more: narrow it down (your color, Exact position).'));
+  }
+  // from a game on the board: its position, ready to search
+  function ghpFrom(fen, flip){
+    ghpLoadFen(fen);
+    if(!GHP.board.some(x=> x==='wP' || x==='bP')) GHP.mode = 'exact';      // no pawns, no pawn structure: that very position
+    GHP.flip = !!flip;
+    GHP.res = null; GHP.q = null;
+    if(currentView!=='history') showView('history');
+    ghoSetView('positions');
+    ghRender();
+    ghpSearch();
+  }
+  (function(){
+    document.getElementById('ghp-palette').addEventListener('click', (e)=>{
+      const b = e.target.closest('.ghp-tool');
+      if(!b) return;
+      GHP.tool = b.dataset.tool; GHP.sel = -1;
+      ghpDraw();
+    });
+    const bd = document.getElementById('ghp-board');
+    bd.addEventListener('click', (e)=>{ const sq = e.target.closest('.sq'); if(sq && sq.dataset.idx!=null) ghpTap(Number(sq.dataset.idx)); });
+    bd.addEventListener('contextmenu', (e)=>{
+      const sq = e.target.closest('.sq');
+      if(!sq || sq.dataset.idx==null) return;
+      e.preventDefault();
+      GHP.board[Number(sq.dataset.idx)] = ''; GHP.sel = -1;
+      ghpDraw(); ghSyncHash();
+    });
+    document.getElementById('ghp-start').addEventListener('click', ()=>{ GHP.board = GHP_START.slice(); GHP.sel = -1; ghpDraw(); ghSyncHash(); });
+    document.getElementById('ghp-clear').addEventListener('click', ()=>{ GHP.board = Array(64).fill(''); GHP.sel = -1; ghpDraw(); ghSyncHash(); });
+    document.getElementById('ghp-flip').addEventListener('click', ()=>{ GHP.flip = !GHP.flip; ghpDraw(); });
+    const fen = document.getElementById('ghp-fen');
+    fen.addEventListener('input', ()=>{ if(ghpLoadFen(fen.value)){ fen.removeAttribute('aria-invalid'); ghSyncHash(); } else fen.setAttribute('aria-invalid', 'true'); });
+    fen.addEventListener('blur', ()=>{ fen.removeAttribute('aria-invalid'); ghpDraw(); });
+    document.getElementById('ghp-mode').addEventListener('click', (e)=>{ const b = e.target.closest('.toggle'); if(!b) return; GHP.mode = b.dataset.val; ghpDraw(); if(GHP.q) ghpSearch(); });
+    document.getElementById('ghp-color').addEventListener('click', (e)=>{ const b = e.target.closest('.toggle'); if(!b) return; GHP.color = b.dataset.val; ghpDraw(); if(GHP.q) ghpSearch(); });
+    document.getElementById('ghp-go').addEventListener('click', ()=>{ if(ghpCanSearch()) ghpSearch(); });
+  })();
+
   // #history?view=openings (then the filters, which a link replaces only when it has some)
   function ghViewParams(){
     const p = new URLSearchParams();
@@ -26456,6 +26831,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghFilterParams().forEach((v, k)=> p.set(k, v));
     if(ghoOn()) p.set('view', 'openings');
     else if(ghgOn()){ p.set('view', 'groups'); if(GH_UI.group) p.set('group', GH_UI.group); }
+    else if(GH_UI.view==='positions'){ p.set('view', 'positions'); const f = ghpPlacement(); if(f!=='8/8/8/8/8/8/8/8') p.set('fen', f); }
     return p;
   }
   // site: a link with one sets the tab (anything else = All); a link with filters or a view but
@@ -26466,7 +26842,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const site = sp!=null ? (sp==='lichess' || sp==='chesscom' ? sp : 'all') : (hasF || v!=null ? 'all' : GH_UI.site);
     const siteChanged = site!==GH_UI.site;
     if(siteChanged){ GH_UI.site = site; GH_STATE.shown = GH_WINDOW; }
-    const want = v==='openings' || v==='groups' ? v : (v==='games' || hasF) ? 'games' : GH_UI.view;
+    const want = v==='openings' || v==='groups' || v==='positions' ? v : (v==='games' || hasF) ? 'games' : GH_UI.view;
+    let fenSet = false;            // a link's position: shown and searched (the first call can come before GHP exists)
+    if(want==='positions' && p && p.get('fen')){ const was = ghpPlacement(); fenSet = ghpLoadFen(p.get('fen')) && ghpPlacement()!==was; }
     const grp = want==='groups' && p && /^gp-[0-9a-f]{8}$/.test(p.get('group') || '') ? p.get('group') : (want==='groups' && v==='groups' ? '' : GH_UI.group || '');
     const changed = want!==GH_UI.view || grp!==(GH_UI.group || '');
     if(GH_UI.view==='groups' && (want!=='groups' || grp!==GH_UI.group)) ghgLeave();
@@ -26474,7 +26852,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GH_UI.group = want==='groups' ? grp : '';
     if(changed || siteChanged) ghSaveFilters();
     const applied = ghApplyFilterParams(p);
-    if((changed || siteChanged) && !applied){ ghRender(); ghSyncHash(); }
+    if((changed || siteChanged || fenSet) && !applied){ ghRender(); ghSyncHash(); }
+    if(fenSet && ghpCanSearch()) ghpSearch();
     if(siteChanged && ghoOn()) rpQueue();
     return applied || changed || siteChanged;
   }
@@ -26524,7 +26903,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoSyncControls(){
     const on = ghoOn();
     document.querySelectorAll('#gh-view .toggle').forEach(b=>{
-      const a = b.dataset.val===(GH_UI.view==='groups' ? 'groups' : (on ? 'openings' : 'games'));
+      const a = b.dataset.val===(GH_UI.view==='groups' || GH_UI.view==='positions' ? GH_UI.view : (on ? 'openings' : 'games'));
       b.classList.toggle('active', a);
       b.setAttribute('aria-pressed', a ? 'true' : 'false');
     });
@@ -29654,7 +30033,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvMenuClose();
     const S = HV_STATE;
     const com = !!hvAnnId();            // comments: a game's moves (not a puzzle's)
-    if(!S || !node || !node.parent || (node.main && !com)) return;
+    if(!S || !node || !node.parent || (node.main && !com && !S.std)) return;
     const root = node.main ? null : hvLineRoot(node);
     const pane = document.getElementById('hv-pane-moves');
     const el = hvEl('div', 'hv-pop');
@@ -29673,6 +30052,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       add(node.comment ? 'Edit comment' : 'Add a comment', ()=> hvComEdit(node), 'hv-pop-com');
       if(node.comment) add('Delete comment', ()=> hvComSet(node, ''), 'hv-pop-com-del');
     }
+    // your games that reach this position or its pawn structure (Game History's Positions)
+    if(S.std) add('Find games with this position', ()=> ghpFrom(node.fen, S.flipped), 'hv-pop-findpos');
     if(!node.main){
       if(typeof nbInsertLine==='function' && !hvNotesOff()) add('Add this line to notes', ()=>{ try{ nbInsertLine(root); }catch(e){} }, 'hv-pop-notes');
       if(!root.parent.main && root.parent.children[0]!==root) add('Promote this line', ()=> hvPromote(root), 'hv-pop-promote');
@@ -29819,7 +30200,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!HV_STATE) return;
       const cell = e.target.closest(HV_COM_SEL);
       const n = cell && HV_STATE.nodes.get(cell.dataset.node);
-      if(!n || !n.parent || (n.main && !hvAnnId())) return;
+      if(!n || !n.parent || (n.main && !hvAnnId() && !HV_STATE.std)) return;
       e.preventDefault();
       hvMenuOpen(n, cell, e.clientX, e.clientY, cell);
     });
@@ -29836,7 +30217,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(lp) clearTimeout(lp.t);
       lp = { x, y, fired:false, t:setTimeout(()=>{
         const n = HV_STATE && HV_STATE.nodes.get(cell.dataset.node);
-        if(lp && n && n.parent && (!n.main || hvAnnId())){ lp.fired = true; hvMenuOpen(n, cell, x, y, cell); }
+        if(lp && n && n.parent && (!n.main || hvAnnId() || HV_STATE.std)){ lp.fired = true; hvMenuOpen(n, cell, x, y, cell); }
       }, 550) };
     });
     list.addEventListener('pointermove', (e)=>{ if(lp && !lp.fired && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 10){ clearTimeout(lp.t); lp = null; } });
@@ -35225,7 +35606,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     gnOverlay.classList.remove('active');
     if(currentView==='history') ghRender();
     if(!quiet){
-      const b = document.querySelector('#history-list .gh-note-btn[data-gid="'+F.gid+'"]');
+      const b = [...document.querySelectorAll('#view-history .gh-note-btn[data-gid="'+F.gid+'"]')].find(x=> x.offsetParent);
       if(b) b.focus({ preventScroll:true });
     }
     if(getLichessToken() && gnHasPending()) gnScheduleSync(800);
