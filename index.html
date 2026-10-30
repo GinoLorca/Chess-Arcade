@@ -2373,6 +2373,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     align-items:center; justify-content:center; padding:20px;
   }
   .modal-overlay.active{ display:flex; }
+  /* a new group (gpNewDialog) */
+  .gp-new-card{ max-width:400px; gap:14px; }
+  .gp-new-field{ display:flex; flex-direction:column; gap:6px; }
+  .gp-new-check{ display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--ink); cursor:pointer; }
+  .gp-new-check input{ width:16px; height:16px; accent-color:var(--brass); }
+  .gp-new-hint{ margin:-4px 0 0; font-size:12.5px; color:var(--ink-soft); }
   /* the end-of-game box (olEnd*) */
   .ol-end-card{ position:relative; max-width:340px; align-items:center; text-align:center; gap:10px; padding:26px 24px 22px; }
   .ol-end-close{ position:absolute; top:8px; right:10px; }
@@ -3409,6 +3415,57 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      skin dresses them; Uptown/Bauhaus corners follow their .toggle/.pz-save-btn
      rules). On a phone the row folds into thumb | details | note button. ---- */
   #view-history [hidden], #gn-overlay [hidden]{ display:none !important; }
+  /* ---- Groups (gp*): the index's cards and a group's page, its north star on top ---- */
+  /* the site tabs and chess.com's offer and progress don't apply to groups (you pick the games) */
+  #view-history.is-ghg :is(.gh-sites, .cc-offer, .cc-progress){ display:none !important; }
+  .ghg{ display:flex; flex-direction:column; gap:16px; margin-top:16px; }
+  .ghg-index{ display:flex; flex-direction:column; gap:14px; }
+  .ghg .panel.ghg-index-head{ flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 16px; padding:16px 20px; }
+  .ghg-intro{ margin:0; flex:1 1 300px; font-size:13.5px; line-height:1.55; color:var(--ink-soft); max-width:62ch; }
+  .ghg-new{ margin-left:auto; }
+  .ghg-cards{ display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:12px; }
+  .ghg-card{ display:flex; flex-direction:column; gap:6px; text-align:left; padding:16px 18px; background:var(--surface); border:1px solid var(--line);
+    border-top:3px solid var(--brass); border-radius:12px; box-shadow:var(--shadow); cursor:pointer; font:inherit; color:var(--ink); min-width:0; }
+  .ghg-card:hover{ border-color:var(--brass-soft); border-top-color:var(--brass); }
+  .ghg-card:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .ghg-card-name{ font-family:"Big Shoulders Display",sans-serif; font-size:24px; font-weight:700; line-height:1.1; overflow-wrap:anywhere; }
+  .ghg-card-line{ font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .ghg-card-stats{ font-size:12.5px; color:var(--ink); }
+  .ghg-card-star{ font-size:13px; line-height:1.45; font-style:italic; color:var(--ink-soft); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .ghg-card-star:empty{ display:none; }
+  .ghg-page{ display:flex; flex-direction:column; gap:16px; }
+  .ghg-back{ align-self:flex-start; }
+  .ghg .panel.ghg-head{ gap:6px; padding:16px 20px; }
+  .ghg .panel.ghg-games{ gap:10px; padding:16px 20px; }
+  .ghg-name{ font-family:"Big Shoulders Display",sans-serif; font-size:36px; font-weight:700; line-height:1.1; color:var(--ink); background:transparent;
+    border:0; border-bottom:1.5px dashed transparent; border-radius:0; padding:0 0 2px; width:100%; box-sizing:border-box; }
+  .ghg-name:hover{ border-bottom-color:var(--line); }
+  .ghg-name:focus{ outline:none; border-bottom-color:var(--brass); }
+  .ghg-meta{ font-size:13px; color:var(--ink-soft); }
+  /* the north star: a card of its own, the board beside the note */
+  .ghg-star{ display:grid; grid-template-columns:minmax(160px, 230px) minmax(0, 1fr); gap:20px; align-items:start; padding:20px 22px;
+    background:var(--surface); border:1px solid var(--line); border-top:3px solid var(--brass); border-radius:14px; box-shadow:var(--shadow); }
+  .ghg-noboard .ghg-star{ grid-template-columns:minmax(0, 1fr); }
+  .ghg-noboard .ghg-board{ display:none; }
+  .ghg-board .nb-board-wrap{ width:100%; }
+  .ghg-star-body{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .ghg-eyebrow{ display:flex; align-items:center; gap:8px; font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--brass-text); }
+  .ghg-eyebrow::before{ content:''; width:11px; height:11px; background:currentColor; clip-path:polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); }
+  .ghg-line{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .ghg-star .ghg-note{ min-height:170px; font-size:15.5px; line-height:1.6; }
+  .ghg-status:empty{ display:none; }
+  .ghg-games-head{ font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); }
+  .ghg-games-head:empty{ display:none; }
+  .ghg-list{ margin-top:0; }
+  .ghg-list .history-row{ position:relative; padding-right:44px; }
+  .ghg-out{ position:absolute; top:8px; right:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; padding:0;
+    background:none; border:1px solid transparent; border-radius:6px; color:var(--ink-soft); font-size:18px; line-height:1; cursor:pointer; }
+  .ghg-out:hover{ color:var(--ink); border-color:var(--line); background:var(--surface-2); }
+  .ghg-out:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .ghg-missing-t{ font-size:13px; color:var(--ink-soft); font-style:italic; }
+  .ghg-foot{ display:flex; justify-content:flex-end; }
+  @media (pointer:coarse){ .ghg-out{ width:44px; height:44px; top:2px; right:2px; } .ghg-list .history-row{ padding-right:52px; } }
+  @media (max-width:640px){ .ghg-star{ grid-template-columns:1fr; padding:16px; } .ghg-board{ max-width:260px; } .ghg-name{ font-size:30px; } }
   #view-history > .gh-panel{ position:relative; z-index:3; }   /* the combobox lists open over the rows */
   .gh-when{ display:contents; }
   /* The rows sit on a surface, like the filters: on a textured page (Felt,
@@ -4437,6 +4494,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     font:inherit; font-size:13px; color:var(--ink);
   }
   .hv-pop-item:hover, .hv-pop-item:focus-visible{ background:var(--surface-2); outline:none; }
+  /* a game's Groups menu (hvGroupsMenu): a check beside the groups it's in */
+  .hv-groups-pop{ z-index:60; max-width:min(320px, calc(100vw - 16px)); max-height:min(60vh, 420px); overflow:auto; }
+  .hv-pop-head{ padding:6px 10px 2px; font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); }
+  .hv-pop-group{ position:relative; padding-left:30px; overflow-wrap:anywhere; }
+  .hv-pop-group::before{ content:''; position:absolute; left:10px; top:50%; width:12px; height:12px; margin-top:-7px; border:1.5px solid var(--ink-soft); border-radius:3px; box-sizing:border-box; }
+  .hv-pop-group[aria-checked="true"]::before{ background:var(--brass); border-color:var(--brass); box-shadow:inset 0 0 0 2px var(--surface); }
+  .hv-pop-sep{ height:1px; margin:4px 6px; background:var(--line); }
   :root[data-skin="bauhaus"] :is(.hv-pop, .hv-pop-item){ border-radius:0; }
 
   @media (min-width:900px){
@@ -5771,6 +5835,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     </div>
   </div>
 </div>
+<!-- A new group (gpNewDialog): its name; made from a game, that game and (if you like) the
+     position on the board -->
+<div class="modal-overlay" id="gp-new" role="dialog" aria-modal="true" aria-labelledby="gp-new-title">
+  <div class="modal-card gp-new-card">
+    <div class="modal-head">
+      <div class="modal-title" id="gp-new-title">New group</div>
+      <button type="button" class="modal-close" id="gp-new-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="gp-new-field">
+      <label class="field-label" for="gp-new-name">Name</label>
+      <input class="text-input" id="gp-new-name" type="text" maxlength="60" autocomplete="off" spellcheck="false" placeholder="vs 3...c5">
+    </div>
+    <label class="gp-new-check" id="gp-new-boardrow"><input type="checkbox" id="gp-new-board" checked> <span id="gp-new-boardtext">Show this position on its page</span></label>
+    <p class="gp-new-hint" id="gp-new-gamerow">This game goes in it. Add others from their own Groups button.</p>
+    <div class="btn-row">
+      <button type="button" class="btn btn-primary" id="gp-new-ok">Create group</button>
+      <button type="button" class="btn btn-ghost" id="gp-new-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="gn-overlay" role="dialog" aria-modal="true" aria-labelledby="gn-title">
   <div class="modal-card gn-card">
     <div class="modal-head">
@@ -6093,7 +6177,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <h1 class="title" style="font-size:26px;">Game History</h1>
           <div class="subtitle" id="history-subtitle">Connect your Lichess account in Settings to see your games.</div>
         </div>
-        <div class="toggle-row gh-seg gh-view" id="gh-view" role="group" aria-label="Show"><button type="button" class="toggle active" data-val="games" aria-pressed="true">Games</button><button type="button" class="toggle" data-val="openings" aria-pressed="false">Openings</button></div>
+        <div class="toggle-row gh-seg gh-view" id="gh-view" role="group" aria-label="Show"><button type="button" class="toggle active" data-val="games" aria-pressed="true">Games</button><button type="button" class="toggle" data-val="openings" aria-pressed="false">Openings</button><button type="button" class="toggle" data-val="groups" aria-pressed="false">Groups</button></div>
       </div>
       <div class="gh-sites" id="gh-site" role="tablist" aria-label="Games from">
         <button type="button" role="tab" id="gh-site-all" class="gh-site-tab" data-site="all" aria-selected="true" aria-controls="history-list gho cc-setup">All <span class="gh-site-n"></span></button>
@@ -6217,6 +6301,38 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     </div>
     <div class="gh-list-note" id="gh-list-note" hidden>Showing your noted games saved on this device.</div>
     <div class="history-list panel gh-list" id="history-list" role="tabpanel" aria-labelledby="gh-site-all"></div>
+    <!-- Groups (gp*): games you gather under names of yours. The index lists them; a group's
+         page has its north star (a note of its own) on top of its games. -->
+    <section class="ghg" id="ghg" hidden>
+      <div class="ghg-index" id="ghg-index">
+        <div class="panel ghg-index-head">
+          <p class="ghg-intro" id="ghg-intro"></p>
+          <button type="button" class="btn btn-ghost ghg-new" id="ghg-new">New group</button>
+        </div>
+        <div class="ghg-cards" id="ghg-cards"></div>
+      </div>
+      <div class="ghg-page" id="ghg-page" hidden>
+        <div class="panel ghg-head">
+          <button type="button" class="btn-link ghg-back" id="ghg-back">&larr; All groups</button>
+          <input class="ghg-name" id="ghg-name" type="text" maxlength="60" aria-label="Group name" spellcheck="false" autocomplete="off">
+          <div class="ghg-meta" id="ghg-meta"></div>
+        </div>
+        <div class="ghg-star">
+          <div class="ghg-board" id="ghg-board"></div>
+          <div class="ghg-star-body">
+            <div class="ghg-eyebrow" id="ghg-star-label">North star</div>
+            <div class="ghg-line" id="ghg-line"></div>
+            <div class="text-input gn-ta ghg-note" id="ghg-note" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" aria-labelledby="ghg-star-label" data-placeholder="The main ideas of this line, its motto and spirit, and the pawn structure you&rsquo;re striving for."></div>
+            <div class="gn-status ghg-status" id="ghg-note-status" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="panel ghg-games">
+          <div class="ghg-games-head" id="ghg-count"></div>
+          <div class="history-list ghg-list" id="ghg-list"></div>
+          <div class="ghg-foot"><button type="button" class="btn-link ghg-delete" id="ghg-delete">Delete this group</button></div>
+        </div>
+      </div>
+    </section>
     <section class="gho" id="gho" role="tabpanel" aria-labelledby="gh-site-all" hidden>
       <div class="gho-note" id="gho-connect" hidden>
         <span id="gho-connect-text">Grouped by Lichess&rsquo;s opening names. Connect Repertoire Lab to see your games by your own repertoire, chapter by chapter.</span>
@@ -6423,6 +6539,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="hv-actions">
           <button class="btn btn-ghost hv-act" id="hv-copy-pgn" type="button">Copy PGN</button>
           <a class="btn btn-ghost hv-act" id="hv-lichess" target="_blank" rel="noopener noreferrer">Open on Lichess</a>
+          <button class="btn btn-ghost hv-act" id="hv-groups" type="button" aria-haspopup="menu" aria-expanded="false">Groups</button>
         </div>
         <textarea id="hv-pgn" hidden readonly tabindex="-1" aria-hidden="true"></textarea>
       </div>
@@ -23742,7 +23859,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const d = JSON.parse(localStorage.getItem(GH_FILTERS_KEY) || 'null');
       if(d && typeof d==='object'){
         GH_FILTERS = ghValidFilters(d.f); GH_UI.more = !!(d.ui && d.ui.more);
-        GH_UI.view = d.ui && d.ui.view==='openings' ? 'openings' : 'games';
+        GH_UI.view = d.ui && (d.ui.view==='openings' || d.ui.view==='groups') ? d.ui.view : 'games';
         if(d.ui && typeof d.ui.osort==='string' && /^[a-z]{1,8}$/.test(d.ui.osort)) GH_UI.osort = d.ui.osort;
         if(d.ui && /^(all|lichess|chesscom)$/.test(String(d.ui.site))) GH_UI.site = d.ui.site;
       }
@@ -23886,7 +24003,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(typeof GN==='object' && GN && (GH_FILTERS.notes || GH_STATE.offline)){
       let added = false;
       Object.values(GN.notes).forEach(n=>{
-        if(!(n.text || n.conflict) || !n.g || ccIsId(n.id) || gnIsOp(n.id) || GH_STATE.ids.has(n.id)) return;
+        if(!(n.text || n.conflict) || !n.g || ccIsId(n.id) || gnIsMeta(n.id) || GH_STATE.ids.has(n.id)) return;
         // your analysis on a game not loaded: that game (once, if it has a note too)
         if(gnIsAn(n.id)){ const gid = n.id.slice(3); if(ccIsId(gid) || GH_STATE.ids.has(gid) || GN.notes[gid] || out.some(x=> x.id===gid)) return; n = Object.assign({}, n, { id:gid }); }
         else if(out.some(x=> x.id===n.id)) return;
@@ -24177,14 +24294,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghShowSub();
     // the Chess.com tab with no account: the setup card instead of the list (chesscom SPEC B.4)
     const only = ghCcPanel(base);
-    const ov = ghoOn();
+    const ov = ghoOn(), gv = ghgOn();
     document.getElementById('gho').hidden = !ov || only;
-    listEl.hidden = ov || only;
-    ['.gh-filters', '.history-footer'].forEach(q=>{ const el = document.querySelector('#view-history '+q); if(el) el.hidden = only; });
+    document.getElementById('ghg').hidden = !gv || only;
+    listEl.hidden = ov || gv || only;
+    ['.gh-filters', '.history-footer'].forEach(q=>{ const el = document.querySelector('#view-history '+q); if(el) el.hidden = only || gv; });
     document.getElementById('view-history').classList.toggle('is-gho', ov);
+    document.getElementById('view-history').classList.toggle('is-ghg', gv);
     if(only){
       document.getElementById('gh-list-note').hidden = true;
       document.getElementById('gh-count').textContent = '';
+      return;
+    }
+    if(gv){
+      document.getElementById('gh-list-note').hidden = true;
+      document.getElementById('gh-count').textContent = '';
+      ghgRender(base);
       return;
     }
     if(ov){
@@ -25217,7 +25342,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(ghCcUp()) ccGames().forEach(g=>{ if(rpCounted(g)) out.push(g); });
     if(typeof GN==='object' && GN && GN.notes){
       Object.values(GN.notes).forEach(n=>{
-        if(!n || !n.g || gnIsOp(n.id) || gnIsAn(n.id) || (ccIsId(n.id) ? ghCcUp() && ccHas(n.id) : GH_STATE.ids.has(n.id))) return;
+        if(!n || !n.g || gnIsMeta(n.id) || gnIsAn(n.id) || (ccIsId(n.id) ? ghCcUp() && ccHas(n.id) : GH_STATE.ids.has(n.id))) return;
         let g = GH_STATE.extras.get(n.id);
         if(!g){ try{ g = ghGameFromSummary(n); }catch(e){ g = null; } }
         if(g && rpCounted(g)) out.push(g);
@@ -25979,8 +26104,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ (first || (chip && !chip.hidden ? chip : null) || document.getElementById('gh-count')).focus({ preventScroll:true }); }catch(e){}
   }
   function ghoSetView(v){
-    v = v==='openings' ? 'openings' : 'games';
+    v = v==='openings' || v==='groups' ? v : 'games';
+    if(v==='groups' && GH_UI.view==='groups' && GH_UI.group){ ghgOpen(''); return; }     // Groups again: back to all of them
     if(GH_UI.view===v) return;
+    if(GH_UI.view==='groups') ghgLeave();
     if(v==='games') GHO_Y = window.scrollY;
     GH_UI.view = v;
     ghSaveFilters();
@@ -25991,12 +26118,259 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(GHO_Y!=null){ const y = GHO_Y; GHO_Y = null; window.scrollTo({ top:y }); }     // back where you were in the tree
     }
   }
+  /* ---- Groups (gp*): games you gather yourself under a name of yours ("vs 3...c5"). You make
+     a group and add games to it, one by one, from a game on the board (its Groups button); a
+     group's page has its north star on top (gq-<the group's hex>, a note of its own: the line's
+     main ideas, its motto, the pawn structure to strive for), with the board it was made from,
+     and the games you added under it. Nothing is grouped for you. ---- */
+  var ghgF = null;                          // the open group's north-star note (a gnField)
+  function ghgOn(){ return GH_UI.view==='groups'; }
+  function gpParse(id, text){
+    let d = null;
+    try{ d = JSON.parse(text); }catch(e){ d = null; }
+    if(!d || typeof d!=='object') return null;
+    const ids = (a)=> Array.isArray(a) ? [...new Set(a.filter(x=> typeof x==='string' && /^(?:\w{8}|cc-d?\d{1,15})$/.test(x)))].slice(0, 1000) : [];
+    return { id, hex:id.slice(3), name:String(d.name || 'Untitled group').slice(0, 60), fen: nbValidFen(String(d.fen || '')) ? String(d.fen) : '',
+      line:gnCleanSan(String(d.line || '')), flip:!!d.flip, inc:ids(d.inc), at:Number(d.at) || 0 };
+  }
+  function gpGet(id){ const n = typeof GN==='object' && GN ? GN.notes[id] : null; return n && n.text ? gpParse(id, n.text) : null; }
+  function gpAll(){
+    if(typeof GN!=='object' || !GN) return [];
+    const out = [];
+    Object.values(GN.notes).forEach(n=>{
+      if(!n || !gnIsGp(n.id)) return;
+      // another device's version of a group: the games either one added are kept, then it's settled
+      if(n.conflict && n.text){
+        const a = gpParse(n.id, n.text), c = gpParse(n.id, n.conflict.text);
+        n.conflict = null;
+        if(a && c){ a.inc = [...new Set(a.inc.concat(c.inc))]; gpSave(a); } else gnPersist();
+      }
+      const G = n.text ? gpParse(n.id, n.text) : null;
+      if(G) out.push(G);
+    });
+    return out.sort((x, y)=> x.name.localeCompare(y.name));
+  }
+  function gpSave(G){
+    G.at = G.at || Date.now();
+    gnSetNote(G.id, JSON.stringify({ v:1, name:G.name, fen:G.fen, line:G.line, flip:!!G.flip, inc:G.inc, at:G.at }),
+      { id:G.id, _op:gnCleanG({ opening:G.name, san:G.line, variant:'standard' }) });
+  }
+  function gpNew(name, from){
+    const hex = gnFnv(name+'|'+Date.now()+'|'+Math.random());
+    const G = { id:'gp-'+hex, hex, name, fen:(from && from.fen) || '', line:(from && from.line) || '', flip:!!(from && from.flip), inc:from && from.game ? [String(from.game)] : [], at:Date.now() };
+    gpSave(G);
+    return G;
+  }
+  function gpIn(G, g){ return G.inc.includes(String(g.id)); }
+  function gpToggle(G, g){
+    const id = String(g.id);
+    G.inc = G.inc.includes(id) ? G.inc.filter(x=> x!==id) : G.inc.concat([id]);
+    gpSave(G);
+  }
+  // a group's games as Game History has them (any site, loaded or kept with a note); the rest
+  // as a bare id, opened from Lichess when it can
+  function gpGames(G){
+    const by = new Map();
+    const add = (g)=>{ if(g && g.id && !by.has(String(g.id))) by.set(String(g.id), g); };
+    (GH_STATE.games || []).forEach(add);
+    GH_STATE.extras.forEach(add);
+    if(ghCcUp()) ccGames().forEach(add);
+    ghBaseList().forEach(add);
+    const have = [], miss = [];
+    G.inc.forEach(id=>{ const g = by.get(id); if(g) have.push(g); else miss.push(id); });
+    have.sort((a, b)=> (b.createdAt || 0) - (a.createdAt || 0));
+    return { have, miss };
+  }
+  function gpRecord(games, u){
+    let w = 0, dr = 0, l = 0;
+    games.forEach(g=>{ const r = ghGameResult(g, u); if(r==='win') w++; else if(r==='loss') l++; else dr++; });
+    return { w, d:dr, l };
+  }
+  function gpStats(G, u){
+    const { have, miss } = gpGames(G), n = have.length + miss.length, R = gpRecord(have, u);
+    return n+' game'+(n===1 ? '' : 's')+(have.length ? ' \u00b7 '+R.w+' won \u00b7 '+R.d+' drawn \u00b7 '+R.l+' lost' : '');
+  }
+  function ghgRender(base){
+    const G = GH_UI.group ? gpGet(GH_UI.group) : null;
+    if(GH_UI.group && !G){ ghgLeave(); ghSyncHash(); }     // deleted (here or on another device)
+    document.getElementById('ghg-index').hidden = !!G;
+    document.getElementById('ghg-page').hidden = !G;
+    const u = ghMe();
+    if(G) ghgPage(G, u); else ghgIndex(u);
+  }
+  function ghgIndex(u){
+    const groups = gpAll();
+    document.getElementById('ghg-intro').textContent = groups.length ? groups.length+' group'+(groups.length===1 ? '' : 's')+' \u00b7 open one for its north star and its games.'
+      : 'No groups yet. Make one here, or from a game on the board (its Groups button), and add the games you come across to it there.';
+    const box = document.getElementById('ghg-cards');
+    box.textContent = '';
+    groups.forEach(G=>{
+      const b = ghEl('button', 'ghg-card');
+      b.type = 'button';
+      b.dataset.group = G.id;
+      b.appendChild(ghEl('span', 'ghg-card-name', G.name));
+      if(G.line) b.appendChild(ghEl('span', 'ghg-card-line', gnMovetext(G.line)));
+      b.appendChild(ghEl('span', 'ghg-card-stats', gpStats(G, u)));
+      b.appendChild(ghEl('span', 'ghg-card-star', gnFirstLine(gnNoteText('gq-'+G.hex)) || ''));
+      box.appendChild(b);
+    });
+  }
+  function ghgPage(G, u){
+    const name = document.getElementById('ghg-name');
+    if(document.activeElement!==name) name.value = G.name;
+    document.getElementById('ghg-meta').textContent = gpStats(G, u);
+    const line = document.getElementById('ghg-line');
+    line.textContent = G.line ? 'After '+gnMovetext(G.line) : '';
+    line.hidden = !G.line;
+    const bd = document.getElementById('ghg-board'), sig = G.fen+'|'+G.flip;
+    document.getElementById('ghg-page').classList.toggle('ghg-noboard', !G.fen);
+    if(bd.dataset.sig!==sig){
+      bd.textContent = '';
+      if(G.fen) bd.appendChild(nbMiniBoard({ fen:G.fen, flip:G.flip, arrows:[], squares:[], label:G.name, ply:null, line:null, extra:[] }));
+      bd.dataset.sig = sig;
+    }
+    // the north star: loaded once per group (redraws never touch what's being typed)
+    const el = document.getElementById('ghg-note');
+    if(!ghgF || ghgF.gid!=='gq-'+G.hex){
+      if(ghgF) gnFieldSave(ghgF);
+      if(!el._nb) nbMount(el, { context:'group' });
+      ghgF = gnField(el);
+      ghgF.op = 'gq';
+      ghgF.st = document.getElementById('ghg-note-status');
+      gnFieldLoad(ghgF, { id:'gq-'+G.hex, _op:gnCleanG({ opening:G.name, san:G.line, variant:'standard' }) });
+      gnRenderField(ghgF);
+    }
+    const { have, miss } = gpGames(G);
+    document.getElementById('ghg-count').textContent = have.length + miss.length ? 'Games'
+      : 'No games in this group yet. Open a game (a row in Games), then its Groups button adds it here.';
+    const list = document.getElementById('ghg-list'), ids = have.map(g=> g.id).concat(miss).join(',');
+    if(list.dataset.sig===ids && list.dataset.group===G.id) return;
+    list.dataset.sig = ids; list.dataset.group = G.id;
+    list.textContent = '';
+    const out = (row, id)=>{
+      const x = ghEl('button', 'ghg-out', '\u00d7');
+      x.type = 'button';
+      x.dataset.gid = id;
+      x.title = 'Take this game out of the group';
+      x.setAttribute('aria-label', 'Take this game out of '+G.name);
+      row.appendChild(x);
+      return row;
+    };
+    const frag = document.createDocumentFragment();
+    have.forEach(g=> frag.appendChild(out(ghRow(g, u), g.id)));
+    // a game that isn't loaded here (an older one, another site's not yet read): opened from Lichess when it can
+    miss.forEach(id=>{
+      const row = ghEl('div', 'history-row ghg-missing');
+      row.dataset.gid = id;
+      row.tabIndex = 0;
+      row.appendChild(ghEl('div', 'ghg-missing-t', ccIsId(id) ? 'A chess.com game (load your chess.com games to see it)' : 'A game not loaded here: open it'));
+      if(!ccIsId(id)){
+        const go = ()=> ghOpenGame({ id, _summary:true, moves:'', players:{ white:{}, black:{} }, variant:'standard' });
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', go);
+        row.addEventListener('keydown', e=>{ if(e.target===row && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); go(); } });
+      }
+      frag.appendChild(out(row, id));
+    });
+    list.appendChild(frag);
+  }
+  function ghgOpen(id){
+    ghgLeave();
+    GH_UI.view = 'groups';
+    GH_UI.group = id || '';
+    ghSaveFilters();
+    ghRender();
+    ghSyncHash();
+    window.scrollTo({ top:0 });
+  }
+  // leaving a group's page: its note is saved (and synced soon)
+  function ghgLeave(){
+    if(ghgF){ clearTimeout(ghgF.timer); gnFieldSave(ghgF); ghgF = null; if(getLichessToken() && gnHasPending()) gnScheduleSync(800); }
+    GH_UI.group = '';
+  }
+  // New group (the Groups index, or a game's Groups menu with the board's position): a name, then its page
+  function gpNewDialog(from){
+    const ov = document.getElementById('gp-new'), name = document.getElementById('gp-new-name'), useB = document.getElementById('gp-new-board');
+    ov._from = from || null;
+    name.value = (from && from.suggest) || '';
+    document.getElementById('gp-new-boardrow').hidden = !(from && from.fen);
+    useB.checked = !!(from && from.fen);
+    document.getElementById('gp-new-boardtext').textContent = from && from.label ? 'Show the position after '+from.label+' on its page' : 'Show this position on its page';
+    document.getElementById('gp-new-gamerow').hidden = !(from && from.game);
+    ov.classList.add('active');
+    try{ name.focus({ preventScroll:true }); name.select(); }catch(e){}
+  }
+  function gpNewClose(){ document.getElementById('gp-new').classList.remove('active'); }
+  function gpNewCreate(){
+    const ov = document.getElementById('gp-new'), from = ov._from || {}, name = document.getElementById('gp-new-name');
+    const v = name.value.replace(/\s+/g, ' ').trim().slice(0, 60);
+    if(!v){ name.focus(); name.setAttribute('aria-invalid', 'true'); return; }
+    name.removeAttribute('aria-invalid');
+    const board = document.getElementById('gp-new-board').checked && from.fen;
+    const G = gpNew(v, { fen: board ? from.fen : '', line: board ? from.line : '', flip:!!from.flip, game:from.game || '' });
+    gpNewClose();
+    if(currentView!=='history') showView('history');
+    ghgOpen(G.id);
+  }
+  (function(){
+    document.getElementById('ghg-cards').addEventListener('click', (e)=>{ const b = e.target.closest('.ghg-card'); if(b) ghgOpen(b.dataset.group); });
+    document.getElementById('ghg-new').addEventListener('click', ()=> gpNewDialog(null));
+    document.getElementById('ghg-back').addEventListener('click', ()=> ghgOpen(''));
+    const name = document.getElementById('ghg-name');
+    const rename = ()=>{
+      const G = GH_UI.group ? gpGet(GH_UI.group) : null, v = name.value.replace(/\s+/g, ' ').trim().slice(0, 60);
+      if(!G) return;
+      if(!v){ name.value = G.name; return; }
+      if(v!==G.name){ G.name = v; gpSave(G); }
+    };
+    name.addEventListener('change', rename);
+    name.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); name.blur(); } else if(e.key==='Escape'){ const G = gpGet(GH_UI.group); if(G) name.value = G.name; name.blur(); } });
+    const note = document.getElementById('ghg-note');
+    note.addEventListener('input', ()=>{
+      const F = ghgF;
+      if(!F) return;
+      clearTimeout(F.timer);
+      F.timer = setTimeout(()=>{ gnFieldSave(F); gnRenderField(F); }, 600);
+      if(F.undo && note.value.trim()){ F.undo = null; gnRenderField(F); }
+    });
+    note.addEventListener('blur', ()=>{ if(ghgF){ gnFieldSave(ghgF); gnRenderField(ghgF); } });
+    document.getElementById('ghg-list').addEventListener('click', (e)=>{
+      const x = e.target.closest('.ghg-out');
+      if(!x) return;
+      e.stopPropagation();
+      const G = gpGet(GH_UI.group);
+      if(!G) return;
+      G.inc = G.inc.filter(y=> y!==x.dataset.gid);
+      gpSave(G);
+      ghRender();
+    }, true);
+    document.getElementById('ghg-delete').addEventListener('click', ()=>{
+      const G = gpGet(GH_UI.group);
+      if(!G || !window.confirm('Delete the group \u201c'+G.name+'\u201d and its north star? Your games stay as they are.')) return;
+      if(ghgF){ clearTimeout(ghgF.timer); ghgF = null; }
+      gnSetNote('gq-'+G.hex, '', null);
+      gnSetNote(G.id, '', null);
+      ghgOpen('');
+    });
+    const ov = document.getElementById('gp-new');
+    document.getElementById('gp-new-ok').addEventListener('click', gpNewCreate);
+    document.getElementById('gp-new-cancel').addEventListener('click', gpNewClose);
+    document.getElementById('gp-new-close').addEventListener('click', gpNewClose);
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) gpNewClose(); });
+    ov.addEventListener('keydown', (e)=>{
+      e.stopPropagation();
+      if(e.key==='Escape'){ e.preventDefault(); gpNewClose(); }
+      else if(e.key==='Enter' && e.target.id==='gp-new-name'){ e.preventDefault(); gpNewCreate(); }
+    });
+  })();
+
   // #history?view=openings (then the filters, which a link replaces only when it has some)
   function ghViewParams(){
     const p = new URLSearchParams();
     if(GH_UI.site==='lichess' || GH_UI.site==='chesscom') p.set('site', GH_UI.site);     // the tab first (All: none); never a username
     ghFilterParams().forEach((v, k)=> p.set(k, v));
     if(ghoOn()) p.set('view', 'openings');
+    else if(ghgOn()){ p.set('view', 'groups'); if(GH_UI.group) p.set('group', GH_UI.group); }
     return p;
   }
   // site: a link with one sets the tab (anything else = All); a link with filters or a view but
@@ -26007,9 +26381,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const site = sp!=null ? (sp==='lichess' || sp==='chesscom' ? sp : 'all') : (hasF || v!=null ? 'all' : GH_UI.site);
     const siteChanged = site!==GH_UI.site;
     if(siteChanged){ GH_UI.site = site; GH_STATE.shown = GH_WINDOW; }
-    const want = v==='openings' ? 'openings' : (v==='games' || hasF) ? 'games' : GH_UI.view;
-    const changed = want!==GH_UI.view;
+    const want = v==='openings' || v==='groups' ? v : (v==='games' || hasF) ? 'games' : GH_UI.view;
+    const grp = want==='groups' && p && /^gp-[0-9a-f]{8}$/.test(p.get('group') || '') ? p.get('group') : (want==='groups' && v==='groups' ? '' : GH_UI.group || '');
+    const changed = want!==GH_UI.view || grp!==(GH_UI.group || '');
+    if(GH_UI.view==='groups' && (want!=='groups' || grp!==GH_UI.group)) ghgLeave();
     GH_UI.view = want;
+    GH_UI.group = want==='groups' ? grp : '';
     if(changed || siteChanged) ghSaveFilters();
     const applied = ghApplyFilterParams(p);
     if((changed || siteChanged) && !applied){ ghRender(); ghSyncHash(); }
@@ -26062,7 +26439,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoSyncControls(){
     const on = ghoOn();
     document.querySelectorAll('#gh-view .toggle').forEach(b=>{
-      const a = b.dataset.val===(on ? 'openings' : 'games');
+      const a = b.dataset.val===(GH_UI.view==='groups' ? 'groups' : (on ? 'openings' : 'games'));
       b.classList.toggle('active', a);
       b.setAttribute('aria-pressed', a ? 'true' : 'false');
     });
@@ -29010,7 +29387,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const back = document.querySelector('#view-play-history .back-link');
     back.textContent = '\u2190 '+(Z ? Z.back : 'Game History');
     back.dataset.nav = Z ? Z.view : 'history';
-    ['hv-tab-notes', 'hv-pane-notes', 'hv-notes-card', 'hv-top-clock', 'hv-bottom-clock'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
+    ['hv-tab-notes', 'hv-pane-notes', 'hv-notes-card', 'hv-top-clock', 'hv-bottom-clock', 'hv-groups'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
   }
   function hvRenderHead(){
     const S = HV_STATE, g = S.game;
@@ -29235,6 +29612,68 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const first = el.querySelector('.hv-pop-item');
     if(first) try{ first.focus({ preventScroll:true }); }catch(e){}
   }
+  // ---- a game's Groups (the header's Groups button): in or out of each of your groups, or a new
+  // one from this game (gpNewDialog: its name, this game, the position on the board if you like) ----
+  function hvGroupsMenu(btn){
+    const S = HV_STATE;
+    if(!S || S.game._puzzle) return;
+    if(hvMenu && hvMenu.kind==='groups'){ hvMenuClose(true); return; }
+    hvMenuClose();
+    const el = hvEl('div', 'hv-pop hv-groups-pop');
+    el.id = 'hv-groups-pop';
+    el.setAttribute('role', 'menu');
+    el.setAttribute('aria-label', 'Groups');
+    const item = (label, fn, cls, checked)=>{
+      const b = hvEl('button', 'hv-pop-item'+(cls ? ' '+cls : ''), label);
+      b.type = 'button';
+      if(checked==null) b.setAttribute('role', 'menuitem');
+      else { b.setAttribute('role', 'menuitemcheckbox'); b.setAttribute('aria-checked', checked ? 'true' : 'false'); }
+      b.addEventListener('click', (e)=>{ e.stopPropagation(); fn(b); });
+      el.appendChild(b);
+      return b;
+    };
+    const groups = gpAll();
+    if(groups.length) el.appendChild(hvEl('div', 'hv-pop-head', 'This game is in'));
+    groups.forEach(G=> item(G.name, (b)=>{
+      gpToggle(G, S.game);
+      const on = gpIn(gpGet(G.id) || G, S.game);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+    }, 'hv-pop-group', gpIn(G, S.game)));
+    if(groups.length) el.appendChild(hvEl('div', 'hv-pop-sep'));
+    item('New group from this game\u2026', ()=>{ hvMenuClose(); hvGroupNew(); }, 'hv-pop-gnew');
+    if(groups.length) item('See your groups', ()=>{ hvMenuClose(); showView('history'); ghgOpen(''); }, 'hv-pop-gall');
+    document.body.appendChild(el);
+    const r = btn.getBoundingClientRect();
+    el.style.position = 'fixed';
+    el.style.left = Math.max(8, Math.min(r.left, innerWidth - el.offsetWidth - 8))+'px';
+    const below = r.bottom + 4 + el.offsetHeight <= innerHeight - 8;
+    el.style.top = (below ? r.bottom + 4 : Math.max(8, r.top - 4 - el.offsetHeight))+'px';
+    btn.setAttribute('aria-expanded', 'true');
+    const outside = (e)=>{ if(!el.contains(e.target) && e.target!==btn) hvMenuClose(); };
+    hvMenu = { el, node:null, opener:btn, outside, kind:'groups', onClose:()=> btn.setAttribute('aria-expanded', 'false') };
+    setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
+    el.addEventListener('keydown', (e)=>{
+      const items = [...el.querySelectorAll('.hv-pop-item')];
+      const i = items.indexOf(document.activeElement);
+      if(e.key==='ArrowDown'){ e.preventDefault(); e.stopPropagation(); items[(i+1) % items.length].focus(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); e.stopPropagation(); items[(i-1+items.length) % items.length].focus(); }
+      else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); hvMenuClose(true); }
+      else if(e.key==='Tab') hvMenuClose();
+    });
+    const first = el.querySelector('.hv-pop-item');
+    if(first) try{ first.focus({ preventScroll:true }); }catch(e){}
+  }
+  // the new group's suggested name: the move on the board, "vs ..." when it's the other side's
+  function hvGroupNew(){
+    const S = HV_STATE, n = S.cur, sans = [];
+    for(let x = n; x && x.parent; x = x.parent) sans.unshift(x.san);
+    const label = n.parent ? hvNodeLabel(n) : '';
+    const mover = n.parent ? (((n.ply + (n.off || 0)) % 2===1) ? 'white' : 'black') : null;
+    const suggest = !label ? '' : (S.me && mover && mover!==S.me ? 'vs '+label : label);
+    gpNewDialog({ suggest, fen:n.parent ? n.fen : '', line:sans.join(' '), flip:!!S.flipped, label, game:String(S.game.id) });
+  }
+  document.getElementById('hv-groups').addEventListener('click', (e)=> hvGroupsMenu(e.currentTarget));
+
   function hvPromote(node){
     const p = node.parent;
     if(!p || p.main) return;
@@ -30085,7 +30524,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     else if(k==='Escape'){ e.preventDefault(); if(HV_STATE.game._puzzle) pzaReturn(); else showView('history'); }
   });
-  onLeavePlay(()=>{ try{ hvNoteFlush(); }catch(e){} });   // before HV_STATE goes
+  onLeavePlay(()=>{ try{ hvNoteFlush(); }catch(e){} try{ hvMenuClose(); }catch(e){} });   // before HV_STATE goes (and a menu open on the page goes with it)
   onLeavePlay(()=>{
     if(HV_STATE) hvFire(hvLeaveLs);
     hvMenuClose();
@@ -32429,7 +32868,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // annotated PGN on Lichess); like the opening notes, an older build leaves it alone, and it
   // keeps a second copy (GN_AN_KEY).
   var GN_AN_KEY = 'wavyChessPrepGameAnnotations';
-  var GN_COPIES = [[GN_CC_KEY, /^cc-d?\d{1,15}$/], [GN_OP_KEY, /^op-[0-9a-f]{8}$/], [GN_AN_KEY, /^an-(?:\w{8}|cc-d?\d{1,15})$/]];
+  // Your groups of games (gp-<hex>: name, color, position, games added and taken out) and each
+  // group's north-star note (gq-<the same hex>), synced the same way (gp*); their copy, GN_GP_KEY.
+  var GN_GP_KEY = 'wavyChessPrepGameGroups';
+  var GN_COPIES = [[GN_CC_KEY, /^cc-d?\d{1,15}$/], [GN_OP_KEY, /^op-[0-9a-f]{8}$/], [GN_AN_KEY, /^an-(?:\w{8}|cc-d?\d{1,15})$/], [GN_GP_KEY, /^g[pq]-[0-9a-f]{8}$/]];
   var GN_STUDY_NAME = SP_STUDY_PREFIX + 'Game notes';
   var GN_MAX = 10000, GN_TOMB_TTL = 30*86400e3;
   var gnSyncTimer = 0, gnSyncRunning = false, gnSyncAgain = false, gnOtherTabValue = null;
@@ -32476,8 +32918,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // what a note can belong to: a Lichess game (8 characters), a chess.com one (cc-<n>, daily
   // cc-d<n>) or an opening (op-<hash>, gnOpId)
-  function gnIdOk(id){ return /^(?:\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}|an-(?:\w{8}|cc-d?\d{1,15}))$/.test(String(id || '')); }
+  function gnIdOk(id){ return /^(?:\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}|an-(?:\w{8}|cc-d?\d{1,15})|g[pq]-[0-9a-f]{8})$/.test(String(id || '')); }
   function gnIsOp(id){ return /^op-[0-9a-f]{8}$/.test(String(id || '')); }
+  function gnIsGp(id){ return /^gp-[0-9a-f]{8}$/.test(String(id || '')); }
+  // a record that isn't a game's (an opening's note, a group, a group's note): never listed as a game
+  function gnIsMeta(id){ return /^(?:op|gp|gq)-[0-9a-f]{8}$/.test(String(id || '')); }
   function gnIsAn(id){ return /^an-(?:\w{8}|cc-d?\d{1,15})$/.test(String(id || '')); }
   function gnHasAnn(gid){ return !!gnNoteText('an-'+gid); }
   // "2 comments \u00b7 1 side line \u00b7 arrows" for a game's saved analysis ('' when none)
@@ -32744,6 +33189,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function gnFamilyOf(g){ return g.opening ? g.opening.split(':')[0].trim() : (g.variant && g.variant!=='standard' ? ghVariantLabel(g.variant) : ''); }
   function gnChapterName(n){
     if(gnIsOp(n.id)) return (n.id+' \u00b7 Opening \u00b7 '+((n.g && n.g.opening) || '?')).slice(0, 100);
+    if(gnIsMeta(n.id)) return (n.id+' \u00b7 '+(gnIsGp(n.id) ? 'Group' : 'Group notes')+' \u00b7 '+((n.g && n.g.opening) || '?')).slice(0, 100);
     const g = n.g || {}, fam = gnFamilyOf(g);
     return (n.id+' \u00b7 '+(gnIsAn(n.id) ? 'Analysis \u00b7 ' : '')+'vs '+(g.opp || '?')+(fam ? ' \u00b7 '+fam : '')).slice(0, 100);
   }
@@ -32765,15 +33211,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const g = n.g || gnCleanG({});
     const t = [];
     const tag = (k, v)=>{ if(v!=null && v!=='') t.push('['+k+' "'+spTagVal(v)+'"]'); };
-    if(gnIsOp(n.id)){
-      // an opening note: the opening's moves (from the game it was written on), no players
+    if(gnIsMeta(n.id)){
+      // an opening note, a group or a group's note: the opening's (or the group's) moves, no players
       tag('Event', GN_STUDY_NAME);
       tag('ECO', g.eco);
       tag('Opening', g.opening);
       tag('Result', '*');
       tag('ChapterName', gnChapterName(n));
       const mv = gnMovetext(g.san);
-      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? gnReadable(n.text) : '(note deleted)')+' } '+(mv ? mv+' ' : '')+'*';
+      const rd = !n.text ? '(deleted)' : (gnIsGp(n.id) ? 'A group of games in Chess Arcade: '+((n.g && n.g.opening) || '') : gnReadable(n.text));
+      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+rd+' } '+(mv ? mv+' ' : '')+'*';
     }
     const an = gnIsAn(n.id), gid = an ? n.id.slice(3) : n.id;      // an analysis record: its game's tags
     const cc = ccIsId(gid);      // a chess.com game's note: its chess.com page, your chess.com name
@@ -32938,7 +33385,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const data = await res.json();
     const got = {};
     ((data && data.chapters) || []).forEach(ch=>{
-      const m = String(ch.name||'').match(/^(\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}|an-(?:\w{8}|cc-d?\d{1,15})) /);
+      const m = String(ch.name||'').match(/^(\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}|an-(?:\w{8}|cc-d?\d{1,15})|g[pq]-[0-9a-f]{8}) /);
       if(m && /^\w{8}$/.test(String(ch.id||''))) got[m[1]] = String(ch.id);
     });
     return got;
@@ -34629,6 +35076,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(gnEd){ gnFieldRefresh(gnEd.F); gnRenderField(gnEd.F); }
     if(hvNote){ gnFieldRefresh(hvNote); gnRenderField(hvNote); }
     hvOpxFields().forEach(F=>{ gnFieldRefresh(F); gnRenderField(F); });
+    if(ghgF){ gnFieldRefresh(ghgF); gnRenderField(ghgF); }
     hvAnnRefresh();
   }
   var gnOverlay = document.getElementById('gn-overlay');
@@ -35396,7 +35844,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvBoardEl.addEventListener('click', soon);
   })();
   // Whatever is being typed is saved before the page goes away.
-  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); hvAnnSave(); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
+  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); hvAnnSave(); if(ghgF) gnFieldSave(ghgF); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
   document.addEventListener('visibilitychange', ()=>{ if(document.hidden) gnFlushAll(); });
   window.addEventListener('pagehide', gnFlushAll);
   // First sync a few seconds after the Saved Puzzles one.
