@@ -4166,6 +4166,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .wrap.play-mode .hv-boardcol > .back-link:hover{ color:var(--ink); }
   :root[data-skin="bauhaus"] .wrap.play-mode .hv-boardcol > .back-link{ border-radius:0; }
   .hv-side{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+  .hv-sidecol{ display:contents; }
+  /* hidden while empty: holding Notes across a resize, it stays rendered
+     until hvPlaceNotes moves it, so a note being typed keeps the focus */
+  .hv-notes-card:not(:has(> #hv-pane-notes)){ display:none; }
   .hv-strip{ margin-bottom:0; padding:4px 8px 4px 10px; min-height:36px; box-sizing:border-box; gap:10px; }
   .hv-strip .ol-player-info{ align-items:center; gap:7px; min-width:0; flex:1 1 auto; }
   .hv-strip .ol-player-name{ font-size:14px; min-width:0; }
@@ -4404,10 +4408,60 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* Notes stay in view under the active tab when there's room for both:
      from 950px tall the tab above keeps about 300px (header and engine
      cards take about 380), so a laptop screen keeps Notes as a tab. */
-  @media (min-width:1180px) and (min-height:950px){
+  @media (min-width:1180px) and (max-width:1439.98px) and (min-height:950px){
     #hv-tab-notes{ display:none; }
     #hv-pane-notes{ display:flex; flex:0 0 auto; height:clamp(200px, calc(100vh - 750px), 300px); height:clamp(200px, calc(100dvh - 750px), 300px); border-top:1px solid var(--line); }
     #hv-pane-notes .hv-note{ resize:none; }
+  }
+  /* Wide screens: three columns. The game's header moves left of the board
+     with Notes as its own card under it; the engine takes the header's
+     place on the right, the Moves / Review / Explorer tabs under it. Both
+     side columns line up with the board itself: the board column's pieces
+     go in rows of the view's grid and the side columns take the board's
+     row (contain:size, so they never make it taller; the moves and the
+     note scroll inside). The wrap's side padding keeps the cards clear of the corner
+     buttons (16-56px in) until the gutter does; 710 = 62 frame chrome +
+     2 x 24 column gaps + 2 x 300 side minimum. Short windows keep two
+     columns. */
+  @media (min-width:1440px) and (min-height:561px){
+    .wrap.play-mode:has(#view-play-history.active){
+      max-width:1640px; --fab-gutter:max(0px, (100vw - 1640px) / 2);
+      padding-inline:max(20px, calc(64px - var(--fab-gutter)));
+    }
+    #view-play-history{
+      --fab-gutter:max(0px, (100vw - 1640px) / 2);
+      --hv-pad:max(20px, calc(64px - var(--fab-gutter)));
+      --sq:clamp(30px, min(calc((100vh - 220px - var(--hv-frame-extra)) / 8), calc((min(100vw, 1640px) - 2 * var(--hv-pad) - 710px - var(--hv-frame-extra)) / 8)), 85px);
+      --sq:clamp(30px, min(calc((100dvh - 220px - var(--hv-frame-extra)) / 8), calc((min(100vw, 1640px) - 2 * var(--hv-pad) - 710px - var(--hv-frame-extra)) / 8)), 85px);
+    }
+    :root[data-anno-prof="on"] #view-play-history{
+      --sq:clamp(30px, min(calc((100vh - 236px - var(--hv-frame-extra)) / 8), calc((min(100vw, 1640px) - 2 * var(--hv-pad) - 710px - var(--hv-frame-extra)) / 8)), 85px);
+      --sq:clamp(30px, min(calc((100dvh - 236px - var(--hv-frame-extra)) / 8), calc((min(100vw, 1640px) - 2 * var(--hv-pad) - 710px - var(--hv-frame-extra)) / 8)), 85px);
+    }
+    .wrap.play-mode #view-play-history.active{ grid-template-columns:minmax(300px, 1fr) auto minmax(300px, 1fr); row-gap:6px; align-items:start; }
+    .hv-boardcol{ display:contents; }
+    .hv-boardcol > *{ grid-column:2; }
+    .wrap.play-mode .hv-boardcol > .back-link{ grid-row:1; justify-self:start; }
+    #hv-row-top{ grid-row:2; }
+    .hv-boardcol > .hv-frame{ grid-row:3; }
+    #hv-row-bottom{ grid-row:4; }
+    #hv-controls{ grid-row:5; }
+    #hv-anno-hint{ grid-row:6; }
+    /* the padding already clears the corner buttons */
+    .wrap.play-mode .hv-boardcol > .back-link{ margin-left:0; }
+    #hv-row-top{ padding-left:12px; }
+    #hv-head{ padding-right:14px; }
+    .hv-side{ display:contents; }
+    .hv-sidecol{ display:flex; flex-direction:column; gap:10px; min-width:0; grid-row:3; align-self:stretch; contain:size; }
+    .hv-sidecol-review{ grid-column:1; }
+    .hv-sidecol-analysis{ grid-column:3; }
+    /* a tall header (prep notes) scrolls before Notes gets squeezed */
+    #hv-head{ flex:0 1 auto; min-height:0; overflow:auto; }
+    .hv-notes-card{ display:flex; flex-direction:column; flex:1 1 auto; min-height:150px; padding:0; overflow:hidden; }
+    #hv-tab-notes{ display:none; }
+    #hv-pane-notes{ display:flex; }      /* in the tabs too, until hvPlaceNotes moves it */
+    .hv-notes-card #hv-pane-notes{ flex:1 1 auto; min-height:0; }
+    #view-play-history .hv-notes-card .hv-note{ min-height:80px; }
   }
   @media (max-width:899.98px){
     .wrap.play-mode:has(#view-play-history.active){ padding-inline:12px; }
@@ -4672,7 +4726,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   #view-play-history .hv-notes-head .nb-bar{ margin-left:auto; }
   #view-play-history .hv-pane-notes .nb-wrap{ flex:1 1 auto; }
   #view-play-history .hv-pane-notes .hv-note{ flex:1 1 0; min-height:160px; overflow:auto; resize:none; }
-  @media (min-width:1180px) and (min-height:950px){
+  @media (min-width:1180px) and (max-width:1439.98px) and (min-height:950px){
     #view-play-history #hv-pane-notes .hv-note{ min-height:0; }
     /* pinned Notes is short: a diagram sits beside its caption, small enough to see whole */
     #hv-note .nb-dg{ flex-direction:row; align-items:flex-end; gap:12px; width:auto; max-width:100%; }
@@ -6236,6 +6290,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     </div>
 
     <div class="hv-side">
+      <!-- From 1440px wide these are columns either side of the board: the
+           game's header and Notes on the left, the engine and the tabs on
+           the right. Narrower, the wrappers are display:contents and the
+           cards stack as before. -->
+      <div class="hv-sidecol hv-sidecol-review">
       <div class="hv-head" id="hv-head">
         <div class="eyebrow">Game review</div>
         <h1 class="title hv-title" id="hv-title">Game</h1>
@@ -6257,7 +6316,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         </div>
         <textarea id="hv-pgn" hidden readonly tabindex="-1" aria-hidden="true"></textarea>
       </div>
+      <!-- three columns only: hvPlaceNotes moves #hv-pane-notes in here -->
+      <div class="hv-card hv-notes-card" id="hv-notes-card"></div>
+      </div>
 
+      <div class="hv-sidecol hv-sidecol-analysis">
       <div class="hv-card hv-engine" id="hv-engine">
         <div class="hv-eng-head">
           <button class="hv-switch" id="hv-eng-toggle" type="button" role="switch" aria-checked="true" aria-keyshortcuts="L" title="Engine on or off (L) &#183; E hides the suggested moves">
@@ -6293,6 +6356,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="text-input gn-ta hv-note" id="hv-note" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" aria-labelledby="hv-note-label" data-placeholder="Your analysis: key moments, mistakes, plans, what to try next time."></div>
           <div class="gn-status" id="hv-note-status" aria-live="polite"></div>
         </div>
+      </div>
       </div>
     </div>
   </section>
@@ -28715,7 +28779,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const back = document.querySelector('#view-play-history .back-link');
     back.textContent = '\u2190 '+(Z ? Z.back : 'Game History');
     back.dataset.nav = Z ? Z.view : 'history';
-    ['hv-tab-notes', 'hv-pane-notes', 'hv-top-clock', 'hv-bottom-clock'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
+    ['hv-tab-notes', 'hv-pane-notes', 'hv-notes-card', 'hv-top-clock', 'hv-bottom-clock'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
   }
   function hvRenderHead(){
     const S = HV_STATE, g = S.game;
@@ -28971,7 +29035,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   // ---- tabs ----
   let hvTab = HV_TABS.indexOf(hvPrefs.tab)>=0 ? hvPrefs.tab : 'moves';
-  const hvMqPinned = window.matchMedia ? matchMedia('(min-width:1180px) and (min-height:950px)') : { matches:false };
+  const hvMqPinned = window.matchMedia ? matchMedia('(min-width:1180px) and (min-height:950px), (min-width:1440px) and (min-height:561px)') : { matches:false };
+  // three columns (CSS at 1440px): Notes is its own card under the header
+  const hvMqWide = window.matchMedia ? matchMedia('(min-width:1440px) and (min-height:561px)') : { matches:false };
+  function hvPlaceNotes(){
+    const pane = document.getElementById('hv-pane-notes');
+    const host = document.getElementById(hvMqWide.matches ? 'hv-notes-card' : 'hv-tabs');
+    if(pane.parentNode===host) return;
+    const had = pane.contains(document.activeElement);
+    host.appendChild(pane);
+    if(had) try{ document.getElementById('hv-note').focus({ preventScroll:true }); }catch(e){}
+  }
   const hvMqPhone = window.matchMedia ? matchMedia('(max-width:899.98px)') : { matches:false };
   function hvNotesPinned(){ return !!hvMqPinned.matches; }
   // A puzzle on the board (pzaOpen) has no Notes: its id isn't a game's.
@@ -29027,6 +29101,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(HV_STATE && hvNotesPinned() && !hvNotesOff()) hvFire(hvPaneLs, 'notes');
       if(HV_STATE) hvRenderEngineNow();
     };
+    hvPlaceNotes();
+    try{ hvMqWide.addEventListener('change', hvPlaceNotes); }catch(e){ try{ hvMqWide.addListener(hvPlaceNotes); }catch(e2){} }
     try{ hvMqPinned.addEventListener('change', onMq); }catch(e){ try{ hvMqPinned.addListener(onMq); }catch(e2){} }
     try{ hvMqPhone.addEventListener('change', ()=>{ if(HV_STATE) hvRenderEngineNow(); }); }catch(e){}
   })();
