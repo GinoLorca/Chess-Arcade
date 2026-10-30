@@ -10060,9 +10060,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the lift isn't a tap (fastBoardTaps, and the click after it).
   const ANNO_HOLD_MS = 350, ANNO_HOLD_SLOP = 6;
   let annoHoldActive = false, annoHoldEndedAt = -Infinity;
-  window.addEventListener('touchmove', (e)=>{
-    if(annoHoldActive && e.cancelable) e.preventDefault();
-  }, { capture:true, passive:false });
+  // Held: the page doesn't scroll. The listener sits on each board (wireAnnotations), where a
+  // hold starts and its touch stays, never on the window: there a non-passive touchmove made
+  // iOS wait for this page's script before every scroll anywhere (Game History, busy loading,
+  // wouldn't scroll at all).
+  function annoHoldNoScroll(e){ if(annoHoldActive && e.cancelable) e.preventDefault(); }
   // On a touch-first screen the boards' tips say what a finger does (the
   // hold above), not what the right button does. Only the plain tips are
   // reworded; a drill's own instructions are left as written.
@@ -10103,6 +10105,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   function wireAnnotations(boardEl, getMarks, onChange, shouldSkip, forceColor){
     let fromIdx = null;
+    boardEl.addEventListener('touchmove', annoHoldNoScroll, { passive:false });
     // A mark from one square to another (the same square: a highlight) onto
     // `marks` - a right button's release, or a held finger's lift.
     function applyMark(marks, fromIdx, toIdx){
@@ -24024,9 +24027,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghSyncSites();
     ghoSyncControls();
   }
+  // A finger on the screen, or the page still gliding after one: Game History's redraws (a page
+  // of games loaded, chess.com, a sync) wait until it settles. On an iPhone a list rebuilt under
+  // the finger stopped the scroll, again and again while the first visit's loads came in.
+  // Only touch-driven scrolling counts: a mouse or trackpad never waits.
+  var ghTouching = false, ghTouchMoveAt = -Infinity, ghTouchScrollAt = -Infinity, ghRenderWait = 0;
+  document.addEventListener('touchstart', ()=>{ ghTouching = true; }, { capture:true, passive:true });
+  document.addEventListener('touchmove', ()=>{ ghTouchMoveAt = performance.now(); }, { capture:true, passive:true });
+  document.addEventListener('touchend', (e)=>{ if(!e.touches || !e.touches.length) ghTouching = false; }, { capture:true, passive:true });
+  document.addEventListener('touchcancel', (e)=>{ if(!e.touches || !e.touches.length) ghTouching = false; }, { capture:true, passive:true });
+  window.addEventListener('scroll', ()=>{ if(performance.now() - ghTouchMoveAt < 3000) ghTouchScrollAt = performance.now(); }, { passive:true });
+  function ghScrollBusy(){ return ghTouching || performance.now() - ghTouchScrollAt < 350; }
   function ghRender(){
     const listEl = document.getElementById('history-list');
     if(!listEl) return;
+    clearTimeout(ghRenderWait); ghRenderWait = 0;
+    if(currentView==='history' && ghScrollBusy()){ ghRenderWait = setTimeout(ghRender, 400); return; }
     const u = ghMe();
     GH_MARKS = ghMixed();                            // All with chess.com in it: rows say their site
     const base = ghBaseList();
