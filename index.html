@@ -4637,6 +4637,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
        longer; Notes keeps a bit under half the column */
     #hv-head{ flex:1 1 auto; min-height:0; overflow:auto; }
     .hv-notes-card{ display:flex; flex-direction:column; flex:0 1 45%; min-height:150px; padding:0; overflow:hidden; }
+    /* with the phase field between them, the header gives up the room (Notes keeps its share,
+       so a diagram still fits) and scrolls; on a very short screen the field card scrolls too */
+    .hv-sidecol-review:has(> #hpf:not([hidden])) > #hv-head{ flex:1 1 0; min-height:96px; }
+    #hpf{ flex:0 1 auto; min-height:0; overflow:auto; }
+    #hpf > *{ flex-shrink:0; }       /* the card scrolls; the field keeps its shape */
     .hv-opx-toggle{ display:none; }
     .hv-opx .hv-opx-body{ display:flex; }
     #hv-tab-notes{ display:none; }
@@ -4667,6 +4672,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hv-anno-hint{ order:5; }
     #hv-engine{ order:6; }
     #hv-tabs{ order:7; overflow:visible; }
+    #hpf{ order:8; }
     #hv-head{ order:9; }
     /* the page ends clear of the Friends pill in the bottom corner */
     .wrap.play-mode #view-play-history.active{ padding-bottom:56px; }
@@ -4694,6 +4700,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #view-play-history .hv-pop-check{ min-height:44px; box-sizing:border-box; padding:10px; }
     #view-play-history .hv-eng-show{ display:inline-flex; align-items:center; min-height:44px; min-width:44px; padding:0 8px; margin:-9px -8px; }
     #view-play-history .hv-act{ min-height:36px; }
+    #view-play-history .hpf-ph{ padding-top:8px; padding-bottom:8px; }
+    #view-play-history .hpf-mark{ height:24px; min-width:24px; padding:0 5px; border-radius:12px; line-height:21px; }
+    #view-play-history .hpf-mark[data-row="1"]{ top:calc(24% + 26px); }
+    #view-play-history .hpf-info{ width:28px; height:28px; margin-top:-6px; margin-bottom:-6px; font-size:12px; line-height:26px; }
     :is(#view-play-history, #gn-overlay) :is(.nb-dg-go, .nb-dg-open){ padding:8px 0; }
     :is(#view-play-history, #gn-overlay) .nb-dg-x{ width:34px; height:34px; }
   }
@@ -4760,6 +4770,52 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hr-acc-num{ font:800 24px/1.05 "JetBrains Mono",monospace; color:var(--ink); font-variant-numeric:tabular-nums; }
   .hr-acc-lab{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); }
   .hr-cc{ font-size:12.5px; line-height:1.4; color:var(--ink-soft); overflow-wrap:anywhere; }      /* chess.com's own accuracy (chesscom SPEC C.3) */
+  /* Phase of the game (hpf*): a field, your goal line on the left; the opening green, the
+     middlegame yellow, the endgame the red zone (the field's colors are the same on every skin) */
+  .hpf{ display:flex; flex-direction:column; gap:6px; padding:10px 12px 10px; container:hpf / inline-size; }
+  .hpf-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; min-width:0; }
+  .hpf-title{ flex:none; }
+  .hpf-info{ flex:none; width:16px; height:16px; margin:0 auto 0 -4px; padding:0; border:1px solid var(--line); border-radius:50%; background:var(--surface); color:var(--ink-soft);
+    font:700 10px/14px Georgia,serif; font-style:italic; cursor:pointer; align-self:center; }
+  .hpf-info[aria-expanded="true"]{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .hpf-info:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .hpf-how{ margin:0; font-size:12px; line-height:1.45; color:var(--ink-soft); }
+  .hpf-now{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; color:var(--ink-soft); font-variant-numeric:tabular-nums; }
+  .hpf-field{ position:relative; width:100%; aspect-ratio:4 / 1; border-radius:6px; overflow:hidden; cursor:pointer; box-shadow:inset 0 0 0 1px rgba(0,0,0,.2); }
+  .hpf-svg{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .hpf-num{ font:700 4.4px "Big Shoulders Display",sans-serif; fill:#ffffff; stroke:#1d231e; stroke-opacity:.4; stroke-width:.4px; paint-order:stroke; }
+  .hpf-zone{ font:800 3.6px "Big Shoulders Display",sans-serif; letter-spacing:.2px; fill:#16201a; fill-opacity:.74; }
+  @container hpf (max-width:330px){ .hpf-zone{ display:none; } }
+  .hpf-qtext{ font:800 2.7px "JetBrains Mono",monospace; fill:#16201a; }
+  .hpf-marks{ position:absolute; inset:0; pointer-events:none; }
+  /* dark symbols (white fails on the amber and orange), a white ring and a dark one round it
+     (the discs share their hues with the yellow and red zones) */
+  .hpf-mark{ pointer-events:auto; position:absolute; top:24%; transform:translateX(-50%); display:inline-flex; align-items:center; gap:1px; min-width:20px; height:18px; padding:0 4px; box-sizing:border-box;
+    border:1.5px solid #ffffff; border-radius:9px; box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.35); color:#10151d; font:800 10px/15px "JetBrains Mono",monospace; cursor:pointer; white-space:nowrap; }
+  .hpf-mark-n{ font-size:8.5px; font-weight:700; opacity:.85; margin-left:1px; }
+  .hpf-mark[data-row="1"]{ top:calc(24% + 19px); }
+  .hpf-mark:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .hpf-queens{ font-size:12px; line-height:1.35; color:var(--ink-soft); }
+  .hpf-phases{ display:flex; flex-direction:column; gap:2px; }
+  .hpf-ph{ display:flex; flex-wrap:wrap; align-items:baseline; gap:0 6px; width:100%; min-width:0; padding:2px 6px 2px 7px; box-sizing:border-box;
+    border:0; border-left:4px solid var(--hpf-zone); border-radius:4px; background:transparent; color:var(--ink); font:inherit; line-height:1.35; text-align:left; cursor:pointer; }
+  .hpf-ph:hover:not(:disabled){ background:var(--surface-2); }
+  .hpf-ph:disabled{ cursor:default; color:var(--ink-soft); }
+  .hpf-ph[aria-current="step"]{ background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--line); }
+  .hpf-ph:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .hpf-ph-name{ flex:0 0 6.2em; font-size:12.5px; font-weight:700; }
+  .hpf-ph-num{ flex:0 0 2.9em; text-align:right; font:800 13.5px/1.35 "JetBrains Mono",monospace; font-variant-numeric:tabular-nums; }
+  .hpf-ph-word{ font-size:12.5px; font-weight:600; }
+  .hpf-ph-sub{ display:flex; gap:0 6px; margin-left:auto; font-size:11.5px; color:var(--ink-soft); text-align:right; }
+  .hpf-ph-sub > :empty{ display:none; }
+  .hpf-ph-marks:not(:empty) + .hpf-ph-avg:not(:empty)::before{ content:'\00b7'; margin-right:6px; }
+  @container hpf (max-width:339px){ .hpf-ph-marks{ display:none; } .hpf-ph-marks + .hpf-ph-avg::before{ content:none !important; } }
+  .hpf-go{ align-self:flex-start; font-size:12.5px; }
+  .hpf-season{ font-size:12px; line-height:1.4; color:var(--ink-soft); }
+  .hpf-season b{ color:var(--ink); font-weight:700; }
+  :root[data-skin="bauhaus"] :is(.hpf-field, .hpf-ph){ border-radius:0; }
+  .hpf-head .hpf-now{ flex:none; }
+  @media (min-width:900px){ .hv-boardcol > #hpf{ margin-top:6px; } }      /* two columns: a little more room under the controls */
   .hr-acc-cc{ margin-top:2px; font-size:11.5px; line-height:1.3; color:var(--ink-soft); }
   .hr-graph-wrap{ min-width:0; }
   .hr-graph{ display:block; width:100%; height:110px; background:#2b2b2b; border-radius:6px; cursor:pointer; touch-action:pan-y; box-shadow:0 0 0 1px var(--line); }
@@ -6634,6 +6690,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <button class="btn btn-ghost hv-act" id="hv-groups" type="button" aria-haspopup="menu" aria-expanded="false">Groups</button>
         </div>
         <textarea id="hv-pgn" hidden readonly tabindex="-1" aria-hidden="true"></textarea>
+      </div>
+      <!-- Phase of the game (hpf*): the game as a drive down a field, the opening green, the
+           middlegame yellow, the endgame the red zone; your accuracy in each phase -->
+      <div class="hv-card hpf" id="hpf" hidden>
+        <div class="hpf-head"><div class="eyebrow hpf-title">Phase of the game</div><button type="button" class="hpf-info" id="hpf-info" aria-expanded="false" aria-controls="hpf-how" aria-label="How the phases are split" title="How the phases are split">i</button><div class="hpf-now" id="hpf-now"></div></div>
+        <p class="hpf-how" id="hpf-how" hidden>The phases follow the pieces, as on Lichess: the middlegame starts once the pieces are developed or traded, the endgame with 6 or fewer pieces left (not counting pawns and kings), or 8 or fewer once both queens are off. A move counts in the phase it was played in; the averages are your other reviewed games.</p>
+        <div class="hpf-field" id="hpf-field">
+          <svg class="hpf-svg" id="hpf-svg" viewBox="0 0 120 30" aria-hidden="true" focusable="false"></svg>
+          <div class="hpf-marks" id="hpf-marks"></div>
+        </div>
+        <div class="hpf-queens" id="hpf-queens" hidden></div>
+        <div class="hpf-phases" id="hpf-phases"></div>
+        <button type="button" class="btn-link hpf-go" id="hpf-go" hidden>Analyze game to grade each phase</button>
+        <div class="hpf-season" id="hpf-season" hidden></div>
       </div>
       <!-- three columns only: hvPlaceNotes moves #hv-pane-notes in here -->
       <div class="hv-card hv-notes-card" id="hv-notes-card"></div>
@@ -30961,6 +31031,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvRenderBoard();
     hvRenderStrips();
     hvRenderEval();
+    if(!HV_STATE.me) hpfRender();      // whose side unknown: the phase card grades the side at the bottom
   }
   document.getElementById('hv-flip').addEventListener('click', hvFlip);
   document.getElementById('hv-copy-pgn').addEventListener('click', async ()=>{
@@ -31464,10 +31535,415 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(to) try{ to.focus({ preventScroll:true }); }catch(e){}
     }
   }
+  /* ---- Phase of the game (hpf*): the game as a drive down a field ----
+     Your goal line on the left. The opening is the green zone (your own
+     territory, to your 35), the middlegame the yellow one (midfield, to
+     their 20), the endgame the red zone. The phases follow the pieces, as
+     Lichess splits a game (scalachess Divider): the middlegame starts once
+     the pieces are developed or traded (10 or fewer pieces that aren't
+     pawns or kings, a back rank under 4 pieces, or the two armies mixed),
+     the endgame at 6 or fewer, or 8 or fewer once both queens are off (a
+     queen trade brings the endgame sooner). The marker follows the move
+     shown; the discs are your inaccuracies, mistakes and blunders where you
+     played them; under the field, your accuracy in each phase (the
+     review's own formula over your moves in it), and the same over your
+     other reviewed games. */
+  const HPF_Y = [[0, 35], [35, 80], [80, 100]];          // each phase's yards from your goal line
+  const HPF_NAMES = ['Opening', 'Middlegame', 'Endgame'];
+  const HPF_ZONE = ['#69a868', '#e9c85a', '#dc6a5f'];    // green, yellow, red (the cells' top edges too)
+  const HPF_MARK_IDS = ['inaccuracy', 'mistake', 'blunder'];
+  const HPF_GAMES = new Map();      // game id -> { h, d }: a reviewed game's phases, for "your reviewed games"
+  let hpfSeasonKey = null, hpfSeasonRes = null, hpfSeasonT = 0;
+  const hpfEl = {
+    card: document.getElementById('hpf'), now: document.getElementById('hpf-now'), field: document.getElementById('hpf-field'),
+    svg: document.getElementById('hpf-svg'), marks: document.getElementById('hpf-marks'), queens: document.getElementById('hpf-queens'),
+    phases: document.getElementById('hpf-phases'), go: document.getElementById('hpf-go'), season: document.getElementById('hpf-season'), cells: [],
+    info: document.getElementById('hpf-info'), how: document.getElementById('hpf-how')
+  };
+  // ---- the phases ----
+  function hpfPieces(B){ let n = 0; for(let i=0; i<64; i++){ const p = B[i]; if(p && p.type!=='k' && p.type!=='p') n++; } return n; }
+  function hpfQueens(B){ let n = 0; for(let i=0; i<64; i++){ const p = B[i]; if(p && p.type==='q') n++; } return n; }
+  function hpfBackSparse(B){ let w = 0, b = 0; for(let c=0; c<8; c++){ const p = B[c], q = B[56+c]; if(p && p.color==='w') w++; if(q && q.color==='b') b++; } return w < 4 || b < 4; }
+  // scalachess Divider: how mixed a 2x2 region's white and black pieces are, by its rank (y 1-7)
+  function hpfMixScore(y, w, b){
+    if(b===0){ if(w===1) return 1 + (8 - y); if(w===2) return y > 2 ? 2 + (y - 2) : 0; if(w===3 || w===4) return y > 1 ? 3 + (y - 1) : 0; return 0; }
+    if(b===1){ if(w===0) return 1 + y; if(w===1) return 5 + Math.abs(4 - y); if(w===2) return 4 + (y - 1); if(w===3) return 5 + (y - 1); return 0; }
+    if(b===2){ if(w===0) return y < 6 ? 2 + (6 - y) : 0; if(w===1) return 4 + (7 - y); if(w===2) return 7; return 0; }
+    if(b===3){ if(w===0) return y < 7 ? 3 + (7 - y) : 0; if(w===1) return 5 + (7 - y); return 0; }
+    if(b===4 && w===0) return y < 7 ? 3 + (7 - y) : 0;
+    return 0;
+  }
+  function hpfMixed(B){
+    let mix = 0;
+    for(let y=0; y<7; y++) for(let x=0; x<7; x++){
+      let w = 0, b = 0;
+      [y*8+x, y*8+x+1, (y+1)*8+x, (y+1)*8+x+1].forEach(i=>{ const p = B[i]; if(p){ if(p.color==='w') w++; else b++; } });
+      mix += hpfMixScore(y + 1, w, b);
+    }
+    return mix;
+  }
+  // { mid, end, q, plain, N } over the positions 0 (the start) to N (after the last move): where
+  // the middlegame and the endgame begin, where both queens were off, and where the endgame would
+  // have begun without the queen rule; -1 for none
+  function hpfDivide(states){
+    const N = states.length - 1;
+    let mid = -1, end = -1, q = -1, plain = -1;
+    for(let i=0; i<=N; i++){ const B = states[i].board; if(hpfPieces(B) <= 10 || hpfBackSparse(B) || hpfMixed(B) > 150){ mid = i; break; } }
+    for(let i=0; i<=N; i++){
+      const B = states[i].board, n = hpfPieces(B), off = hpfQueens(B)===0;
+      if(q < 0 && off) q = i;
+      if(plain < 0 && n <= 6) plain = i;
+      if(mid >= 0 && end < 0 && (n <= 6 || (off && n <= 8))) end = i;
+    }
+    if(end >= 0 && !(mid < end)) mid = -1;
+    return { mid, end, q, plain, N };
+  }
+  // where each phase begins: [0, middlegame, endgame]; one never reached begins at N+1
+  function hpfBounds(d){ const a1 = d.mid >= 0 ? d.mid : (d.end >= 0 ? d.end : d.N + 1), a2 = d.end >= 0 ? d.end : d.N + 1; return [0, a1, a2]; }
+  function hpfPhaseOf(d, pos){ const B = hpfBounds(d); return pos < B[1] ? 0 : (pos < B[2] ? 1 : 2); }
+  function hpfReached(d, k){ const B = hpfBounds(d), next = k < 2 ? B[k+1] : d.N + 1; return B[k] <= d.N && next > B[k]; }
+  // a position's yard line: each phase spreads over its zone; the last phase played stops short of the next zone
+  function hpfYard(d, pos){
+    const B = hpfBounds(d), k = hpfPhaseOf(d, pos), a = B[k], b = k < 2 ? B[k+1] : d.N + 1;
+    return HPF_Y[k][0] + (HPF_Y[k][1] - HPF_Y[k][0]) * (pos - a) / Math.max(1, b - a);
+  }
+  // the position at a yard line (a tap on the field); past where the game got, its last position
+  function hpfPosAt(d, yard){
+    const B = hpfBounds(d);
+    let k = yard < HPF_Y[1][0] ? 0 : (yard < HPF_Y[2][0] ? 1 : 2);
+    while(k > 0 && !hpfReached(d, k)) k--;
+    if(!hpfReached(d, k)) return 0;
+    const a = B[k], b = k < 2 ? B[k+1] : d.N + 1;
+    const t = Math.max(0, Math.min(1, (yard - HPF_Y[k][0]) / (HPF_Y[k][1] - HPF_Y[k][0])));
+    return Math.max(a, Math.min(b - 1, Math.round(a + t * (b - a))));
+  }
+  // ---- the grades ----
+  // your moves in each phase (a move counts in the phase it was played in): { n, loss, acc, marks }
+  function hpfGrade(ev, b, d, mine){
+    const out = [0, 1, 2].map(()=> ({ n:0, loss:0, acc:null, marks:{ inaccuracy:0, mistake:0, blunder:0 } }));
+    for(let p=1; p<=d.N; p++){
+      const mover = p % 2 ? 'w' : 'b';
+      if(mover!==mine) continue;
+      const o = out[hpfPhaseOf(d, p-1)];
+      o.loss += Math.max(0, (hrMoverScore(ev[p-1], mover) - hrMoverScore(ev[p], mover)) - 15);      // as hrRun
+      o.n++;
+      if(b && o.marks[b[p-1]]!=null) o.marks[b[p-1]]++;
+    }
+    out.forEach(o=>{ o.acc = hrAccuracy(o.loss, o.n); });
+    return out;
+  }
+  function hpfWord(acc){ return acc >= 90 ? 'Strong' : acc >= 80 ? 'Solid' : acc >= 70 ? 'Shaky' : 'Needs work'; }
+  function hpfMarksText(m){
+    const bits = [];
+    if(m.blunder) bits.push(m.blunder+' blunder'+(m.blunder===1 ? '' : 's'));
+    if(m.mistake) bits.push(m.mistake+' mistake'+(m.mistake===1 ? '' : 's'));
+    if(m.inaccuracy) bits.push(m.inaccuracy+' inaccurac'+(m.inaccuracy===1 ? 'y' : 'ies'));
+    return bits.length ? bits.join(', ') : 'No mistakes';
+  }
+  function hpfMine(S){ return String(S.me || (S.flipped ? 'black' : 'white')).charAt(0); }
+  function hpfOn(S){ return !!(S && S.std && S.game && !S.game._puzzle && S.main.length > 0 && Array.isArray(S.plyStates)); }
+  function hpfGraded(S){ const R = S.review; return !!(R && !R.partial && Array.isArray(R.ev) && R.ev.length===S.main.length + 1); }
+  // ---- drawing ----
+  function hpfSvg(tag, attrs, parent){ const el = hrSvgEl(tag, attrs); parent.appendChild(el); return el; }
+  function hpfDrawStatic(){
+    const svg = hpfEl.svg;
+    if(svg.dataset.drawn) return;
+    svg.dataset.drawn = '1';
+    const g = hpfSvg('g', { 'class':'hpf-static' }, svg);
+    // the end zones, then the three phase zones, each with a faint mowing stripe every 5 yards
+    hpfSvg('rect', { x:0, y:0, width:10, height:30, fill:'#4c8a50' }, g);
+    hpfSvg('rect', { x:110, y:0, width:10, height:30, fill:'#bf5248' }, g);
+    [[10, 45], [45, 90], [90, 110]].forEach(([x1, x2], k)=>{
+      hpfSvg('rect', { x:x1, y:0, width:x2 - x1, height:30, fill:HPF_ZONE[k] }, g);
+      for(let x = x1 + 5; x < x2; x += 10) hpfSvg('rect', { x, y:0, width:Math.min(5, x2 - x), height:30, fill:'#ffffff', 'fill-opacity':0.07 }, g);
+    });
+    for(let yd=5; yd<100; yd+=5) hpfSvg('line', { x1:10+yd, y1:0, x2:10+yd, y2:30, stroke:'#ffffff', 'stroke-opacity': yd % 10 ? 0.4 : 0.7, 'stroke-width': yd % 10 ? 0.2 : 0.32 }, g);
+    for(let yd=1; yd<100; yd++) if(yd % 5) [9.6, 20.4].forEach(y=> hpfSvg('line', { x1:10+yd, y1:y-0.45, x2:10+yd, y2:y+0.45, stroke:'#ffffff', 'stroke-opacity':0.45, 'stroke-width':0.18 }, g));
+    [10, 110].forEach(x=> hpfSvg('line', { x1:x, y1:0, x2:x, y2:30, stroke:'#ffffff', 'stroke-width':0.6 }, g));
+    for(let yd=10; yd<100; yd+=10){ const t = hpfSvg('text', { x:10+yd, y:27.6, 'text-anchor':'middle', 'class':'hpf-num' }, g); t.textContent = String(yd <= 50 ? yd : 100 - yd); }
+    [['OPENING', 11.3], ['MIDDLEGAME', 46.3], ['RED ZONE', 91.3]].forEach(([s, x])=>{ const t = hpfSvg('text', { x, y:4.3, 'class':'hpf-zone' }, g); t.textContent = s; });
+    hpfSvg('g', { 'class':'hpf-q' }, svg);
+    hpfSvg('g', { 'class':'hpf-dyn' }, svg);
+  }
+  // where both queens came off: a dotted line
+  function hpfDrawQueens(d){
+    const g = hpfEl.svg.querySelector('.hpf-q');
+    while(g.firstChild) g.removeChild(g.firstChild);
+    if(d.q < 0) return;
+    const x = 10 + hpfYard(d, d.q);
+    hpfSvg('line', { x1:x, y1:0, x2:x, y2:30, stroke:'#1d231e', 'stroke-opacity':0.55, 'stroke-width':0.35, 'stroke-dasharray':'0.6 0.7' }, g);
+    hpfSvg('rect', { x:x - 1.9, y:17.2, width:3.8, height:3.8, rx:1.9, fill:'#ffffff', 'fill-opacity':0.92, stroke:'#1d231e', 'stroke-opacity':0.5, 'stroke-width':0.25 }, g);
+    const t = hpfSvg('text', { x, y:20.05, 'text-anchor':'middle', 'class':'hpf-qtext' }, g);
+    t.textContent = 'Q';
+    const tip = hrSvgEl('title', {});
+    tip.textContent = 'Queens off';
+    t.appendChild(tip);
+  }
+  // the move shown: a line across the field with a knob
+  function hpfDrawMarker(x){
+    const g = hpfEl.svg.querySelector('.hpf-dyn');
+    while(g.firstChild) g.removeChild(g.firstChild);
+    hpfSvg('line', { x1:x, y1:0.4, x2:x, y2:29.6, stroke:'#ffffff', 'stroke-width':1.1 }, g);
+    hpfSvg('line', { x1:x, y1:0.4, x2:x, y2:29.6, stroke:'#141815', 'stroke-width':0.5 }, g);
+    hpfSvg('circle', { cx:x, cy:15, r:1.7, fill:'#141815', stroke:'#ffffff', 'stroke-width':0.45 }, g);
+  }
+  function hpfBuild(){
+    if(hpfEl.cells.length) return;
+    for(let k=0; k<3; k++){
+      const b = hvEl('button', 'hpf-ph');
+      b.type = 'button';
+      b.dataset.k = String(k);
+      b.style.setProperty('--hpf-zone', HPF_ZONE[k]);
+      b.appendChild(hvEl('span', 'hpf-ph-name', HPF_NAMES[k]));
+      b.appendChild(hvEl('span', 'hpf-ph-num'));
+      b.appendChild(hvEl('span', 'hpf-ph-word'));
+      const sub = hvEl('span', 'hpf-ph-sub');          // what went wrong (a wide card only: the field's discs show it) and your average
+      sub.appendChild(hvEl('span', 'hpf-ph-marks'));
+      sub.appendChild(hvEl('span', 'hpf-ph-avg'));
+      b.appendChild(sub);
+      b.addEventListener('click', ()=>{
+        const S = HV_STATE;
+        if(!hpfOn(S) || !S._hpf || !hpfReached(S._hpf, k)) return;
+        hvGoto(Math.max(0, hpfBounds(S._hpf)[k]));
+        hvRevealBoard();
+      });
+      hpfEl.phases.appendChild(b);
+      hpfEl.cells.push(b);
+    }
+  }
+  function hpfRender(){
+    const S = HV_STATE, E = hpfEl, on = hpfOn(S);
+    E.card.hidden = !on;
+    if(!on) return;
+    hpfBuild();
+    hpfDrawStatic();
+    if(!S._hpf) S._hpf = hpfDivide(S.plyStates);
+    const d = S._hpf, R = S.review, job = hrJob && hrJob.S===S ? hrJob : null, graded = hpfGraded(S), mine = hpfMine(S);
+    const G = graded ? hpfGrade(R.ev, R.b, d, mine) : null;
+    hpfDrawQueens(d);
+    // your other reviewed games (this one left out), a phase's average from 2 or more of them
+    const O = job ? null : hpfOthers(hpfSeason(), S), avg = (k)=> O && O.cnt[k] >= 2 ? 'avg '+Math.round(O.avg[k]) : '';
+    E.cells.forEach((b, k)=>{
+      const reached = hpfReached(d, k), o = G ? G[k] : null;
+      const num = !reached || (G && o.acc==null) ? '\u2013' : G ? Math.round(o.acc)+'%' : (job ? '\u2026' : '\u2013');
+      const word = !reached ? 'Not reached' : G ? (o.acc==null ? 'No moves of yours' : hpfWord(o.acc)) : (job ? 'Grading\u2026' : 'Not graded');
+      const marks = G && reached && o.acc!=null ? hpfMarksText(o.marks) : '', av = avg(k), sub = [marks, av].filter(Boolean).join(' \u00b7 ');
+      b.querySelector('.hpf-ph-num').textContent = num;
+      b.querySelector('.hpf-ph-word').textContent = word;
+      b.querySelector('.hpf-ph-marks').textContent = marks;
+      b.querySelector('.hpf-ph-avg').textContent = av;
+      b.title = sub;
+      b.disabled = !reached;
+      b.setAttribute('aria-label', HPF_NAMES[k]+': '+(num!=='\u2013' && num!=='\u2026' ? 'your accuracy '+num+', ' : '')+word+(sub ? ', '+sub.replace('avg ', 'your average over your other reviewed games ') : '')+(reached ? '. Go to where it begins' : ''));
+    });
+    hpfRenderMarks(S, d, R, graded, mine);
+    // the queen trade, when it brought the endgame sooner
+    let qt = '';
+    if(d.q >= 0 && d.q <= d.N){
+      const at = d.q > 0 ? hvNodeLabel(S.main[d.q-1]) : 'the start';
+      const sooner = d.end >= 0 && (d.plain < 0 || d.end < d.plain);
+      const by = sooner && d.plain >= 0 ? Math.ceil(d.plain / 2) - Math.ceil(d.end / 2) : 0;
+      qt = 'Queens off at '+at+(sooner ? ': endgame '+(by > 0 ? by+' move'+(by===1 ? '' : 's')+' sooner' : 'sooner') : '');
+    }
+    E.queens.textContent = qt;
+    E.queens.hidden = !qt;
+    // Analyze game (the review pane's own button, here too); when the engine can't run, why
+    const goHad = document.activeElement===E.go;
+    E.go.hidden = !!(graded || job || !S.std);
+    const noEng = !graded && !job && (hve.state==='failed' || hrNotice==='engine');
+    const goTxt = noEng ? (hve.state==='failed' && hve.failWhy==='slow' ? 'The engine didn\u2019t finish downloading, so the phases aren\u2019t graded. Try again'
+      : 'Grading the phases needs the engine, which isn\u2019t available here. Try again') : 'Analyze game to grade each phase';
+    if(E.go.textContent!==goTxt) E.go.textContent = goTxt;
+    if(goHad && E.go.hidden){
+      // the keys stay in the card (the review pane's Cancel may be in a tab that isn't shown)
+      const to = E.cells.find(b=> !b.disabled);
+      if(to) try{ to.focus({ preventScroll:true }); }catch(e){}
+    }
+    hpfRenderSeason(job, O);
+    hpfRenderMarker();
+  }
+  // Your inaccuracies, mistakes and blunders where you played them, built again only when they
+  // change (or the field's width does). Discs keep a disc's width apart, on two rows; one with no
+  // room left joins the nearest disc, which then shows the worst of them and how many.
+  let hpfFieldW = 0;
+  function hpfRenderMarks(S, d, R, graded, mine){
+    const E = hpfEl, fw = E.field.clientWidth || 300;
+    const sig = graded ? (R.at || 0)+'|'+d.N+'|'+mine+'|'+R.b.join(',')+'|'+Math.round(fw / 10) : '';
+    hpfFieldW = Math.round(fw / 10);
+    if(E.marks.dataset.sig===sig) return;
+    const fa = document.activeElement, fPly = fa && E.marks.contains(fa) ? fa.dataset.ply : null;
+    E.marks.dataset.sig = sig;
+    E.marks.textContent = '';
+    if(!graded) return;
+    const gap = 26 / fw * 100, rows = [[], []], all = [];
+    for(let p=1; p<=d.N; p++){
+      const id = R.b[p-1];
+      if((p % 2 ? 'w' : 'b')!==mine || HPF_MARK_IDS.indexOf(id) < 0) continue;
+      const x = (10 + hpfYard(d, p-1)) / 120 * 100;
+      const r = rows.findIndex(row=> row.every(v=> Math.abs(v.x - x) > gap));
+      if(r >= 0){ const ent = { x, r, plies:[p], ids:[id] }; rows[r].push(ent); all.push(ent); continue; }
+      const near = all.reduce((m, v)=> !m || Math.abs(v.x - x) < Math.abs(m.x - x) ? v : m, null);
+      near.plies.push(p); near.ids.push(id);
+    }
+    all.forEach(ent=>{
+      const worst = ent.ids.reduce((w, id)=> HPF_MARK_IDS.indexOf(id) > HPF_MARK_IDS.indexOf(w) ? id : w, ent.ids[0]), badge = HR_BY_ID[worst];
+      const labs = ent.plies.map((p, i)=> HR_BY_ID[ent.ids[i]].label+': '+hvNodeLabel(S.main[p-1])+' ('+HPF_NAMES[hpfPhaseOf(d, p-1)].toLowerCase()+')');
+      const m = hvEl('button', 'hpf-mark hpf-mark-'+worst, badge.symbol);
+      m.type = 'button';
+      m.dataset.ply = String(ent.plies[0]);
+      m.dataset.row = String(ent.r);
+      if(ent.plies.length > 1){ m.appendChild(hvEl('span', 'hpf-mark-n', String(ent.plies.length))); m.dataset.n = String(ent.plies.length); }
+      m.style.left = ent.x+'%';
+      m.style.backgroundColor = badge.color;
+      m.title = labs.join('\n');
+      m.setAttribute('aria-label', labs.join('; ')+(ent.plies.length > 1 ? '. Go to the first' : '. Go to this move'));
+      m.addEventListener('click', (e)=>{ e.stopPropagation(); hvGoto(ent.plies[0]); hvRevealBoard(); });
+      E.marks.appendChild(m);
+    });
+    if(fPly){ const back = E.marks.querySelector('.hpf-mark[data-ply="'+fPly+'"]'); if(back) try{ back.focus({ preventScroll:true }); }catch(e){} }
+  }
+  // the move shown; on a side line, the game's move it branches from (as the review graph)
+  function hpfRenderMarker(){
+    const S = HV_STATE, E = hpfEl;
+    if(!hpfOn(S) || !S._hpf || E.card.hidden) return;
+    const base = hvBranchBase(S.cur) || S.root;
+    const d = S._hpf, pos = Math.min(d.N, base.ply || 0), k = hpfPhaseOf(d, pos);
+    hpfDrawMarker(10 + hpfYard(d, pos));
+    const txt = hvNodeLabel(S.cur), ph = k===2 ? 'Endgame, red zone' : HPF_NAMES[k], key = txt+'|'+k;
+    if(E.now.dataset.k!==key){
+      E.now.dataset.k = key;
+      E.now.textContent = txt;
+      E.now.appendChild(hvEl('span', 'hv-sr', ', '+ph.toLowerCase()));
+      E.now.title = txt+' \u00b7 '+ph;
+    }
+    E.cells.forEach((b, i)=>{ if(i===k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  }
+  // ---- your reviewed games: each phase's accuracy, game by game ----
+  // (the reviews kept on this device whose games are loaded here; read a few at a time)
+  function hpfGameGrades(g, e){
+    const id = String(g.id);
+    let c = HPF_GAMES.get(id);
+    if(!c || c.h!==e.h){
+      if(!ghIsStd(g) || g.initialFen) return null;
+      const toks = String(g.moves || '').trim() ? String(g.moves).trim().split(/\s+/) : [];
+      if(toks.length!==e.n) return null;
+      const built = hvBuildPlyStates(toks, hvStartState(g));
+      if(built.sanMoves.length!==e.n || gnFnv(built.sanMoves.join(' '))!==e.h) return null;
+      c = { h:e.h, d:hpfDivide(built.plyStates) };
+      HPF_GAMES.set(id, c);
+    }
+    const u = ghMe(), me = g._me || (u ? ghMyColor(g, u) : null);       // whose side: only once Game History knows your name
+    return me ? hpfGrade(e.e.split(',').map(hrDecScore), null, c.d, me.charAt(0)) : null;
+  }
+  // { per: Map(game id -> [opening, middlegame, endgame accuracy or null]) } once read; null meanwhile
+  function hpfSeason(){
+    const st = hrReadStore().g, games = new Map();
+    try{ ghBaseList('all').forEach(g=>{ if(g && g.id!=null) games.set(String(g.id), g); }); }catch(e){}
+    const todo = Object.keys(st).filter(id=> games.has(id));
+    const key = todo.map(id=> id+':'+st[id].at).sort().join(',');
+    if(key===hpfSeasonKey) return hpfSeasonRes;
+    hpfSeasonKey = key;
+    hpfSeasonRes = null;
+    clearTimeout(hpfSeasonT);
+    const per = new Map();
+    let i = 0;
+    const step = ()=>{
+      hpfSeasonT = 0;
+      if(hpfSeasonKey!==key) return;
+      const t0 = performance.now();
+      while(i < todo.length && performance.now() - t0 < 10){
+        const id = todo[i++];
+        let r = null;
+        try{ r = hpfGameGrades(games.get(id), st[id]); }catch(e){ r = null; }
+        if(r) per.set(id, r.map(o=> o.acc));
+      }
+      if(i < todo.length){ hpfSeasonT = setTimeout(step, 16); return; }
+      hpfSeasonRes = { per };
+      hpfRender();
+    };
+    hpfSeasonT = setTimeout(step, 0);
+    return null;
+  }
+  // the other games: { games, avg, cnt } (the game shown is never compared with itself)
+  function hpfOthers(SE, S){
+    if(!SE) return null;
+    const cur = S && S.game && S.game.id!=null ? String(S.game.id) : '', vals = [[], [], []];
+    let n = 0;
+    SE.per.forEach((a, id)=>{ if(id===cur) return; n++; a.forEach((x, k)=>{ if(x!=null) vals[k].push(x); }); });
+    return { games:n, avg:vals.map(v=> v.length ? v.reduce((s, x)=> s + x, 0) / v.length : null), cnt:vals.map(v=> v.length) };
+  }
+  function hpfRenderSeason(job, O){
+    const S = HV_STATE, E = hpfEl.season;
+    if(!hpfOn(S)) return;
+    let lead = '', rest = '', work = '';
+    if(job) rest = 'Grading each phase as the review runs\u2026';
+    else if(!O) rest = 'Comparing with your other reviewed games\u2026';
+    else if(O.games){
+      // the averages are on the rows; here, the phase to work on (2 or more games in it, 3 points apart)
+      const has = [0, 1, 2].filter(k=> O.cnt[k] >= 2);
+      if(has.length >= 2){
+        lead = 'Your '+O.games+' other game'+(O.games===1 ? '' : 's')+': ';
+        const lo = has.reduce((m, k)=> O.avg[k] < O.avg[m] ? k : m, has[0]), hi = has.reduce((m, k)=> O.avg[k] > O.avg[m] ? k : m, has[0]);
+        if(O.avg[hi] - O.avg[lo] >= 3) work = HPF_NAMES[lo].toLowerCase();
+        else rest = 'even across the phases';
+      } else rest = 'Review more of your games to compare the phases ('+O.games+' other so far).';
+    }
+    const sig = lead+'|'+rest+'|'+work;
+    if(E.dataset.sig===sig) return;
+    E.dataset.sig = sig;
+    E.textContent = '';
+    if(lead) E.appendChild(document.createTextNode(lead));
+    E.appendChild(document.createTextNode(rest));
+    if(work){ E.appendChild(document.createTextNode('work on the ')); E.appendChild(hvEl('b', '', work)); }
+    E.hidden = !(lead || rest);
+  }
+  // Three columns: the left column, between the header and Notes. Narrower, after the board's
+  // controls: two columns keep the side column the screen's height (the card would squeeze the
+  // moves), and one column orders it after the tabs (order 8).
+  function hpfPlace(){
+    const card = hpfEl.card, wide = hvMqWide.matches;
+    const host = wide ? document.querySelector('#view-play-history .hv-sidecol-review') : document.querySelector('#view-play-history .hv-boardcol');
+    const before = wide ? document.getElementById('hv-notes-card') : null;
+    if(!host || (card.parentNode===host && card.nextElementSibling===before)) return;
+    const fa = document.activeElement, had = !!fa && card.contains(fa);
+    host.insertBefore(card, before);
+    if(had) try{ fa.focus({ preventScroll:true }); }catch(e){}
+  }
+  hpfPlace();
+  try{ hvMqWide.addEventListener('change', hpfPlace); }catch(e){ try{ hvMqWide.addListener(hpfPlace); }catch(e2){} }
+  hpfEl.go.addEventListener('click', ()=> hrStart());
+  // how the phases are split, shown on demand (a tooltip alone reaches neither touch nor keys)
+  hpfEl.info.addEventListener('click', ()=>{
+    const open = hpfEl.how.hidden;
+    hpfEl.how.hidden = !open;
+    hpfEl.info.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  // a tap on the field goes to that point of the game
+  hpfEl.field.addEventListener('click', (e)=>{
+    if(e.target.closest('.hpf-mark')) return;
+    const S = HV_STATE;
+    if(!hpfOn(S) || !S._hpf) return;
+    const r = hpfEl.field.getBoundingClientRect();
+    if(!r.width) return;
+    hvGoto(hpfPosAt(S._hpf, Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 120 - 10))));
+    hvRevealBoard();
+  });
+  // a new width spaces the discs again
+  try{
+    let raf = 0;
+    new ResizeObserver(()=>{
+      if(raf) return;
+      raf = requestAnimationFrame(()=>{ raf = 0; if(!hpfEl.card.hidden && Math.round((hpfEl.field.clientWidth || 300) / 10)!==hpfFieldW) hpfRender(); });
+    }).observe(hpfEl.field);
+  }catch(e){}
+  hvOnGame(()=>{ hpfEl.marks.dataset.sig = '-'; hpfEl.now.dataset.k = ''; hpfRender(); });
+  hvOnNode(()=> hpfRenderMarker());
+
   function hrRenderAll(){
     hrRenderPane();
     hrRenderGraph();
     hrRenderTabDot();
+    hpfRender();
   }
   function hrRenderAcc(S, R){
     const box = hrUI.acc, P = S.game.players || {};
