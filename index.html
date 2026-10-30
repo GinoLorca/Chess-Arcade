@@ -4271,6 +4271,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      moves (a side line) dotted */
   ::highlight(hv-mv){ color:var(--brass-text); text-decoration:underline; text-decoration-thickness:1.5px; }
   ::highlight(hv-mv-alt){ color:var(--brass-text); text-decoration:underline dotted; text-decoration-thickness:1.5px; }
+  /* your comments on moves (hvCom*): a row under the move pair (the game's moves), inline in a
+     side line; the comment box; another device's version (hvAnnConflictRow) */
+  .hv-movelist .hv-com{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; padding:1px 4px 5px 12px; font-size:12.5px; line-height:1.5; }
+  .hv-com-go{ flex:0 0 auto; background:none; border:0; padding:0; font:inherit; font-weight:700; color:var(--ink-soft); cursor:pointer; }
+  .hv-com-go:hover{ color:var(--ink); }
+  .hv-com-text{ flex:1 1 160px; min-width:0; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
+  .hv-com-inline{ font-style:italic; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
+  /* comments read in the skin's text face, not the move list's mono */
+  .hv-com-text, .hv-com-inline{ font-family:"Libre Franklin",system-ui,-apple-system,sans-serif; }
+  :root[data-skin="bauhaus"] :is(.hv-com-text, .hv-com-inline){ font-family:"Jost","Libre Franklin",system-ui,sans-serif; }
+  :root[data-skin="chessbook"] :is(.hv-com-text, .hv-com-inline){ font-family:"EB Garamond","Libre Franklin",Georgia,serif; font-size:13.5px; }
+  :root[data-skin="uptown"] :is(.hv-com-text, .hv-com-inline){ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }
+  .hv-com-mv{ background:none; border:0; padding:0; font:inherit; font-style:normal; color:var(--brass-text); text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:2px; cursor:pointer; }
+  .hv-com-mv.alt{ text-decoration-style:dotted; }
+  .hv-com-go:focus-visible, .hv-com-mv:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
+  .hv-com-pop{ width:min(320px, calc(100% - 8px)); box-sizing:border-box; padding:10px; display:flex; flex-direction:column; gap:8px; }
+  .hv-com-pop-title{ font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .hv-com-pop .hv-com-ta{ font-family:inherit; font-weight:400; font-size:13px; line-height:1.45; resize:vertical; min-height:4.8em; }
+  .hv-com-pop-acts{ display:flex; gap:8px; justify-content:flex-end; }
+  .hv-movelist .hv-ann-conflict{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; margin:0 0 8px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); font-size:12.5px; color:var(--ink); }
+  #hv-movelist .mv-san{ -webkit-touch-callout:none; }
+  .gh-ann-line{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .hv-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
   .hv-act{ padding:6px 12px; font-size:12.5px; text-decoration:none; display:inline-flex; align-items:center; }
   /* ---- Review prep (hp*): which of your Repertoire Lab lines the game
@@ -23696,7 +23718,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if((Number(g.createdAt)||0) < from) return false;
     }
     if(f.variant && (g.variant || 'standard')!==f.variant) return false;
-    if(f.notes && !gnHasNote(g.id)) return false;
+    if(f.notes && !gnHasNote(g.id) && !gnHasAnn(g.id)) return false;      // a note, or your analysis on the board
     if(f.rep && rpReady() && !rpRepMatch(g, f.rep)) return false;     // kept but ignored until your repertoire is here
     return true;
   }
@@ -23738,6 +23760,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       let added = false;
       Object.values(GN.notes).forEach(n=>{
         if(!(n.text || n.conflict) || !n.g || ccIsId(n.id) || gnIsOp(n.id) || GH_STATE.ids.has(n.id)) return;
+        // your analysis on a game not loaded: that game (once, if it has a note too)
+        if(gnIsAn(n.id)){ const gid = n.id.slice(3); if(ccIsId(gid) || GH_STATE.ids.has(gid) || GN.notes[gid] || out.some(x=> x.id===gid)) return; n = Object.assign({}, n, { id:gid }); }
+        else if(out.some(x=> x.id===n.id)) return;
         const g = GH_STATE.extras.get(n.id) || ghGameFromSummary(n);
         if(ghVsComputer(g)) return;
         out.push(g);
@@ -23872,7 +23897,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     bits.push(mv+' move'+(mv===1 ? '' : 's'));
     if(g.status) bits.push(OL_STATUS_LABELS[g.status] || String(g.status));
     main.appendChild(ghEl('div', 'history-line2', bits.join(' \u00b7 ')));
-    const note = gnNoteText(g.id), waiting = !note && gnWaiting(g.id);
+    const note = gnNoteText(g.id), waiting = !note && gnWaiting(g.id), ann = gnAnnSummary(g.id);
+    if(ann) main.appendChild(ghEl('div', 'gh-ann-line', 'Your analysis: '+ann));
     if(note || waiting){
       const line = waiting ? 'Another version of this note is waiting: open to choose.' : gnFirstLine(note);
       const nl = ghEl('button', 'gh-note-line', line);
@@ -25051,7 +25077,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(ghCcUp()) ccGames().forEach(g=>{ if(rpCounted(g)) out.push(g); });
     if(typeof GN==='object' && GN && GN.notes){
       Object.values(GN.notes).forEach(n=>{
-        if(!n || !n.g || gnIsOp(n.id) || (ccIsId(n.id) ? ghCcUp() && ccHas(n.id) : GH_STATE.ids.has(n.id))) return;
+        if(!n || !n.g || gnIsOp(n.id) || gnIsAn(n.id) || (ccIsId(n.id) ? ghCcUp() && ccHas(n.id) : GH_STATE.ids.has(n.id))) return;
         let g = GH_STATE.extras.get(n.id);
         if(!g){ try{ g = ghGameFromSummary(n); }catch(e){ g = null; } }
         if(g && rpCounted(g)) out.push(g);
@@ -28330,6 +28356,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const node = hvMkNode(from, move, next, pzMoveToSAN(from.state, move, next), 'v'+(++hvSeq), false);
     from.children.push(node);
     HV_STATE.nodes.set(node.id, node);
+    if(!hvAnnBusy) hvAnnSoon();         // a new side line is kept with the game (hvAnnSave)
     return node;
   }
   // 'Start', '14. Nf5' or '14...Nf5'
@@ -28931,6 +28958,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       m.dataset.node = node.id;
       hvAddBadge(m, node);
       host.appendChild(m);
+      if(node.comment){
+        host.appendChild(document.createTextNode(' '));
+        const c = hvEl('span', 'hv-com-inline');
+        c.dataset.node = node.id;
+        hvComText(c, node.comment);
+        host.appendChild(c);
+      }
       if(i>0) nodes[i-1].children.slice(1).forEach(sib=>{
         sp();
         const nest = hvEl('span', 'hv-nest');
@@ -28959,6 +28993,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!S) return;
     const el = document.getElementById('hv-movelist');
     const frag = document.createDocumentFragment();
+    const cf = hvAnnConflictRow();
+    if(cf) frag.appendChild(cf);
     // a set position where Black moves first starts '1. ... Kf5'
     const off = S.root.off || 0, main = (off ? [null] : []).concat(S.main), rows = Math.ceil(main.length/2);
     const alts = (i)=> main[i] ? main[i].parent.children.filter(c=> c!==main[i]) : [];
@@ -28966,6 +29002,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       frag.appendChild(hvEl('div', 'mv-num', (r+1)+'.'));
       frag.appendChild(main[2*r] ? hvMoveCell(main[2*r]) : hvEl('div', 'mv-san', '\u2026'));
       frag.appendChild(main[2*r+1] ? hvMoveCell(main[2*r+1]) : hvEl('div', 'mv-san'));
+      [main[2*r], main[2*r+1]].forEach(n=>{ if(n && n.comment) frag.appendChild(hvComRow(n)); });
       alts(2*r).concat(alts(2*r+1)).forEach(b=> frag.appendChild(hvVarRow(b)));
     }
     // moves tried after the game's last move
@@ -29014,13 +29051,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvMenuOpen(node, anchor, x, y, opener){
     hvMenuClose();
     const S = HV_STATE;
-    if(!S || !node || node.main) return;
-    const root = hvLineRoot(node);
+    const com = !!hvAnnId();            // comments: a game's moves (not a puzzle's)
+    if(!S || !node || !node.parent || (node.main && !com)) return;
+    const root = node.main ? null : hvLineRoot(node);
     const pane = document.getElementById('hv-pane-moves');
     const el = hvEl('div', 'hv-pop');
     el.id = 'hv-var-pop';
     el.setAttribute('role', 'menu');
-    el.setAttribute('aria-label', 'Line options');
+    el.setAttribute('aria-label', node.main ? 'Move options' : 'Line options');
     const add = (label, fn, cls)=>{
       const b = hvEl('button', 'hv-pop-item'+(cls ? ' '+cls : ''), label);
       b.type = 'button';
@@ -29028,10 +29066,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       b.addEventListener('click', (e)=>{ e.stopPropagation(); hvMenuClose(); fn(); });
       el.appendChild(b);
     };
-    add('Go to this line', ()=>{ hvGoNode(node); hvRevealBoard(); }, 'hv-pop-go');
-    if(typeof nbInsertLine==='function' && !hvNotesOff()) add('Add this line to notes', ()=>{ try{ nbInsertLine(root); }catch(e){} }, 'hv-pop-notes');
-    if(!root.parent.main && root.parent.children[0]!==root) add('Promote this line', ()=> hvPromote(root), 'hv-pop-promote');
-    add(node===root ? 'Delete this line' : 'Delete from this move', ()=> hvDeleteFrom(node), 'hv-pop-delete');
+    if(!node.main) add('Go to this line', ()=>{ hvGoNode(node); hvRevealBoard(); }, 'hv-pop-go');
+    if(com){
+      add(node.comment ? 'Edit comment' : 'Add a comment', ()=> hvComEdit(node), 'hv-pop-com');
+      if(node.comment) add('Delete comment', ()=> hvComSet(node, ''), 'hv-pop-com-del');
+    }
+    if(!node.main){
+      if(typeof nbInsertLine==='function' && !hvNotesOff()) add('Add this line to notes', ()=>{ try{ nbInsertLine(root); }catch(e){} }, 'hv-pop-notes');
+      if(!root.parent.main && root.parent.children[0]!==root) add('Promote this line', ()=> hvPromote(root), 'hv-pop-promote');
+      add(node===root ? 'Delete this line' : 'Delete from this move', ()=> hvDeleteFrom(node), 'hv-pop-delete');
+    }
     pane.appendChild(el);
     const pr = pane.getBoundingClientRect();
     let left = x - pr.left + pane.scrollLeft, top = y - pr.top + pane.scrollTop + 4;
@@ -29059,6 +29103,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     p.children.splice(i, 1);
     p.children.unshift(node);
     hvRenderMoveList();
+    hvAnnSoon();
   }
   function hvDeleteFrom(node){
     const S = HV_STATE;
@@ -29068,11 +29113,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     (function drop(n){ if(n===S.cur) inside = true; S.nodes.delete(n.id); n.children.forEach(drop); })(node);
     p.children.splice(p.children.indexOf(node), 1);
     if(inside) hvGoNode(p); else hvRenderMoveList();
+    hvAnnSoon();
   }
   (function(){
     const list = document.getElementById('hv-movelist');
+    let lp = null;        // a long press (touch) opens the menu, and the tap after it does nothing else
     list.addEventListener('click', (e)=>{
       if(!HV_STATE) return;
+      if(lp && lp.fired){ lp = null; e.preventDefault(); e.stopPropagation(); return; }
+      const mv = e.target.closest('.hv-com-mv');
+      if(mv && mv._mv){ e.stopPropagation(); hvMvGo(mv._mv); return; }
+      const cg = e.target.closest('.hv-com-go[data-node]');
+      if(cg){ const n = HV_STATE.nodes.get(cg.dataset.node); if(n){ hvGoNode(n); hvRevealBoard(); } return; }
+      const cf = e.target.closest('[data-ann]');
+      if(cf){ hvAnnResolve(cf.dataset.ann==='merge'); return; }
       const mb = e.target.closest('.hv-var-menu');
       if(mb){
         e.stopPropagation();
@@ -29087,14 +29141,34 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const n = HV_STATE.nodes.get(cell.dataset.node);
       if(n){ hvGoNode(n, { sound:true }); hvRevealBoard(); }
     });
+    const HV_COM_SEL = '.mv-san[data-node], .hv-com[data-node], .hv-com-inline[data-node]';
     list.addEventListener('contextmenu', (e)=>{
       if(!HV_STATE) return;
-      const cell = e.target.closest('.mv-san[data-node]');
+      const cell = e.target.closest(HV_COM_SEL);
       const n = cell && HV_STATE.nodes.get(cell.dataset.node);
-      if(!n || n.main) return;
+      if(!n || !n.parent || (n.main && !hvAnnId())) return;
       e.preventDefault();
       hvMenuOpen(n, cell, e.clientX, e.clientY, cell);
     });
+    list.addEventListener('dblclick', (e)=>{
+      const cell = HV_STATE && e.target.closest('.hv-com[data-node], .hv-com-inline[data-node]');
+      const n = cell && HV_STATE.nodes.get(cell.dataset.node);
+      if(n && hvAnnId()){ e.preventDefault(); hvComEdit(n); }
+    });
+    list.addEventListener('pointerdown', (e)=>{
+      if(e.pointerType!=='touch' || !HV_STATE) return;
+      const cell = e.target.closest(HV_COM_SEL);
+      if(!cell) return;
+      const x = e.clientX, y = e.clientY;
+      if(lp) clearTimeout(lp.t);
+      lp = { x, y, fired:false, t:setTimeout(()=>{
+        const n = HV_STATE && HV_STATE.nodes.get(cell.dataset.node);
+        if(lp && n && n.parent && (!n.main || hvAnnId())){ lp.fired = true; hvMenuOpen(n, cell, x, y, cell); }
+      }, 550) };
+    });
+    list.addEventListener('pointermove', (e)=>{ if(lp && !lp.fired && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 10){ clearTimeout(lp.t); lp = null; } });
+    list.addEventListener('pointercancel', ()=>{ if(lp){ clearTimeout(lp.t); lp = null; } });
+    list.addEventListener('pointerup', ()=>{ if(lp && !lp.fired){ clearTimeout(lp.t); lp = null; } });
   })();
 
   // ---- tabs ----
@@ -29797,6 +29871,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       cur: tree.root, flipped: opts.flip!=null ? !!opts.flip : me==='black', whiteName: ghOppName(P.white), blackName: ghOppName(P.black),
       plyStates: tree.plyStates, sanMoves: tree.sanMoves, review: null };
     hvSelected = null;
+    hvAnnApply();                       // your saved side lines, comments and arrows on this game
     marksHv = hvMarksOf(tree.root);
     hvModeUi();
     hvFire(hvGameLs, HV_STATE);
@@ -32209,7 +32284,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // gnIdOk refuses their ids, so its sync never touches those chapters; like the chess.com
   // notes they keep a second copy (GN_OP_KEY) that loading takes back from (gnRestoreCc).
   var GN_OP_KEY = 'wavyChessPrepOpeningNotes';
-  var GN_COPIES = [[GN_CC_KEY, /^cc-d?\d{1,15}$/], [GN_OP_KEY, /^op-[0-9a-f]{8}$/]];
+  // Your analysis on a game (an-<game id>): its comments on moves, side lines and arrows, as
+  // one record (hvAnnText) beside the game's note, synced the same way in its own chapter (an
+  // annotated PGN on Lichess); like the opening notes, an older build leaves it alone, and it
+  // keeps a second copy (GN_AN_KEY).
+  var GN_AN_KEY = 'wavyChessPrepGameAnnotations';
+  var GN_COPIES = [[GN_CC_KEY, /^cc-d?\d{1,15}$/], [GN_OP_KEY, /^op-[0-9a-f]{8}$/], [GN_AN_KEY, /^an-(?:\w{8}|cc-d?\d{1,15})$/]];
   var GN_STUDY_NAME = SP_STUDY_PREFIX + 'Game notes';
   var GN_MAX = 10000, GN_TOMB_TTL = 30*86400e3;
   var gnSyncTimer = 0, gnSyncRunning = false, gnSyncAgain = false, gnOtherTabValue = null;
@@ -32256,8 +32336,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // what a note can belong to: a Lichess game (8 characters), a chess.com one (cc-<n>, daily
   // cc-d<n>) or an opening (op-<hash>, gnOpId)
-  function gnIdOk(id){ return /^(?:\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8})$/.test(String(id || '')); }
+  function gnIdOk(id){ return /^(?:\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}|an-(?:\w{8}|cc-d?\d{1,15}))$/.test(String(id || '')); }
   function gnIsOp(id){ return /^op-[0-9a-f]{8}$/.test(String(id || '')); }
+  function gnIsAn(id){ return /^an-(?:\w{8}|cc-d?\d{1,15})$/.test(String(id || '')); }
+  function gnHasAnn(gid){ return !!gnNoteText('an-'+gid); }
+  // "2 comments \u00b7 1 side line \u00b7 arrows" for a game's saved analysis ('' when none)
+  function gnAnnSummary(gid){
+    let A = null;
+    try{ A = JSON.parse(gnNoteText('an-'+gid) || 'null'); }catch(e){ A = null; }
+    if(!A) return '';
+    const c = Array.isArray(A.c) ? A.c.length : 0, l = Array.isArray(A.l) ? A.l.length : 0, m = Array.isArray(A.m) ? A.m.length : 0;
+    const bits = [];
+    if(c) bits.push(c+' comment'+(c===1 ? '' : 's'));
+    if(l) bits.push(l+' side line'+(l===1 ? '' : 's'));
+    if(m) bits.push('arrows');
+    return bits.join(' \u00b7 ');
+  }
   function gnOpId(name){ return 'op-'+gnFnv(String(name || '').trim().toLowerCase()); }
   function gnCleanNote(n, id){
     if(!n || typeof n!=='object' || !gnIdOk(id)) return null;
@@ -32511,7 +32605,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function gnChapterName(n){
     if(gnIsOp(n.id)) return (n.id+' \u00b7 Opening \u00b7 '+((n.g && n.g.opening) || '?')).slice(0, 100);
     const g = n.g || {}, fam = gnFamilyOf(g);
-    return (n.id+' \u00b7 vs '+(g.opp || '?')+(fam ? ' \u00b7 '+fam : '')).slice(0, 100);
+    return (n.id+' \u00b7 '+(gnIsAn(n.id) ? 'Analysis \u00b7 ' : '')+'vs '+(g.opp || '?')+(fam ? ' \u00b7 '+fam : '')).slice(0, 100);
   }
   function gnReadable(t){
     let r = nbPlain(String(t||'')).replace(/\r/g, '').replace(/\{/g, '(').replace(/\}/g, ')').replace(/\[%/g, '[ %').replace(/\n[ \t]*(\n[ \t]*)+/g, '\n');
@@ -32541,11 +32635,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const mv = gnMovetext(g.san);
       return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? gnReadable(n.text) : '(note deleted)')+' } '+(mv ? mv+' ' : '')+'*';
     }
-    const cc = ccIsId(n.id);      // a chess.com game's note: its chess.com page, your chess.com name
+    const an = gnIsAn(n.id), gid = an ? n.id.slice(3) : n.id;      // an analysis record: its game's tags
+    const cc = ccIsId(gid);      // a chess.com game's note: its chess.com page, your chess.com name
     const mine = cc ? ((ghCcUp() && ccName()) || 'Me') : (GH_STATE.username || GN.sync.user || 'Me'), opp = g.opp || '?';
     const pad = x=> String(x).padStart(2, '0');
     tag('Event', GN_STUDY_NAME);
-    tag('Site', cc ? ccGameUrl(n.id) : 'https://lichess.org/'+n.id);
+    tag('Site', cc ? ccGameUrl(gid) : 'https://lichess.org/'+gid);
     if(g.at){ const d = new Date(g.at); tag('Date', d.getUTCFullYear()+'.'+pad(d.getUTCMonth()+1)+'.'+pad(d.getUTCDate())); }
     tag('White', g.me==='white' ? mine : opp);
     tag('Black', g.me==='white' ? opp : mine);
@@ -32561,7 +32656,71 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // Moves only for standard chess: another variant's moves need its own
     // start position, which the summary doesn't keep.
     const moves = (!g.variant || g.variant==='standard') ? gnMovetext(g.san) : '';
+    if(an){
+      // the game with your side lines and comments, as Lichess shows a study chapter
+      let mt = moves;
+      if(moves && n.text){ try{ mt = gnAnnMovetext(g.san, n.text) || moves; }catch(e){ mt = moves; } }
+      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? 'Your analysis from Chess Arcade: comments and side lines.' : '(analysis deleted)')+' } '+(mt ? mt+' ' : '')+result;
+    }
     return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? gnReadable(n.text) : '(note deleted)')+' } '+(moves ? moves+' ' : '')+result;
+  }
+  // A game's moves with an analysis record's side lines and comments, as PGN movetext:
+  // '1. d4 d5 2. Nc3 { Jobava } (2. c4 e6) 2... Nf6'. Every move is replayed and written by
+  // the app's own SAN, so Lichess takes it; a line that doesn't replay is left out.
+  function gnAnnMovetext(san, text){
+    const A = JSON.parse(text);
+    const toks = String(san || '').trim() ? String(san).trim().split(/\s+/) : [];
+    const mk = (parent, move, state, s)=> ({ parent, move, state, san:s, uci:move ? hvUci(move) : '', ply:parent ? parent.ply+1 : 0, kids:[], main:false, com:'' });
+    const root = mk(null, null, pzStartPosition(), '');
+    root.main = true;
+    const main = [root];
+    for(const t of toks){
+      const at = main[main.length-1], f = hvFindMoveBySan(at.state, t);
+      if(!f) break;
+      const n = mk(at, f.move, f.next, pzMoveToSAN(at.state, f.move, f.next));
+      n.main = true; at.kids.push(n); main.push(n);
+    }
+    const walk = (ref, make)=>{
+      if(typeof ref==='number') return ref >= 0 && ref < main.length ? main[ref] : null;
+      if(!Array.isArray(ref) || !(ref[0] >= 0) || ref[0] >= main.length) return null;
+      let n = main[ref[0]];
+      for(const u of ref.slice(1)){
+        let c = n.kids.find(k=> k.uci===u);
+        if(!c){
+          if(!make) return null;
+          let r = null;
+          try{ r = pzApplyUCI(n.state, u); }catch(e){ r = null; }
+          if(!r || !r.move) return null;
+          c = mk(n, r.move, r.next, pzMoveToSAN(n.state, r.move, r.next));
+          n.kids.push(c);
+        }
+        n = c;
+      }
+      return n;
+    };
+    (Array.isArray(A.l) ? A.l : []).forEach(L=> walk(L, true));
+    (Array.isArray(A.c) ? A.c : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null; if(n && typeof x[1]==='string') n.com = x[1]; });
+    const com = (t)=> '{ '+String(t).replace(/[{}]/g, m=> m==='{' ? '(' : ')').replace(/\[%/g, '[ %').replace(/\s+/g, ' ').trim()+' }';
+    const out = [];
+    const line = (start)=>{
+      let n = start, num = true;
+      while(n){
+        const white = n.ply % 2===1, no = Math.ceil(n.ply/2);
+        if(white) out.push(no+'.'); else if(num) out.push(no+'...');
+        out.push(n.san);
+        num = false;
+        if(n.com){ out.push(com(n.com)); num = true; }
+        const p = n.parent;
+        if(p.kids[0]===n && p.kids.length > 1){
+          p.kids.slice(1).forEach(v=>{ out.push('('); line(v); out.push(')'); });
+          num = true;
+        }
+        n = n.kids[0] || null;
+      }
+    };
+    if(root.com) out.push(com(root.com));
+    if(root.kids[0]) line(root.kids[0]);
+    return out.join(' ').replace(/\( /g, '(').replace(/ \)/g, ')');
   }
   function gnSanFromMovetext(s){
     return gnCleanSan(String(s||'').replace(/\$\d+/g, ' ').replace(/\([^)]*\)/g, ' ').replace(/\d+\.(\.\.)?/g, ' ').replace(/(1-0|0-1|1\/2-1\/2|\*)\s*$/, ''));
@@ -32639,7 +32798,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const data = await res.json();
     const got = {};
     ((data && data.chapters) || []).forEach(ch=>{
-      const m = String(ch.name||'').match(/^(\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}) /);
+      const m = String(ch.name||'').match(/^(\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}|an-(?:\w{8}|cc-d?\d{1,15})) /);
       if(m && /^\w{8}$/.test(String(ch.id||''))) got[m[1]] = String(ch.id);
     });
     return got;
@@ -34330,6 +34489,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(gnEd){ gnFieldRefresh(gnEd.F); gnRenderField(gnEd.F); }
     if(hvNote){ gnFieldRefresh(hvNote); gnRenderField(hvNote); }
     hvOpxFields().forEach(F=>{ gnFieldRefresh(F); gnRenderField(F); });
+    hvAnnRefresh();
   }
   var gnOverlay = document.getElementById('gn-overlay');
   var gnTextEl = document.getElementById('gn-text');
@@ -34448,6 +34608,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvOpxLoad(game);
   }
   function hvNoteFlush(){
+    try{ hvAnnSave(); }catch(e){}       // the analysis on the board, before HV_STATE moves on
     const ops = hvOpxFlush();
     if(!hvNote && !ops) return;
     if(hvNote){ gnFieldSave(hvNote); clearTimeout(hvNote.undoTimer); hvNote = null; }
@@ -34881,8 +35042,221 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // the same note against another game, or the game's lines changed
     hvOnGame(()=> hvMvSoon());
   })();
+
+  /* ---- Your analysis on the board, kept with the game: comments on moves (right-click a
+     move, or press and hold on a touch screen), the side lines you play, and the arrows and
+     squares you draw. One record per game, an-<game id> (gnIsAn), saved as you go and synced
+     like the game's note; opening the game again puts it all back. ---- */
+  var hvAnnTimer = 0, hvAnnBusy = false;
+  var HV_COM_MAX = 2000;
+  function hvAnnId(){
+    const S = HV_STATE, id = S && S.game && S.game.id ? String(S.game.id) : '';
+    return S && !S.game._puzzle && /^(?:\w{8}|cc-d?\d{1,15})$/.test(id) ? 'an-'+id : '';
+  }
+  function hvAnnRef(n){ return n.main ? n.ply : hvNodeRef(n).line; }
+  function hvAnnNode(r){ return typeof r==='number' ? hvNodeFromRef({ ply:r }) : (Array.isArray(r) ? hvNodeFromRef({ line:r }) : null); }
+  // the record: { v:1, l:[side lines' ends, as refs], c:[[ref, comment]], m:[[ref, 'Ge2e4 ...', 'Re4 ...']] }
+  // ('' when there's nothing); arrows as shown (the profile's colors) in the diagram codes
+  function hvAnnText(noMarks){
+    const S = HV_STATE, lines = [], com = [], mk = [];
+    const prof = annoProfile();
+    const marks = (n)=>{
+      const m = n.marks;
+      if(noMarks || !m || !hasMarks(m)) return;
+      const p = m.noProfile ? null : annoResolveColors(m, prof), ar = [], sq = [];
+      m.arrows.forEach((a, i)=>{ if(a.from==null || a.to==null || a.from===a.to || ar.length >= 24) return; ar.push(nbCodeOf(p ? p.arrows[i] : a.color)+idxToAlg(a.from)+idxToAlg(a.to)); });
+      Object.keys(m.squares).forEach(k=>{ if(sq.length < 32) sq.push(nbCodeOf(p ? p.squares[k] : m.squares[k])+idxToAlg(Number(k))); });
+      if(ar.length || sq.length) mk.push([hvAnnRef(n), ar.join(' '), sq.join(' ')]);
+    };
+    (function walk(n){
+      if(n.comment) com.push([hvAnnRef(n), n.comment]);
+      marks(n);
+      n.children.forEach(c=>{ if(!c.main && !c.children.length) lines.push(hvNodeRef(c).line); walk(c); });
+    })(S.root);
+    return lines.length || com.length || mk.length ? JSON.stringify({ v:1, l:lines, c:com, m:mk }) : '';
+  }
+  // A record onto the tree: its side lines, comments and marks. mine: this device's comments
+  // and marks stay, and a different comment from the other version is added under it.
+  function hvAnnMerge(A, mine){
+    if(!A || typeof A!=='object') return;
+    hvAnnBusy = true;
+    try{
+      (Array.isArray(A.l) ? A.l : []).forEach(L=>{ if(Array.isArray(L)) hvNodeFromRef({ line:L }); });
+      (Array.isArray(A.c) ? A.c : []).forEach(x=>{
+        const n = Array.isArray(x) ? hvAnnNode(x[0]) : null;
+        if(!n || typeof x[1]!=='string' || !x[1].trim()) return;
+        const t = x[1].slice(0, HV_COM_MAX);
+        if(mine && n.comment && n.comment!==t) n.comment = (n.comment+'\n'+t).slice(0, HV_COM_MAX);
+        else if(!mine || !n.comment) n.comment = t;
+      });
+      (Array.isArray(A.m) ? A.m : []).forEach(x=>{
+        const n = Array.isArray(x) ? hvAnnNode(x[0]) : null;
+        if(!n) return;
+        const m = hvMarksOf(n);
+        if(hasMarks(m)) return;
+        String(x[1] || '').split(' ').forEach(t=>{ const k = /^([A-Z])([a-h][1-8])([a-h][1-8])$/.exec(t); if(k && NB_CODES[k[1]]) m.arrows.push({ from:nbAlgIdx(k[2]), to:nbAlgIdx(k[3]), color:NB_CODES[k[1]] }); });
+        String(x[2] || '').split(' ').forEach(t=>{ const k = /^([A-Z])([a-h][1-8])$/.exec(t); if(k && NB_CODES[k[1]]) m.squares[nbAlgIdx(k[2])] = NB_CODES[k[1]]; });
+      });
+    } finally { hvAnnBusy = false; }
+  }
+  // hvOpen: the game's saved analysis onto its tree (a tree kept from earlier in the session
+  // already has it: nothing is added twice)
+  function hvAnnApply(){
+    const S = HV_STATE, id = hvAnnId();
+    S.annText = id ? gnNoteText(id) : '';
+    if(!S.annText) return;
+    let A = null;
+    try{ A = JSON.parse(S.annText); }catch(e){ A = null; }
+    hvAnnMerge(A, false);
+  }
+  function hvAnnSoon(){ clearTimeout(hvAnnTimer); hvAnnTimer = setTimeout(hvAnnSave, 700); }
+  function hvAnnSave(){
+    clearTimeout(hvAnnTimer); hvAnnTimer = 0;
+    const S = HV_STATE, id = hvAnnId();
+    if(!S || !id) return;
+    let t = hvAnnText(false);
+    if(t.length > GN_MAX) t = hvAnnText(true);        // too much to keep: the arrows give way first
+    if(t.length > GN_MAX || t===(S.annText || '')) return;
+    if(!t && !GN.notes[id]) return;
+    gnSetNote(id, t, S.game);
+    S.annText = gnNoteText(id);
+  }
+  // Another device's analysis arrived (a sync, another tab): the game opens again with it, at
+  // the same move of the game. An edit of this device's still waiting to be saved goes first.
+  function hvAnnRefresh(){
+    const S = HV_STATE, id = hvAnnId();
+    if(!S || !id || !hvViewActive()) return;
+    if(gnNoteText(id)===(S.annText || '')){
+      // the same analysis: only an other-version notice to show or clear (a redraw for nothing
+      // would take the keyboard's place from the move list, the line menu's button)
+      const c = !!(GN.notes[id] && GN.notes[id].conflict);
+      if(c!==!!document.querySelector('#hv-movelist .hv-ann-conflict')) hvRenderMoveList();
+      return;
+    }
+    if(hvAnnTimer || (hvMenu && hvMenu.kind==='com')) return;
+    let n = S.cur;
+    while(n && !n.main) n = n.parent;
+    HV_TREES.delete(String(S.game.id));
+    hvOpen(S.game, S.username, { at:{ ply:n ? n.ply : 0 }, flip:S.flipped });
+  }
+  // another device's different version of this game's analysis: add it to this one, or not
+  function hvAnnConflictRow(){
+    const id = hvAnnId(), n = id ? GN.notes[id] : null;
+    if(!n || !n.conflict) return null;
+    const row = hvEl('div', 'hv-ann-conflict');
+    row.appendChild(hvEl('span', '', 'Another device saved different comments or lines for this game '+relTime(n.conflict.at)+'.'));
+    const b1 = hvEl('button', 'btn-link', 'Add them to these'); b1.type = 'button'; b1.dataset.ann = 'merge';
+    const b2 = hvEl('button', 'btn-link', 'Keep only these'); b2.type = 'button'; b2.dataset.ann = 'keep';
+    row.appendChild(b1); row.appendChild(b2);
+    return row;
+  }
+  function hvAnnResolve(merge){
+    const id = hvAnnId(), n = id ? GN.notes[id] : null;
+    if(!n || !n.conflict) return;
+    if(merge){ let A = null; try{ A = JSON.parse(n.conflict.text); }catch(e){ A = null; } hvAnnMerge(A, true); }
+    n.conflict = null;
+    gnPersist();
+    hvAnnSave();
+    hvRedraw();
+  }
+  // ---- comments ----
+  function hvComRow(n){
+    const row = hvEl('div', 'hv-com');
+    row.dataset.node = n.id;
+    const go = hvEl('button', 'hv-com-go', hvNodeLabel(n));
+    go.type = 'button';
+    go.dataset.node = n.id;
+    go.title = 'Go to '+hvNodeLabel(n);
+    row.appendChild(go);
+    const t = hvEl('span', 'hv-com-text');
+    hvComText(t, n.comment);
+    row.appendChild(t);
+    return row;
+  }
+  // a comment's words, its moves ("14. Nf5") as links like the notes' (hvMv*)
+  function hvComText(host, text){
+    const S = HV_STATE;
+    let at = 0;
+    (S && S.std ? hvMvScan(text) : []).forEach(seq=>{
+      const path = hvMvResolve(seq);
+      path.forEach((x, i)=>{
+        if(x.tk.ns < at) return;
+        if(x.tk.ns > at) host.appendChild(document.createTextNode(text.slice(at, x.tk.ns)));
+        const b = hvEl('button', 'hv-com-mv'+(path.slice(0, i+1).every(y=> y.main) ? '' : ' alt'), text.slice(x.tk.ns, x.tk.e));
+        b.type = 'button';
+        b._mv = { path, i };
+        host.appendChild(b);
+        at = x.tk.e;
+      });
+    });
+    if(at < text.length) host.appendChild(document.createTextNode(text.slice(at)));
+  }
+  function hvComSet(node, text){
+    const t = String(text || '').replace(/\r\n?/g, '\n').trim().slice(0, HV_COM_MAX);
+    if((node.comment || '')===t) return;
+    if(t) node.comment = t; else delete node.comment;
+    hvRenderMoveList();
+    hvAnnSave();                 // a comment is kept at once
+  }
+  // The comment box, under the move: Save (or Cmd/Ctrl+Enter, or clicking elsewhere) keeps
+  // what's written; Cancel or Escape leaves the comment as it was.
+  function hvComEdit(node){
+    hvMenuClose();
+    const S = HV_STATE;
+    if(!S || !node || !hvAnnId()) return;
+    const pane = document.getElementById('hv-pane-moves');
+    const lab = hvNodeLabel(node);
+    const el = hvEl('div', 'hv-pop hv-com-pop');
+    el.id = 'hv-com-pop';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', 'Comment on '+lab);
+    el.appendChild(hvEl('div', 'hv-com-pop-title', 'Comment on '+lab));
+    const ta = document.createElement('textarea');
+    ta.className = 'text-input hv-com-ta';
+    ta.rows = 3;
+    ta.maxLength = HV_COM_MAX;
+    ta.value = node.comment || '';
+    ta.placeholder = 'What this move does, what you missed\u2026 Moves written like 14. Nf5 become links.';
+    ta.setAttribute('aria-label', 'Comment on '+lab);
+    el.appendChild(ta);
+    const acts = hvEl('div', 'hv-com-pop-acts');
+    const save = hvEl('button', 'btn', 'Save'); save.type = 'button';
+    const cancel = hvEl('button', 'btn btn-ghost', 'Cancel'); cancel.type = 'button';
+    acts.appendChild(save); acts.appendChild(cancel);
+    el.appendChild(acts);
+    pane.appendChild(el);
+    const cell = document.querySelector('#hv-movelist [data-node="'+node.id+'"]');
+    const pr = pane.getBoundingClientRect(), cr = cell ? cell.getBoundingClientRect() : pr;
+    el.style.left = Math.max(4, Math.min(cr.left - pr.left + pane.scrollLeft, pane.clientWidth - el.offsetWidth - 4))+'px';
+    el.style.top = (cr.bottom - pr.top + pane.scrollTop + 4)+'px';
+    const done = (keep)=>{
+      if(!hvMenu || hvMenu.el!==el) return;
+      const v = ta.value;
+      hvMenuClose(true);
+      if(keep) hvComSet(node, v);
+    };
+    const outside = (e)=>{ if(!el.contains(e.target)) done(true); };
+    hvMenu = { el, node, opener:cell, outside, kind:'com' };
+    setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
+    save.addEventListener('click', ()=> done(true));
+    cancel.addEventListener('click', ()=> done(false));
+    el.addEventListener('keydown', (e)=>{
+      e.stopPropagation();
+      if(e.key==='Escape'){ e.preventDefault(); done(false); }
+      else if(e.key==='Enter' && (e.metaKey || e.ctrlKey)){ e.preventDefault(); done(true); }
+    });
+    try{ ta.focus({ preventScroll:true }); ta.setSelectionRange(ta.value.length, ta.value.length); }catch(e){}
+    if(el.getBoundingClientRect().bottom > pr.bottom) el.scrollIntoView({ block:'nearest' });
+  }
+  (function(){
+    // arrows and squares drawn on the board (right-click, or the pen) are kept too
+    const soon = ()=>{ if(HV_STATE && hvAnnId()) hvAnnSoon(); };
+    hvBoardEl.addEventListener('pointerup', soon);
+    hvBoardEl.addEventListener('contextmenu', soon);
+    hvBoardEl.addEventListener('click', soon);
+  })();
   // Whatever is being typed is saved before the page goes away.
-  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
+  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); hvAnnSave(); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
   document.addEventListener('visibilitychange', ()=>{ if(document.hidden) gnFlushAll(); });
   window.addEventListener('pagehide', gnFlushAll);
   // First sync a few seconds after the Saved Puzzles one.
