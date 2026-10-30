@@ -26414,9 +26414,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const { have, miss } = gpGames(G);
     document.getElementById('ghg-count').textContent = have.length + miss.length ? 'Games'
       : 'No games in this group yet. Open a game (a row in Games), then its Groups button adds it here.';
-    const list = document.getElementById('ghg-list'), ids = have.map(g=> g.id).concat(miss).join(',');
-    if(list.dataset.sig===ids && list.dataset.group===G.id) return;
-    list.dataset.sig = ids; list.dataset.group = G.id;
+    // rebuilt when the games or what a row shows (its note, your analysis) change
+    const list = document.getElementById('ghg-list');
+    const lsig = have.map(g=> g.id+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)).concat(miss).join('\u0001');
+    if(list.dataset.sig===lsig && list.dataset.group===G.id) return;
+    list.dataset.sig = lsig; list.dataset.group = G.id;
+    // the keyboard stays on the same row or button through a rebuild, as in the Games list
+    const fa = document.activeElement, fRow = fa && fa!==list && list.contains(fa) ? fa.closest('.history-row') : null;
+    const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-grp-btn') ? '.gh-grp-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : (fa.classList.contains('ghg-out') ? '.ghg-out' : ''))));
     list.textContent = '';
     const out = (row, id)=>{
       const x = ghEl('button', 'ghg-out', '\u00d7');
@@ -26444,6 +26449,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       frag.appendChild(out(row, id));
     });
     list.appendChild(frag);
+    if(fRow && gnIdOk(fRow.dataset.gid || '')){
+      const r = list.querySelector('.history-row[data-gid="'+CSS.escape(fRow.dataset.gid)+'"]');
+      const el = r && ((fSel && r.querySelector(fSel)) || r);
+      if(el) el.focus({ preventScroll:true });
+    }
   }
   function ghgOpen(id){
     ghgLeave();
