@@ -1943,6 +1943,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .pz-turn-title{ font-family:"Big Shoulders Display",sans-serif; font-weight:700; font-size:18px; text-transform:uppercase; color:var(--brass-text); }
   .pz-turn-sub{ font-size:12.5px; color:var(--ink-soft); }
   .pz-help-row{ justify-content:center; gap:18px; }
+  /* Analyze (a finished puzzle) is a 44px target on touch without making its row any taller: the board mustn't move */
+  @media (pointer:coarse){ #pz-analyze{ position:relative; } #pz-analyze::after{ content:''; position:absolute; inset:-14px -12px; } }
   .btn-link{
     background:none; border:none; padding:0; cursor:pointer;
     font-size:12.5px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
@@ -2752,8 +2754,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .rush-tile svg{ width:11px; height:11px; flex-shrink:0; display:block; }
   .rush-tile.solved{ background:var(--good-soft); border-color:var(--good); color:var(--good); }
   .rush-tile.missed{ background:var(--bad-soft); border-color:var(--bad); color:var(--bad); }
-  a.rush-tile:hover{ filter:brightness(.94); }
-  a.rush-tile:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  /* once the rush is over each tile is a button: it opens that puzzle on the analysis board */
+  button.rush-tile{ width:100%; margin:0; cursor:pointer; line-height:inherit; -webkit-appearance:none; appearance:none; }
+  button.rush-tile:hover{ filter:brightness(.94); }
+  button.rush-tile:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  @media (pointer:coarse){ button.rush-tile{ min-height:44px; } }
   .rush-bests{ display:flex; gap:10px; flex-wrap:wrap; }
   .rush-best{
     background:var(--surface-2); border:1px solid var(--line); border-radius:8px;
@@ -4291,6 +4296,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-pop-check:hover{ background:var(--surface-2); }
   .hv-pop-check:has(input:focus-visible){ outline:2px solid var(--focus); outline-offset:-2px; }
   .hv-pop-check input{ width:15px; height:15px; margin:0; flex:0 0 auto; accent-color:var(--ink); }
+  /* each row's key (1, 2, 3, E) at its right end; "Hide suggested moves" sits apart */
+  .hv-pop-check .kbd{ margin-left:auto; min-width:22px; box-sizing:border-box; text-align:center; font-size:10.5px; padding:1px 5px; }
+  .hv-pop-sep{ height:1px; margin:4px 6px; background:var(--line); }
   .hv-arrow-dot, .hv-eng-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 auto; box-shadow:0 0 0 1px rgba(0,0,0,.3); }
   .hv-eng-dot{ width:9px; height:9px; }
   .hv-eng-dot.is-off{ visibility:hidden; }
@@ -4310,6 +4318,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-eng-pill-wait{ background:var(--surface-2); color:var(--ink-soft); }
   .hv-eng-pv{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   :root[data-skin="bauhaus"] :is(.hv-eng-pill, .hv-icon-btn, .hv-eng-line, .hv-switch-track, .hv-switch-knob){ border-radius:0; }
+  /* E: one quiet line where the engine lines were */
+  .hv-eng-hidden{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 12px; min-height:26px; font-size:12.5px; line-height:1.35; color:var(--ink-soft); }
+  .hv-eng-hidden .kbd{ font-size:10.5px; padding:1px 5px; }
+  .hv-eng-show{ color:var(--ink); text-transform:none; letter-spacing:0; }
+  .hv-eng-show:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
 
   .hv-tabs{ display:flex; flex-direction:column; padding:0; overflow:hidden; }
   .hv-tablist{ display:flex; gap:2px; padding:4px 8px 0; border-bottom:1px solid var(--line); flex:0 0 auto; }
@@ -4438,6 +4451,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #view-play-history .hv-switch{ padding:9px 6px; margin:-9px -6px; }
     #view-play-history .hv-icon-btn{ width:36px; height:36px; }
     #view-play-history .hv-pop-check{ min-height:44px; box-sizing:border-box; padding:10px; }
+    #view-play-history .hv-eng-show{ display:inline-flex; align-items:center; min-height:44px; min-width:44px; padding:0 8px; margin:-9px -8px; }
     #view-play-history .hv-act{ min-height:36px; }
     :is(#view-play-history, #gn-overlay) :is(.nb-dg-go, .nb-dg-open){ padding:8px 0; }
     :is(#view-play-history, #gn-overlay) .nb-dg-x{ width:34px; height:34px; }
@@ -5582,6 +5596,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     <div class="next-actions">
       <button class="btn btn-primary next-go" id="next-go">Next position</button>
       <button class="btn btn-ghost" id="next-review">Look at the board</button>
+      <button class="btn btn-ghost" id="next-analyze" style="display:none;">Analyze</button>
       <button class="btn btn-ghost" id="next-settings">Change settings</button>
       <button class="btn btn-ghost" id="next-save" style="display:none;">&#9734; Save puzzle</button>
       <button class="btn btn-ghost" id="next-link" style="display:none;">Copy link</button>
@@ -6245,14 +6260,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
       <div class="hv-card hv-engine" id="hv-engine">
         <div class="hv-eng-head">
-          <button class="hv-switch" id="hv-eng-toggle" type="button" role="switch" aria-checked="true" title="Engine on or off (L)">
+          <button class="hv-switch" id="hv-eng-toggle" type="button" role="switch" aria-checked="true" aria-keyshortcuts="L" title="Engine on or off (L) &#183; E hides the suggested moves">
             <span class="hv-switch-track" aria-hidden="true"><span class="hv-switch-knob"></span></span>
             <span class="hv-switch-text">Engine</span>
           </button>
           <div class="hv-eng-status" id="hv-eng-status" aria-live="polite"></div>
-          <button class="hv-icon-btn" id="hv-eng-arrow" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="hv-arrow-pop" aria-label="Engine arrows" title="Engine arrows: best, 2nd and 3rd best moves"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.19 5.24 L10.50 2.52 L13.50 2.52 L13.81 5.24 A7.0 7.0 0 0 1 15.50 5.94 L17.64 4.23 L19.77 6.36 L18.06 8.50 A7.0 7.0 0 0 1 18.76 10.19 L21.48 10.50 L21.48 13.50 L18.76 13.81 A7.0 7.0 0 0 1 18.06 15.50 L19.77 17.64 L17.64 19.77 L15.50 18.06 A7.0 7.0 0 0 1 13.81 18.76 L13.50 21.48 L10.50 21.48 L10.19 18.76 A7.0 7.0 0 0 1 8.50 18.06 L6.36 19.77 L4.23 17.64 L5.94 15.50 A7.0 7.0 0 0 1 5.24 13.81 L2.52 13.50 L2.52 10.50 L5.24 10.19 A7.0 7.0 0 0 1 5.94 8.50 L4.23 6.36 L6.36 4.23 L8.50 5.94 A7.0 7.0 0 0 1 10.19 5.24 Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.9"/></svg></button>
+          <button class="hv-icon-btn" id="hv-eng-arrow" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="hv-arrow-pop" aria-label="Engine arrows" title="Engine arrows: best (1), 2nd best (2), 3rd best (3) &#183; E hides the suggested moves"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.19 5.24 L10.50 2.52 L13.50 2.52 L13.81 5.24 A7.0 7.0 0 0 1 15.50 5.94 L17.64 4.23 L19.77 6.36 L18.06 8.50 A7.0 7.0 0 0 1 18.76 10.19 L21.48 10.50 L21.48 13.50 L18.76 13.81 A7.0 7.0 0 0 1 18.06 15.50 L19.77 17.64 L17.64 19.77 L15.50 18.06 A7.0 7.0 0 0 1 13.81 18.76 L13.50 21.48 L10.50 21.48 L10.19 18.76 A7.0 7.0 0 0 1 8.50 18.06 L6.36 19.77 L4.23 17.64 L5.94 15.50 A7.0 7.0 0 0 1 5.24 13.81 L2.52 13.50 L2.52 10.50 L5.24 10.19 A7.0 7.0 0 0 1 5.94 8.50 L4.23 6.36 L6.36 4.23 L8.50 5.94 A7.0 7.0 0 0 1 10.19 5.24 Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.9"/></svg></button>
         </div>
         <div class="hv-eng-lines" id="hv-eng-lines"></div>
+        <!-- E hides the suggested moves (arrows and lines); the eval bar and
+             the depth keep going. Show is for touch. -->
+        <div class="hv-eng-hidden" id="hv-eng-hidden" hidden>
+          <span>Suggested moves hidden &#183; press <span class="kbd">E</span> to show</span>
+          <button class="btn-link hv-eng-show" id="hv-eng-show" type="button" aria-label="Show suggested moves" aria-keyshortcuts="E">Show</button>
+        </div>
       </div>
 
       <div class="hv-card hv-tabs" id="hv-tabs">
@@ -7876,6 +7897,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="btn-row pz-help-row">
         <button class="btn-link" id="pz-hint">Get a hint</button>
         <button class="btn-link" id="pz-view-solution">View the solution</button>
+        <!-- once the puzzle is done, in their place (the same one-line row) -->
+        <button class="btn-link" id="pz-analyze" type="button" title="Open this puzzle on the analysis board" hidden>Analyze</button>
       </div>
 
       <div class="arcade-prompt" id="pz-status">&nbsp;</div>
@@ -8028,7 +8051,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="rush-card rush-tiles-card">
         <div class="rush-lab">Puzzles</div>
         <div class="rush-tiles" id="rush-tiles"></div>
-        <div class="field-hint" id="rush-tiles-hint">Every puzzle you attempt lands here. Once the rush is over, tap any of them to open it on Lichess and see the answer.</div>
+        <div class="field-hint" id="rush-tiles-hint">Every puzzle you attempt lands here. Once the rush is over, tap any of them to open it on a board and see the answer.</div>
       </div>
     </div>
   </section>
@@ -18820,6 +18843,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const solBtn = document.getElementById('pz-view-solution');
     hintBtn.disabled = roundPz.done;
     solBtn.disabled = roundPz.done;
+    // Done: Analyze takes their place in the same one-line row, so the
+    // board never moves (pzCentreBoard); an unfinished puzzle never offers it.
+    hintBtn.hidden = solBtn.hidden = roundPz.done;
+    document.getElementById('pz-analyze').hidden = !roundPz.done;
   }
 
   function pzGetHint(){
@@ -20568,6 +20595,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         refreshStatsPz();
         if(!roundPz.replay) spRoundEnded(false);   // a saved puzzle: missed on the first try
       }
+      // Kept for Analyze (and Puzzle History, live only); the move still does just what it did.
+      if(roundPz.tries.length < 20){ roundPz.tries.push({ at:roundPz.solIndex, uci }); if(!roundPz.replay) phTries(roundPz); }
       pzWrongFeedback();
       return;
     }
@@ -20784,6 +20813,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     pzErrorBanner.style.display='none';
     pzSelected = null;
     roundPz = null;
+    document.getElementById('pz-analyze').hidden = true;     // Hint and View the solution are back (pzRefreshTurnCard)
+    document.getElementById('pz-hint').hidden = document.getElementById('pz-view-solution').hidden = false;
     pzSideBadgeLoading();
     clearMarksObj(marksPz);
     pzBoardEl.innerHTML='';
@@ -20898,7 +20929,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         // Kept for saving: the setup moves, the source game, and whether
         // this is a saved puzzle's practice run (never reported).
         tokens: tokens.slice(), gameId: (entry.game && entry.game.id) || '',
-        replay: replay || null
+        replay: replay || null,
+        // The wrong moves, for Analyze: { at: solution index, uci }, the first 20.
+        tries: []
       };
       buildLabelsPz(roundPz.flipped);
       renderBoardPz();
@@ -21056,7 +21089,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const RUSH_BEST_KEY = 'wavyChessPrepRushBest';
   const RUSH_POOL_KEY = 'wavyChessPrepRushPool';
   const RUSH_SEEN_MAX = 1500;
-  const RUSH_TILES_HINT_LIVE = 'Every puzzle you attempt lands here. Once the rush is over, tap any of them to open it on Lichess and see the answer.';
+  // (worded to wrap as the old "on Lichess" text did: at 390px the view is centred whole, so a line
+  // more or less here would move the board)
+  const RUSH_TILES_HINT_LIVE = 'Every puzzle you attempt lands here. Once the rush is over, tap any of them to open it on a board and see the answer.';
   const RUSH_CHECK_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const RUSH_X_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
 
@@ -21456,19 +21491,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
   }
   // During a rush the tiles are just a record; once it's over each one
-  // becomes a link to that puzzle on Lichess -- chess.com also keeps the
-  // answers hidden until the rush ends, then lets you open any of them.
+  // becomes a button that opens that puzzle on the analysis board (its Open
+  // on Lichess link is one more click) -- chess.com also keeps the answers
+  // hidden until the rush ends, then lets you open any of them.
   function rushRenderTiles(final){
     rushTilesEl.innerHTML = '';
     if(!runRush) return;
     runRush.attempts.forEach((a, i)=>{
-      const tile = document.createElement(final ? 'a' : 'div');
+      const tile = document.createElement(final ? 'button' : 'div');
       tile.className = 'rush-tile ' + (a.ok ? 'solved' : 'missed');
-      tile.title = 'Puzzle ' + (i+1) + (a.ok ? ', solved' : ', missed') + (final ? ' - open on Lichess' : '');
+      tile.title = 'Puzzle ' + (i+1) + (a.ok ? ', solved' : ', missed') + (final ? ' - analyze it' : '');
       if(final){
-        tile.href = 'https://lichess.org/training/' + encodeURIComponent(a.id);
-        tile.target = '_blank';
-        tile.rel = 'noopener';
+        tile.type = 'button';
+        tile.dataset.i = String(i);
+        tile.setAttribute('aria-label', 'Analyze puzzle ' + (i+1) + (a.ok ? ', solved' : ', missed') + ', rating ' + a.rating);
       }
       tile.innerHTML = a.ok ? RUSH_CHECK_SVG : RUSH_X_SVG;
       const num = document.createElement('span');
@@ -21645,7 +21681,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     r.locked = true;
     run.score++;
     run.highest = Math.max(run.highest, r.entry.rating);
-    run.attempts.push({ id:r.entry.id, rating:r.entry.rating, ok:true });
+    run.attempts.push({ id:r.entry.id, rating:r.entry.rating, ok:true, entry:r.entry });   // entry: for Analyze, from the result tiles
     rushRenderScore();
     rushRenderTiles(false);
     rushScoreCardEl.classList.remove('flash-good'); void rushScoreCardEl.offsetWidth; rushScoreCardEl.classList.add('flash-good');
@@ -21666,7 +21702,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     r.done = true;
     r.locked = true;
     run.strikes++;
-    run.attempts.push({ id:r.entry.id, rating:r.entry.rating, ok:false });
+    run.attempts.push({ id:r.entry.id, rating:r.entry.rating, ok:false, entry:r.entry,
+      miss:{ at:r.solIndex, uci:idxToAlg(move.from)+idxToAlg(move.to)+(move.promotion||'') } });   // Analyze shows the move that missed
     r.state = after;
     r.lastMove = null;
     r.missSq = move.to;
@@ -21882,7 +21919,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     rushTurnBadgeEl.classList.add('over');     // nobody is to move any more
     rushSetStatus('');
     rushTilesHintEl.textContent = run.attempts.length
-      ? 'Tap any puzzle to open it on Lichess and see the answer.'
+      ? 'Tap any puzzle to open it on a board and see the answer.'
       : 'No puzzles attempted this time.';
     rushRenderTiles(true);
     if(isBest) playSolvedSound(); else playLoseSound();
@@ -21972,6 +22009,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     rushStartRun();
   });
   document.getElementById('rush-again').addEventListener('click', rushStartRun);
+  // After the rush, a tile opens its puzzle on the analysis board (pzaFromRush).
+  rushTilesEl.addEventListener('click', (e)=>{
+    const t = e.target.closest('button.rush-tile');
+    if(t && runRush && !runRush.live) pzaFromRush(Number(t.dataset.i));
+  });
   document.getElementById('rush-retry').addEventListener('click', rushStartRun);
 
   /* ================= PLAY ONLINE =================
@@ -28048,17 +28090,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return { plyStates, sanMoves: sanTokens.slice(0, appliedCount), moves };
   }
 
-  // ---- prefs: engine switch, engine arrows (best, 2nd, 3rd), last tab, explorer database ----
+  // ---- prefs: engine switch, engine arrows (best, 2nd, 3rd), suggested moves
+  //      hidden (E: the arrows and lines, never the eval), last tab, explorer database ----
   const HV_PREFS_KEY = 'wavyChessPrepReviewPrefs';
   const HV_TABS = ['moves', 'review', 'explorer', 'notes'];
   const hvPrefs = (function(){
-    const p = { v:1, engine:true, arrows:[true, true, true], tab:'moves', exDb:'masters' };
+    const p = { v:1, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters' };
     try{
       const raw = JSON.parse(localStorage.getItem(HV_PREFS_KEY) || 'null');
       if(raw && typeof raw==='object'){
         if(typeof raw.engine==='boolean') p.engine = raw.engine;
         if(Array.isArray(raw.arrows) && raw.arrows.length===3 && raw.arrows.every(b=> typeof b==='boolean')) p.arrows = raw.arrows.slice();
         else if(raw.arrow===false) p.arrows = [false, false, false];   // the earlier best-move switch, turned off
+        if(typeof raw.hide==='boolean') p.hide = raw.hide;
         if(HV_TABS.indexOf(raw.tab)>=0) p.tab = raw.tab;
         if(raw.exDb==='masters' || raw.exDb==='lichess') p.exDb = raw.exDb;
       }
@@ -28514,7 +28558,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   hvLive.setAttribute('aria-live', 'polite');
   (hvBoardEl.closest('.hv-frame') || hvBoardEl.parentNode).appendChild(hvLive);
   hvBoardEl.setAttribute('role', 'group');
-  let hvLiveT = 0;
+  let hvLiveT = 0, hvSayT = 0;
+  // A key that changes no move (1, 2, 3, E, a blocked Space) says what it did.
+  // Emptied first, so the same words twice are read twice.
+  function hvSay(text){
+    clearTimeout(hvSayT);
+    hvLive.textContent = '';
+    hvSayT = setTimeout(()=>{ hvLive.textContent = text; }, 60);
+  }
   function hvAnnounce(node){
     clearTimeout(hvLiveT);
     hvLiveT = setTimeout(()=>{
@@ -28640,8 +28691,35 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(g.winner==='black') return '0-1';
     return (g.status==='started' || g.status==='created' || g.status==='aborted' || g.status==='noStart') ? '*' : '\u00bd-\u00bd';
   }
+  // A puzzle (pzaOpen): its id, how it went (never a result: it's one moment
+  // of a game), its rating and themes; no opening, no prep (S.me is null).
+  function hvRenderPuzzleHead(S){
+    const Z = S.game._puzzle, o = PZA_OUT[Z.outcome];
+    document.getElementById('hv-title').textContent = 'Puzzle #'+Z.id;    // as the Puzzles card writes it
+    const res = document.getElementById('hv-result');
+    res.textContent = '';
+    if(o) res.appendChild(hvEl('span', 'history-result-pill '+o[0], o[1]));
+    const th = Z.themes.filter(t=> !PH_HIDE_THEMES.includes(t)).slice(0, 3).map(pzThemeLabel);
+    document.getElementById('hv-meta').textContent = (Z.rating ? ['Rating '+Z.rating] : []).concat(th).join(' \u00b7 ');
+    const op = document.getElementById('hv-opening');
+    op.textContent = ''; op.hidden = true; op.removeAttribute('title');
+    document.getElementById('hv-pgn').value = S.sanMoves.length ? gnMovetext(S.sanMoves.join(' ')) : '';
+    if(typeof hpRender==='function') hpRender(S);
+  }
+  // What a puzzle changes on this screen, put back for a game: the eyebrow,
+  // the back link (to where Analyze was pressed), Notes (a puzzle has nowhere
+  // to keep them; hidden also hides the pinned pane) and the clocks (none).
+  function hvModeUi(){
+    const Z = HV_STATE ? HV_STATE.game._puzzle : null;
+    document.querySelector('#hv-head .eyebrow').textContent = Z ? 'Puzzle analysis' : 'Game review';
+    const back = document.querySelector('#view-play-history .back-link');
+    back.textContent = '\u2190 '+(Z ? Z.back : 'Game History');
+    back.dataset.nav = Z ? Z.view : 'history';
+    ['hv-tab-notes', 'hv-pane-notes', 'hv-top-clock', 'hv-bottom-clock'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
+  }
   function hvRenderHead(){
     const S = HV_STATE, g = S.game;
+    if(g._puzzle) return hvRenderPuzzleHead(S);
     document.getElementById('hv-title').textContent = S.whiteName+' vs '+S.blackName;
     const res = document.getElementById('hv-result');
     res.textContent = '';
@@ -28675,6 +28753,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const S = HV_STATE, a = document.getElementById('hv-lichess');
     const id = S && S.game.id ? String(S.game.id) : '';
     const cu = S ? ccGameUrl(id) : null;
+    // a puzzle: its own page (the source game's id is never this board's)
+    if(S && S.game._puzzle){ if(a.textContent!=='Open on Lichess') a.textContent = 'Open on Lichess'; a.hidden = false; a.href = 'https://lichess.org/training/'+S.game._puzzle.id; return; }
     if(cu){ if(a.textContent!=='Open on chess.com') a.textContent = 'Open on chess.com'; a.hidden = false; a.href = cu; return; }
     if(a.textContent!=='Open on Lichess') a.textContent = 'Open on Lichess';
     if(!S || !/^[A-Za-z0-9]{8}$/.test(id)){ a.hidden = true; a.removeAttribute('href'); return; }
@@ -28762,8 +28842,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     // moves tried after the game's last move
     (main.length ? main[main.length-1] : S.root).children.forEach(b=> frag.appendChild(hvVarRow(b)));
-    const g = S.game, bits = [hvResultText(g)];
-    if(g.winner==='white') bits.push('White wins'); else if(g.winner==='black') bits.push('Black wins');
+    const g = S.game, Z = g._puzzle, bits = Z ? ['Puzzle'] : [hvResultText(g)];
+    if(Z){ if(PZA_OUT[Z.outcome]) bits.push(PZA_OUT[Z.outcome][1]); }     // a puzzle: how it went, never a result
+    else if(g.winner==='white') bits.push('White wins'); else if(g.winner==='black') bits.push('Black wins');
     else if(bits[0]!=='*') bits.push('Draw');
     if(g.status && g.status!=='draw') bits.push(OL_STATUS_LABELS[g.status] || String(g.status));
     else if(g.status==='draw') bits.push(OL_STATUS_LABELS.draw);
@@ -28820,7 +28901,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       el.appendChild(b);
     };
     add('Go to this line', ()=>{ hvGoNode(node); hvRevealBoard(); }, 'hv-pop-go');
-    if(typeof nbInsertLine==='function') add('Add this line to notes', ()=>{ try{ nbInsertLine(root); }catch(e){} }, 'hv-pop-notes');
+    if(typeof nbInsertLine==='function' && !hvNotesOff()) add('Add this line to notes', ()=>{ try{ nbInsertLine(root); }catch(e){} }, 'hv-pop-notes');
     if(!root.parent.main && root.parent.children[0]!==root) add('Promote this line', ()=> hvPromote(root), 'hv-pop-promote');
     add(node===root ? 'Delete this line' : 'Delete from this move', ()=> hvDeleteFrom(node), 'hv-pop-delete');
     pane.appendChild(el);
@@ -28893,16 +28974,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const hvMqPinned = window.matchMedia ? matchMedia('(min-width:1180px) and (min-height:950px)') : { matches:false };
   const hvMqPhone = window.matchMedia ? matchMedia('(max-width:899.98px)') : { matches:false };
   function hvNotesPinned(){ return !!hvMqPinned.matches; }
+  // A puzzle on the board (pzaOpen) has no Notes: its id isn't a game's.
+  let hvTabAway = null;      // 'notes' while a puzzle stood in for it: hvOpen gives it back to the next game
+  function hvNotesOff(){ return !!(HV_STATE && HV_STATE.game._puzzle); }
   function hvVisiblePanes(){
     if(!HV_STATE || !hvViewActive()) return [];
     const v = [hvTab];
-    if(hvNotesPinned() && hvTab!=='notes') v.push('notes');
+    if(hvNotesPinned() && hvTab!=='notes' && !hvNotesOff()) v.push('notes');
     return v;
   }
   function hvPaneShown(name){ return hvVisiblePanes().indexOf(name)>=0; }
   function hvSetTab(name, opts){
     if(HV_TABS.indexOf(name)<0) name = 'moves';
-    if(name==='notes' && hvNotesPinned()) name = 'moves';
+    if(name==='notes' && hvNotesOff() && !(opts && opts.save)) hvTabAway = 'notes';
+    if(name==='notes' && (hvNotesPinned() || hvNotesOff())) name = 'moves';
+    if(opts && opts.save) hvTabAway = null;      // a tab picked by hand is the one to keep
     const before = hvVisiblePanes();
     hvTab = name;
     HV_TABS.forEach(t=>{
@@ -28929,7 +29015,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const t = e.target.closest('.hv-tab');
       if(!t || (e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Home' && e.key!=='End')) return;
       e.preventDefault(); e.stopPropagation();
-      const vis = HV_TABS.filter(x=> !(x==='notes' && hvNotesPinned()));
+      const vis = HV_TABS.filter(x=> !(x==='notes' && (hvNotesPinned() || hvNotesOff())));
       let i = vis.indexOf(t.id.slice(7));
       if(e.key==='ArrowLeft') i = (i-1+vis.length) % vis.length;
       else if(e.key==='ArrowRight') i = (i+1) % vis.length;
@@ -28938,7 +29024,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     const onMq = ()=>{
       if(hvTab==='notes' && hvNotesPinned()) hvSetTab('moves');
-      else if(HV_STATE && hvNotesPinned()) hvFire(hvPaneLs, 'notes');
+      else if(HV_STATE && hvNotesPinned() && !hvNotesOff()) hvFire(hvPaneLs, 'notes');
       if(HV_STATE) hvRenderEngineNow();
     };
     try{ hvMqPinned.addEventListener('change', onMq); }catch(e){ try{ hvMqPinned.addListener(onMq); }catch(e2){} }
@@ -29237,16 +29323,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // Three steady rows, updated in place (never rebuilt): a line keeps being
   // the same button while the engine deepens, so a click on it lands.
   function hvRenderLines(){
-    const S = HV_STATE, box = document.getElementById('hv-eng-lines');
+    const S = HV_STATE, box = document.getElementById('hv-eng-lines'), note = document.getElementById('hv-eng-hidden');
     const n = S.cur;
     const show = S.std && hvPrefs.engine && hve.state!=='failed' && !hvTerminal(n);
-    const fa = document.activeElement, fIn = !!(fa && box.contains(fa));
-    box.hidden = !show;
+    const fa = document.activeElement, fIn = !!(fa && box.contains(fa)), fNote = !!(fa && note.contains(fa));
+    // E hides the rows (they keep updating out of sight) and shows the note
+    box.hidden = !show || hvPrefs.hide;
+    note.hidden = !show || !hvPrefs.hide;
     if(!show){
       box.textContent = '';
-      if(fIn) try{ document.getElementById('hv-eng-toggle').focus({ preventScroll:true }); }catch(e){}
+      if(fIn || fNote) try{ document.getElementById('hv-eng-toggle').focus({ preventScroll:true }); }catch(e){}
       return;
     }
+    if(fIn && hvPrefs.hide) try{ document.getElementById('hv-eng-show').focus({ preventScroll:true }); }catch(e){}
     const c = hvLiveFor(n);
     const rows = [];
     for(let k=1;k<=3;k++){
@@ -29287,10 +29376,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       b.setAttribute('aria-label', 'Line '+l.multipv+(on ? ' ('+HV_ARROW_HUES[l.multipv-1]+' arrow)' : '')+', '+sc+': '+pv+'. Play the first move.');
     });
     if(fIn && !fa.isConnected && box.firstElementChild) try{ box.firstElementChild.focus({ preventScroll:true }); }catch(e){}
+    if(fNote && !hvPrefs.hide && box.firstElementChild) try{ box.firstElementChild.focus({ preventScroll:true }); }catch(e){}
   }
   document.getElementById('hv-eng-lines').addEventListener('click', (e)=>{
     const b = e.target.closest('.hv-eng-line[data-uci]');
-    if(!b || !HV_STATE || b.dataset.fen4!==HV_STATE.cur.fen4) return;
+    if(!b || !HV_STATE || hvPrefs.hide || b.dataset.fen4!==HV_STATE.cur.fen4) return;
     const n = hvPlay(HV_STATE.cur, b.dataset.uci);
     if(n){ hvGoNode(n, { sound:true }); hvRevealBoard(); }
   });
@@ -29302,6 +29392,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function hvBestLine(){ return hvEngLine(1); }
   function hvPlayBest(){
+    // with the suggested moves hidden, Space doesn't give the best one away
+    if(hvPrefs.hide && HV_STATE && HV_STATE.std && hvPrefs.engine && !hvTerminal(HV_STATE.cur)){ hvSay('Suggested moves are hidden. Press E to show them.'); return; }
     const l = hvBestLine();
     if(!l) return;
     const n = hvPlay(HV_STATE.cur, l.firstUci);
@@ -29396,7 +29488,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // Repertoire Lab's engine arrows: the best move green, the 2nd blue, the
   // 3rd amber (three hues, so three candidates don't read as one plan),
-  // each switched on its own from the cog. Thinner than a user arrow (70%
+  // each switched on its own from the cog or with 1, 2, 3 (none while E
+  // hides the suggested moves). Thinner than a user arrow (70%
   // of its shaft) and translucent, with a light halo: never mistaken for
   // one. Drawn 3rd, 2nd, best, so the best move's arrow is on top.
   const HV_ARROW_COLORS = ['rgb(56,176,120)', 'rgb(59,132,235)', 'rgb(226,142,46)'];
@@ -29405,7 +29498,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvDrawEngArrow(){
     while(hvEngSvg.firstChild) hvEngSvg.removeChild(hvEngSvg.firstChild);
     const S = HV_STATE;
-    if(!S) return;
+    if(!S || hvPrefs.hide) return;
     const cx = (i)=>{ const c = i%8; return (S.flipped ? 7-c : c) + 0.5; };
     const cy = (i)=>{ const r = Math.floor(i/8); return (S.flipped ? r : 7-r) + 0.5; };
     const shaft = 0.26*0.7;
@@ -29426,7 +29519,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       hvEngSvg.appendChild(g);
     }
   }
-  // ---- the cog: which engine arrows to draw ----
+  // ---- the cog: which engine arrows to draw, and E's "Hide suggested moves" ----
   function hvArrowMenuOpen(){
     hvMenuClose();
     const S = HV_STATE, btn = document.getElementById('hv-eng-arrow'), card = document.getElementById('hv-engine');
@@ -29436,21 +29529,37 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     el.setAttribute('role', 'group');
     el.setAttribute('aria-label', 'Engine arrows');
     el.appendChild(hvEl('div', 'hv-pop-head', 'Engine arrows'));
+    const cap = (k)=>{ const c = hvEl('span', 'kbd', k); c.setAttribute('aria-hidden', 'true'); return c; };   // the box says it with aria-keyshortcuts
     HV_ARROW_NAMES.forEach((name, i)=>{
       const row = hvEl('label', 'hv-pop-check');
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.checked = !!hvPrefs.arrows[i];
       cb.dataset.k = String(i+1);
+      cb.setAttribute('aria-keyshortcuts', String(i+1));
       cb.addEventListener('change', ()=>{
         hvPrefs.arrows[i] = cb.checked; hvSavePrefs();
         hvRenderEngineNow();
       });
       const dot = hvEl('span', 'hv-arrow-dot');
       dot.style.background = HV_ARROW_COLORS[i];
-      row.appendChild(cb); row.appendChild(dot); row.appendChild(hvEl('span', '', name));
+      row.appendChild(cb); row.appendChild(dot); row.appendChild(hvEl('span', 'hv-pop-name', name)); row.appendChild(cap(String(i+1)));
       el.appendChild(row);
     });
+    // E's switch, set apart: while it's ticked, the boxes above only choose
+    // which arrows come back.
+    const sep = hvEl('div', 'hv-pop-sep');
+    sep.setAttribute('role', 'separator');
+    el.appendChild(sep);
+    const hideRow = hvEl('label', 'hv-pop-check hv-pop-hide');
+    const hb = document.createElement('input');
+    hb.type = 'checkbox';
+    hb.id = 'hv-pop-hide';
+    hb.checked = !!hvPrefs.hide;
+    hb.setAttribute('aria-keyshortcuts', 'E');
+    hb.addEventListener('change', ()=> hvSetHide(hb.checked, true));
+    hideRow.appendChild(hb); hideRow.appendChild(hvEl('span', 'hv-pop-name', 'Hide suggested moves')); hideRow.appendChild(cap('E'));
+    el.appendChild(hideRow);
     card.appendChild(el);
     el.style.top = (btn.offsetTop + btn.offsetHeight + 6)+'px';
     const outside = (e)=>{ if(!el.contains(e.target) && !btn.contains(e.target)) hvMenuClose(); };
@@ -29460,9 +29569,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     el.addEventListener('keydown', (e)=>{
       const boxes = [...el.querySelectorAll('input')];
       const i = boxes.indexOf(document.activeElement);
+      const ak = hvArrowKeyOf(e);
       if(e.key==='ArrowDown'){ e.preventDefault(); e.stopPropagation(); boxes[(i+1) % boxes.length].focus(); }
       else if(e.key==='ArrowUp'){ e.preventDefault(); e.stopPropagation(); boxes[(i-1+boxes.length) % boxes.length].focus(); }
       else if(e.key==='Tab' && ((e.shiftKey && i===0) || (!e.shiftKey && i===boxes.length-1))){ hvMenuClose(); }
+      // the keys it shows work in it too, as they do on the rest of the screen
+      else if((ak || e.key==='e' || e.key==='E') && !e.ctrlKey && !e.metaKey && !e.altKey){
+        e.preventDefault(); e.stopPropagation();
+        if(!e.repeat){ if(ak) hvToggleArrow(ak); else hvToggleHide(); }
+      }
     });
     try{ el.querySelector('input').focus({ preventScroll:true }); }catch(e){}
   }
@@ -29480,8 +29595,52 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     } else if(hve.owner!=='review' && hve.state!=='off') hve.quit();
     hvRenderEngineNow();
   }
+  // ---- keys 1 / 2 / 3 (the arrows) and E (hide the suggested moves) ----
+  // The same prefs as the cog. They need the engine on: with it off they
+  // change nothing and say why.
+  function hvEngKeyBlocked(){
+    if(!HV_STATE) return true;
+    if(!HV_STATE.std){ hvSay('The engine works for standard chess games only.'); return true; }
+    if(!hvPrefs.engine){ hvSay('The engine is off \u2014 press L to turn it on.'); return true; }
+    return false;
+  }
+  // While E hides them, 1 / 2 / 3 brings the suggested moves back with that
+  // arrow on (a toggle there would show nothing).
+  function hvToggleArrow(k){
+    if(hvEngKeyBlocked()) return;
+    const back = hvPrefs.hide, i = k-1;
+    if(back){ hvPrefs.hide = false; hvPrefs.arrows[i] = true; }
+    else hvPrefs.arrows[i] = !hvPrefs.arrows[i];
+    hvSavePrefs();
+    hvSyncArrowPop();
+    hvRenderEngineNow();
+    hvSay((back ? 'Suggested moves shown. ' : '')+HV_ARROW_NAMES[i]+' arrow '+(hvPrefs.arrows[i] ? 'on' : 'off'));
+  }
+  function hvToggleHide(){
+    if(hvEngKeyBlocked()) return;
+    hvSetHide(!hvPrefs.hide);
+  }
+  // The engine keeps running: the eval bar, its number and the depth go on.
+  // quiet: from the pop-up's box, which a screen reader already reads out.
+  function hvSetHide(on, quiet){
+    hvPrefs.hide = !!on;
+    hvSavePrefs();
+    hvSyncArrowPop();
+    hvRenderEngineNow();
+    if(!quiet) hvSay(on ? 'Suggested moves hidden. Press E to show them.' : 'Suggested moves shown');
+  }
+  // an open cog pop-up reads its boxes only when it opens
+  function hvSyncArrowPop(){
+    const el = hvMenu && hvMenu.kind==='arrows' ? hvMenu.el : null;
+    if(!el) return;
+    el.querySelectorAll('input[data-k]').forEach(cb=>{ cb.checked = !!hvPrefs.arrows[Number(cb.dataset.k)-1]; });
+    const hb = el.querySelector('#hv-pop-hide');
+    if(hb) hb.checked = !!hvPrefs.hide;
+  }
+  document.getElementById('hv-eng-show').addEventListener('click', ()=>{ if(HV_STATE) hvSetHide(false); });
 
   // ---- opening a game ----
+  // opts: at ({ply} or {line}: where it opens), flip (which way up; else your side at the bottom)
   function hvOpen(game, username, opts){
     opts = opts || {};
     try{ hvNoteFlush(); }catch(e){}      // the previous game's note, if one was open
@@ -29495,19 +29654,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const me = knowMe ? ghMyColor(game, username) : null;
     const P = game.players || {};
     HV_STATE = { game, username: username || null, me, std: ghIsStd(game), tree, root: tree.root, nodes: tree.nodes, main: tree.main,
-      cur: tree.root, flipped: me==='black', whiteName: ghOppName(P.white), blackName: ghOppName(P.black),
+      cur: tree.root, flipped: opts.flip!=null ? !!opts.flip : me==='black', whiteName: ghOppName(P.white), blackName: ghOppName(P.black),
       plyStates: tree.plyStates, sanMoves: tree.sanMoves, review: null };
     hvSelected = null;
     marksHv = hvMarksOf(tree.root);
+    hvModeUi();
     hvFire(hvGameLs, HV_STATE);
     hvRenderHead();
     hvNoteLoad(game);
     hvBuildLabels();
+    if(!game._puzzle && hvTabAway){ if(hvTab==='moves') hvTab = hvTabAway; hvTabAway = null; }
     hvSetTab(hvTab, { silent:true });
     hvGoNode(tree.root);
     if(opts.at) hvGoRef(opts.at);
     hvFire(hvPaneLs, hvTab);
-    if(hvNotesPinned() && hvTab!=='notes') hvFire(hvPaneLs, 'notes');
+    if(hvNotesPinned() && hvTab!=='notes' && !hvNotesOff()) hvFire(hvPaneLs, 'notes');
   }
   document.getElementById('hv-start').addEventListener('click', ()=>{ if(HV_STATE) hvGoNode(HV_STATE.root); });
   document.getElementById('hv-prev').addEventListener('click', ()=> hvStep(-1));
@@ -29533,6 +29694,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     btn.textContent = ok ? 'Copied' : 'Couldn\u2019t copy';
     btn._t = setTimeout(()=>{ btn.textContent = 'Copy PGN'; }, 1600);
   });
+  // 1, 2 or 3 (0 for any other key): by the digit typed, or by the key's
+  // place on the top row or the keypad, so AZERTY (whose top row types
+  // symbols and accents unshifted) works too. Keypad keys with Num Lock off
+  // are End, the arrows and so on, and stay those.
+  function hvArrowKeyOf(e){
+    if(e.key==='1' || e.key==='2' || e.key==='3') return Number(e.key);
+    const m = /^(?:Digit|Numpad)([123])$/.exec(e.code || '');
+    return m && e.key && e.key.length===1 ? Number(m[1]) : 0;
+  }
   document.addEventListener('keydown', (e)=>{
     if(!HV_STATE || !hvViewActive()) return;
     if(document.querySelector('.modal-overlay.active')) return;   // Settings or a dialog has the keys
@@ -29552,11 +29722,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else if(k==='End' || k==='ArrowDown'){ e.preventDefault(); hvGoNode(hvLineEnd(HV_STATE.cur)); }
     else if(k==='x' || k==='X'){ e.preventDefault(); hvFlip(); }
     else if(k==='l' || k==='L'){ e.preventDefault(); hvToggleEngine(); }
+    else if(hvArrowKeyOf(e)){ e.preventDefault(); if(!e.repeat) hvToggleArrow(hvArrowKeyOf(e)); }
+    else if(k==='e' || k==='E'){ e.preventDefault(); if(!e.repeat) hvToggleHide(); }
     else if(k===' ' || k==='Spacebar'){
       if(tag==='BUTTON' || tag==='A') return;   // Space presses a focused button
       e.preventDefault(); hvPlayBest();
     }
-    else if(k==='Escape'){ e.preventDefault(); showView('history'); }
+    else if(k==='Escape'){ e.preventDefault(); if(HV_STATE.game._puzzle) pzaReturn(); else showView('history'); }
   });
   onLeavePlay(()=>{ try{ hvNoteFlush(); }catch(e){} });   // before HV_STATE goes
   onLeavePlay(()=>{
@@ -30690,6 +30862,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const SP_MAX_CHAPTERS = 64;
   let SP_PLAY = null;          // a practice run: { queue:[ids], index, label }
   let nextBoxAfterSave = null; // set by the Solved-it box: reopen it after the Save dialog
+  let nextBoxAfterAnalyze = null; // set by the Solved-it box: reopen it on coming back from Analyze
   let spLibDirty = true, spPassiveRender = false, spColFocus = null;
   let spArmedPid = null, spArmTimer = 0;
   let spOtherTabValue = null, spBackoffUntil = 0;
@@ -31271,6 +31444,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const play = spMake('button', 'btn btn-primary', 'Play');
     play.addEventListener('click', ()=> spPlayQueue(ids, index, spQueueLabel()));
     acts.appendChild(play);
+    const an = spMake('button', 'btn btn-ghost sp-analyze', 'Analyze');
+    an.setAttribute('aria-label', 'Analyze puzzle '+p.id);       // starts with the visible label
+    an.addEventListener('click', ()=> pzaFromSaved(p.id, an));
+    acts.appendChild(an);
     const edit = spMake('button', 'btn btn-ghost', 'Edit');
     edit.addEventListener('click', ()=> spOpenSave(p.id));
     acts.appendChild(edit);
@@ -34148,12 +34325,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var PH_KEY = 'wavyChessPrepPuzzleHistory';
   var PH_OUTS = ['solved','missed','viewed','skipped'];
   var PH_MAX = 200, PH_FULL = 30, PH_LEFT_MS = 864e5;
+  var PH_TRIES = 20, PH_TRY_RE = /^\d{1,2}:[a-h][1-8][a-h][1-8][qrbn]?$/;   // w: a live try's wrong moves, 'at:uci' (Analyze)
   var PH_FEN_RE = /^[1-8pnbrqkPNBRQK\/]+ [wb] /, PH_THEME_RE = /^[A-Za-z0-9]{1,30}$/;
   var PH_HIDE_THEMES = ['short','long','veryLong','oneMove','master','masterVsMaster','superGM'];
   var PH_ACT = phBlankAct('');      // Lichess activity, this visit only
   var phFetched = new Map();        // id -> spCleanPuzzle entry fetched by id this visit (cap 20)
   var phThumbCache = new Map(), phThumbOwner = null;   // apart from spThumbCache: a node lives in one place only
   var phFilter = { show:'all' }, phLimit = 40, phReturn = 'setup-puzzle', phDirty = false, phSaveTimer = 0, phStoreFull = false;
+  var phKeepLimit = 0;              // coming back from Analyze: the list as long as it was
   var phFocusKey = null;            // a focused control that came back disabled ("Loading..."), refocused once enabled
   var PH = null;                    // { v:1, dis:{id,at}|null, rows:[...] }, set at the end of this block
 
@@ -34176,6 +34355,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     ['pt','pc','pl'].forEach(k=>{ const n = Number(x[k]); if(isFinite(n) && n > 0) row[k] = n; });
     if(x.e){ const e = spCleanPuzzle(x.e); if(e && e.id===id && e.tokens.length) row.e = e; }
+    // the live try's wrong moves (this device only: never synced anywhere)
+    if(Array.isArray(x.w)){ const w = x.w.filter(s=> typeof s==='string' && PH_TRY_RE.test(s)).slice(0, PH_TRIES); if(w.length) row.w = w; }
     return row;
   }
   function phLoad(raw){
@@ -34208,6 +34389,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const keep = x.t > m.t ? Object.assign({}, x) : m, other = keep===m ? x : m;
       keep.out = keep.out || other.out || null;          // a result is never lost
       if(!keep.e && other.e) keep.e = other.e;
+      if(!keep.w && other.w) keep.w = other.w;
       ['pt','pc','pl'].forEach(k=>{ const n = Math.max(keep[k]||0, other[k]||0); if(n) keep[k] = n; });
       by.set(x.id, keep);
     });
@@ -34259,6 +34441,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(row.out) return;                                 // the first live result, as reported to Lichess
         row.out = clean ? 'solved' : roundPz.phRevealed ? 'viewed' : roundPz.failed ? 'missed' : 'skipped';
       }
+      phSaveSoon();
+    }catch(err){}
+  }
+  // A live wrong move (pzTryMove): the row keeps the try's wrong moves, for Analyze.
+  function phTries(r){
+    if(!PH || !r || r.replay) return;
+    try{
+      const row = PH.rows.find(x=> x.id===String(r.id)); if(!row) return;
+      row.w = r.tries.slice(0, PH_TRIES).map(t=> t.at+':'+t.uci).filter(s=> PH_TRY_RE.test(s));
       phSaveSoon();
     }catch(err){}
   }
@@ -34327,7 +34518,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   /* ---- Save a row (a logged one, or one only Lichess activity has) ---- */
-  var phSaveGen = 0;                // every Save tap and every change of screen; a Save still fetching checks it
+  var phSaveGen = 0;                // every Save or Analyze tap and every change of screen; one still fetching checks it
   async function phSave(row, btn){
     if(!PH || !row || btn.dataset.busy) return;
     const gen = ++phSaveGen;
@@ -34403,7 +34594,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const n = document.getElementById('ph-notice'); n.textContent = notice || ''; n.hidden = !notice;
     showView('puzzle-history');                                 // phShown() runs from showView
   }
-  function phShown(){ if(!PH) return; phLimit = 40; phRender(); phLoadActivity(false); }
+  function phShown(){ if(!PH) return; phLimit = phKeepLimit || 40; phKeepLimit = 0; phRender(); phLoadActivity(false); }
 
   // A local result wins; otherwise Lichess's (latest) result; otherwise
   // practiced, or not finished.
@@ -34458,6 +34649,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     play.type = 'button'; play.dataset.phKey = x.id+'|play';
     play.addEventListener('click', ()=> phReplay(x.id, 'Puzzle history'));
     acts.appendChild(play);
+    if(phStateOf(x)!=='open'){                               // finished ones only: Analyze shows the answer
+      const an = spMake('button', 'btn btn-ghost ph-analyze', 'Analyze');
+      an.type = 'button'; an.dataset.phKey = x.id+'|analyze';
+      an.setAttribute('aria-label', 'Analyze puzzle '+x.id);
+      an.addEventListener('click', ()=> pzaFromHistory(x, an));
+      acts.appendChild(an);
+    }
     const save = spMake('button', 'btn btn-ghost ph-save', spIsSaved(x.id) ? '\u2605 Saved' : '\u2606 Save');
     save.type = 'button'; save.dataset.phKey = x.id+'|save';
     save.addEventListener('click', ()=> phSave(x, save));
@@ -34795,6 +34993,182 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     btn.title = phShareMode() ? 'Share this puzzle' : 'Copy a link to this puzzle';
     btn.addEventListener('click', ()=>{ if(roundPz) phShare(String(roundPz.id), btn, document.querySelector('.pz-meta-card')); });
   })();
+
+  /* ================= ANALYZE A FINISHED PUZZLE =================
+     A finished puzzle (solved, missed, or its solution shown) opens on the
+     review's analysis board (hv*): from the Puzzles drill, live or practice
+     (the side panel and the Solved-it box), Puzzle Rush's result tiles,
+     Saved Puzzles and Puzzle History. Every place hands pzaOpen one shape:
+     the source game's moves through the opponent's setup move (tokens), the
+     solution (UCI), your wrong tries ({at: solution index, uci}), how it
+     went, the players, and where to come back to. The board gets a standard
+     game -- so the engine, the review and the explorer all work; it can't
+     start from a FEN -- opened at the puzzle position with your side at the
+     bottom, the solution as the main line and each try as a side line.
+     It only reads: nothing here reports to Lichess, counts a try or changes
+     a result, and the back link (or Escape) goes back to exactly where
+     Analyze was pressed. */
+  var PZA_OUT = { solved:['history-result-win','Solved'], solvedAfterMiss:['history-result-draw','Solved after a miss'],
+    missed:['history-result-loss','Missed'], viewed:['history-result-loss','Solution shown'], skipped:['history-result-loss','Skipped'],
+    practiced:['history-result-draw','Practiced'] };
+  var PZA_BACK = { 'play-puzzle':'Puzzle', 'play-rush':'Puzzle Rush', saved:'Saved puzzles', 'puzzle-history':'Puzzle history' };
+  var PZA_BAD = 'This puzzle\u2019s moves don\u2019t replay here, so it can\u2019t open on the board.';
+  // h = { id, tokens, solution, tries, outcome (a PZA_OUT key), rating, themes,
+  // players (spCleanPlayers), ret: { view, y, top, focus, box, inner, limit } }.
+  // '' once the board is open, else why it couldn't (the caller says so).
+  function pzaOpen(h){
+    if(!h || !/^\w{5}$/.test(String(h.id || ''))) return PZA_BAD;
+    const id = String(h.id), tokens = (h.tokens || []).map(String), sol = (h.solution || []).map(String);
+    const ret = h.ret || {};
+    // the solution as SAN from the puzzle position (spSolutionSan, without the numbers)
+    const sans = [];
+    let solver = 'w';
+    try{
+      let st = pzReplayPGNWithStates(tokens).state;
+      solver = st.turn;
+      sol.forEach(u=>{ const b = st, r = pzApplyUCI(st, u); sans.push(pzMoveToSAN(b, r.move, r.next)); st = r.next; });
+    }catch(e){ return PZA_BAD; }
+    const moves = tokens.concat(sans);
+    // the board's own replay must read every move: it stops quietly at the first it can't
+    if(!tokens.length || !sans.length || hvBuildPlyStates(moves, pzStartPosition()).sanMoves.length !== moves.length) return PZA_BAD;
+    const side = (c)=>{
+      const p = (h.players || []).find(x=> x && x.color===c) || {};
+      return { user:{ name: p.name && p.name!=='?' ? String(p.name) : (c==='white' ? 'White' : 'Black'), title:p.title || '' }, rating: p.rating!=null ? p.rating : null };
+    };
+    // Never the source game's id: notes and reviews would land on a stranger's game.
+    const game = { id:'pz-'+id, variant:'standard', moves:moves.join(' '), players:{ white:side('white'), black:side('black') },
+      _puzzle:{ id, outcome: PZA_OUT[h.outcome] ? h.outcome : null, rating:Number(h.rating) || 0, themes:(h.themes || []).filter(t=> typeof t==='string'),
+        view: PZA_BACK[ret.view] ? ret.view : 'menu', back: PZA_BACK[ret.view] || 'All drills', ret } };
+    hvOpen(game, null, { at:{ ply:tokens.length }, flip: solver==='b' });
+    if(!HV_STATE || HV_STATE.main.length !== moves.length){ pzaReturn(); return PZA_BAD; }
+    let added = false;
+    (h.tries || []).slice(0, 20).forEach(t=>{
+      const at = Number(t && t.at);
+      if(Number.isInteger(at) && at >= 0 && at < sol.length && hvNodeFromRef({ line:[tokens.length + at, String(t.uci)] })) added = true;
+    });
+    if(added) hvRenderMoveList();
+    return '';
+  }
+  // Back where Analyze was pressed: the finished puzzle as it was (its box
+  // too, if Analyze came from there), the Rush results, or the Saved / History
+  // list at the same place and length; the focus on the same Analyze.
+  function pzaReturn(){
+    const Z = HV_STATE ? HV_STATE.game._puzzle : null;
+    if(!Z){ showView('history'); return; }
+    const r = Z.ret, view = Z.view;
+    if(view==='puzzle-history') phKeepLimit = r.limit || 0;
+    showView(view);
+    const box = view==='play-puzzle' && !!roundPz && String(roundPz.id)===Z.id && !!nextBoxAfterAnalyze && nextBoxAfterAnalyze();
+    const put = ()=>{
+      if(currentView!==view) return;
+      if(r.inner!=null){ const t = document.getElementById('rush-tiles'); if(t) t.scrollTop = r.inner; }
+      const el = r.focus ? document.querySelector(r.focus) : null;
+      // a list's button back where it was on screen (its cards settle their size as they come into view), else the page
+      if(el && r.top!=null) window.scrollTo({ top:Math.max(0, window.scrollY + el.getBoundingClientRect().top - r.top) });
+      else if(r.y!=null) window.scrollTo({ top:r.y });
+      if(el && !box) try{ el.focus({ preventScroll:true }); }catch(e){}
+    };
+    put();
+    requestAnimationFrame(put);
+  }
+  // The Puzzles drill once the puzzle is done (live or practice): from the
+  // side panel, or from the Solved-it box (box: it's there again on returning).
+  function pzaFromRound(box){
+    const r = roundPz;
+    if(!r || !r.done) return;
+    const why = pzaOpen({ id:r.id, tokens:r.tokens, solution:r.solution, tries:r.tries,
+      outcome: !r.failed ? 'solved' : r.phRevealed ? 'viewed' : 'solvedAfterMiss',
+      rating:r.rating, themes:r.themes, players:spCleanPlayers(r.players),
+      ret:{ view:'play-puzzle', y:window.scrollY, box:!!box, focus:'#pz-analyze' } });
+    if(why) pzStatusEl.textContent = 'Couldn\u2019t open this puzzle on the board.';
+  }
+  // Puzzle Rush, after the run: a result tile. Rush fetches without the
+  // players or themes, so the board shows White and Black.
+  function pzaFromRush(i){
+    const run = runRush, a = run && run.attempts[i];
+    if(!a || run.live || !a.entry) return;
+    const tiles = document.getElementById('rush-tiles');
+    const why = pzaOpen({ id:a.id, tokens:a.entry.tokens, solution:a.entry.solution, tries:a.miss ? [a.miss] : [],
+      outcome:a.ok ? 'solved' : 'missed', rating:a.rating, themes:[], players:[],
+      ret:{ view:'play-rush', y:window.scrollY, inner:tiles.scrollTop, focus:'#rush-tiles .rush-tile[data-i="'+i+'"]' } });
+    if(why) document.getElementById('rush-tiles-hint').textContent = why;
+  }
+  // Saved Puzzles: a card's Analyze. One saved on another device has no moves
+  // until Lichess fills them in (the public call its first practice makes);
+  // the wrong tries come from its Puzzle History row, if it has one.
+  async function pzaFromSaved(id, btn){
+    let p = SP.puzzles[id];
+    if(!p || btn.dataset.busy) return;
+    const gen = ++phSaveGen, sel = '#saved-list .saved-card[data-pid="'+id+'"] .sp-analyze';
+    if(!p.tokens.length){
+      pzaBusy(btn, true);
+      const ok = await spHydrateOne(id);
+      pzaBusy(btn, false);
+      if(ok){ spPersist(); spLibDirty = true; }
+      if(gen!==phSaveGen || currentView!=='saved') return;           // moved on while it fetched
+      btn = document.querySelector(sel) || btn;                       // a sync may have redrawn the list
+      p = SP.puzzles[id];
+      if(!ok || !p || !p.tokens.length) return pzaNote(btn, 'Couldn\u2019t load this puzzle\u2019s moves from Lichess. Check the connection and try again.');
+    }
+    const why = pzaOpen({ id, tokens:p.tokens, solution:p.solution, tries:pzaTries(phFind(id)),
+      outcome: p.firstTry || (p.practice.tries ? 'practiced' : null), rating:p.rating, themes:p.themes, players:p.players,
+      ret:pzaListRet('saved', btn, sel) });
+    if(why) pzaNote(btn, why);
+  }
+  // Puzzle History: a finished card's Analyze. The moves: the saved copy,
+  // then the logged ones, then Lichess's public by-id call (kept this visit).
+  async function pzaFromHistory(x, btn){
+    if(!PH || btn.dataset.busy) return;
+    const gen = ++phSaveGen, sel = '#ph-list [data-ph-key="'+x.id+'|analyze"]';
+    const sp = SP.puzzles[x.id];
+    let e = (sp && sp.tokens.length) ? sp : phEntry(x.id);
+    if(!e){
+      pzaBusy(btn, true);
+      const res = await phFetchEntry(x.id);
+      pzaBusy(btn, false);
+      if(gen!==phSaveGen || currentView!=='puzzle-history') return;
+      btn = document.querySelector(sel) || btn;
+      e = res.entry || null;
+      if(!e){ const m = PH_FETCH_MSG[res.why] || PH_FETCH_MSG.net; return pzaNote(btn, m[0].replace('#ID', '#'+x.id)+' '+m[1]); }
+    }
+    const why = pzaOpen({ id:x.id, tokens:e.tokens, solution:e.solution, tries:pzaTries(phFind(x.id)), outcome:phStateOf(x),
+      rating:e.rating || x.r, themes:e.themes.length ? e.themes : x.th, players:e.players, ret:pzaListRet('puzzle-history', btn, sel) });
+    if(why) pzaNote(btn, why);
+  }
+  // A History row's wrong moves ('at:uci') as tries.
+  function pzaTries(row){
+    return ((row && row.w) || []).map(s=>{ const m = /^(\d+):(\w+)$/.exec(s); return m ? { at:Number(m[1]), uci:m[2] } : null; }).filter(Boolean);
+  }
+  // Where a list card's Analyze comes back to: the page, the button's place on screen, the list's length.
+  function pzaListRet(view, btn, focus){
+    return { view, y:window.scrollY, top:btn.getBoundingClientRect().top, focus, limit: view==='puzzle-history' ? phLimit : 0 };
+  }
+  // Fetching first: the button says so and keeps the focus (it isn't disabled).
+  function pzaBusy(btn, on){
+    if(on){ btn.dataset.busy = '1'; btn.setAttribute('aria-busy', 'true'); btn.dataset.label = btn.textContent; btn.textContent = 'Loading\u2026'; return; }
+    delete btn.dataset.busy; btn.removeAttribute('aria-busy');
+    if(btn.dataset.label!=null){ btn.textContent = btn.dataset.label; delete btn.dataset.label; }
+  }
+  // Why it didn't open, under the card's buttons (gone with the next redraw).
+  function pzaNote(btn, text){
+    const main = btn && btn.closest('.saved-main');
+    if(!main) return;
+    let n = main.querySelector('.pza-note');
+    if(!n){ n = spMake('div', 'saved-practice pza-note'); n.setAttribute('role', 'alert'); main.appendChild(n); }
+    n.textContent = text;
+  }
+  document.getElementById('pz-analyze').addEventListener('click', ()=> pzaFromRound(false));
+  // The board's back link goes back the same way while a puzzle is open
+  // (capture phase: ahead of its own data-nav listener, which it then stops).
+  (function(){
+    const back = document.querySelector('#view-play-history .back-link');
+    document.addEventListener('click', (e)=>{
+      if(!back.contains(e.target) || !HV_STATE || !HV_STATE.game._puzzle) return;
+      e.preventDefault();
+      e.stopPropagation();
+      pzaReturn();
+    }, true);
+  })();
   phRenderLeft();
 
   annoMountLabels();
@@ -34984,6 +35358,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const settingsBtn = document.getElementById('next-settings');
     const saveBtn = document.getElementById('next-save');
     const linkBtn = document.getElementById('next-link');
+    const analyzeBtn = document.getElementById('next-analyze');
     const BANNERS = ['result-banner', 'knight-result-banner', 'checks-result-banner', 'pz-result-banner', 'wl-result-banner', 'wl-step-banner', 'sb-result-banner', 'sb-step-banner']
       .map(id => document.getElementById(id)).filter(Boolean);
     // dismissed: the banner whose box was closed to look at the board, so it
@@ -34994,6 +35369,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let afterSave = null;
     const saveOv = document.getElementById('save-overlay');
     nextBoxAfterSave = () => { const b = afterSave; afterSave = null; if(b && shown(b) && dismissed !== b) open(b); };
+    // afterAnalyze: the banner whose box made way for the analysis board. On
+    // coming back (pzaReturn) the box is there again, focus on Analyze; one
+    // that was about to open opens, one closed to look at the board stays
+    // closed. True when it opened.
+    let afterAnalyze = null;
+    nextBoxAfterAnalyze = () => {
+      const b = afterAnalyze || document.getElementById('pz-result-banner'), mine = !!afterAnalyze;
+      afterAnalyze = null;
+      if(!b || !shown(b) || dismissed === b) return false;
+      open(b);
+      returnFocus = document.getElementById('pz-analyze');
+      if(mine) analyzeBtn.focus({ preventScroll:true });
+      return true;
+    };
     // A box-only banner (data-box-only, never drawn) counts as shown while
     // its display says so and its view is on screen.
     const shown = el => el.style.display !== 'none'
@@ -35018,6 +35407,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(isPuzzle) saveBtn.innerHTML = spIsSaved(String(roundPz.id)) ? '&#9733; Saved' : '&#9734; Save puzzle';
       linkBtn.style.display = isPuzzle ? '' : 'none';
       if(isPuzzle) linkBtn.textContent = phShareMode() ? 'Share puzzle' : 'Copy link';
+      analyzeBtn.style.display = isPuzzle && roundPz.done ? '' : 'none';     // never Whose Line or Static Boards
       current = banner;
       returnFocus = document.activeElement;
       overlay.classList.add('active');
@@ -35043,6 +35433,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     saveBtn.addEventListener('click', () => { afterSave = current; close(); spOpenSave(); });
     // Copy (or share) a link to the puzzle; the box stays open.
     linkBtn.addEventListener('click', () => { if(roundPz) phShare(String(roundPz.id), linkBtn, linkBtn.closest('.next-card')); });
+    // Analyze: the box steps aside for the analysis board, and is back on returning.
+    analyzeBtn.addEventListener('click', () => { afterAnalyze = current; close(); pzaFromRound(true); });
     settingsBtn.addEventListener('click', () => act('settings'));
     const review = () => { dismissed = current; close(); };
     reviewBtn.addEventListener('click', review);
@@ -35052,7 +35444,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(e.key === 'Escape'){ e.preventDefault(); review(); }
       // Enter on a box button (or in the copy-by-hand link field) is that
       // control's own; anywhere else it's Next.
-      else if(e.key === 'Enter' && ![reviewBtn, settingsBtn, saveBtn, linkBtn].includes(document.activeElement)
+      else if(e.key === 'Enter' && ![reviewBtn, settingsBtn, saveBtn, linkBtn, analyzeBtn].includes(document.activeElement)
               && !(document.activeElement && document.activeElement.classList.contains('ph-url'))){
         e.preventDefault();
         // data-fresh-enter: an Enter still held from the press before the
@@ -35082,6 +35474,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       current = null;
       dismissed = null;
       afterSave = null;
+      afterAnalyze = null;
     });
     BANNERS.forEach(b => watch.observe(b, { attributes:true, attributeFilter:['style'] }));
   })();
