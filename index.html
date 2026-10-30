@@ -3427,6 +3427,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ghp-board .sq{ position:relative; display:flex; align-items:center; justify-content:center; padding:0; border:0; margin:0; cursor:pointer; font:inherit; }
   .ghp-board .sq:focus-visible{ outline:3px solid var(--focus); outline-offset:-3px; z-index:1; }
   .ghp-board .sq.ghp-sel{ box-shadow:inset 0 0 0 3px var(--brass); }
+  #ghp-palette .ghp-tool[data-tool$="K"], #ghp-palette .ghp-tool[data-tool$="Q"], #ghp-palette .ghp-tool[data-tool$="R"], #ghp-palette .ghp-tool[data-tool$="B"],
+  #ghp-palette .ghp-tool[data-tool$="N"], #ghp-palette .ghp-tool[data-tool$="P"]{ touch-action:none; cursor:grab; }      /* a tray piece can be dragged */
+  .ghp-board.ghp-drop-off{ outline:2px dashed var(--ink-soft); outline-offset:3px; }      /* let go here: the piece comes off */
   .ghp-board .ghp-coord{ position:absolute; font:700 9px/1 "JetBrains Mono",monospace; opacity:.6; pointer-events:none; }
   .ghp-board .ghp-coord.f{ right:2px; bottom:1px; } .ghp-board .ghp-coord.r{ left:2px; top:2px; }
   .ghp-palette{ display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px; }
@@ -4287,6 +4290,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   :root[data-skin="bauhaus"] .wrap.play-mode .hv-boardcol > .back-link{ border-radius:0; }
   .hv-side{ display:flex; flex-direction:column; gap:10px; min-width:0; }
   .hv-sidecol{ display:contents; }
+  #view-play-history .hv-card-off{ display:none !important; }      /* turned off in Settings (Analysis board cards) */
+  /* the tabs turned off but Notes on, below three columns (where Notes is a tab or pinned in the
+     tabs card): the card stays, holding Notes alone */
+  #view-play-history #hv-tabs.hv-card-off:has(> #hv-pane-notes:not([hidden])){ display:flex !important; }
+  #view-play-history #hv-tabs.hv-card-off > .hv-tablist, #view-play-history #hv-tabs.hv-card-off > .hv-pane:not(#hv-pane-notes){ display:none !important; }
+  #view-play-history #hv-tabs.hv-card-off > #hv-pane-notes:not([hidden]){ display:flex; flex-direction:column; flex:1 1 auto; height:auto; border-top:0; }
   /* hidden while empty: holding Notes across a resize, it stays rendered
      until hvPlaceNotes moves it, so a note being typed keeps the focus */
   .hv-notes-card:not(:has(> #hv-pane-notes)){ display:none; }
@@ -4582,6 +4591,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .wrap.play-mode .hv-boardcol > .back-link{ margin-left:max(0px, calc(44px - var(--fab-gutter))); }
     #hv-row-top{ padding-left:max(12px, calc(56px - var(--fab-gutter))); }
     #hv-head{ padding-right:max(14px, calc(60px - var(--fab-gutter))); }
+    /* the header turned off: the card on top drops below the settings button while the gutter can't clear it */
+    .hv-side:has(> .hv-sidecol-review > #hv-head.hv-card-off){ padding-top:clamp(0px, calc((36px - var(--fab-gutter)) * 100), 50px); }
   }
   /* Notes stay in view under the active tab when there's room for both:
      from 950px tall the tab above keeps about 300px (header and engine
@@ -4642,6 +4653,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .hv-sidecol-review:has(> #hpf:not([hidden])) > #hv-head{ flex:1 1 0; min-height:96px; }
     #hpf{ flex:0 1 auto; min-height:0; overflow:auto; }
     #hpf > *{ flex-shrink:0; }       /* the card scrolls; the field keeps its shape */
+    /* with the header turned off, Notes takes the room */
+    .hv-sidecol-review:has(> #hv-head.hv-card-off) > .hv-notes-card{ flex:1 1 auto; }
     .hv-opx-toggle{ display:none; }
     .hv-opx .hv-opx-body{ display:flex; }
     #hv-tab-notes{ display:none; }
@@ -6117,6 +6130,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <input type="file" id="bg-file" accept="image/*" style="display:none;">
     </div>
 
+    <div class="field" id="hvcards-field">
+      <div class="field-label" id="hvcards-label">Analysis board cards</div>
+      <div class="toggle-row hvcards-row" id="hvcards-row" role="group" aria-labelledby="hvcards-label">
+        <button type="button" class="toggle active" data-card="head" aria-pressed="true">Game review</button>
+        <button type="button" class="toggle active" data-card="phase" aria-pressed="true">Phase of the game</button>
+        <button type="button" class="toggle active" data-card="notes" aria-pressed="true">Notes</button>
+        <button type="button" class="toggle active" data-card="engine" aria-pressed="true">Engine</button>
+        <button type="button" class="toggle active" data-card="tabs" aria-pressed="true">Moves &#183; Review &#183; Explorer</button>
+      </div>
+      <div class="field-hint">The cards around the board when you review a game. Turn one off to hide it; the cards left in its column take its room. With the Engine card off the engine still runs when it&#8217;s on (L turns it on or off).</div>
+    </div>
+
     <div class="modal-sep"></div>
 
     <div class="field">
@@ -6453,7 +6478,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="ghp-controls">
           <div>
             <div class="eyebrow">Find by position</div>
-            <p class="ghp-hint">Set up a position: pick a piece and tap squares to place it, or Move and tap a piece, then a square. Right-click (or Erase) takes one off.</p>
+            <p class="ghp-hint">Set up a position: drag pieces from the tray onto the board and around it; drag one off the board to take it off. Or pick a piece and tap squares; right-click (or Erase) takes one off.</p>
           </div>
           <div class="ghp-tools">
             <button type="button" class="btn btn-ghost" id="ghp-start">Start position</button>
@@ -26725,7 +26750,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     [...bd.children].forEach((el, k)=>{
       const row = Math.floor(k/8), col = k % 8;
       const r = GHP.flip ? row : 7 - row, c = GHP.flip ? 7 - col : col, i = r*8 + c, p = GHP.board[i];
-      el.className = 'sq '+((r + c) % 2===0 ? 'dark' : 'light')+(GHP.sel===i ? ' ghp-sel' : '');
+      el.className = 'sq '+((r + c) % 2===0 ? 'dark' : 'light')+(GHP.sel===i ? ' ghp-sel' : '')+(p ? ' draggable' : '')
+        +(el.classList.contains('dragging-from') ? ' dragging-from' : '')+(el.classList.contains('drag-over') ? ' drag-over' : '');     // a redraw mid-drag (a search ending) keeps the drag's look
       el.dataset.idx = i;
       const sig = p+'|'+(col===0 ? r : '')+'|'+(row===7 ? c : '');
       if(el.dataset.sig!==sig || el.dataset.set!==ghpSetKey()){
@@ -26902,6 +26928,91 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ghp-mode').addEventListener('click', (e)=>{ const b = e.target.closest('.toggle'); if(!b) return; GHP.mode = b.dataset.val; ghpDraw(); if(GHP.q) ghpSearch(); });
     document.getElementById('ghp-color').addEventListener('click', (e)=>{ const b = e.target.closest('.toggle'); if(!b) return; GHP.color = b.dataset.val; ghpDraw(); if(GHP.q) ghpSearch(); });
     document.getElementById('ghp-go').addEventListener('click', ()=>{ if(ghpCanSearch()) ghpSearch(); });
+  })();
+  // Drag a piece (as the Static Boards tray): from the tray onto a square, from one square to
+  // another, or off the board to take it off. A tap still picks, places and erases as before.
+  (function(){
+    const SLOP = 4, sec = document.getElementById('ghp'), bd = document.getElementById('ghp-board'), pal = document.getElementById('ghp-palette');
+    let drag = null, raf = null, X = 0, Y = 0, justEnded = false;
+    function target(x, y){
+      const el = document.elementFromPoint(x, y), sq = el && el.closest ? el.closest('.sq') : null;
+      if(sq && bd.contains(sq)) return { kind:'sq', i:Number(sq.dataset.idx), el:sq };
+      const r = bd.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom ? { kind:'frame' } : { kind:'off' };
+    }
+    sec.addEventListener('pointerdown', (e)=>{
+      if(drag || !e.isPrimary || (e.pointerType==='mouse' && e.button!==0)) return;
+      const tool = e.target.closest && e.target.closest('.ghp-tool'), sq = e.target.closest && e.target.closest('.sq');
+      let d = null;
+      if(tool && pal.contains(tool) && GHP_CODES[tool.dataset.tool]) d = { from:'tray', k:tool.dataset.tool, el:tool };
+      else if(sq && bd.contains(sq) && GHP.board[Number(sq.dataset.idx)]) d = { from:'sq', i:Number(sq.dataset.idx), k:GHP.board[Number(sq.dataset.idx)], el:sq };
+      if(d) drag = Object.assign(d, { id:e.pointerId, x0:e.clientX, y0:e.clientY, started:false, ghost:null, size:0 });
+    }, { capture:true, passive:true });
+    function begin(d){
+      d.started = true;
+      if(GHP.sel >= 0){ GHP.sel = -1; ghpDraw(); }        // a drag lets go of a Move pick
+      const s = bd.querySelector('.sq');
+      d.size = s ? s.getBoundingClientRect().width * 0.9 : 40;
+      const g = document.createElement('span');
+      g.className = 'piece-wrap drag-ghost';
+      g.innerHTML = PIECE_SVG[d.k] || '';
+      g.style.width = d.size+'px';
+      g.style.height = d.size+'px';
+      document.body.appendChild(g);
+      d.ghost = g;
+      if(d.from==='sq') d.el.classList.add('dragging-from');
+    }
+    function paint(){
+      raf = null;
+      const d = drag;
+      if(!d || !d.ghost) return;
+      d.ghost.style.transform = 'translate('+(X - d.size/2)+'px,'+(Y - d.size/2)+'px)';
+      const over = target(X, Y);
+      bd.querySelectorAll('.sq.drag-over').forEach(x=> x.classList.remove('drag-over'));
+      if(over.kind==='sq') over.el.classList.add('drag-over');
+      bd.classList.toggle('ghp-drop-off', d.from==='sq' && over.kind==='off');
+    }
+    function cleanup(d){
+      if(raf!=null){ cancelAnimationFrame(raf); raf = null; }
+      if(d.ghost && d.ghost.parentNode) d.ghost.remove();
+      if(d.el) d.el.classList.remove('dragging-from');
+      bd.querySelectorAll('.sq.drag-over').forEach(x=> x.classList.remove('drag-over'));
+      bd.classList.remove('ghp-drop-off');
+      if(drag===d) drag = null;
+    }
+    document.addEventListener('pointermove', (e)=>{
+      const d = drag;
+      if(!d || e.pointerId!==d.id) return;
+      if(!d.started){
+        if(Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < SLOP) return;
+        begin(d);
+      }
+      X = e.clientX; Y = e.clientY;
+      if(raf==null) raf = requestAnimationFrame(paint);
+    });
+    // capture: before the click a drag can end with, which is then swallowed (never also a tap)
+    document.addEventListener('pointerup', (e)=>{
+      const d = drag;
+      if(!d || e.pointerId!==d.id) return;
+      if(!d.started){ drag = null; return; }                // a tap: its click does the rest
+      justEnded = true;
+      setTimeout(()=>{ justEnded = false; }, 0);
+      if(e.pointerType!=='mouse') annoSwallowClickNear(e.clientX, e.clientY);   // touch, pen: the click comes later (iOS 50-80 ms), never also a tap
+      if(document.activeElement===d.el) d.el.blur();
+      const over = target(e.clientX, e.clientY);
+      cleanup(d);
+      if(over.kind==='sq' && !(d.from==='sq' && over.i===d.i)){
+        if(d.from==='sq') GHP.board[d.i] = '';
+        GHP.board[over.i] = d.k;
+      } else if(over.kind==='off' && d.from==='sq') GHP.board[d.i] = '';
+      else return;                                          // the frame, or back where it was: nothing changes
+      GHP.sel = -1;
+      ghpDraw();
+      ghSyncHash();
+    }, true);
+    document.addEventListener('pointercancel', (e)=>{ if(drag && e.pointerId===drag.id) cleanup(drag); });
+    window.addEventListener('blur', ()=>{ if(drag) cleanup(drag); });
+    sec.addEventListener('click', (e)=>{ if(justEnded){ justEnded = false; e.stopImmediatePropagation(); e.preventDefault(); } }, true);
   })();
 
   // #history?view=openings (then the filters, which a link replaces only when it has some)
@@ -29309,8 +29420,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   //      hidden (E: the arrows and lines, never the eval), last tab, explorer database ----
   const HV_PREFS_KEY = 'wavyChessPrepReviewPrefs';
   const HV_TABS = ['moves', 'review', 'explorer', 'notes'];
+  const HV_CARDS = ['head', 'phase', 'notes', 'engine', 'tabs'];     // the cards around the board (Settings)
   const hvPrefs = (function(){
-    const p = { v:1, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters' };
+    const p = { v:1, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters', cards:{ head:true, phase:true, notes:true, engine:true, tabs:true } };
     try{
       const raw = JSON.parse(localStorage.getItem(HV_PREFS_KEY) || 'null');
       if(raw && typeof raw==='object'){
@@ -29320,6 +29432,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(typeof raw.hide==='boolean') p.hide = raw.hide;
         if(HV_TABS.indexOf(raw.tab)>=0) p.tab = raw.tab;
         if(raw.exDb==='masters' || raw.exDb==='lichess') p.exDb = raw.exDb;
+        if(raw.cards && typeof raw.cards==='object') HV_CARDS.forEach(k=>{ if(typeof raw.cards[k]==='boolean') p.cards[k] = raw.cards[k]; });
       }
     }catch(e){}
     return p;
@@ -29931,7 +30044,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const back = document.querySelector('#view-play-history .back-link');
     back.textContent = '\u2190 '+(Z ? Z.back : 'Game History');
     back.dataset.nav = Z ? Z.view : 'history';
-    ['hv-tab-notes', 'hv-pane-notes', 'hv-notes-card', 'hv-top-clock', 'hv-bottom-clock', 'hv-groups'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
+    ['hv-top-clock', 'hv-bottom-clock', 'hv-groups'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
+    ['hv-tab-notes', 'hv-pane-notes', 'hv-notes-card'].forEach(id=>{ document.getElementById(id).hidden = hvNotesOff(); });
   }
   function hvRenderHead(){
     const S = HV_STATE, g = S.game;
@@ -30322,11 +30436,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvNotesPinned(){ return !!hvMqPinned.matches; }
   // A puzzle on the board (pzaOpen) has no Notes: its id isn't a game's.
   let hvTabAway = null;      // 'notes' while a puzzle stood in for it: hvOpen gives it back to the next game
-  function hvNotesOff(){ return !!(HV_STATE && HV_STATE.game._puzzle); }
+  function hvNotesOff(){ return !!(HV_STATE && HV_STATE.game._puzzle) || !hvPrefs.cards.notes; }      // a puzzle, or Notes turned off in Settings
   function hvVisiblePanes(){
     if(!HV_STATE || !hvViewActive()) return [];
-    const v = [hvTab];
-    if(hvNotesPinned() && hvTab!=='notes' && !hvNotesOff()) v.push('notes');
+    const v = hvPrefs.cards.tabs ? [hvTab] : [];          // the tabs card turned off: none of its panes is on screen (the explorer asks nothing)
+    // Notes pinned beside the active tab, or, with the tabs off, a card of its own (three columns) or alone in the tabs card
+    if(!hvNotesOff() && v.indexOf('notes') < 0 && (hvNotesPinned() || !hvPrefs.cards.tabs)) v.push('notes');
     return v;
   }
   function hvPaneShown(name){ return hvVisiblePanes().indexOf(name)>=0; }
@@ -31641,7 +31756,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return bits.length ? bits.join(', ') : 'No mistakes';
   }
   function hpfMine(S){ return String(S.me || (S.flipped ? 'black' : 'white')).charAt(0); }
-  function hpfOn(S){ return !!(S && S.std && S.game && !S.game._puzzle && S.main.length > 0 && Array.isArray(S.plyStates)); }
+  function hpfOn(S){ return !!(hvPrefs.cards.phase && S && S.std && S.game && !S.game._puzzle && S.main.length > 0 && Array.isArray(S.plyStates)); }
   function hpfGraded(S){ const R = S.review; return !!(R && !R.partial && Array.isArray(R.ev) && R.ev.length===S.main.length + 1); }
   // ---- drawing ----
   function hpfSvg(tag, attrs, parent){ const el = hrSvgEl(tag, attrs); parent.appendChild(el); return el; }
@@ -31938,6 +32053,38 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }catch(e){}
   hvOnGame(()=>{ hpfEl.marks.dataset.sig = '-'; hpfEl.now.dataset.k = ''; hpfRender(); });
   hvOnNode(()=> hpfRenderMarker());
+
+  // ---- the cards around the board (Settings: Analysis board cards) ----
+  // A card turned off is hidden and the others in its column take its room. Notes off goes the
+  // way a puzzle's does (no card, no tab, no "Add this line to notes"); the engine keeps running
+  // with its card off (L turns it on or off).
+  const HV_CARD_EL = { head:'hv-head', engine:'hv-engine', tabs:'hv-tabs' };
+  function hvApplyCards(){
+    Object.keys(HV_CARD_EL).forEach(k=> document.getElementById(HV_CARD_EL[k]).classList.toggle('hv-card-off', !hvPrefs.cards[k]));
+    if(HV_STATE){
+      hvModeUi();
+      if(hvNotesOff() && hvTab==='notes') hvSetTab('moves', { silent:true });
+      hvPlaceNotes();
+      if(hvPaneShown(hvTab)) hvFire(hvPaneLs, hvTab);
+      if(hvTab!=='notes' && hvPaneShown('notes')) hvFire(hvPaneLs, 'notes');
+      if(hvPaneShown('moves')) requestAnimationFrame(hvKeepInView);     // the move list was hidden or changed size: the current move back in view
+    }
+    hpfRender();
+  }
+  (function(){
+    const row = document.getElementById('hvcards-row');
+    const sync = ()=> row.querySelectorAll('.toggle').forEach(b=>{ const on = !!hvPrefs.cards[b.dataset.card]; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    row.addEventListener('click', (e)=>{
+      const b = e.target.closest('.toggle');
+      if(!b || HV_CARDS.indexOf(b.dataset.card) < 0) return;
+      hvPrefs.cards[b.dataset.card] = !hvPrefs.cards[b.dataset.card];
+      hvSavePrefs();
+      sync();
+      hvApplyCards();
+    });
+    sync();
+  })();
+  hvApplyCards();
 
   function hrRenderAll(){
     hrRenderPane();
