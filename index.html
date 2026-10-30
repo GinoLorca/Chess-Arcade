@@ -11530,6 +11530,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // particular is slow to spin up a media element, so a brand-new one per
   // sound made every move's click start noticeably late there. A second
   // copy only gets made when the same sound has to overlap itself.
+  // iPhone and iPad: the app's sounds play over your music instead of stopping it. A media
+  // element's sound took the device's audio session for itself (on a Mac it never did). The
+  // Audio Session API (iOS 17 and later) makes the page's audio 'ambient', as a game's is: it
+  // mixes with what's playing, and the silent switch mutes it. Older systems: as before.
+  try{ if(navigator.audioSession && navigator.audioSession.type!=='ambient') navigator.audioSession.type = 'ambient'; }catch(e){}
   const soundPool = new Map();
   function pooledAudio(src){
     let list = soundPool.get(src);
