@@ -4242,6 +4242,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-result{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; font-weight:600; color:var(--ink); margin-top:4px; }
   .hv-meta{ font-size:12.5px; max-width:none; }
   .hv-opening{ font-size:12.5px; color:var(--ink); overflow-wrap:anywhere; }
+  /* the opening section (hvOpx*): Wikibooks' description of the line, your opening notes */
+  .hv-opx{ margin-top:6px; border-top:1px solid var(--line); padding-top:4px; }
+  .hv-opx-toggle{ display:flex; align-items:center; gap:8px; width:100%; background:none; border:0; padding:5px 0; cursor:pointer;
+    font:inherit; font-size:12.5px; font-weight:700; color:var(--ink); text-align:left; }
+  .hv-opx-toggle:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:4px; }
+  .hv-opx-chev{ margin-left:auto; flex:0 0 auto; width:7px; height:7px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:translateY(-2px) rotate(45deg); }
+  .hv-opx.open .hv-opx-chev{ transform:translateY(2px) rotate(-135deg); }
+  .hv-opx-body{ display:none; flex-direction:column; gap:10px; padding:4px 0 2px; }
+  .hv-opx.open .hv-opx-body{ display:flex; }
+  .hv-opx-about{ display:flex; flex-direction:column; gap:4px; }
+  .hv-opx-title{ align-self:flex-start; font-size:12.5px; font-weight:700; text-align:left; text-transform:none; letter-spacing:0; }   /* "3. Bf4", not "3. BF4" */
+  .hv-opx-text{ font-size:12.5px; line-height:1.5; color:var(--ink); overflow-wrap:anywhere; }
+  .hv-opx-text:not(.open){ max-height:4.5em; overflow:hidden; -webkit-mask-image:linear-gradient(#000 55%, transparent); mask-image:linear-gradient(#000 55%, transparent); }
+  .hv-opx-text > p{ margin:0 0 6px; }
+  .hv-opx-text > .wb-h{ font-weight:700; margin:8px 0 3px; }
+  .hv-opx-text > ul{ margin:0 0 6px; padding-left:18px; }
+  .hv-opx-foot{ display:flex; flex-wrap:wrap; align-items:center; gap:2px 12px; font-size:11.5px; color:var(--ink-soft); }
+  .hv-opx-foot a{ color:inherit; text-decoration:underline; }
+  .hv-opx-note{ display:flex; flex-direction:column; gap:4px; }
+  .hv-opx-label{ margin:0; overflow-wrap:anywhere; }
+  .hv-opx .hv-opx-ed{ font-size:13px; font-weight:400; font-family:inherit; line-height:1.45; padding:6px 8px; min-height:2.5em; max-height:9.5em; border-radius:8px; }
+  .hv-opx .hv-opx-ed.nb-empty::before{ top:6px; left:8px; right:8px; }
+  .hv-opx .nb-bar, .hv-opx .nb-count{ display:none; }
+  .hv-opx-status{ font-size:11.5px; }
+  .hv-opx-status:empty{ display:none; }
   .hv-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
   .hv-act{ padding:6px 12px; font-size:12.5px; text-decoration:none; display:inline-flex; align-items:center; }
   /* ---- Review prep (hp*): which of your Repertoire Lab lines the game
@@ -4455,13 +4480,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .hv-sidecol{ display:flex; flex-direction:column; gap:10px; min-width:0; grid-row:3; align-self:stretch; contain:size; }
     .hv-sidecol-review{ grid-column:1; }
     .hv-sidecol-analysis{ grid-column:3; }
-    /* a tall header (prep notes) scrolls before Notes gets squeezed */
-    #hv-head{ flex:0 1 auto; min-height:0; overflow:auto; }
-    .hv-notes-card{ display:flex; flex-direction:column; flex:1 1 auto; min-height:150px; padding:0; overflow:hidden; }
+    /* the header takes the room (the opening section, prep), scrolling inside when it's
+       longer; Notes keeps a bit under half the column */
+    #hv-head{ flex:1 1 auto; min-height:0; overflow:auto; }
+    .hv-notes-card{ display:flex; flex-direction:column; flex:0 1 45%; min-height:150px; padding:0; overflow:hidden; }
+    .hv-opx-toggle{ display:none; }
+    .hv-opx .hv-opx-body{ display:flex; }
     #hv-tab-notes{ display:none; }
     #hv-pane-notes{ display:flex; }      /* in the tabs too, until hvPlaceNotes moves it */
     .hv-notes-card #hv-pane-notes{ flex:1 1 auto; min-height:0; }
-    #view-play-history .hv-notes-card .hv-note{ min-height:80px; }
+    #view-play-history #hv-notes-card .hv-note{ min-height:0; }     /* the smaller card: the note scrolls, its status line stays in view (beats the 160px later on) */
+    /* and, as in the short pinned Notes, a diagram sits beside its caption, small enough to
+       see whole (the card is about 45% of a column that follows the screen's height) */
+    #hv-notes-card #hv-note .nb-dg{ flex-direction:row; align-items:flex-end; gap:12px; width:auto; max-width:100%; }
+    #hv-notes-card #hv-note .nb-board-wrap{ flex:0 0 auto; width:clamp(104px, calc(45vh - 220px), 200px); width:clamp(104px, calc(45dvh - 220px), 200px); }
+    #hv-notes-card #hv-note .nb-dg-foot{ flex-direction:column; align-items:flex-start; gap:6px; }
+    #hv-notes-card #hv-note .nb-dg-x{ margin-left:0; }
   }
   @media (max-width:899.98px){
     .wrap.play-mode:has(#view-play-history.active){ padding-inline:12px; }
@@ -6301,6 +6335,32 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="hv-result" id="hv-result"></div>
         <div class="subtitle hv-meta" id="hv-meta"></div>
         <div class="hv-opening" id="hv-opening"></div>
+        <!-- The opening (hvOpx*): what Wikibooks says about the line played, and your
+             notes on the opening (every game of it) and on this variation. Folded to one
+             line under 1440px wide; always open in the three columns. -->
+        <div class="hv-opx" id="hv-opx" hidden>
+          <button class="hv-opx-toggle" id="hv-opx-toggle" type="button" aria-expanded="false" aria-controls="hv-opx-body"><span id="hv-opx-toggle-text">About this opening</span><span class="hv-opx-chev" aria-hidden="true"></span></button>
+          <div class="hv-opx-body" id="hv-opx-body">
+            <div class="hv-opx-about" id="hv-opx-about" hidden>
+              <button class="btn-link hv-opx-title" id="hv-opx-title" type="button" title="Show this position on the board"></button>
+              <div class="hv-opx-text" id="hv-opx-text"></div>
+              <div class="hv-opx-foot">
+                <button class="btn-link" id="hv-opx-more" type="button" aria-expanded="false" aria-controls="hv-opx-text">More</button>
+                <span>From <a id="hv-opx-src" target="_blank" rel="noopener noreferrer">Wikibooks</a> &#183; CC BY-SA</span>
+              </div>
+            </div>
+            <div class="hv-opx-note" id="hv-opx-fam-wrap" hidden>
+              <div class="field-label hv-opx-label" id="hv-opx-fam-label">Your notes &#183; <span id="hv-opx-fam-name"></span></div>
+              <div class="text-input gn-ta hv-opx-ed" id="hv-opx-fam" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" aria-labelledby="hv-opx-fam-label" data-placeholder="Plans and ideas for every game of this opening"></div>
+              <div class="gn-status hv-opx-status" id="hv-opx-fam-status" aria-live="polite"></div>
+            </div>
+            <div class="hv-opx-note" id="hv-opx-var-wrap" hidden>
+              <div class="field-label hv-opx-label" id="hv-opx-var-label">Your notes &#183; <span id="hv-opx-var-name"></span></div>
+              <div class="text-input gn-ta hv-opx-ed" id="hv-opx-var" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" aria-labelledby="hv-opx-var-label" data-placeholder="Plans and ideas for this variation"></div>
+              <div class="gn-status hv-opx-status" id="hv-opx-var-status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
         <div class="hv-prep" id="hv-prep" hidden>
           <div class="hv-prep-name" id="hv-prep-name"></div>
           <div class="hv-prep-text" id="hv-prep-line" hidden></div>
@@ -23673,7 +23733,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(typeof GN==='object' && GN && (GH_FILTERS.notes || GH_STATE.offline)){
       let added = false;
       Object.values(GN.notes).forEach(n=>{
-        if(!(n.text || n.conflict) || !n.g || ccIsId(n.id) || GH_STATE.ids.has(n.id)) return;
+        if(!(n.text || n.conflict) || !n.g || ccIsId(n.id) || gnIsOp(n.id) || GH_STATE.ids.has(n.id)) return;
         const g = GH_STATE.extras.get(n.id) || ghGameFromSummary(n);
         if(ghVsComputer(g)) return;
         out.push(g);
@@ -24987,7 +25047,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(ghCcUp()) ccGames().forEach(g=>{ if(rpCounted(g)) out.push(g); });
     if(typeof GN==='object' && GN && GN.notes){
       Object.values(GN.notes).forEach(n=>{
-        if(!n || !n.g || (ccIsId(n.id) ? ghCcUp() && ccHas(n.id) : GH_STATE.ids.has(n.id))) return;
+        if(!n || !n.g || gnIsOp(n.id) || (ccIsId(n.id) ? ghCcUp() && ccHas(n.id) : GH_STATE.ids.has(n.id))) return;
         let g = GH_STATE.extras.get(n.id);
         if(!g){ try{ g = ghGameFromSummary(n); }catch(e){ g = null; } }
         if(g && rpCounted(g)) out.push(g);
@@ -32140,6 +32200,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      Everything here is a var: Game History and the Saved Puzzles sync, both
      earlier in the file, look at these names. */
   var GN_KEY = 'wavyChessPrepGameNotes', GN_CC_KEY = 'wavyChessPrepGameNotesChessCom';
+  // Your notes on an opening (op-<hash of its name>: the whole opening, its family, or one
+  // variation) live here too and sync in the same study, one chapter each. An older build's
+  // gnIdOk refuses their ids, so its sync never touches those chapters; like the chess.com
+  // notes they keep a second copy (GN_OP_KEY) that loading takes back from (gnRestoreCc).
+  var GN_OP_KEY = 'wavyChessPrepOpeningNotes';
+  var GN_COPIES = [[GN_CC_KEY, /^cc-d?\d{1,15}$/], [GN_OP_KEY, /^op-[0-9a-f]{8}$/]];
   var GN_STUDY_NAME = SP_STUDY_PREFIX + 'Game notes';
   var GN_MAX = 10000, GN_TOMB_TTL = 30*86400e3;
   var gnSyncTimer = 0, gnSyncRunning = false, gnSyncAgain = false, gnOtherTabValue = null;
@@ -32184,8 +32250,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       san: gnCleanSan(s.san)
     };
   }
-  // a game id a note can belong to: a Lichess game (8 characters) or a chess.com one (cc-<n>, daily cc-d<n>)
-  function gnIdOk(id){ return /^(?:\w{8}|cc-d?\d{1,15})$/.test(String(id || '')); }
+  // what a note can belong to: a Lichess game (8 characters), a chess.com one (cc-<n>, daily
+  // cc-d<n>) or an opening (op-<hash>, gnOpId)
+  function gnIdOk(id){ return /^(?:\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8})$/.test(String(id || '')); }
+  function gnIsOp(id){ return /^op-[0-9a-f]{8}$/.test(String(id || '')); }
+  function gnOpId(name){ return 'op-'+gnFnv(String(name || '').trim().toLowerCase()); }
   function gnCleanNote(n, id){
     if(!n || typeof n!=='object' || !gnIdOk(id)) return null;
     const link = n.link && /^\w{8}$/.test(String(n.link.s)) && /^\w{8}$/.test(String(n.link.c)) ? { s:String(n.link.s), c:String(n.link.c) } : null;
@@ -32225,28 +32294,33 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      A restored note whose chapter is in a study this device no longer files into (the older tab
      re-filed its notes: the study was deleted on Lichess, or another Lichess account was
      connected) is filed afresh by the next sync, as gnSync's account switch does. */
+  // (the opening notes' copy, GN_OP_KEY, works the same way: GN_COPIES)
   function gnRestoreCc(out){
-    let d = null;
-    try{ const t = localStorage.getItem(GN_CC_KEY); d = t ? JSON.parse(t) : null; }catch(e){ d = null; }
-    const N = d && typeof d==='object' && d.v===1 && d.notes && typeof d.notes==='object' ? d.notes : null;
-    if(!N) return;
     const known = new Set(out.sync.studies.map(x=> x.id));
-    Object.keys(N).forEach(id=>{
-      if(!/^cc-d?\d{1,15}$/.test(id) || out.notes[id]) return;
-      const n = gnCleanNote(N[id], id);
-      if(!n) return;
-      if(n.link && !known.has(n.link.s)){ n.link = null; n.pushedAt = 0; }
-      out.notes[n.id] = n;
+    GN_COPIES.forEach(([key, re])=>{
+      let d = null;
+      try{ const t = localStorage.getItem(key); d = t ? JSON.parse(t) : null; }catch(e){ d = null; }
+      const N = d && typeof d==='object' && d.v===1 && d.notes && typeof d.notes==='object' ? d.notes : null;
+      if(!N) return;
+      Object.keys(N).forEach(id=>{
+        if(!re.test(id) || out.notes[id]) return;
+        const n = gnCleanNote(N[id], id);
+        if(!n) return;
+        if(n.link && !known.has(n.link.s)){ n.link = null; n.pushedAt = 0; }
+        out.notes[n.id] = n;
+      });
     });
   }
   function gnMirrorCc(src){
-    const o = {};
-    let k = 0;
-    Object.keys(src.notes || {}).forEach(id=>{ if(/^cc-d?\d{1,15}$/.test(id)){ o[id] = src.notes[id]; k++; } });
-    try{
-      if(k) localStorage.setItem(GN_CC_KEY, JSON.stringify({ v:1, notes:o }));
-      else localStorage.removeItem(GN_CC_KEY);
-    }catch(e){ try{ localStorage.removeItem(GN_CC_KEY); }catch(e2){} }
+    GN_COPIES.forEach(([key, re])=>{
+      const o = {};
+      let k = 0;
+      Object.keys(src.notes || {}).forEach(id=>{ if(re.test(id)){ o[id] = src.notes[id]; k++; } });
+      try{
+        if(k) localStorage.setItem(key, JSON.stringify({ v:1, notes:o }));
+        else localStorage.removeItem(key);
+      }catch(e){ try{ localStorage.removeItem(key); }catch(e2){} }
+    });
   }
   // Reports failure: the notes share this browser's storage with uploaded
   // backgrounds and sounds, so a save can run out of room.
@@ -32271,7 +32345,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const full = e && (e.name==='QuotaExceededError' || e.name==='NS_ERROR_DOM_QUOTA_REACHED' || e.code===22 || e.code===1014);
       gnStore = full ? 'full' : 'blocked';
       ok = false;
-      if(full){ try{ if(localStorage.getItem(GN_CC_KEY)!=null){ localStorage.removeItem(GN_CC_KEY); localStorage.setItem(GN_KEY, json); gnStore = 'ok'; ok = true; } }catch(e4){} }   // the chess.com notes' second copy goes first (its protection only)
+      if(full){ try{ if(GN_COPIES.some(([k])=> localStorage.getItem(k)!=null)){ GN_COPIES.forEach(([k])=> localStorage.removeItem(k)); localStorage.setItem(GN_KEY, json); gnStore = 'ok'; ok = true; } }catch(e4){} }   // the chess.com notes' second copy goes first (its protection only)
       if(!ok && full && hrDropCache()){ try{ localStorage.setItem(GN_KEY, json); gnStore = 'ok'; ok = true; }catch(e2){} }   // notes first: the game reviews give way, then one more try
       if(!ok && full && typeof rlDropCache==='function' && rlDropCache()){ try{ localStorage.setItem(GN_KEY, json); gnStore = 'ok'; ok = true; }catch(e3){} }   // then the Repertoire Lab copy (read again next visit)
     }
@@ -32314,7 +32388,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let t = String(text==null ? '' : text).replace(/\r\n?/g, '\n').slice(0, GN_MAX);
     if(nbBlank(t)) t = '';
     let n = GN.notes[gid];
-    const g = game ? gnSummary(game) : null;
+    const g = game ? (game._op || gnSummary(game)) : null;      // _op: an opening note's own summary (hvOpxLoad)
     if(n && n.text===t){ if(g && !n.g){ n.g = g; gnPersist(); } return false; }
     if(!n){
       if(!t) return false;
@@ -32431,6 +32505,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function gnResultTag(g){ return g.res==='draw' ? '1/2-1/2' : ((g.res==='win')===(g.me==='white') ? '1-0' : '0-1'); }
   function gnFamilyOf(g){ return g.opening ? g.opening.split(':')[0].trim() : (g.variant && g.variant!=='standard' ? ghVariantLabel(g.variant) : ''); }
   function gnChapterName(n){
+    if(gnIsOp(n.id)) return (n.id+' \u00b7 Opening \u00b7 '+((n.g && n.g.opening) || '?')).slice(0, 100);
     const g = n.g || {}, fam = gnFamilyOf(g);
     return (n.id+' \u00b7 vs '+(g.opp || '?')+(fam ? ' \u00b7 '+fam : '')).slice(0, 100);
   }
@@ -32452,6 +32527,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const g = n.g || gnCleanG({});
     const t = [];
     const tag = (k, v)=>{ if(v!=null && v!=='') t.push('['+k+' "'+spTagVal(v)+'"]'); };
+    if(gnIsOp(n.id)){
+      // an opening note: the opening's moves (from the game it was written on), no players
+      tag('Event', GN_STUDY_NAME);
+      tag('ECO', g.eco);
+      tag('Opening', g.opening);
+      tag('Result', '*');
+      tag('ChapterName', gnChapterName(n));
+      const mv = gnMovetext(g.san);
+      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? gnReadable(n.text) : '(note deleted)')+' } '+(mv ? mv+' ' : '')+'*';
+    }
     const cc = ccIsId(n.id);      // a chess.com game's note: its chess.com page, your chess.com name
     const mine = cc ? ((ghCcUp() && ccName()) || 'Me') : (GH_STATE.username || GN.sync.user || 'Me'), opp = g.opp || '?';
     const pad = x=> String(x).padStart(2, '0');
@@ -32550,7 +32635,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const data = await res.json();
     const got = {};
     ((data && data.chapters) || []).forEach(ch=>{
-      const m = String(ch.name||'').match(/^(\w{8}|cc-d?\d{1,15}) /);
+      const m = String(ch.name||'').match(/^(\w{8}|cc-d?\d{1,15}|op-[0-9a-f]{8}) /);
       if(m && /^\w{8}$/.test(String(ch.id||''))) got[m[1]] = String(ch.id);
     });
     return got;
@@ -34194,6 +34279,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function gnRenderField(F){
     if(!F || !F.gid) return;
+    if(F.op) return hvOpxStatus(F);          // an opening note: its own quieter line
     const st = document.getElementById(F===hvNote ? 'hv-note-status' : 'gn-status');
     if(!st) return;
     const n = GN.notes[F.gid];
@@ -34239,6 +34325,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function gnRefreshFields(){
     if(gnEd){ gnFieldRefresh(gnEd.F); gnRenderField(gnEd.F); }
     if(hvNote){ gnFieldRefresh(hvNote); gnRenderField(hvNote); }
+    hvOpxFields().forEach(F=>{ gnFieldRefresh(F); gnRenderField(F); });
   }
   var gnOverlay = document.getElementById('gn-overlay');
   var gnTextEl = document.getElementById('gn-text');
@@ -34314,9 +34401,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     gnCloseEditor(true);
     ghOpenGame(g);
   });
-  document.getElementById('gn-use-other').addEventListener('click', ()=>{
-    if(!gnEd) return;
-    const F = gnEd.F;
+  // A note's other version (the conflict box): use it, or keep this one. The
+  // pop-up's buttons and the opening notes' (hvOpxStatus) both come here.
+  function gnUseOther(F){
     gnFieldSave(F);
     const n = GN.notes[F.gid];
     if(!n || !n.conflict) return;
@@ -34329,13 +34416,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     F.saved = F.ta.value;
     F.base = n.text;
     gnRenderField(F);
-  });
-  document.getElementById('gn-keep').addEventListener('click', ()=>{
-    if(!gnEd) return;
-    const n = GN.notes[gnEd.F.gid];
+  }
+  function gnKeepMine(F){
+    const n = GN.notes[F.gid];
     if(n && n.conflict){ n.conflict = null; gnPersist(); }
-    gnRenderField(gnEd.F);
-  });
+    gnRenderField(F);
+  }
+  document.getElementById('gn-use-other').addEventListener('click', ()=>{ if(gnEd) gnUseOther(gnEd.F); });
+  document.getElementById('gn-keep').addEventListener('click', ()=>{ if(gnEd) gnKeepMine(gnEd.F); });
   // While the editor is open it has the keyboard: Escape and Cmd/Ctrl+Enter
   // save and close, and nothing reaches the shortcuts underneath. Keys
   // inside the pop-up reach the note editor's own handler first (bold,
@@ -34353,12 +34441,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvNote = gnField(document.getElementById('hv-note'));
     gnFieldLoad(hvNote, game);
     gnRenderField(hvNote);
+    hvOpxLoad(game);
   }
   function hvNoteFlush(){
-    if(!hvNote) return;
-    gnFieldSave(hvNote);
-    clearTimeout(hvNote.undoTimer);
-    hvNote = null;
+    const ops = hvOpxFlush();
+    if(!hvNote && !ops) return;
+    if(hvNote){ gnFieldSave(hvNote); clearTimeout(hvNote.undoTimer); hvNote = null; }
     if(getLichessToken() && gnHasPending()) gnScheduleSync(800);
   }
   (function(){
@@ -34372,8 +34460,261 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     ta.addEventListener('blur', ()=>{ if(hvNote){ gnFieldSave(hvNote); gnRenderField(hvNote); } });
   })();
+
+  /* ---- The opening (hv-opx, in the review's header): what Wikibooks' Chess Opening
+     Theory says about the line played, and your own notes on the opening, one for every
+     game of its family and one for this variation. The notes are GN notes (gnOpId ids)
+     and sync with the game notes. The description is the deepest Wikibooks page the
+     game's moves reach (transpositions redirect) that has real text; its theory table,
+     references and the like are left out. Wikibooks is CC BY-SA: the excerpt names and
+     links its page. Its HTML is never inserted: wbClean keeps only the text, bold and
+     italic, as blocks this code builds. ---- */
+  var hvOpF = { fam:null, var:null };
+  var hvOpxOpen = false;          // folded under 1440px wide; your choice stays for the session
+  var hvOpxSeq = 0;
+  var WB_API = 'https://en.wikibooks.org/w/api.php', WB_CACHE_KEY = 'wavyChessPrepOpeningWiki', WB_PLIES = 24;
+  var WB_SKIP = /^(theory table|references|see also|statistics|external links|further reading|sources|footnotes|all possible)/i;
+  var wbMem = new Map();
+  function hvOpxFields(){ return [hvOpF.fam, hvOpF.var].filter(Boolean); }
+  function hvOpxFlush(){
+    const fs = hvOpxFields();
+    fs.forEach(F=>{ clearTimeout(F.timer); clearTimeout(F.undoTimer); gnFieldSave(F); });
+    hvOpF = { fam:null, var:null };
+    return fs.length;
+  }
+  // the names a game's opening notes go under: its family ("Sicilian Defense") and, when it
+  // has one, its whole name ("Sicilian Defense: Najdorf Variation")
+  function hvOpxNames(game){
+    const full = game && !game._puzzle && game.opening && game.opening.name ? String(game.opening.name).trim() : '';
+    if(!full) return null;
+    return { full, fam:ghFamily(game), v:ghVariation(game), eco:game.opening.eco ? String(game.opening.eco) : '' };
+  }
+  function hvOpxLoad(game){
+    hvOpxFlush();
+    const box = document.getElementById('hv-opx');
+    const N = hvOpxNames(game);
+    box.hidden = !N;
+    hvOpxFold(hvOpxOpen);
+    hvOpxAbout(null);
+    if(!N) return;
+    const san = ((HV_STATE && HV_STATE.sanMoves) || []).slice(0, 12).join(' ');
+    [['fam', N.fam, N.fam, ''], ['var', N.v ? N.full : '', N.v, N.eco]].forEach(([k, name, label, eco])=>{
+      const wrap = document.getElementById('hv-opx-'+k+'-wrap');
+      wrap.hidden = !name;
+      if(!name) return;
+      document.getElementById('hv-opx-'+k+'-name').textContent = label;
+      const F = gnField(document.getElementById('hv-opx-'+k));
+      F.op = k;
+      F.st = document.getElementById('hv-opx-'+k+'-status');
+      gnFieldLoad(F, { id:gnOpId(name), _op:gnCleanG({ opening:name, eco, san, variant:'standard' }) });
+      hvOpF[k] = F;
+      gnRenderField(F);
+    });
+    hvOpxCount();
+    hvOpxWiki(game);
+  }
+  function hvOpxFold(open){
+    hvOpxOpen = !!open;
+    document.getElementById('hv-opx').classList.toggle('open', hvOpxOpen);
+    document.getElementById('hv-opx-toggle').setAttribute('aria-expanded', hvOpxOpen ? 'true' : 'false');
+  }
+  // the folded line says whether you've written anything here
+  function hvOpxCount(){
+    const k = hvOpxFields().filter(F=> gnNoteText(F.gid)).length;
+    document.getElementById('hv-opx-toggle-text').textContent = 'About this opening'+(k ? ' \u00b7 your notes ('+k+')' : ' \u00b7 your notes');
+  }
+  // An opening note's status line: quiet unless there's something to do (a deleted note to
+  // undo, another device's version to choose, storage that won't save).
+  function hvOpxStatus(F){
+    const st = F.st;
+    if(!st) return;
+    const n = GN.notes[F.gid], c = n && n.conflict;
+    const sig = F.undo ? 'undo' : (c ? 'c:'+c.at+':'+(n.text ? 1 : 0)+':'+(c.mine ? 1 : 0) : (gnStore!=='ok' ? 'm:'+gnStatusText(F.gid) : ''));
+    hvOpxCount();
+    if(st.dataset.sig===sig) return;
+    st.dataset.sig = sig;
+    st.textContent = '';
+    const btn = (label, fn)=>{
+      const b = ghEl('button', 'btn-link', label);
+      b.type = 'button';
+      b.addEventListener('mousedown', e=> e.preventDefault());
+      b.addEventListener('click', fn);
+      st.appendChild(document.createTextNode(' '));
+      st.appendChild(b);
+    };
+    if(sig==='undo'){
+      st.appendChild(document.createTextNode('Note deleted.'));
+      btn('Undo', ()=>{ if(!F.undo) return; F.ta.value = F.undo; F.undo = null; gnFieldSave(F); gnRenderField(F); F.ta.focus(); });
+    } else if(c){
+      const first = nbFirstLine(c.text);
+      const said = first ? ' (\u201c'+(first.length > 60 ? first.slice(0, 60)+'\u2026' : first)+'\u201d)' : '';
+      st.appendChild(document.createTextNode(c.mine ? 'Your earlier version'+said+' was replaced by one from another device.'
+        : (!n.text ? 'You deleted this note, but another device had saved a version'+said+' '+relTime(c.at)+'.'
+          : 'Another device saved a different version'+said+' '+relTime(c.at)+'.')));
+      btn(c.mine ? 'Use mine' : (!n.text ? 'Restore it' : 'Use that version'), ()=> gnUseOther(F));
+      btn(c.mine ? 'Discard mine' : (!n.text ? 'Keep it deleted' : 'Keep mine'), ()=> gnKeepMine(F));
+    } else if(sig) st.textContent = sig.slice(2);
+  }
+  // ---- Wikibooks ----
+  function wbTitle(sans){ return 'Chess Opening Theory/'+sans.map((m, i)=> i%2===0 ? (i/2+1)+'. '+m : ((i+1)/2)+'...'+m).join('/'); }
+  function wbCacheRead(){
+    try{ const d = JSON.parse(localStorage.getItem(WB_CACHE_KEY) || 'null'); if(d && d.v===1 && d.e && typeof d.e==='object') return d; }catch(e){}
+    return { v:1, e:{} };
+  }
+  function wbCacheGet(k){
+    const e = wbCacheRead().e[k];
+    return e && Date.now() - e.at < (e.r ? 30 : 7)*86400e3 ? (e.r || null) : undefined;     // a line with no page is asked again after a week
+  }
+  function wbCachePut(k, r){
+    const d = wbCacheRead();
+    d.e[k] = { at:Date.now(), r };
+    Object.keys(d.e).sort((a, b)=> d.e[b].at - d.e[a].at).slice(60).forEach(x=>{ delete d.e[x]; });
+    try{ localStorage.setItem(WB_CACHE_KEY, JSON.stringify(d)); }catch(e){ try{ localStorage.removeItem(WB_CACHE_KEY); }catch(e2){} }   // only a cache: never in the notes' way
+  }
+  async function wbApi(params){
+    const q = new URLSearchParams(Object.assign({ action:'query', format:'json', formatversion:'2', origin:'*' }, params));
+    const res = await fetch(WB_API+'?'+q.toString(), { credentials:'omit', referrerPolicy:'no-referrer' });
+    if(!res.ok) throw new Error('Wikibooks answered '+res.status);
+    return res.json();
+  }
+  // A page's extract as plain blocks: { head, blocks:[{ k:'p'|'h'|'li', r:[[text, 'b'|'i'|'']] }], chars }.
+  // The first heading is the page's own ("3. Bf4 \u00b7 Jobava London"); a section whose heading
+  // is in WB_SKIP is dropped with everything under it.
+  function wbClean(html){
+    const root = new DOMParser().parseFromString('<div>'+String(html || '')+'</div>', 'text/html').body.firstChild;
+    const out = { head:'', blocks:[], chars:0 };
+    if(!root) return out;
+    const runs = (el, mark, r)=>{
+      el.childNodes.forEach(ch=>{
+        if(ch.nodeType===3){ const t = ch.nodeValue.replace(/\s+/g, ' '); if(t) r.push([t, mark]); }
+        else if(ch.nodeType===1){
+          const tag = ch.tagName.toLowerCase();
+          if(tag==='br') r.push([' ', mark]);
+          else if(!/^(style|script|sup|table|img|math)$/.test(tag)) runs(ch, tag==='b' || tag==='strong' ? 'b' : (tag==='i' || tag==='em' ? (mark || 'i') : mark), r);
+        }
+      });
+      return r;
+    };
+    const push = (k, r)=>{
+      while(r.length && !r[0][0].trim()) r.shift();
+      if(!r.length) return;
+      r[0][0] = r[0][0].replace(/^\s+/, ''); r[r.length-1][0] = r[r.length-1][0].replace(/\s+$/, '');
+      const n = r.reduce((a, x)=> a + x[0].length, 0);
+      if(!n) return;
+      out.blocks.push({ k, r }); out.chars += n;
+    };
+    let skip = false, first = true;
+    root.childNodes.forEach(el=>{
+      if(el.nodeType!==1) return;
+      const tag = el.tagName.toLowerCase();
+      if(/^h[1-6]$/.test(tag)){
+        const t = el.textContent.replace(/\s+/g, ' ').trim();
+        if(tag==='h2' || tag==='h1'){ skip = WB_SKIP.test(t); if(first && !skip){ out.head = t; first = false; return; } }
+        else if(WB_SKIP.test(t)){ skip = true; return; }
+        first = false;
+        if(!skip && t) push('h', [[t, '']]);
+        return;
+      }
+      first = false;
+      if(skip) return;
+      if(tag==='ul' || tag==='ol') el.querySelectorAll(':scope > li').forEach(li=> push('li', runs(li, '', [])));
+      else if(tag==='p' || tag==='div' || tag==='blockquote' || tag==='dl') push('p', runs(el, '', []));
+    });
+    if(out.blocks.length > 40) out.blocks.length = 40;
+    return out;
+  }
+  async function wbExtract(title){
+    const d = await wbApi({ titles:title, prop:'extracts', redirects:'1' });
+    const pg = d && d.query && Array.isArray(d.query.pages) ? d.query.pages[0] : null;
+    return pg && typeof pg.extract==='string' ? wbClean(pg.extract) : null;
+  }
+  // The deepest page of the line with something to say (120+ characters), or null.
+  async function wbLookup(sans){
+    const line = sans.slice(0, WB_PLIES);
+    const key = line.join(' ');
+    if(!key) return null;
+    if(wbMem.has(key)) return wbMem.get(key);
+    const cached = wbCacheGet(key);
+    if(cached!==undefined){ wbMem.set(key, cached); return cached; }
+    const titles = line.map((m, i)=> wbTitle(line.slice(0, i+1)));
+    const d = await wbApi({ titles:titles.join('|'), redirects:'1' });
+    const q = (d && d.query) || {};
+    const norm = new Map((q.normalized || []).map(x=> [x.from, x.to]));
+    const redir = new Map((q.redirects || []).map(x=> [x.from, x.to]));
+    const have = new Set((q.pages || []).filter(pg=> pg && pg.title && !pg.missing && !pg.invalid).map(pg=> pg.title));
+    const found = [];
+    titles.forEach((t, i)=>{ let f = norm.get(t) || t; f = redir.get(f) || f; if(have.has(f) && !found.some(x=> x.title===f)) found.push({ ply:i+1, title:f }); });
+    let r = null;
+    for(const c of found.reverse().slice(0, 3)){
+      const x = await wbExtract(c.title);
+      if(x && x.chars >= 120){ r = { ply:c.ply, title:c.title, head:x.head, blocks:x.blocks }; break; }
+    }
+    wbMem.set(key, r);
+    wbCachePut(key, r);
+    return r;
+  }
+  async function hvOpxWiki(game){
+    const seq = ++hvOpxSeq;
+    const S = HV_STATE;
+    // standard chess from the usual start only (Wikibooks' tree starts there)
+    if(!S || !S.std || game.initialFen || !S.sanMoves || !S.sanMoves.length) return;
+    let r = null;
+    try{ r = await wbLookup(S.sanMoves); }catch(e){ r = null; }
+    if(seq!==hvOpxSeq || HV_STATE!==S) return;           // another game opened meanwhile
+    hvOpxAbout(r);
+  }
+  function hvOpxAbout(r){
+    const box = document.getElementById('hv-opx-about'), text = document.getElementById('hv-opx-text');
+    box.hidden = !r;
+    text.textContent = '';
+    text.classList.remove('open');
+    const more = document.getElementById('hv-opx-more');
+    more.textContent = 'More'; more.setAttribute('aria-expanded', 'false');
+    if(!r) return;
+    const t = document.getElementById('hv-opx-title');
+    const moves = r.title.replace(/^Chess Opening Theory\//, '').split('/').join(' ');
+    t.textContent = r.head || moves;
+    t.dataset.ply = String(r.ply);
+    t.title = 'Show '+moves+' on the board';
+    let list = null;
+    r.blocks.forEach(b=>{
+      const el = document.createElement(b.k==='li' ? 'li' : (b.k==='h' ? 'div' : 'p'));
+      if(b.k==='h') el.className = 'wb-h';
+      b.r.forEach(([tx, m])=>{ const n = m ? document.createElement(m) : null; if(n){ n.textContent = tx; el.appendChild(n); } else el.appendChild(document.createTextNode(tx)); });
+      if(b.k==='li'){ if(!list){ list = document.createElement('ul'); text.appendChild(list); } list.appendChild(el); }
+      else { list = null; text.appendChild(el); }
+    });
+    const a = document.getElementById('hv-opx-src');
+    a.href = 'https://en.wikibooks.org/wiki/'+encodeURI(r.title.replace(/ /g, '_'));
+    requestAnimationFrame(()=>{ more.hidden = text.scrollHeight <= text.clientHeight + 2; });
+  }
+  (function(){
+    document.getElementById('hv-opx-toggle').addEventListener('click', ()=> hvOpxFold(!hvOpxOpen));
+    document.getElementById('hv-opx-more').addEventListener('click', (e)=>{
+      const text = document.getElementById('hv-opx-text'), on = !text.classList.contains('open');
+      text.classList.toggle('open', on);
+      e.currentTarget.textContent = on ? 'Less' : 'More';
+      e.currentTarget.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+    document.getElementById('hv-opx-title').addEventListener('click', (e)=>{
+      const ply = Number(e.currentTarget.dataset.ply);
+      if(HV_STATE && ply > 0) hvGoto(ply);
+    });
+    ['fam', 'var'].forEach(k=>{
+      const el = document.getElementById('hv-opx-'+k);
+      nbMount(el, { context:'opening' });
+      el.addEventListener('input', ()=>{
+        const F = hvOpF[k];
+        if(!F) return;
+        clearTimeout(F.timer);
+        F.timer = setTimeout(()=>{ gnFieldSave(F); gnRenderField(F); }, 600);
+        if(F.undo && el.value.trim()){ F.undo = null; gnRenderField(F); }
+      });
+      el.addEventListener('blur', ()=>{ const F = hvOpF[k]; if(F){ gnFieldSave(F); gnRenderField(F); } });
+    });
+  })();
   // Whatever is being typed is saved before the page goes away.
-  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
+  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
   document.addEventListener('visibilitychange', ()=>{ if(document.hidden) gnFlushAll(); });
   window.addEventListener('pagehide', gnFlushAll);
   // First sync a few seconds after the Saved Puzzles one.
