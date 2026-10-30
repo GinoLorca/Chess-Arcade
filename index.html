@@ -4267,6 +4267,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-opx .nb-bar, .hv-opx .nb-count{ display:none; }
   .hv-opx-status{ font-size:11.5px; }
   .hv-opx-status:empty{ display:none; }
+  /* moves written in the notes are links (hvMv*): the game's own moves underlined, other
+     moves (a side line) dotted */
+  ::highlight(hv-mv){ color:var(--brass-text); text-decoration:underline; text-decoration-thickness:1.5px; }
+  ::highlight(hv-mv-alt){ color:var(--brass-text); text-decoration:underline dotted; text-decoration-thickness:1.5px; }
   .hv-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
   .hv-act{ padding:6px 12px; font-size:12.5px; text-decoration:none; display:inline-flex; align-items:center; }
   /* ---- Review prep (hp*): which of your Repertoire Lab lines the game
@@ -34712,6 +34716,170 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       });
       el.addEventListener('blur', ()=>{ const F = hvOpF[k]; if(F){ gnFieldSave(F); gnRenderField(F); } });
     });
+  })();
+
+  /* ---- Moves in your notes: in the review's note and the opening notes, "13. Nxe5",
+     "13...Nxe5" or a whole line ("13. Nxe5 Qxe5 14. Bd4") is a link to that move on the
+     board, when it's legal from the game's own position at that move number. A click
+     goes there with the move played onto its square (a capture, a check: the board and
+     its sound show it): the game's own move, or a side line for one it didn't play. The
+     note's text never changes: the links are CSS highlights over it (::highlight(hv-mv)
+     for the game's moves, hv-mv-alt for the others), found again whenever the text
+     changes (typed, loaded, synced, a line added from the menu). ---- */
+  var HV_MV_EDS = ['hv-note', 'hv-opx-fam', 'hv-opx-var'];
+  var hvMvLinks = [], hvMvTimer = 0;
+  var HV_MV_SAN = /^(?:O-O-O|O-O|0-0-0|0-0|[KQRBN][a-h]?[1-8]?x?[a-h][1-8](?:=?[QRBN])?|[a-h](?:x[a-h])?[1-8](?:=?[QRBN])?)[+#]?[!?]{0,2}/;
+  var HV_MV_NUM = /(\d{1,3})[ \t]*(\.\.\.|\u2026|\.)[ \t]*/g;
+  // The move sequences in a text: [{ toks:[{ ns, s, e, san, ply }] }] (ply: 0-based from the
+  // start, White's move N at 2(N-1); ns: where the token's link starts, its number included).
+  function hvMvScan(text){
+    const out = [];
+    const re = new RegExp(HV_MV_NUM.source, 'g');
+    let m;
+    while((m = re.exec(text)) && out.length < 60){
+      if(m.index > 0 && /[\w.]/.test(text.charAt(m.index-1))) continue;
+      const n = Number(m[1]);
+      let p = m.index + m[0].length, ns = m.index, cur = n ? HV_MV_SAN.exec(text.slice(p)) : null;
+      if(!cur){ re.lastIndex = m.index + m[0].length; continue; }
+      let ply = (n-1)*2 + (m[2]==='.' ? 0 : 1);
+      const toks = [];
+      while(cur && toks.length < 40){
+        const e = p + cur[0].length;
+        if(e < text.length && /\w/.test(text.charAt(e))) break;           // "e4x" or "Nf3abc": not a move
+        toks.push({ ns, s:p, e, san:cur[0], ply });
+        ply++;
+        const nx = /^[ \t]+(?:(\d{1,3})[ \t]*(\.\.\.|\u2026|\.)[ \t]*)?/.exec(text.slice(e));
+        if(!nx) break;
+        if(nx[1] && (Number(nx[1])-1)*2 + (nx[2]==='.' ? 0 : 1)!==ply) break;   // a number that isn't the next move's ends the line
+        ns = nx[1] ? e + nx[0].search(/\d/) : e + nx[0].length;
+        p = e + nx[0].length;
+        cur = HV_MV_SAN.exec(text.slice(p));
+      }
+      if(toks.length) out.push({ toks });
+      re.lastIndex = toks.length ? toks[toks.length-1].e : p;
+    }
+    return out;
+  }
+  // A token's move from a position: its SAN exactly, or (written a little differently:
+  // "Nbd7" where "Nd7" is enough, no "x", "0-0") the one legal move it can mean.
+  function hvMvFind(st, tok){
+    const t = tok.replace(/[+#!?]+$/, '').replace(/^0-0-0$/, 'O-O-O').replace(/^0-0$/, 'O-O');
+    const f = hvFindMoveBySan(st, t);
+    if(f) return f;
+    const m = /^([KQRBN])?([a-h])?([1-8])?x?([a-h][1-8])(?:=?([QRBN]))?$/.exec(t);
+    if(!m) return null;
+    const piece = (m[1] || 'P').toLowerCase(), to = nbAlgIdx(m[4]), promo = m[5] ? m[5].toLowerCase() : null;
+    const c = pzAllLegalMoves(st).filter(mv=> mv.piece===piece && mv.to===to && (mv.promotion || null)===promo
+      && (!m[2] || idxToAlg(mv.from).charAt(0)===m[2]) && (!m[3] || idxToAlg(mv.from).charAt(1)===m[3]));
+    return c.length===1 ? { move:c[0], next:pzApplyMoveRaw(st, c[0]) } : null;
+  }
+  // A sequence against this game: [{ tk, from, move, main }] up to its first move that isn't
+  // legal there (nodes that don't exist yet are stand-ins until a click makes them).
+  function hvMvResolve(seq){
+    const S = HV_STATE;
+    const base = seq.toks[0].ply - (S.root.off || 0);
+    if(base < 0 || base > S.main.length) return [];
+    let node = base===0 ? S.root : S.main[base-1];
+    const path = [];
+    for(const tk of seq.toks){
+      const f = hvMvFind(node.state, tk.san);
+      if(!f) break;
+      const uci = hvUci(f.move);
+      const child = node.children.find(c=> c.uci===uci) || null;
+      path.push({ tk, from:node, move:f.move, main:!!(child && child.main) });
+      node = child || { state:f.next, children:[], stand:true };
+    }
+    return path;
+  }
+  // a block's text, and where each of its text nodes starts in it (a diagram is skipped)
+  function hvMvText(block){
+    const parts = [];
+    let text = '';
+    const walk = (n)=>{
+      for(let c = n.firstChild; c; c = c.nextSibling){
+        if(c.nodeType===3){ parts.push({ node:c, at:text.length }); text += c.nodeValue; }
+        else if(c.nodeType===1 && c.getAttribute('contenteditable')!=='false' && !c.classList.contains('nb-dg')) walk(c);
+      }
+    };
+    walk(block);
+    return { text, parts };
+  }
+  function hvMvPoint(map, off){
+    for(let i = map.parts.length-1; i >= 0; i--){
+      const pt = map.parts[i];
+      if(off >= pt.at) return [pt.node, Math.min(off - pt.at, pt.node.nodeValue.length)];
+    }
+    return null;
+  }
+  function hvMvRefresh(){
+    clearTimeout(hvMvTimer);
+    hvMvLinks = [];
+    const S = HV_STATE, play = [], alt = [];
+    if(S && S.std && !S.game._puzzle && hvViewActive()){
+      HV_MV_EDS.forEach(id=>{
+        const ed = document.getElementById(id);
+        if(!ed || !ed.isConnected) return;
+        const blocks = ed.firstElementChild ? [...ed.children] : [ed];
+        blocks.forEach(b=>{
+          const map = hvMvText(b);
+          if(!/\d/.test(map.text)) return;
+          hvMvScan(map.text).forEach(seq=>{
+            const path = hvMvResolve(seq);
+            path.forEach((x, i)=>{
+              const a = hvMvPoint(map, x.tk.ns), z = hvMvPoint(map, x.tk.e);
+              if(!a || !z) return;
+              const r = document.createRange();
+              try{ r.setStart(a[0], a[1]); r.setEnd(z[0], z[1]); }catch(e){ return; }
+              const played = path.slice(0, i+1).every(y=> y.main);
+              hvMvLinks.push({ ed, range:r, path, i, played });
+              (played ? play : alt).push(r);
+            });
+          });
+        });
+      });
+    }
+    if(window.CSS && CSS.highlights && typeof Highlight==='function'){
+      CSS.highlights.set('hv-mv', new Highlight(...play));
+      CSS.highlights.set('hv-mv-alt', new Highlight(...alt));
+    }
+  }
+  function hvMvSoon(){ clearTimeout(hvMvTimer); hvMvTimer = setTimeout(hvMvRefresh, 150); }
+  function hvMvHit(ed, x, y){
+    return hvMvLinks.find(l=> l.ed===ed && [...l.range.getClientRects()].some(r=> x >= r.left - 1 && x <= r.right + 1 && y >= r.top && y <= r.bottom)) || null;
+  }
+  // the link's move on the board: the nodes it needs are made (a side line when the game
+  // didn't play it), then the board steps onto it from the position before
+  function hvMvGo(l){
+    if(!HV_STATE) return false;
+    let n = l.path[0].from;
+    if(n.stand) return false;
+    for(let k = 0; k <= l.i; k++){ n = hvPlay(n, l.path[k].move); if(!n) return false; }
+    if(HV_STATE.cur!==n.parent) hvGoNode(n.parent);
+    hvGoNode(n, { sound:true });
+    hvRevealBoard();
+    hvMvRefresh();
+    return true;
+  }
+  (function(){
+    const mo = typeof MutationObserver==='function' ? new MutationObserver(hvMvSoon) : null;
+    HV_MV_EDS.forEach(id=>{
+      const ed = document.getElementById(id);
+      if(!ed) return;
+      if(mo) mo.observe(ed, { childList:true, subtree:true, characterData:true });
+      ed.addEventListener('click', (e)=>{
+        if(e.button!==0 || e.shiftKey || e.altKey || e.metaKey || e.ctrlKey) return;
+        const sel = window.getSelection();
+        if(sel && !sel.isCollapsed) return;              // a drag that selected text isn't a click on a move
+        const l = hvMvHit(ed, e.clientX, e.clientY);
+        if(l) hvMvGo(l);
+      });
+      ed.addEventListener('mousemove', (e)=>{
+        const on = !!hvMvHit(ed, e.clientX, e.clientY);
+        if(ed._mvOn!==on){ ed._mvOn = on; ed.style.cursor = on ? 'pointer' : ''; }
+      });
+    });
+    // the same note against another game, or the game's lines changed
+    hvOnGame(()=> hvMvSoon());
   })();
   // Whatever is being typed is saved before the page goes away.
   function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
