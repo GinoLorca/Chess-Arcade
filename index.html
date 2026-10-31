@@ -2408,6 +2408,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ol-end-players .ol-end-vs{ color:var(--ink-soft); font-size:12px; }
   .ol-end-players .ol-end-r{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); }
   .ol-end-acts{ display:flex; flex-direction:column; gap:8px; width:100%; }
+  /* the opening, once the game is over (step 2, 2026-10-31): the review's prep card in a sentence or two */
+  .ol-end-op{ width:100%; box-sizing:border-box; text-align:left; display:flex; flex-direction:column; gap:3px; padding:10px 12px; margin:0 0 4px; border:1px solid var(--line); border-radius:8px; font-size:13px; line-height:1.4; }
+  .ol-end-op[hidden], .ol-end-op [hidden]{ display:none !important; }
+  .ol-end-op-name{ font-weight:600; color:var(--ink); }
+  .ol-end-op-text{ color:var(--ink-soft); }
+  .ol-end-op-acts{ display:flex; flex-wrap:wrap; gap:2px 14px; margin-top:3px; }
+  .ol-end-op-acts .btn-link{ color:var(--ink); text-transform:none; letter-spacing:0; font-size:13px; }
   .ol-end-acts .btn{ width:100%; min-height:44px; justify-content:center; }
 
   /* ---- Street-Fighter-style split-screen VS intro, before an online game ---- */
@@ -3287,8 +3294,43 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .plaque-board .piece-wrap{ filter:none; }
   /* the Chess Arcade logo (the user's, 2026-10-31) sits where the theme swatch was; the swatch stays built, unseen */
   #page-header .plaque-board{ display:none; }
-  .plaque-logo{ flex:0 0 auto; width:144px; height:144px; margin:-6px -4px -6px 0; filter:drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
-  @media (max-width:480px){ .plaque-logo{ width:104px; height:104px; } }
+  /* ... and it glows like an arcade sign (the user, 2026-10-31): a halo in the logo's two colours for the theme that
+     breathes, now and then flickers, and a shine that sweeps the badge every few seconds. Only opacity, transform and
+     a small highlight move, so it stays cheap; still for reduced motion. --lg-a/--lg-b/--lg-o/--lg-mask come from
+     paintThemeLogo. */
+  .plaque-logo-wrap{ position:relative; flex:0 0 auto; display:block; width:108px; height:108px; margin:-4px -2px -4px 0; isolation:isolate; }   /* 25% smaller (the user, 2026-10-31) */
+  .plaque-logo{ display:block; width:100%; height:100%; filter:drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
+  .plaque-logo-wrap::before{
+    content:""; position:absolute; inset:9%; border-radius:28%; z-index:-1; pointer-events:none;
+    background:linear-gradient(135deg, var(--lg-a, #29d3ff), var(--lg-b, #ff3fd2));
+    filter:blur(11px); opacity:calc(var(--lg-o, 1) * .5); will-change:opacity, transform;
+    animation:plaqueGlow 4.2s ease-in-out infinite;
+  }
+  .plaque-logo-wrap::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(105deg, transparent 42%, rgba(255,255,255,.38) 50%, transparent 58%) no-repeat;
+    background-size:300% 100%; background-position:150% 0;
+    -webkit-mask:var(--lg-mask) center / contain no-repeat; mask:var(--lg-mask) center / contain no-repeat;
+    animation:plaqueShine 7s ease-in-out infinite 1.2s;
+  }
+  @keyframes plaqueGlow{
+    0%, 100%{ opacity:calc(var(--lg-o, 1) * .42); transform:scale(.97); }
+    45%{ opacity:calc(var(--lg-o, 1) * .9); transform:scale(1.05); }
+    86%{ opacity:calc(var(--lg-o, 1) * .66); transform:scale(1); }
+    88%{ opacity:calc(var(--lg-o, 1) * .18); }
+    90%{ opacity:calc(var(--lg-o, 1) * .72); }
+    92%{ opacity:calc(var(--lg-o, 1) * .3); }
+    94%{ opacity:calc(var(--lg-o, 1) * .66); }
+  }
+  @keyframes plaqueShine{
+    0%{ background-position:150% 0; }
+    16%, 100%{ background-position:-50% 0; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .plaque-logo-wrap::before{ animation:none; opacity:calc(var(--lg-o, 1) * .6); }
+    .plaque-logo-wrap::after{ animation:none; display:none; }
+  }
+  @media (max-width:480px){ .plaque-logo-wrap{ width:78px; height:78px; } .plaque-logo-wrap::before{ filter:blur(8px); } }
   @media (max-width:480px){ .plaque-board{ --tsq:11px; } }
 
   /* ---- Game History ---- */
@@ -3522,12 +3564,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ghg-eyebrow-plain::before{ display:none; }
   .ghg-line{ font-family:"JetBrains Mono",monospace; font-size:17px; line-height:1.5; color:var(--ink); overflow-wrap:anywhere; }
   .ghg-line.is-none{ font-family:inherit; font-size:14px; color:var(--ink-soft); }
-  .ghg-cx{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .ghg-cx .text-input{ flex:1 1 260px; min-width:0; }
-  .ghg-cx-msg{ font-size:13px; color:var(--ink-soft); }
-  .ghg-cx-msg.is-bad{ color:var(--bad); }
-  .ghg-cx-msg:empty{ display:none; }
+  .ghg-rl{ font-size:14px; line-height:1.45; color:var(--ink); }
+  .ghg-rl b{ font-weight:600; }
+  .ghg-rl-sub{ display:block; font-size:13px; color:var(--ink-soft); }
+  .ghg-rl-pick > summary{ cursor:pointer; font-size:13px; color:var(--ink-soft); width:max-content; max-width:100%; }
+  .ghg-rl-pick[open] > summary{ margin-bottom:8px; }
+  .ghg-rl-form{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .ghg-rl-form .text-input{ flex:1 1 260px; min-width:0; }
+  .ghg-rl-msg{ font-size:13px; color:var(--ink-soft); margin-top:6px; }
+  .ghg-rl-msg.is-bad{ color:var(--bad); }
+  .ghg-rl-msg:empty{ display:none; }
   .ghg-links{ display:flex; gap:18px; flex-wrap:wrap; }
+  .gh-lc{ display:flex; flex-direction:column; gap:6px; padding:14px 18px; }
+  .gh-lc[hidden]{ display:none; }
+  .gh-lc-k{ font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .gh-lc-title{ margin:0; font-size:17px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
+  .gh-lc-moves{ font-family:"JetBrains Mono",monospace; font-size:15px; line-height:1.5; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .gh-lc-moves .gh-lc-split{ color:var(--ink); font-weight:800; text-decoration:underline; text-underline-offset:3px; }
+  .gh-lc-idea-l{ margin-top:4px; font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .gh-lc-idea{ width:100%; box-sizing:border-box; }
+  .gh-lc-links{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 18px; margin-top:2px; }
+  .gh-lc-links [hidden]{ display:none; }
+  @media (pointer:coarse){ .gh-lc-links .btn-link{ min-height:44px; display:inline-flex; align-items:center; } }
   .ghg-links:not(:has(a:not([hidden]))){ display:none; }
   .ghg-star .ghg-note{ min-height:170px; font-size:15.5px; line-height:1.6; }
   .ghg-status:empty{ display:none; }
@@ -3724,6 +3782,84 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-status-btn{ margin-left:2px; }
   .gho-status-btn, .gho-out-all{ color:var(--ink); }   /* --brass-text is 3:1 on Hustler light */
   .gho-ins{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; }
+  /* the daily brief (step 2, 2026-10-31; the user: "a big number with a graphic", cycling through the telling ones, in a
+     corner beside the cards, the supporting facts under them, not packed). Your last 7 days. */
+  .gho-top{ display:grid; grid-template-columns:minmax(0,1fr); gap:10px; }
+  .gho-top.has-brief{ grid-template-columns:minmax(260px, 1fr) minmax(0, 2fr); align-items:start; }
+  .gho-top.has-brief .gho-ins{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .gho-brief{ min-width:0; display:flex; flex-direction:column; gap:10px; padding:14px 16px 12px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  .gho-brief[hidden]{ display:none; }
+  :root[data-skin="bauhaus"] .gho-brief, :root[data-skin="bauhaus"] .gho-facts{ border-radius:0; border-width:2px; }
+  .gho-brief-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .gho-brief-k{ font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .gho-brief-n{ font-size:12px; color:var(--ink-soft); text-align:right; }
+  .gho-brief-hero{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto 1fr; column-gap:16px; row-gap:2px; align-items:start; min-height:96px; }
+  .gho-brief-fig{ grid-row:1 / span 3; width:92px; height:92px; }
+  .gho-brief-fig svg{ display:block; width:100%; height:100%; overflow:visible; }
+  .gho-brief-big{ font-size:46px; font-weight:800; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+  .gho-brief-what{ font-size:14px; font-weight:700; line-height:1.3; }
+  .gho-brief-vs{ font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
+  .gho-brief-dots{ display:flex; flex-wrap:wrap; gap:6px; }
+  .gho-brief-dot{ font:inherit; font-size:12px; line-height:1.2; padding:4px 10px; border:1px solid var(--line); border-radius:999px; background:none; color:var(--ink-soft); cursor:pointer; }
+  .gho-brief-dot[aria-pressed="true"]{ color:var(--ink); border-color:var(--ink); font-weight:600; }
+  .gho-brief-dot:focus-visible, .gho-fact-go:focus-visible, .gho-fact-l:focus-visible, .gho-facts-more:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  :root[data-skin="bauhaus"] .gho-brief-dot{ border-radius:0; }
+  .gho-brief-hero.is-in{ animation:ghoBriefIn .35s ease-out; }
+  @keyframes ghoBriefIn{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion:reduce){ .gho-brief-hero.is-in{ animation:none; } }
+  .gho-facts{ list-style:none; margin:0; padding:4px 14px; display:flex; flex-direction:column; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  .gho-facts[hidden]{ display:none; }
+  .gho-fact{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; padding:8px 0; border-top:1px solid var(--line); }
+  .gho-fact:first-child{ border-top:0; }
+  .gho-fact-tag{ flex:0 0 auto; font-family:"JetBrains Mono",monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:6px; background:var(--surface-2); color:var(--ink); }
+  .gho-fact-tag.is-bad{ background:var(--bad-soft); color:var(--bad); }
+  .gho-fact-tag.is-you{ background:var(--partial-soft); color:var(--partial); }
+  .gho-fact-t{ flex:1 1 280px; min-width:0; font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
+  .gho-fact-t b{ font-family:"JetBrains Mono",monospace; font-weight:700; }
+  .gho-fact-ls{ display:flex; flex-wrap:wrap; gap:4px 12px; flex:0 0 auto; }
+  .gho-fact-go, .gho-fact-l, .gho-facts-more{ font:inherit; font-size:12.5px; color:var(--ink); background:none; border:0; padding:0; cursor:pointer; text-decoration:underline; text-underline-offset:2px; white-space:nowrap; }
+  .gho-facts-more{ align-self:flex-start; margin:2px 0 8px; }
+  @media (max-width:959px){ .gho-top.has-brief{ grid-template-columns:minmax(0,1fr); } }
+  @media (pointer:coarse){ .gho-brief-dot, .gho-fact-go, .gho-fact-l, .gho-facts-more{ min-height:44px; } .gho-fact-l{ display:inline-flex; align-items:center; } }
+  /* prep gaps (step 2, 2026-10-31): every place games left your lines, two lists, most often first; each opens its games
+     on the move, and Repertoire Lab on the chapter (your opponents' moves) or the line (yours) */
+  .gho-gaps{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+  .gho-gaps[hidden]{ display:none; }
+  .gho-gap-col{ min-width:0; display:flex; flex-direction:column; gap:2px; padding:11px 13px 8px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  :root[data-skin="bauhaus"] .gho-gap-col{ border-radius:0; border-width:2px; }
+  .gho-gap-h{ margin:0; font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .gho-gap-sub{ margin:0 0 4px; font-size:12px; line-height:1.35; color:var(--ink-soft); }
+  .gho-gap-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .gho-gap{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 12px; padding:7px 0; border-top:1px solid var(--line); }
+  .gho-gap-go{ flex:1 1 220px; min-width:0; display:flex; flex-direction:column; gap:1px; text-align:left; font:inherit; color:var(--ink); background:none; border:0; padding:0; cursor:pointer; }
+  .gho-gap-go:focus-visible, .gho-gap-l:focus-visible, .gho-gap-more:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
+  .gho-gap-t{ font-size:13.5px; line-height:1.3; overflow-wrap:anywhere; }
+  .gho-gap-t b{ font-family:"JetBrains Mono",monospace; font-weight:700; }
+  .gho-gap-d{ font-size:12px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
+  @media (hover:hover){ .gho-gap-go:hover .gho-gap-t{ text-decoration:underline; text-underline-offset:2px; } }
+  .gho-gap-ls{ display:flex; gap:12px; flex:0 0 auto; }
+  .gho-gap-l{ font-size:12px; color:var(--ink); text-decoration:underline; text-underline-offset:2px; white-space:nowrap; }
+  .gho-gap-more{ align-self:flex-start; margin-top:4px; font:inherit; font-size:12.5px; color:var(--ink); background:none; border:0; padding:4px 0; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+  .gho-gap-none{ font-size:12.5px; color:var(--ink-soft); padding:6px 0 2px; border-top:1px solid var(--line); }
+  @media (max-width:760px){ .gho-gaps{ grid-template-columns:minmax(0,1fr); } }
+  /* where your games end up (step 2, 2026-10-31): per color, how many games reach an endgame and which kinds */
+  .gho-ends{ display:flex; flex-direction:column; gap:6px; padding:11px 13px 10px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  .gho-ends[hidden]{ display:none; }
+  :root[data-skin="bauhaus"] .gho-ends{ border-radius:0; border-width:2px; }
+  .gho-ends-cols{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px 24px; }
+  .gho-ends-col[hidden]{ display:none; }
+  .gho-ends-col h4{ margin:0; font-size:14px; font-weight:800; }
+  .gho-ends-sum{ margin:2px 0 6px; font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
+  .gho-ends-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .gho-end-b{ width:100%; display:grid; grid-template-columns:minmax(0,1fr) 92px 64px; align-items:center; gap:10px; padding:6px 0; border:0; border-top:1px solid var(--line); background:none; color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .gho-end-b:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  @media (hover:hover){ .gho-end-b:hover .gho-end-k{ text-decoration:underline; text-underline-offset:2px; } }
+  .gho-end-k{ font-size:13px; line-height:1.3; overflow-wrap:anywhere; }
+  .gho-end-v{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); text-align:right; white-space:nowrap; }
+  .gho-end-b.is-thin .gho-end-v{ opacity:.75; }
+  @media (max-width:760px){ .gho-ends-cols{ grid-template-columns:minmax(0,1fr); } }
+  @media (pointer:coarse){ .gho-end-b{ min-height:44px; } }
+  @media (pointer:coarse){ .gho-gap-go, .gho-gap-l, .gho-gap-more{ min-height:44px; } .gho-gap-l{ display:inline-flex; align-items:center; } }
   .gho-lp{ white-space:nowrap; }
   /* From 680px "Left first" is three columns of counts under the header's
      "you / opp / end" (always on screen, touch screens included); the words
@@ -4552,6 +4688,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-prep-acts .btn-link{ color:var(--ink); text-transform:none; letter-spacing:0; font-size:12.5px; line-height:1.4; text-align:left; overflow-wrap:anywhere; }
   .hv-prep-acts .btn-link:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
   .hv-prep-key{ color:var(--ink-soft); font-size:11.5px; margin-top:2px; }
+  /* your line, one tap into Repertoire Lab's Learn or Practice for it (2026-10-31) */
+  .hv-prep-rl{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 16px; margin-top:4px; font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
+  .hv-prep-rl > span{ flex:1 0 100%; }                 /* the label on its own line: the review's column is narrow */
+  .hv-prep-rl[hidden]{ display:none; }
+  .hv-prep-rl .btn-link{ color:var(--ink); text-transform:none; letter-spacing:0; font-size:12.5px; }
+  .hv-prep-rl .btn-link:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
   #view-play-history .hv-movelist .mv-san.is-prep{ text-decoration:underline dotted var(--ink-soft); text-decoration-thickness:1.5px; text-underline-offset:3px; }
   #view-play-history .hv-movelist .mv-san.is-prep.mv-viewed{ text-decoration-color:currentColor; }
   #view-play-history .hv-movelist .mv-san.is-dev{ outline:1.5px dashed var(--ink-soft); outline-offset:-1px; border-radius:4px; }
@@ -6080,6 +6222,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     <div class="modal-title ol-end-title" id="ol-end-title">Game over</div>
     <div class="ol-end-sub" id="ol-end-sub"></div>
     <div class="ol-end-players" id="ol-end-players"></div>
+    <div class="ol-end-op" id="ol-end-op" hidden>
+      <div class="ol-end-op-name" id="ol-end-op-name"></div>
+      <div class="ol-end-op-text" id="ol-end-op-depth"></div>
+      <div class="ol-end-op-text" id="ol-end-op-left"></div>
+      <div class="ol-end-op-acts"><button type="button" class="btn-link" id="ol-end-op-go"></button><a class="btn-link" id="ol-end-op-learn" target="_blank" rel="noopener">Learn this line</a><a class="btn-link" id="ol-end-op-practice" target="_blank" rel="noopener">Practice it</a></div>
+    </div>
     <div class="ol-end-acts">
       <button type="button" class="btn btn-primary" id="ol-end-review">Review game</button>
       <button type="button" class="btn btn-ghost" id="ol-end-again">New game</button>
@@ -6451,7 +6599,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <button class="neon-sign" id="card-play">Play</button>
     </div>
     <div class="plaque-board" id="theme-preview-board" aria-hidden="true"></div>
-    <img class="plaque-logo" src="data:image/webp;base64,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" alt="Chess Arcade" width="144" height="144" decoding="async">
+    <span class="plaque-logo-wrap" id="plaque-logo-wrap"><img class="plaque-logo" src="data:image/webp;base64,UklGRuRbAABXRUJQVlA4WAoAAAAQAAAAHwEAHwEAQUxQSOwHAAABoEVtmyFJ+v74Y4y1bZu9tm3btm3btm3btu0drdUR8X8XrVJnxNV2REwASrmIc1odnXMilUGceq+CCirqvUovJ+oVnfcbd9rZF1x2tbXXrYBrr7LUfLNONVzRuXonvZM47wBAp1hi+5NvfuHTEf8ZK2T6+4ePnrz2qM0WnAAd1bveRtQDwLhL7n/L+3+wa0spVsJk7OboV6/Yaf4hAOBdL+IUQL8FD3xoBDtaCCEmM2OFNLMUQ4jGjl/evOPMAOBdryAqwMBlz/6QJC3EZKy0lkIkyfaXjpwPgFNpdU4BLHDaJyQZorEipxhJ8pWDpgfgpZU5BcbZ/jmSFhKrtaVA8q871uwPeGlVToHpT/yWZEis5CmQfHePcQGVViQKzHHpH2SMrO4WE/ndUZMAKq1GFJj58n/JYKz4KZIjjp4A0NaiwCSn/0VGYwZaIL/dawDUtQ5R+N1/JKMxEy2Qb60J+FahwBIvkcGYkRbJm6eDuFYgiuFnJkZjZqbE0bsBvvmcYJn3aYkZGskHp4dKkyn0WGNgnlrk6M0B11Qe0z5BS8zWSF48GNo8oljlRwbmrEW+MjN8szjBvsbIzA0ctQq8NIWDu5gpMXsj0+5w0gSK4fcxGDM4GU+GSMMpJn6ZgXlskVequAZTTPUeA7M58Lb+cA2lmOYTBmZ04D0DxDWQYspPGJjVgff0E9cwDhN/wMDMbuetTqVBnAx/hYHZ3c7LoNIQov5BBmZ44HHwjSAelzIwywN3gG8Aj/0ZmOcWwzLQuilWZrRMY+LPU8HVyWGaUZaY7ZHP91epi6h/jpEZH3gmfF08TmRgzlvgmtA6KJa2aFnHZD9NLK5m4oZ/zsTMj7wdWjPF+QzM/sBNoDVSLGHR8i/ZTxOIq4m4/m8xsgBGXgatiWJvRpZAi6kNWgMnk4xOqQgw8gXnaqA4n5GFMHJj+B45meWfZKUg2ceDnPQINzCwGEbuAu2Bkznbk5WDZF8OEeme4joGFsTIneC75WSGf8xKQrIP+4t0R3EWA4ti5Hrw3RCMN9KsMNhTcN3w2JWRhdHS/NCuRF8vD4EXdEPRxsTSmPjT2JDOPM5jKA6M3AS+E8GQb5kKhN0D14liFSaWR+Pvk0I6u9RCgWDkVvAABIO+YioSdjsUgGIxGkukccTYEMDjKIYiwcQVoYDgacYyEXgyPBwm+o1WJiKfh0CxEhPLpPG3ieE8jmIoFExcEepwH2OpCDwUHgO+YCoVkbdBMX07rVQkvq/AikwslcY/JgZ2ZygWNC4EnF0yIjcC7mYsF4EHwb3KVDIuxJCvSkbkXZhsNK1kPIu52ktG4kf924wF0/j1sOVZNn6aYD1a0fh16i2YisbfM29XOP6bY8fC0T5nn//6/Nfnvz7/9fmvz399/uvz3/9H2aF4bFs4/pt9s8Lx14xr0YrGmCmXZsk0/jDuQlYyEr8cOtu/tJLxnp/w55IR+QQGfs5UMm4Dni8ZgWcCtzKWjH2AkxnKReRawPYlgzY3sAStWBhHjwtM/hetVCS+JgJ9n6lUBF4Nr7iZoVzsAe+xT7kwLgpVLEYrFMafx4YIhv9EKxORD8EBDvcylonAQ+ABj70YyoSxDQo4zBGtSCR+ORACiOg7TCUi2GVQAPA4iaFEJK7RmWJhswJh/HE4pIOIf4+pPAReAUWnHkcylIfE5btymOk/s9KQ+PEAkc7g8BBjaQg8Ah5deqzLVBjM/p4GriuRgZ9ZKguBN0PRTY/9GctC4mLdExl/pFlJiHwaDt1WnMhQEhJXg3bPyaS/mpWDyJedQw8VJzKUhNWgPXEywYhkpSDyKXHosWJfxmJgi0J7Jm7wx5bKQOSNUNRQsSZjEbD0+9TiagHFPYwlIPJAKGrqZNrfk+Vf4pv9ndQGij0Yss9iXBiKWqs8wZh7gSdCUXOH6X5LlneRrw9QqR0UWzBknaW/5oBDPT2uYMi5wO2hqKu4wW8x5lvgFfCos8OMYyzlWuSrg5zUC4pVLFqeJf44NRzq77EHQ5ZZ+mcxKBrR41S2Z5hFbgiPhhTFVQzZZYG7w6NBxentbM8sCzwUHg3rpN89DFllgcfAS+PAyYC7GTLKIo+BFzSyQ79bGCyXLPFQqKCxnciljJZHidwdKmh0ERxDSzkU+fcG8GhCcdi+nTF/Ar9dHB7N6bHM9wyZY5EvTg2PZvWY+immlDORvGQgFM2r6HcaGbLFAv/YDnBoZges+Q1jypNIvjAnVNDcopjkBjJkiAWGY/rBo/kV2PhrMuZGJF9sAxxaoSgmOD8xpZyIxjH7eKigRSrQ9jgZUy7ERF4xDaBonaLABm+TMeVATOSDiwJe0FKdoP8OH5ApWrWzaOSTqwDq0HIVGLTt6yRDqm4pknxwZcA5tGJRQNd6IJIpWhVLwcjfrm4DRNGqRQHMc8ZXJGNMlcpSSCTfPGBqwClauagDhq178yiSFqJVoxQDSX55/tIKqEPLdwpgoo2u/4YkLYRkFcZSDJEdPzhnxaEAvEOvKKoAhi111OMj2WkMIcSUklXGlFIMISR2+vWde83rAagKek9RBYDxltjrmldHsLrG75+5YLv5hgKAV0FvK+odOo4795p7nnnT4+9+9v3oP//5r/f/95/fR33zyZsPXnfizivOMgwdnXeCXlrUK7ruP3TCyaeepgJONdn4g/uhS/HeCXp7ceq9OlRMp96rE1RJERFXEUUEBR1WUDgg0lMAAFDtAJ0BKiABIAE+KRCHQiGhCuUHQgwBQlsLT1kgC/AJ4E7vV1+A/DPrLvI+N/Jf+4e6BVf6l/Z/zx/Z/+5/nPlT3UdQf87zi/O/2j/T/4n/Ff+f/I//////cH/Gf7n+5fu18sfzh/t/8n+7/0Efqp/ov7v/o//B/k//////q5/Zn3o/tt6jP6j/d/+h/h/3//7v1H/7H/x/5z3Wf2P/L/9P/E/7n5Av57/a/+7+f/xdexz/gP9v/2vcK/mn94/6H5//MB/v//j/uP3/+kP+rf7P/3f6r/bf//6H/6V/h//P+2X/6+QD0AP+B///c3/gHMAfKLzQ/O/k9+33rv+MfSf4X+/ftV/dP/X/seqB2V+wXqh/LvwD+V/wH7dfvR/0/n//leMvzE/xft6+Qv8Y/nf+c/uP7gf339wvqO/B8Fbcf9n/0/Ua9+PqH+k/vv+F/7f+g+HD5f/lemX14/3X5qf5b7Af5p/O/85/d/3F/tv//97D/neRn9q/23/G/1X5Y/YF/Kv61/qf8D+9f+k+m7+g/7f+P/2f7ee9H83/xX/U/zP+o/bD7Dv5X/VP9j/ev9B/7v8j////J98nsh/ab/4+5r+tH+8/PhzjwbkJQofx2dJaj2/3LUwUYpzCfoPyed0/JClFXojQ4UggdD70dMiteh729dPLljo5zmFPg/tYB5zIrdDymb9i68vnDzJ2vD9P////NWv8SD8twDknaSVRrUZUicI0iV3H8hOgKXXGud1h7L5iI2GBPWdpQgm3CFa78miwp6Ewt6D8N5wRMdSQt5d+mc9tn4uvdiN9D7zv+gpgjd/BqJMRHW46fLLh3EwKAZhfEtPqewtWS/mQfb3lUuZ1KmjX5pZ95UBE7AK8M+OfcCbbZtlsyD5JNgiJhX+50w56lxv3yCM5PHMxnmE6byCNv49As2ASaz2FqrATqAZeAeetWXheE8Y8sO6GQaymTfhi2NipnuEZY7+80EgAjeAmLQlv2piIS95P9p6J8Yp07rG4UAo171wRugbdQypE1/I6DrJnRMYiQIUBHypww5lTJIJ/kwHAfJT+l4kGn5BBBSSvcM2U8lmQAoC1DTfU1nbi6GjGpNc44eFAE4/uz/dsJBhXpRXj6cJpLnFV7oFSgJbpeHndTS+mOlpiyveZrjBYcs0AV5a2Xjj+PWaKemOwvUNHuQx1iQYhTcGeuqZWATKiO8+uKQSt7IRn8jlmqWugKMXPNEiCfR56JVmbx+QDxp2KOVaHykvl0eOd32X+r4gcnpacIBvdHO9s9w0nOc2IMd3TbQMrFENh1x8/gqUDbERuDn+Zaa8CsIIykbrtZjbGBs7D5cR2RPT5IaZvNL2p7VCnKAK/Jpvhf++SKLydVMX4MoBTWLnOysQojWchNeH2kPrNHfp7uvLmDR9ng/exoaupT+P/04gD0WvbvQBAr4ZmWz+eqmMWyam4oCiDJT5zEwUHFEq97Kuvqzd2bISA4HVkVBXZ/G44A1djQzGjrsNwsKvEZhgEeD2juHZ3tOOlB37b06X1SvuhmA718KUWNGj0Czqc6WJQRPem9HQhqaCpQCUKIXzWGlN+jPsZ/aSQyiWNUt2auO66w6sFpdJc5EsAR9MWu4sCV5yl5CvmW+OfSp4us78AOhY//tN5ndWscSXgYn8Y56y7bXDM6OxZe/UGkp/DuntY7xzn2v2yVAePHH2t+LhysVtQNsCiVHrskrxM715YEsZYpeO4svFfI4hAlu8qi/PChELx1cjL+ylvs3p4FEHdrRbZyQ6GdGz6d3X5p4X37r1BwbaJgtoh1ax/gNnA27ZcHo0eb4xTo0I8mjUvM/USSqp8F1iZ0ZTvb0+3oHQYa6USS1w7wS/ALKpDDnxbPIygVoBfrT0JBqGZXreRTtl3v1rvXOu25lqrsz4SZjrD3pOwEIddCjzl+hWAe2Hxeq3KfaVOTwUoBHRD7xmhl2m4AznylyO8e5wY/lq+FfNE7Af7u5JD2JDw3eZc1tINTHWFs5GFQJkXju5emL0NUv1L/DQ5FS6+4iKkJV8dWEwLjeaDVs5/uk7A2VwWxH8khpIGzkEW1yZjxS63SMZdQZMjZub4f/rc7vnQ/lRZpb+uKRKGRJffuPQ9zQ7NY/VH/kUh2eNdSH7N7GsMz0liCQHlY+8DCe51emm5cVEEv9IgFS27um5koa3TOeBHKm8Crdqxu9K/0t0boaQFBY3YreeTZNaqfYdl/UDx0Dv/9dbkMXM1G2+sJl+OrT34yQ28O8/cOmJdcgaC6WhxM23oy9bd5ob0tmkR6Xb5KkyAOCy3WqzjXep2F8YPy+vR7FZtzxP6E2rb5Voz9tPjgmjAlYhWwt/BnHGwEJCDGcs84C9rCZXotKqfmkF/XvLOSWdEHHT16eNQmImfhxL2RfZhRkWhP1ciF5OEL95dydJfLAMJQf8gR//eLbcIOIP5YqW26+4UbWKxu6Hfczvc/erBlNqmM8uL52YaiVrffLC/GLEfumQLJpDY7cTwAeAmq+4Tl4SHzLnBYvpFSbU+zSW/q2IYXz/dDrAAAP761iACm//am6/Qa+8Eyp58QPd2VBUFbaeJcCQfgagjmFBFUG0Yoi9139eLkxEAPQX/E8DXvNok4Wvqk5JxcW6M5EAB30fbkJGJGdYU/7AtpWJbTahXCsqPBjWDf7i2K/bNorumWAFC62WURnZQHKrzQ2DGbF22xgvvHGzc/H7HnU+i5W8+VqWhnzCJaJ3AuGPG8VPt+Ap4VwyqZNRtUYSRTdgXEli0SdHmvXshAkyKTe4spxe4wLoQTmH04k5mEzw0BsFpaY5fM0LbAoEfCW+Swr9gkfoQVHl/oACQlVvSlfJxbTFtUz11tU7mAdcJmIi++Z/+TkcNuPRn6jm9HDTKZWyKlfDz0P/5K5Fhw6g2Xqpoymn7bj0loaizLyGdUkwVa39mET8nl65YdjdGIHnff9mm+cOeGnCNIpKGZUgLNCPOvNxsNl3vrZ5DRT6GSMrzPcI8NpNF5TZ+fMu7WEV6Qh/LR1nHLb8fnNWdJWWoyLuVGpRkgGLyYJj2iQW/F/7zbtH9LoIAfswkawot+qvknBKHOQBVOpxJtJcovWCb1vvGl7FWZ7s6ZGyplmPzu94NiLRmf0oVUwfQn6z7LWT3TxzYZ5QUI9op+o5P9HpeGBanMaIwYuzMoUFJ9qjCAG4gP5RU52rNDR7u/nHn3HY/IZe7AK29jCEH95/Pkxqm5GeZRfxT3plfzgI/mpuOZDvoAnaUfCudoMnpn4SqXe52u75Dcq1Lhz5VJjVaiqGhM9goNKgZuN3Zrd/QHCCH/y4bk6ITEuvt/N8mtumeUTk8F/1FKVEachy3EKFDBtT4GMPL6w2sf7ZcfZo+IE9UMNBEwEQmKG+oqyfEckzgX+IcfavhsyAdUHO27ItqnsBj+5w4/HR10pO9FsHhQHScTxhi8r/bGDmPWYxeNNYsWS/qdv74lGIaBfD8D3E6HbFm2wcQzFK1q1XNEt2rMCnU6pYk+xHt1ICsBsbzzZ7AprwZiT3jqJtePcqVlqL4s6eBx5+2M1OLY57JRuli2+I9FF8P5yv5ly1/GDfYC2scRj1lc/0sNLcyp36K3f8mkQby9/e0tlB9AyQWvsldc0UY0J7WzLvlGgJCPeBH/DOt5giPTHLSLg4ujmEcxE1QwYmyEMC1A1olb3HfHIpo7MLerz99oR5571zjjTAoe2JKLfYBG2NBU9fYF1/8NX99yPIGWgHHebxHqU0USXioGuKL3QmWOAe3eoc6H0UIJJbLK2+X2EDbUv3JSGe6NpPSTNAU+tLO47SS7F5x+Q9v3Zue1WvBCLwubu9W/x/8twEubtoUma4GZ4UnhwYu+6eZ8o3H+6yn/W6T9NeARdBKlSnFKmQV56Y2/lQe8vl3Kt6FUYcUc6WNGKy/k8IrSh2FYMeVgRPQJJiaJ/RaAAAJP/+YGf8YBloRn3+M00CY5Tn0T0+3JlRJlxAD//y18VGJXAtuyVqmmAymxBnxn6BsFWLgRIky3UzO//8cAwhzY+ZGwZjX+15d845gmHvLmGHHXXb25+WG4NpQcnyLsbezFweNDqGsQHXMYv6UaM9yLfH7UR1/duKhJocfoI5P2vH6XZIp50TDccotwQ56cSNeqNnElAbqqSIG0UrgMsLGClp4+q2W3xsMPUvyn0hxIvqseWyXVmgM7DHyALWWeD/72+5vpAI0W049i6ryo3Gk1o4Rv4D8mmQlJC8VqieALs6EJNuCBg0Ajk7rUbDKtihkFfq1pICXHhy0q+lkgZn+BoIi982xYxy+TEHEQ0fyJ0fm/XCGmzHW1gu0hcdyZM7jHFfiKDu1StQwwDjc6yQydvL96YQKyGX1/t1y6a6hFjV4Ogo9va8SLDshgwS0gwT7z1U+YeKHEb8kXmX5aKDnviKx22LCJotECMIx61VimHp8kmjIH/B0/jQZKpq5bnuxmb3p2HSKJgf17iL5j/G1/Balf0WqBTRpt6wkAN6tOYp/OANGR1w/QU/tXvWHb7xL3ycn8FiyqSaCWG474e+1jhWOqB1mLmtFndEXRuAYk9Y7caHsU3vLIkD8FtBzU7HAqMqYRgAZRGiB/ij9ZThIqMOvATxJFrVswsk7NnVCT4ob8YmrzRSk9n8oUNnXnArTD3+6cxjzIaZoqX1cFW+xdsDQXW4000/i0kcSDWKXBRk6MVF/1jkurRsr5FmI3zpUtiMsQvX9zFxHnwtkqVkSOtmVZ4Vte7DrtkJGTnLDcmH2d00DfzvuPiKwitlif0Xy+uLmXA84eFsAFd/CMsItJkWquk4poWlNMMP1If876lCgac0QVJJ4ARuPYBXeoikTrBxmAi8aOdHP0fa0fbgdEgE9V7cdcjhHYrBQgb1NHLgmeQ2XuF0aOTrlJveZAknlxYrAUpeIsPHb77hbGfdIfJBCR4+3yrRYvdauNpy3pMSmTTOE2S86ZOVPMK63L+xWdm2I05eob+S6O8BDQKNAKl+iiSFJcA0q139i3UWhjgeH5Kl6VcNGZwk6MKUDkUf5HbmxoZx9IGU2n2fRLXceQWeqJ32dH9huyrXTEBBYEdjRpgeaoo4p8FQ4/xSXFvUwnZcpAj1GTMf1UnrKGWYcoXdT/3i6qYiLmV13XyeAKBPbYKOtdifThpwBc4HPtpTXZF+ALc/GWSjHByl1HfI2YoNy6lSrEpEIznMpksQVVyJKfHirXzVexBaFYNOS0+0iAPiGcdu+fFF6qrhGAdSxKZ6oXoMgzHHBk1AXWXiQtEl0U0I/I2/8crRueDrE9hzXrU9IIsq+hdJVxRBpxyuX6UagSjUlXqGU0ZARRvqVZBuQfFuDY0W63q2U+BEq/QlMAfuoEST/+guwCQ5TYQoCLDIVX9pvlNcQf388rz3I79/nSTPE3sU7t1oxC1Fr0RUYhE06WYtqThAJoJg8oHdmrGSngulRszFB2ao8IpBINUKf0S688n/OUYFSp9IMFuzTCax9UkPI+wiYuy9ip+8oD5WPTxbvJ2VYW8j2nuwFAAK5GYRaHIxNevGZZtSVUzcUoS7yZjLAmdpzkYE+PfISHzRxjPjfRQpGCrFO0yD3+3qbAmUQRfds5JKhT9AFzUdRaorr3PORcv9C1IvvW9KPiPWhKmNYQuXp6pcK4h5GGe7lWtRP3RN/nXbewWDqs9qSz2YnFVguNxw1IgAF0Ial4T7rGNPc7xPS9aMHxfGfL4tKv/enhDRTbaVBhqh9z+GqnIzZsmKhQYjie4AoYZKa2CJPrRe9eMOjb5/qvt5S9SjARYv0p6IpWWWKPbLctXYTtpN+l00rOJApNKjZZz+mXf391T1y1NYvnta/ihQL8NUnwHL05IXPnK/lELSJYeuCxdhF8KrrteAAq5OMr2b1q1haYRULfgy1sRCO9qPBf49l5WSIdYsXBPpQVY0SCfpeom+50IdMhOz0HoqpOFlRY/s5XIcVWqkGv3fFOyOAd1gsNkcJCbehlp+7Mo2MtpwyJlz4YtLPYhgS9gb8NK8tYYJuDJhAi8bm9DGFgblBL9AEwozzurI7Lz6v5q/gFn5mPKMFbJW3BDeUZ/rDrjvb9lQ33Z2ZDpoIKJjNE5AvSjoYxlhrWHI0bDHdHFdoax7wd+Ijq+FWDj/n1KqI0XfIg4A+mLgfTX69wUUlZXAGCQgK1sSew5x9DUoQDXIqQZKwmd+n7CuqLs91aZMyN3sjWkEUQcI1jU8abDr2aRnHReaAIP39V2ixuMBl0zyElChmXzTsW9RqvKL9yDIIqwfWMYGzIxZftz8hdB8Pru1a6rv5HnO2RNWid2cidMzyyOYtG4Zqlz2NNEnmYbfIqH4CRC5+ythK6lIHX/6P6Qh9GjtCgwXMSBgCytceClYeQgGcCmBBOAaUs6lc6dNCsJW6/IIS4eS1ptYjfU0VKxRAtPnzAzjdpQaoMqW1/1S7Sg/XhBtzq/5+TrfrUxGpMXpTQYIYI+rCZtYVTFzXr7mGqbeXrRjT0hpcS97HbQSVHs5wJhHvQU8xNxJpC5CaR1NOeDJoyUbNwtzXZIrtOjeuvuz0AR8uj+QPLystBZbCD45l0ytxtgDZGtGUeOOm0l5g57iQXjMNDzVq3FDiqQvtwayNO9NSDrmck9OJ0xjwz4N0hcqUvUK/QgbuCu/8FFVQOqd387qJRlyL9PqJj5evVq+AwwyvLykk5ytNyDcJ3kYm72e6jyiYNp6UjoIV/+WnPsjrtF2yIoZHZOVWAdcOIw2f7zZJuvtHopa7G1MxYgdpaPV/32VVE/GBdtFb7XXZW9Qg3INxBdCd7sxvWgL5HLaPAA8sMudbv3fGpjSNwxv2VRoDmXNDMvLWL/5oavAFYg9TElIrLqEWeT2smMgfnLjjW9Rbx7F/pGD9mIM3rbny/9wVJ2XpDsyUTCMik9QRKqo1uxLZNCSzuEhrXOvSmIEEdvbGFJ5AXFq+/BH0n4T2RiKncMZzzPfBHnP9LzksQ8WakVxeZzBunzM2Aw9PCG/4BGmZubNcLhoikqv5rQF/CZTKLvmbVE2aUKt6njjzBeITBa+xZBa8tCmr82nI0APtMBijT5DpxEsztxkaKD2gmlfkmZfImqhGYWeYsDGpUJs+0j32pX4HO+wsJrFXSWDDJmriAy4YhP1kFzcrwZbMcN+eU81j/mMAMRJ0gRv/9U0kofGosPm4RVdLZium0mCSYIfSBaFqL+8HDMVuFU0TbgGIwIKHZu6crqapdhw1TVVLNOqAn9sT3kKq3wLsG9OCgCx3Krfd6qqOrxC3bNHTouglnGok8jfz2JpgL1tsrrkUTtSlUv8uawg6PELjbaA9Uj9PLXdRBSlF8RO1/GQYAGlQjVOGULOs7w7oXURgsCgvTk+ccuNOka/tZkU5E94MuFweYOiVZ6BMJwE/I/LTTmGGIizLYtmEtZpRFqUcRM2yj34Aw89cj2kmt9MvDmXSfuTAqSEeTKlbXqzh9ptO/emhN9I/AZDAr/Acp47ktma3HEid1+Z4kk3ph9aSbx0wuL8J5bC2hxL5IFXL0wZlVuJ8THyRBACjqPybbu5NwCr77vMNSN0MlbU4qcnfwsoIu0ofSYRfXPJYVSk9s24geYsi+WSrsuNoK34qWBp57JRLvhpIs7aorLmy5BJG3cObxAjXazxwcHB50mULrvSudG95ZesyVv3Tj6Sf5TWpipkvQCLgxOdfzPNpr16mZulVFairPEXNhslsu7+lQyLe3qlwUCyMXpM+5fyVo30Tn0WRHhdolvY5VRYgb9nbnXgJVegFY7y83t7H7jeUNk5f9rSsRjiEXdJI7JUkunFRcUA/BPTCD9MXpNaDFfteorjyNfbwiCigC3SrEOYSAQVRlGsg9spiS4SXHCTXBMAfs8wFzfWg4KVrvItWfVsF6omitHaBL2y0qV8hh0k7gUJGVBlaaSMlVoAjILv5n7grOEw4lJ4AxPk4zRTFe0JwVUWKJGRCV0OyRV4UDjT9xZugfCac8IeyrI7RLeq28NVOQ3s6dpLavKz22Y5TszLB1xCRoD073hJ4oMuXlsQcSDD0Bxt6RPKaMeC7kXV78XOyaxFdInaS/wLji0LzNyLrxpITaPG+zid6aI34Ui0llw++ik2u62Dd4BidyLRMXh3kcHl+vVucpySqdLtEq5D8Yj3D2RJymlvnJBFQrLY6kdV8iEdKJYgFC/0OlATlnVrsSAUeuZKMwjONPI/Qeaa2a5pqFjkX+Q4fVpkwWDVhEzzvNySlAp7N+2Z9J5gB4q+bhPiri33Zhd4zaKyj0Vlv7YO3j+ONttYr0/bt19HwzXysPbs0KpdF57e/LgoG9VVodcf6r5RCE1Nz82CGThVN5MmwFmuGiWDouEPUwWvNEsDyRWVhaf5NavsQOkIuq8wCl0snFFRqcbpkvo65E6IPAndq8FJIpl+AYSZ+Z1Ds4tirpDAve8P/pxwc0/cT0htcMslsJjJcv2asksqZGNzKL5hrQTUwuPOkTDr/i363lOJ/maWQSwDyH1mnUl8gRdFaFQVW8HgMXbd8tHezwnhLWGyFGil1EC7hp/OUW7TTpFwe4gOTyJ+sRMCOr3y3PmCaOhYtOjZaSVrYaDrQzVltcpDB4ErLL1XL781osvQEMiYBp4WBJE7xoJerPLTN+I+UEBTjHKBwvxFb/umfWT3jaQCJSZbmfXxHrSS9stp1AaEfaecVKpTm5pCB8P1CCXERiWq9UJGxveX8nY+5BeyQWWhKMyiTBeKOB4Z5yoWME7FxTHHVFlx0zKablwtsLFQaIJYL38cK5tKPDkhowr4bAGE55HgykM5PKXln7iM9yjUkBSQCngzpfMY2Ga20wHZY5tMTKo9w9J5f+RjnzZBAabOowRz16AmkohAs7SWIH+PKrVZVcFHsiKZSb+/poYB2tMbmYY/3bvZA1KC1GPH2lhNzEk+Bp+XRv1JklyaMEWBdHkOUA24k3+wf2NET+hLq54FhOlOFFu8GcikAopt/0av6AicqloXkJHYEAbpWyC0x9V53c1dgFCO0jdB1AnEtlZZc1XMSwvY8/fOIwYez8gBaBtGL0E0A9VCsCTj5kp0sJPk95wfCMx4hcY471qkdMR6PodxfxCnhYAHejw9Vpp5lL6tLXk050OdE7hca17N8PhejEfR7CYSIdsW7Pyfd9LJI+hJQgO5quTydmq4z+rO0cdH90KD5Tymsxlg6GY+URnNz9ie6TAbgGDWenDkptMOFi6d4+9NMKRkjYai85fGkgiRPogrvSmIVvvUJz2tUI1dnc6HDP5glSWGJiSzpHSD2f1sAi171V4IzWRkUo3FZBJSZOp4Qc6sVTqa2QZUYm9WPeF1MTeU5OeLm3YP7LiWSNrXK8QTa4FwTERcDlIcjsav3Bb7BF8vzOiUAGm4RiVA/Hl/5DlrFJOKC9n0EVJG+DDDSO6t9diUl3Tu0kgKdmSPTJJ92O0ZO1CoT+HJC9g5RWwnF376yrAKHYirkLJf9grg3x9ioNoekx7MiVqL+ACK0ypFFl1RDxiwRku9iCRibAEHxZzKYaYP2H4OF2tUL7x4vHJU+ejuZUsgqisGq+2m+8kqcN/h7H/mYGDv6M14Wx4G0jJPQdJR1gVhjxXE95dkNi6zIxXiYC02Dobhj8XUBBW1+1BsMhQi6scBDDyKA/cXRNbpWnKd7A0ewYzBowRihYPWXsVt7DcVfTXuhnskWKl4YXq0rjusOJfrq3U1uII70FxcoIAH9A27I68XHvJzVWy6GiqG85uZQmb8QOcVpIGre1YvIBVXEUsJsX3/zH0c9hj8HmlXZVSsonR15aeqTTSj5DJY/j5SMU3sbJxAO7knzOGbOnCZEpI57YfPLg73ywvFjARvIL3slWTedrMUu3oi1e/n/yS/fEiE3q5SKQFH+LYbKOIAex3n4/1azMLfNftaLzuP6Edna1AMVMGx+rsb8/gmCbgQjXj26cglGDtCX5N9XqOkzxzQVeGxBcBGNqt5byneLwIaAiKKHFYlquh2sOO+20wFchWmWH9lKK8X+v/PctJvZ8aQXiZWB39XCSyq9IDW9QZqnkYreLCaQYg0zndP7nm+nRzq+VCpchZKHz39dsLru8EVZWXnZu3NlwgMJ1tPKskHE7SaB6uVU3Y1qiUfhOKKdBh6HSn4SxrInKFdIzzTIG2Bbl0+eDJdgCQNFmIJEF5Bc1cB5XKWfMxxTVutQt/Qgs6ltyqZUg0KjBzRQ7IjOyWMLQD07xIRpFAV+aaoXPokfkjrm10GoE+X1Ckh9KfI/iOov5rmVgwuveZt183vxACbct5rtAWqtLUHWe5058RXaadEx20m86vNLnVftduFl2tXWGqTVKs+LxlwVDVwmeNAsfAkc2U/svc3+x2mSTFWvWKU05iqcN11JUwJsePmmbrIpS0QQAHqTai+09A72SVCxelrfpKIe29jPXhHUmEGdLuvRE9g4U+u4L5WlIvP8zcatRZCycVYCUKsqRXYc3yFhA/GIb2OQgezgrpqFl4Kl6zuRUt6f6h5CGPIhpNPf5RVP71SHLu3bys0VLfupAX+XZSFdQ9zAJAWwtMakrreyGQQ3hGeTZ7hpmJEh61DtQPLYCzLiZoHD59x6+6V8a5cxWDa13xoXRczHND+c/YehdaP4a7xizGjRg6w5tf/OL90HmVXVx1jgzptWg6tzAx7dBlz5xha3D92hM+iCrWSj5nqL8QJvgqv7fqhKBJUdWynfv8ZPCgEpacMC+QuSjNJrkJLWcsr6n+E8D74UYCoxmsld11uohiJmDAc70ysfflWZsJPqU7KB7jIwzSv1FS+z7vSvSKGlq3Kfo3mELTWHUl9Kkg83qC9VNOhO5bUA2bv+N7kEnjCFqXyH54Bkh8Q4mVfjUwCYYQvf40B6Qny+Q+IUfaqInuFD9o0QUD87UyIFFD+VUW+i91qHLQNoyr9ih0TVdaO0wd2WP/rX728qQ7wccDFr4omjYyCr03j0Xf82AXE+7UC9fd26Q5OAim68aCVF7tr4R3zqhIXo1XIj8ZuvLtrA4h+lCTGLAz++FfF4Pm+5zAbzfKkbPk5kspNVpZVoafJcYm4HgOqtRN43puCcoW8A+IjIQE3ZRPINCIB0qDGqLjMDg7w97TM9AFnIF6LXQalewIpHGvstowgNqyZdxoT+4bh108DzkvfzzMcj7IaQKL8XQzuNpkanLcSUts09LXwUiL4efe/GkxKy/FIPW/A7CkGH4+07QPHCHdzIHt0pDToWKrmAZWAbi2Eky3vU0kJhnD+XQPk7snUdd0vNMOK802R1QG39I7NBkcITE51QWE2P8yRXCiT3QyKVuVJfcsmIPMLE51nhS+Cp01B784zAHAQgECivP27sIh4TmBBeaMajgGwpiNz2NKhilDvQLu7HNFkb58P+nLGobaByU5YHFpH+gAwKBsG0GLOBfxkPJhob6dxCfQmihT3jkta+EYGpnUmyk8CKh8IUZsKA8AlxuW9/sR2T1OvB8Gkr9vJr2K/bqcIji0Rq4s340NWzPS+4ovRjZcs7TS9QTTV2Os6+DRhbb7+y7rKLEaviZZMQlzSHCetIki6VDt4ZmlvGFPQZ44QjE57VZRH9T3iWVY6ucmBT0irdOFw7RqEFXVEQAABefnliSLfIVOkIXmd62THGWHhS+rG9QexEa+s3ke11JTeTrEoLKgv6bASOs+vyXrYZ8aMC0/bh27TIhNk1667AF1U77EoTSeq7OLd9DqiWGRSKrzBue3GPU6pNIYwIFADR+00CKghtfFmlaY7b5zESiAXwFXvxL8x70bCwZWg5AcjG/YQvsB6i3HLRA8g3+eiC6HWQHg0+qwWYnt+oXZEHcQzjm+4Q+HWTyvM8edXxl283qIzYYoN2sP4fjqssUxwIGHJuUaElgpsCE9r8GKYtWQQICgJs07lXBm6FRv4T585iemmJxu6620P9RpR47rI05HltXtNR89pq+RblbdfXYzu8izCh9gPdE6S9iI+LWLRXUcBYGNjC6ddSG5yAzjzgSOUM+6SG6jwnKEOgy3VLZY2B04eZ/iOrAYCE9l9CBayaXbICrlMdM7f2izSD+3jdNwLi/1wX19wEmw4RwvdxDhX4qtVnpyW2iAbabtfDqBnmh51ZmONA2z286IyX5L5OOFn7+3HZQhbCTXyPqD5JtpJCoEGJctx7/v+x4s7xeeUfsA9W8fFBkqvrd7exVJNl32y/C0pizcykw484NQOUEXZ1vNaxsu9a1Jwm/mZQbBLYF5EgFA32FLv/7Ox7wvUC513M/Gzvn5rcCsn/txD93UzdfwEvW1IqDrEJ7R4npTkhNpJVnBHr6cV0B1RkjKgqksuHMRBctutb9ZJ+lOIu6H15gfIfoVqAcsCaaEZT8X+r9s41UtI6xbu7xS4YYNpjm+t/nKBREqxP3Yx+wRpIzhroUENyBJ2aNhXotB9m1v6Q+f3Q6Y0k2NT9wp2UXB09eQaHa2/wFWQS/j6NOrSlCr9Ovg1xIWgoFzFZ1aj+RZL/7PVG9yR59KXbKBCwD5t9T3JvhX3C93t3L3zTy67V57v9BV7maAK8kGY1I5b/ZzqG1k6ZZrmsfYHrjNn/gRR6VuoJ5zkmeWqrjWjyYOpaSF2npMdVy5yo0L39PmX604fr0LrpEMH6nhfRj88qiintpw39KKuts/HVZ4b9s9Jzb8jvMm6+NlIRT8AVtDOgZ2suNOGy8aIeqOoEJicgLod8pwGpJqLL/DFcxM/VS7ktHbedkqAeEmWv6h7E+aFu4XsMfiSb7equEEOPXx02ETBs4ddeoYoAVIad4lvy+cxR+A3UvtKFRLfJXq8o2B97aEo5pZG942KzQBtJmGwaoEaVpYUEg7n3OG+8GfOk5Trkdv9BfprSrRMQEzH0wQ60esWkMcYxDFMY/6FkrPahYXzR9X1QKeIu8swFdAy25H6xnEu7mH7SdNCyMJVR6F0+nBtvxCscsCLZR6LoS2OVr767rIZso0QPXWRMT8hcRcnPzuz0aNBt7qYW712FOmb4SEkM7M1iuDDZ/ftf1zkFomYi5yK375369VesDkXogvnrV562QqoYDyNxzUBPVxPfBf5YhE1zPaSJK6Zemc6fySpG6G3Rr7bfKSRBUNnd3PBmq+SMlvbplKE1q4uce1QA1pCcusIF0SGNJEe/y9RBDxktQRtCO9hXr2+iho6atREINpz0I3HFTzXKUTV5hvQHlvvtRl8WyW05qq5vLeN0jOmFeuv2wW2NIcvyk0Uy/K9J4mAmg+uZW3iawwek1h6NpEq+PtM/sf/HDhQgkSls14K4IifROIY3siLLC6ap7jTb99vtNfuhY0pW2eWzJnjYdqK/bgHWaKy/WSIZ15zNFnxAVeDtkp5EIzW5y9IEVqqf7Iab/YzczKs7UB5g38eHD6TzNgyhwd46vdDgBXBuBxF0VYATLe5+YMw2AkTQDYvAnoVYz5vICX/C/sBc3kHtBicTMc9Ohr962mEX497mxm2XxX3sXHSWGc48ywk9/rKWul44xEmPqk7bky0NMmoIJQAAw44xMTQkpfhwKXIzA0N/9h89WmD467oNtUvxBNwMqcz2znWTg8Tr+d5G8j75juvahFJpAwIowjmDp1Zz9z8Siy6U4cchCEhPY4Fmgo7GnczqE7saKm7hl6aNyQL+k7laFrHuyfjeKiZxCP2mlAtHNEv0jT4/gRfX9dT0PV+r0nIcBvkFBkzjEls4vxL+Kl3FF1AvgX4TmXdIc6HkYyIcdT6wvcsA80PIvCJ9JZr853//P4BQRi4+jS23Kl2I0FHFdwMfFkwHB746eFxDoDFPQfWa/gBR4mdb4kZ5M5Bc3MrwvEj0tNnXnM+wXtkmueJbO8TpeU60Z1akuZxxENYBARJWhFXk0rP9PPh6PnFB9Ix9jqDyKg2FB5TAezb2a5ja+xy4HzQZTlpin1KClitXeXHdV4VAP/I6WKL2VvOqQRl3VMl8X2v9Vw25g2XqSFqAmh7BSYWGcRuXxUFruLP6df4nZkRcNod2WLSRIqFxNMQ86GdQamofbkgrUDucCTxD6ExPcmwFxXqSu/csPl51r0t9KzoVsZExsdgzSo5Lf0oivyC/yY9jX20CjdJ8xVyYOonJu0UtswxIQc+zbbC+i4itfqiE9Z6mH0PYpp8drdGrMr6/52TB024CikjtjbESNOqqxW3rqtzumktGwXeKWHtAfS+0CnEKGkNs1rgmtBoK2diM+TYYHQjYEuwj53mvS4B1+GqJC0Ndt53BE70U4mI1S8SScm3KDbU8YzeXtvIEONO9g+EYop3jn5CFXlpMjBr8Cct4amEod9tUaZewe6DC2WkXUs7mPsclZatB7sG46zPtr5ck0jLkpTYtTYWmi0fY9DQuZ8rVAw1V2LPg+XwzWQnoDr46mOA6cpU4lmrOk1jUoZ0+EcvL6fI6vgtOdxigEoH+Z7TbbfIj2pV3MLAQuO7IT0BnFR2C4IOm4PJxdR7KWaxtIoR1oyzPz7PqoCQcmmqRrBUBIvS1raQQDufQBboYvTG4Tjkg8YSJ0QeSKCyWA0Ax9QosoVqtFcqy0FxGFvbZ/snbSB3FHwLGWh7oTAg9GxNHVezdOPEMj9QbvNqBjEpIBtUNhzGtA9gNPDGo3xnwD3oTfh97LfXoMLGszUm8n7W3/uTELbPeypAnIvLAn2E7YkdP0UMiCpNzlwMfkZVi3Tjr5B1XSbv4oRTLHVmouqfvi/IHZaniiJtoyspzNw3qxq0M3xkvhVx0VvSM3y/TngYOoJeAJ95gXtSb9VpQe+oyt+YdrUrATxuHoLQb6pAIQdpI5GA/nWbO/da0vOIhMkIYg6DkwooQT306Jm97/5C0x4DNPzpihNdaEBHZHOip3oMmWmc9XT3XF25+KOK9tefVCJbYR2LU30vn/QfCZO8anPytu1gTDtf5e3gXYiqk/fw6+tJz+LS1fGf9YXFHPQKHdAw/i6op4tjC83PPdgxRsIWAzvot259fg6aEEO0AIJwGE1vvvZI0lL/btANFsjQdC6NXji3SCVBIrJv9J+OtE7QmKwp80xnloWdpfIqs0OzxVsNor8VMOJenttsrU9xWsLaTsb3MSBk3c00p/6DOQldobHCyoc5SAzhEL8pnNAGC1nYJq1yNJmABTmZEGvV975SIqV9pyqRwbPBYwxRXD0f1pBqw0cWnpJapw7u3T9YJtLZFPtZI3XlC+Ysof0I9PUCLduO5DHstCth3JvysKONtD+4IyRC8CqwJcI6+G+ZWPvqBV04zvIuMEdq6t4l7vDGarTTexEZ7BEvfIgtPoPZidQGQWSPHMj7Tc9mgPeWCaLOP1eStRbNoJk1AOFLy9A3A4vLy3xmR29VSgamOCPHkUi/VvepOK7KT70r6XjVkdke1o7XkibV7q4JyELEQT4YAhC/gJBKrIxFu5xMq2Wri9L4ppeUB+wN9Bj1YmDbuQtuuiftGS0kIC6TYr14ba8TnIYQQcYiOLY0vLYEwZOE0SsIg+7Sw7FwGhleL5kdtBTNiepwyaARHz00sqQ6SXlsGAYEM8JsQ81SAzzSY+KNocAKh+K0I+wOjnnW//hrUk47NQ3UtrzW7heoFPfVsCsf+mYLIp1mwUxHZnQYvWWI5T8FntwJS/j7M4IUVAcRxIXtPJcbJ2JNKfpUZTAzA0Hg7HWzcLzpdHePKUuEM7jBHiH5gvJYDbN0MKFotVhtIzgvOGi4H5LLyrWJeIh+Sz5usAHykBZNiLXOCBnl1GMrRYwuFlWc37rmiflqPaGu/vyETQzSZtJeYuDXHf+WVQTOgSi8NpT2S1bbV0rlT43t76FcfRAWQbGClZupf2rTU4yZPCw9cDrUvTkSPP1GrqQoYmORXEay4fHGev4SdWiP3thD3Pzfa+f4ei+gTDGVlIkKJLP0cqkk7IwN0E/PbqHNitWRG+/TeOHUdAWyRyXGGWktcwRNUmvE2srhX6W6+zZ5rFDGEgwoTXBMeoSiZeqcATsQuYpU0v3Qo2ZsnO2TCl8CvA39/cJwI+AQrGCBJWz15govTQ28OXYyrxo1AOalb+RjRZmY12wB94sqrxFzNm003StjuT7dsEkAFAdx891yRy2EktUwtoyl1XALT/qZb8DZxvrObpqAKy+PkhbWoy0PrYcAUxKsejjRZhXaZL9ebw6TSJSY2T5Sg1xjcKoyxs6vjo+NDTOMku7TUacWcaYlinpZ+95N+0ckPC2tYu1xabXG8sIeBo8x8g49eW+QREiNzXcpuJJhVVE/uiZMyaR19UOGEGldu2grWFgCU1n87v0rc9qgIa+tLv6bp5Df4YOIn85yt3uJXFx7lxpfUa4Or2zjl/k8jAW47GlfeOuEo1URnUX4pXaFpsgdMXupKD0N6bS7qZtEkL0Iyhx0U/4dn2nygM0T5NUgdjsgPG74xYoLST4OXoJdqlWbx42axbrwJKwbskeRYeYgAFpFiLDOqIhZ0MZDtcFnAKvX8krafYGoWNAXvce7IliVds8yacxbUaBMOoOYh7qlnr1OabHgcYEXKndw7EAaxY6RZdVVqxlxUD+/dyTmJ/TKAxbrO2hqKlrIHqL8nbKVp0GbsjBQRW9B7Pv4Vn5S9q/r2GWTeVc1gKXxLUv8t5ru/Cv1DiXDiFOMwDI4flZVuww7NnkGM0kmnhQ3TDjzmbiXaZ4+8IGgOh8ASXA2p8xE8T5LJoeOM/EFTsoxw1ME4jI9x77mZNEjHQAoenr1erK4FiSo81/RWOSAAcCwgtZ8HVEFQ1KE+9omcHR8wUZ7yKxxgGNKvZtSAyptqR+NWqe16LW8JicglZ3/ywrNUlVjtq0BmpndLpQPWiZkRT7e1SGLQIiisSqIPpw/msi+SJ79tlHDPMp6Ndi022cD1+eMY+M2gyuK75jeO328W6JaL1F1JajOXIDNzUObkg2MXhUgCjOId2uCyn2Hlls8X7NE7XWTN4E/x/zZxzIS2GOkCWz6c1A2/DJvhK/+4GMzMkUbhNOa4YmpQoJbNqhn9wgrcw4BcZ/5EWsFEG7Bg2WxnkRjFvLrB38SprwPCba3HOVyY36xiROPX6y8HK8QBPwi6ui34ciUbuZIsKd5+pmvtFM6RcbO7tui7HPulMthGq/++UyVkoY6CxVAr9aNnY1KBrXQM/8BT6cSVYbKQsdDog4iGmSimJ/VldPVjs6XbU2D4ehRVGdn6kGEo7thmyhdWcAZEmuyL1lQH2wiNbtHwss9l0NYTi1yHx32r7BTu0Eu5FMETmvexslSNNB5h/f/1HNc1pavyQq8l1/awMrYliT3EAPavVDLeOlIYi94fweN6pu2PmTxh4cC1/mFqyA0sKCxttV4bR4MiL9+J8noo3tePcb/PF/inSBhW3hBvZltKNQPPcBsa7eyZjMi2AOw5gct3di1IEubKB7t1pNcajDj96wom9j2MQpbiH3jHU6RT9kiHT7WpgeaoVxoz8mt8R5qQe5O0sHnOvJvvfE5DIMAWW016BGHYV4iBUnLvNBz37DIZPibEBTyBxZVitBqMg7gfufNRfZsUvdGoyYhHYtcWhV+NIDmw4CHVYjtsZ+WjfbnYWOBGOxSG80p4P21pJmBcPaEBlvMpURAfiut2DKsHn3LLGKZu/pfa+TiVYVtUKktZgw+tJ/GaoGDYOaXS94cPe0VYK0aq5t+C0MExaHbgrjpJyiwfwfUMHHAPmrHxR7pDkq2r8WvGWj7lGXYIzWXrcApC1guWY9L8TbcKVSfbIU6skemAI3/0D1jLCBbvq/ElTJEdhizq5XXoGugpo3KS2ZTkWj2ES1LjMtfSCQRtMc3QwXV1QHWVkJqILgRZrx6M+4G/+bM9/U5AvZLEqE0kpfD9z4v749/C91qWYP1TGh5YyPkHsz5iyX4MvrquBa6HC8GPDtjihQ6w1NNWCaxTzDxmBsY5uEpivJrbWx8mTDTruwwOV/fOl5WlvSjPJPD/ltfp1UtImGqgSYsenIwXIsV2Ahh0dt/cxDWiCVje3nl49asSGNp3p9Ecu/opRl4iCD5uYqor9bgYVW9q63nVN1bzHVBqEgG4O2iuXcup1Z3ILvly/PPz6n5mZxoY9Q8leMhFkuKwS5M82cXeywRlZuNPSL7MX9Tj9BL+yeBwshko77fZpFeFLIt2P5DFBNyfm4aROi7QP7H7JY4ylhl1RFMf0XCPFZjKpG8xLzT+2OPPxua6gQ+v6d/oNSznuWwfa/I7NuzWNS1b0KRql7jeRizcU9LnxmbknA9vw78lQ7ATAQWYXDba0LvzViLZIZgCISvN0l7CEf18l0uUAvWG9UBBEbsSUje88WBPsszlS8CsBQQEwGj1pg+joHgXp3qrKt8YCbH/KNROt1J0lQ7v2k89VjeT6kjjkAcI0W8X02ZIcGfyW/CHXWbjnML58GC4UIN6twIjst8kzYRJcAkLgeAnK/IR1Y5kb0VPhph7wJsvYMfHBm7Nj50u/JEXFz+2az85U+MDjBvMhp4mrzDkgZuCekYzfJnsGjxEKMajjZEA5sH+0z6GncFHDV1jllHeAoyCGON4ynp/i3yhNU9eyyD6G8BUBqPbZhQDZmTRQ4t9kydC09o8HXyin0XmHRQHwWEZ97gFr4GG8BA7Kt0cFJIozML542lSxmQlcx0IYR/b1ZyBPwfqCDdEE+O6s2X8W3ML1ArxRBUBYQftGfJ7uYm7FRN2SYX3EWRL3U049ewnbii8D9W662Y84gpVoYyyb0T814D2UnnlcPFfFB7wHjG7xXpN5BWW2uQVeD+g9Wq2yXM/cs42VBJfhpjgih7hsyxnUBFA0Zrt/hGzOptxD6Gx59Mihj7zpIY+dN/MuAdV5d9u+r0EVB3kJK8AT32Ogy/xH/6f54u8eL4WgU350hZbrUHMrVycpzeb0W+znjNB0JKi/wicaSz1KuiROihpcqfYw8UVUafFq5ob0P9DzZeV7s80Ba3aHN12O+Q3/dtz7N1/P9q5h2+hpP4C/Jh3kj0iYbpXTIxkvEzSZzkW7qoQDMcZPP4GIEukXj3e3YOV3gVQ5No9tuAOABG+FI4Zxr3QqNWXw7EaniRU0dyEN4y6Nqfi1P9x7KMTXuzCPmhCBAHJRs/VcRcnySjZwuLQKmu8eLxzjtatM+OCb+c8hcO/2nnvfgRyyVb8YKtk785e99eATFyx3jSTaNI51OgbWzqY0oPeL4un7ydI4QTyzSRkf80VKIAWeol9Rwbh5pBXRKf0AOiZlUX6X6PVE6/VV1brHPsIjbFqDINp4+UEJZP0Is/bDH3Bwt3auavMM3fn/hIMExHtV9aA4ALTUnDM6Rz+3nvDbT+1tX93Y9VPhnpZyTt7dyzxD1FJYJDf//VuLdvG0StJB5QI0bIbUqY/2vvTCybD3VfoE9Spe7ZKsEBZmHOq8Gh33faLOdDeAMbZLESi0x7Z+fOCKsCXDxJVJX2C+g7gI2ynaNFFLQK/Lw/VUwO+fQTqZ/a6ZMg9lu5Fz8tI5rZqE5bMdrpCCQmvANl/Go0+T65uWHj0DGPo+Brf7Ms1rknnMlMPn53cnh+j/5S6J1CgtR83LLp6/7pBB0HTLNWGPTQhWfxxJGscgB4FZgPp+vQktvXY99gH7R/EJ9xqC24H5fH5t8KRhKABn6OW2UQbBnWCDpL+6ioRB+RdREZ6tgbAl06gdV/oOy38gGU0WD3PIqzaZ3R55ql8zvboVyPGe97COZT6kvEr4MawrJcMx6dfkWEu8WJvfRT26rfxLF2e9AjBpuigzdF6a+HddVRdyJhKNjXAgTu1gvzeAUEa0MMhmLHSAMxg1jgT2O/qW1LPNFnHBayk/PDzE9ReiwFUNn/A3oY+0lKe7PHh1HYmyK04y6wlXL5PFtcQ1emp7NllOEx+U0GqAmtpeGSf6TSag5bhRtYZXQqthJPsjKTSrGSmM6JyfLfC7Rwnb1oCTyaDy11GIXr82t562rwuRdPbY4Sz8we93hZXgAppcrfgMTruCH/936/j9H5unaRKY4r6fwuV8GT5wXOQ31utBAJvI1MRGNJngeAFokoZo8qZwfTynGAv1hGI0RFQg5m9eLE8+Dh81Ph+8RCZD0sJF+t7ajcqNCQn5RLz4MqTMO0xNmflg68aA0xYSMbfn6UJnXJSBBo5BTFdyQYieFcelFCKR/Yf+AxQELhY4wHxXm8pKfZ0pvV3Al4LSWUD3nN2oUc3sgDnEpMUkCPbeU+6VNoXGO0CercstUQq29aTWjAcw0ocM7294jt/hHZBuW0kZfZdTgPq5wg0bnIvX6vgzcRym3JkzbB3fDe9BVE0KFJzLPtPluAc3b5EzoaLCllB/T2zkJnur4qCINSN0yOt4bRQ1akyXB1/BM8LuhQttUFI3ZdFAJ1W6z9RIAI07SCSAIxumTW6z3QnNIB5SiI9r0szJFXfkrTfEeUvmrAiMhHZSZxWC55XHibFRPM2TNWrDZHnIaP7IjL4wKxefQMawVKVDhqbrFVzamUp/GmabmTHrqCrqWS0TcOMoG0zD9zuf5SrOsfPj2JsoyG0OmkQ5OdRGRMalRfMEtJxXQdck7ozd2SR0Dt4zl7Nhi/zG5Q9Bz65jiIAMJeANWUA1n0ha1mMfKBwFsSA9ZGndz4rFWYoE0h/SNo3KfAdi154dlCc+tMSQ6gms58odjf4edXPEgC6uxeufzv5/kZx2t2CkRbAXSwS/+5JdBzDpdkRzbMXAVuMd0iwCy8tTy3as5GJu8Oje8BRE5uTsGi1rfxmPkHZcLHmwJEgWo5LF9eCfK2kLkUEF7e3F6M8CiTxMldaKOyBJhrgBirv25ZhDYcldY8WCUU/L8ryskh0ZZzpBq4escpQKZbckrQR6quiQOs5/X7LbBiyzXdhcR3RVjV4o0qBfXmpPktuwrRxr5V7938zo8ZQ1ye4l47DKKYuXepDMk1mCqv9KjxFLJ3cQO/OPisgFCimtKWnJ6O1GejufK7YPtibj6Z9WB+uoGrFXvUyffLtywfJHbjuaMxplF8NRJgEZ2rYbn0nKEDf6zSYLDniAtFgQfn9xJeEDeH4CQKnvZH68CBRxFc9LFXt4CJLn0hxZjDQ+rstuy3eKSLYzWJgLTFtbEE23+oKsFAHLVBfB9xjG8ithgB34bmAyYES/oZajbRIwPQ/P2tmEHZwKNp8kia5RE5SUQk8Mmh2pet4WHsgmZsyPJGalt5Xi2cVmraB9iAG2GkQS4DOONcIbopJyIcyiMqBXzEQQc1+iXSpzHNg8QFKAc7P97HohQ4RhWNIkAbO7NHJ7Eqdh3Tj0M4rs+Td1AobzSj0FMGfiVvn8t3C8zCTDw3ZtDlvFyNApOm2NhmXU8svLmH8F585N7chGTOF/t8SGUDgkxFWPd+EmyFyYqke1cmzhWwzMPP+H9EtTya0fgM8M94KyJJcFhaE9DfBdhlsoJ+QHreOK+g/Db8VVAFuKtTT9ktXcg1tCHQl6sMzugSyrLwkdJl7u6NKBuM4MTlHUGf/gil9UWCBni/4fUmfzrS0H0puN/kRySuXCpvHpIiYoP2hskKxYRvPPyldjit5JchTd0QAvZ58Wa0PbaGM7OjwtpEnFlku6WUt5cTiBtI1jdZUV8bqUaXMo/a+RpQh5FgiJtjixAELt/ZzGC+rghD+5OoQzr/X3RbXNSh8FxJk9NHtZNMprRulVtlbJU1MS9b4LUn8ydsWS8cruDAJ6KzuOayvESTsFDn14AllsV3oUyVO1XLw0pZ94XWE8A5P0DZSmKOL3WHgjiO+pnP2y3KQgqXHNg2rDwiHJKo6/mMzKpXmEXL5uaK/d46c0kMWEaAmpg8eucjGXuriidnh+ltWdMP5BK7EufY86Tb9fv+sapSrGEzdRdCzB+BWV5F+zjJaSR9GgDh24pWqXOlAY9eQpeFAsiviBdvjMNUJEm+1dkuZZYagJPiAEHnnOOAH7+4y8xfWDhwp7EVCyQKfMIT32ptco2wMXItdKYt/rv+U/pKawd2ABVp08ycI8S4sCWY+I0LJ8JEADpNNCLEkn4zwP0wdV4GunWhiHKnsHIw9q5oCrOAlKfMwqwHYAG0L+dYnjQPCb90tlix3Xo2MNw+IHuRl8m+yxRj3zMKOzogB9kT1q6pSQvhzVX5dSLxVSbxAbmfN6zjfhcmiCDOWwJCkgkibFDFrToafh+grU/cQpyE7rbCgUs4SEXbg9O2t1rgo7Bg0oS3lmTpw6308DnN3HXxvydqqwn2U7cDnLU92jAYyKNnJyHhvfG87YOzyPWHPWQ0Yz+hdZ0pApXYqN+9KJnXsATTMp2XPoR/+922FfaDVnCVlOCfW6/Cz0qOEg6Vi3HljqHaDBCx85P3ibslp5e5CQ6GwrH38Xsc9t5KffBlGtE6Y6ld6yNSKsHFLB1VE9HlQdI7bgzX8hFsQ8JPAbEiUCLrpuWkrDWhnI1UC2QXiWUu9y4oqYnNH6wPVUGkGVu7tH4kXbQupgypn/RXX4e5vQYhthWU86g53PJXPQrIBWrF8guuFA6iYiGHM5RocOtV0exUhFfHp1vefORYCKpDKXUp/3YdEwsZx7SFBoJQFvjNkIL8Wng2MT4bmTOp7NxJSBdpRY943Ilmr3yYetZ9lAXb+pKiFQtxwjOasmG5QqFLLlAz680aaL1KIwDdZJz/kogj7rMku3r8ExGtOYyRcYQffrBY7sJPuFLXax3B0VZev40tJPXcvaBH/n35Qn6TLAYtpYz12gEZa3Y35mYyBO16RujwZ7yf9Bi0yP2fxXJH0bUZRU3oNkgI0mlRkBKKD9MqG3vlSsCV9s3wxXhyQTRiYcUJT1usmv86wUwWpuA1UHKycv4hfumtzMnBnQrzSy5/JNIYkJihhZ37hbv5lOm/sSD5Yzx0FDASuIau24cwfBy4k+qBp/oyNVugrLHMkFciYCIK1KeQ9ZpyTm8AGEWbIYYJ6LWEyab4dWf81ihNwcbGJ2/Hm/HnWKZ3EgxXjVKayOc64c9KvNt0DxWAOD1HdedHmYWG+NumHGVOJwBp7G9bZMCdqyDXjGXxxmagn3ZjiYagoAKxdYjVR0bZv0BsiRo+rbp5UlHyok6YwXRz1JKgruWhuBoIJieRG/dBGqAkt5ln04wKYEAZ6+qMfuAb+zSpAj0rdzvV4DhNyBs05xYn07NRbWmbqSOzBOvzJ8n7EYRAxy5SHLyYfUtCRcmuZQOLD5UvqJ4vv1nr2chftd4RQ9ZyqGsyml94v2GcTjB+wc3B8ELm78RSf/RNZ/l2XQICaRGUyPEXPoc7XiJ6kuG2/Hk7MI4Lmoqc6oIneEQHU2DCsJKUMDwRSF1FO4L/wkJH+90A2BZzN9oC+twroBIy1kLX5kemifOlzypzRAEh2edy1fzPYBWsgudeSgk7YEMjlPSZZSAoh4cI09MqV1VSn6nrql7liH7gMT5ML8HuEVAgHECMeevlpfIepAdqgoqlhyG8w8HvyozQgAGHYdSUtAPYVp3j9hH5bjzuDua5lx/wtqGFmAoO+7KG/mudCvGIRcl4gaD43vvnMoDvLzX178+NPXmr0YQYqFfpG7hMJyTA1Mee6EJaJsZ7iMEKmLdAdzLgLuk1U875HsxRgzhJ86R675sqdGNJPbJ+DzoknqBbqIzdTVhYWevMfTaRiV0AUpc+WtLLFN6edZemeJUp9SQAANLMVvDeymKEhF16ctgeg82foo/PnrDZZ83UAJ6JKYAlkqh1s5OCerYTht5CBgQPKnJsbuLQ6O6lZQv6hDteFaxn3+ctnNlsdx+zow8ObEodbWDRNfW5B+fYH13Kq0lO4NxjNVv+rt+3/WjLpaYotnNuLUSF6+mHTWCOFETr4vzrODIcEcvMIURuNStPojq6GhxYjIVXX2PITxFW1kLqf9NWMmVGSNg9c0HkQu/38Hk2Glo8AGpD2TKa/aK5FPG+jPCzOXqraqqGtdugTBplA4hfpaOHG2lm2w4KJOlKAnhU6d+m3vOCIDYXMl0SZOrEniU5z1ErTT7/Al0Bvlg4g84aTFjfN7rBR5CgGi+S15NxCROICQ1JvD3DyMDp98dgeqj0/V3yIQfrlzuuXAaghTAwusQnwdQoFk1ar5ILIbPigN7RPUG9YFeTF1jO6yDMAbqZPiAqkmKORR4d8udYVM+xM+HQ31ALL/ae68fpDGaAAxwQMBhSQlp6iGPIzbF5puSLtQ4QJBg2clLlm0jeSICjK4W1g/TRUuBurjxgj3nA9eLKK0Ud2KOFVbGxyxsKMIAnj0svH9nJAKdPm+bqf0ZNvHmssIxIWv+oBLkt5q2fJ/wIkzADdEZulDe7H6QcwnQmtF3neJilU4VW9TqlCb3SIzwSKn0f53HfwBeYoePM0agUQdChxHSfA+r6xFE29RR5a7uqULHTm4nujIg9oJXQfC2Xa/RczEfDm6Uz8n39w9up4mZYszuLntvaBm2HTArFO6rUxiA3hp5SDiQo3CSmXRe+ahpP2Xoq3h1VZMBd2e3VCfl4BiouORWmFPXR48vdgSHdU2BXkLnyZojuALVymJNY0iD7VWbPtwZ9+Fz7jEWOTJQJZVhNyy6OCtPY/L7S/svhiR+Rb1gz82+2NP3l1fDU/jFU5SjRbOORc9RbVBByK91oC3oT9itCwOTCVyIWmgT+yspACCNPF7xLuu26wg0KgZsFUnggBfTillLh3snfUCNa+N8l88i1+L4OlU+nCxyxYAlBajUaUcttsLuLP/0eAfLOygty7GX7ULtS1QDZAwIxbiNEAcpon1EilcgjOODzIiDg+LtVlkWJvqm2wUsxOKOgmRlpEHzeKop8g9kxWdBm9eO706XXKEFFZn+V3diCfp49/qnArd43BmBAzAp4KvzNhFKiCJ/zu9bMM+Dcdeq5Vfr1KS1E5qsrfDGZa7ESbc34Pv50ugmRTU9pk7w3a8cRqTfFP3WMNdPjE/qUpmxYCNnbu3DPpbD+U1KSQo6y6sdWXLt+oC9YZORnOE9a7Kb3fjn11BZyLIwVfqSk7wHpetZCEZOJ7yaiakoq3Ek8kaFx/gJ9HDkKZHH747oPr9WJ1eFC1rRm88+ZWkwur3WXNmp7w3xNQtpBz2T+N/wWMkbhydAJ+gXX29Obv1HRz6PdkQRG0aGMH+4SpZHppXolk7v6IfmEgIhn4V0mktoge6BTiO6+9eH/q9Gl2jVMVNjW3zAGhRTR8CHZlkOaWLz0fUq45oUYTD4L8CR49Q1hpIsOSkHvpQmdHrwJbn0G5yscHEhKZic4BhPMpjFb6pNO78Bczx+8RmOf6dygFSmb1doIdLPakYZcRqV85691uKqb00kBGiDdGC4b36kR2MpTrOEz0sda6WaXZhh5Sj3Ask26FMIw3euuSScqj3H/XzF7GB05fBfToZ+LyruW0rNsQlveukw8D9hZEnQYYGj5uHG8bkwJ/1zXM7/HYaCdNZAD1HjmyoFZOOAs+tzo0NmOQRDGYxa9n4B8ei9iLQ4hhWfFMcotBh1dM4jqMd9YoyzSY2V8rxzRbU9IxkrjxWXKOmGBuBmRkrVi3j6IF6R1j31WIJc6OPPR+g78ZJ952QC1BA37Ka+NnLHxFelSJakhBNNzZpsDdurBidnL8PEpplRAD3b6i0oaX6ILdYLL+rkcGjA7VG/X9/XfB58/v+EIFj06Zp86ulxEssavC9yLzRtKq0gjxzBokFSAV+FE/u3vKgkOiILR2jiPfIYedOXjhq40+stPDJcWobV4KHV/cr9/K8RxH4YzPUPr0rgL5xlTP093KrmDgu3OQE/9x2FUox9WanK974ggMqvg7Lr5km1xhEitiPxtLf2tv2Bt+SC2dmEQXe5wxLEY+lpUTiSeHWzo1sZ1oRsypdp6AQzVuP6ZD/DyYdNiDM1myuGQ3Et4tdC7UJ/WPqwswh4bVK1CqQ4A9woH7bfPu4k+4Cb7CkBYI6zMMNt+NvSqjEnONzJqC06aHFlWoI7uV2fv/A8Ld9HMIPVFrZZqtPUFtZsDMYj3WWBl4V+zLIRRUB7B3NRyGh1SU0Se1ebpiK3VlVerjQqV9d8Whi1dAG3S4eSejRsJ/w5AkcwIdWj+rLf1fb47hGj8L4sKEgFx0HMXAvdiC2YMKYkHcuH8bFVjD0BqUXeqS8GVy0ysf3Gh7SWydvIhY5hb3Occ6yibyqkwiKlGyuhA+RCToJMM1zxWydnxH2ttBDL0zgy2Yna+r7zHPMh4RILkR6Pf5ziCuz1aqeZ52/oX/p2N3bA/4Hy4WKeZlebLu76HXo0jd8jXPp7XzJMFJn9cWANN8aphftFeNW/pOs2qjK53CnvuL5plBJmyGRFunmFA3pCQfeEIfhapz+xIPrPafpKS9Ncyt1/g7e7ekypk+tNMVvfZzcKpx8MswiuiYtkzZD02Yj3u0jV7ekkP/cwbatfBytv0b1E4YD8B4otli14ZD6l5E2OBnRvjH6JekWiuqBRcAh8Kk0IEqg/jqnZNxp+2ItX8EAgC2AfVkYTmAd6/4BQOOHiQxHL/D5qTQhRWnYVQKYBs6YHVR2tuZHyAAJd9tb2WrBuCV1IqDQIdVtA5HW55DktytoukEZSs0/Owk5KdLzCU+7p2DW0oBSh2HneaoxA0lZGSXfGH7lowNhUqvDVKxB58GaYvdE9V5Wner6IksvadEEvqw7bva4RVhXCJtHXAjqNfUAoHBUxNtv3zfhfqlVL/V1rQh+Dwg5B33J53s9S5EBwFAwl8Yy1S3Z9zXTbQhM8R5qZTiFBOTmVQ8nbxuJ3IDbhDn2StBljlIG8FLq9rMeUNsyoKrGHThkajQnirguV9xNnVtABd/HHXdSlaN3vyMZjXlqu5tx1PQWjul9uOMtq9XrlT34rQpfObOMVsEqGcjh/eK4B81XrEhkseziWRz2j5/cT4RBWpQTtHVzSdT1RMCli7sd0dT/MXgz0DafFPDiCncBB2duTWHkqUiOddWeY7inLwqQKUsRovyTM98brnn0csDaAgk+iBpcc8S5fgxUFreuOVE9zuMgsVnWGhoQYaJ5G2ANcDYgKG2vsQ0PpmL97O9QgL2evlAAARoY9739c1CgwwEDylOMGR6KHc/VQw2TrPfSXDQIHE3hhME4Q9l3sbrTQJPuvlLwgA0MOWccfb0V7eQ/oeXWVpL7iHdPwyeChqCQBmKWy7fwyUDawizwZ5S8GFiWrkVpq8avMUGUJMmTlf/M8/j8j5t/EeSuGtRkSdLPyx9NszH/UWhzOXMfT5xRwPJBwhyynpOGWUeLjBQ8ZDerLX9z0F8x0a9aH7mS3fVRPd1uR4qxReH6QlkbZG2cZp+D6K4dVQtX8UN/IJHwt4XXJFbEgw0bFMTEbyoU8QM/Dvp+QpWAELDGLc4gAy0Du5HPEDMEaRlm73oYLxJtoWOpv6ElZYbLAEkeDQX4hIn6C/aucTDXdQ3uHPsHT4KJPBukQeNGSdnYvpO4FaRqhVKC1jsU93l30fetKuNdm09jpy5DCoEqLbpw18E54aqu78JO0DtXgVvif6paemlmcGnRGOxMpIyeDx4xp2eHLClHA6JD6KdqDiaY4CeiDUvL70vQVYriEIFpz45PSl9a9FuvsTwza5VTQ237tXEQG90QPNprWxyikQ4Wg7arINKn+rPLGorSknxTpKa3q8Gf8kjSaIbH9dudNhUwNbGMtFRx8NuG4jwj8+OPdY7OeD+0TiA6B3ZmoW2Bgqg81sXfKMqJVU++S3YIXybQpEnJBPpTIvOjQR4DQiMkekF08OAZ8A8eWg7Fb9I/3gjeQXgByyFts1/wuY2TGDSaOSFdWiBhWsAc5g+cUp7chmOgpVKGxbKnsw9Fbb5vpOyAOusquOutf8ouIdq9cVQc1Y0EpIQZ6ExH1VqePzx6iqEDnxhmNvjukgGbhLMA/RqYWkrXzZVZGLa/tksS5qaYDsfBqICR+6spN8uDkA7XxSRLTAr83ZG11ufzP/Ll6lctutV/Eg7T3eqQ8wgnEFT/2mJ1h3BxHjxzuNcvyjMqFuxXZzVodts6bUjtbBiuZxOj8kHK4AlnZeU1IK5WbQCqq55aAUF0vRnwH66iEtPRtfG+AX/At/l751Pzsf3hDD2B5BSRDyQW16+rp+WPjFEm16pOR4Twq+pin8LVu3f7U8mqPXDqy6P7P8MnQgtOyQGwFYJeUwHVVd+TUHwQtVFokmbOytFoHL2fBUcDk9luYB8d/Q+lOEY0Mjw4B9cVpWv3Sa6+wMrtrIFkDO4SlDd++6WvOio9/vlOmfKM0xuuWkM/o461P855fg8JtYpfKrpH9a6OuJ6RXOmsseGGWkOO9wiXYqxoWgBMG2WQRIN2YGyxLdGevp1wNtnDax9mrCMue35EqBaZjj/KP/D9Vmq3Fce0f+UF1y/k9e1zKIl0bGzYg8F/+Fr/cH1MXdsHNIQ+55O+7BPd1GsKJXGRfaSuCIehhfqsKTMz/1c4Le5pp/T6BvF7FQmdq7PhjNVvQsruujU3vC0A9/AG2mRp433/QlXaXQBhBuxiZXVnF9pG1Bi4JB85uTKp4pldCpTHvz/PXcBkRcWftldbO9Wl0AzlieavIsJ1GQUqZYTZB5fzt044ofo6wbdCUg1Ndw6wU/uWcW0xBZhMS9D7BixrTDkZfwrYYRg7W2lmtXgYdcyQxoDiAWB3Za1J1L6jJSc/lma5i1Q6kUGP/cRRYJagAAAAAAA" alt="Chess Arcade" width="108" height="108" decoding="async"></span>
   </header>
 
   <!-- ============ PLAY (the header's Play sign, 2026-10-31): where to go, four doors; the buttons keep the ids
@@ -6579,6 +6727,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
               <option value="draw">Draw</option>
               <option value="other">Other endings</option>
             </select>
+            <select class="select-input" id="gh-eg" aria-label="Endgame">
+              <option value="">Endgame: any</option>
+              <option value="yes">Reached an endgame</option>
+              <option value="no">No endgame</option>
+              <optgroup label="Reached a">
+                <option value="rook">Rook endgame</option>
+                <option value="pawn">Pawn endgame</option>
+                <option value="queen">Queen endgame</option>
+                <option value="knight">Knight endgame</option>
+                <option value="bishopOpp">Opposite-colored bishops</option>
+                <option value="bishopSame">Same-colored bishops</option>
+                <option value="bishopKnight">Bishop vs knight</option>
+                <option value="minor">Minor pieces</option>
+                <option value="rookMinor">Rook and minor pieces</option>
+                <option value="queenMix">Queen and other pieces</option>
+                <option value="uneven">Uneven pieces</option>
+              </optgroup>
+            </select>
             <select class="select-input" id="gh-len" aria-label="Length">
               <option value="">Any length</option>
               <option value="short">Up to 25 moves</option>
@@ -6605,6 +6771,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
     </div>
     <div class="gh-list-note" id="gh-list-note" hidden>Showing your noted games saved on this device.</div>
+    <!-- The line card (2026-10-31, the user: "whenever we have a variation named, the variation can always be cited to
+         repertoire lab and the idea behind it"): the Games list narrowed to one of your chapters or lines shows its moves,
+         the idea behind it in your words, Repertoire Lab one tap away, and a group made from it -->
+    <section class="panel gh-lc" id="gh-lc" aria-labelledby="gh-lc-title" hidden>
+      <div class="gh-lc-k">Your line in Repertoire Lab</div>
+      <h3 class="gh-lc-title" id="gh-lc-title"></h3>
+      <div class="gh-lc-moves" id="gh-lc-moves"></div>
+      <label class="gh-lc-idea-l" for="gh-lc-idea">The idea</label>
+      <input class="text-input gh-lc-idea" id="gh-lc-idea" type="text" maxlength="200" autocomplete="off" placeholder="What this line is for, in a sentence">
+      <div class="gh-lc-links">
+        <a class="btn-link" id="gh-lc-rl" target="_blank" rel="noopener">Open in Repertoire Lab</a>
+        <a class="btn-link" id="gh-lc-learn" target="_blank" rel="noopener">Learn</a>
+        <a class="btn-link" id="gh-lc-practice" target="_blank" rel="noopener">Practice</a>
+        <button type="button" class="btn-link" id="gh-lc-group">Make a group from it</button>
+      </div>
+    </section>
     <div class="history-list panel gh-list" id="history-list" role="tabpanel" aria-labelledby="gh-site-all"></div>
     <!-- Groups (gp*): games you gather under names of yours. The index lists them; a group's
          page has its north star (a note of its own) on top of its games. -->
@@ -6625,15 +6807,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="panel ghg-moves" id="ghg-moves">
           <div class="ghg-eyebrow ghg-eyebrow-plain">The line</div>
           <div class="ghg-line" id="ghg-line"></div>
-          <form class="ghg-cx" id="ghg-cx-form" novalidate>
-            <input class="text-input" id="ghg-cx" type="url" inputmode="url" maxlength="300" placeholder="Paste your Chessable link for this line" aria-label="Your Chessable link for this line" autocomplete="off" autocapitalize="off" spellcheck="false">
-            <button type="submit" class="btn btn-ghost" id="ghg-cx-save">Save</button>
-          </form>
-          <div class="ghg-cx-msg" id="ghg-cx-msg" role="status" aria-live="polite"></div>
+          <div class="ghg-rl" id="ghg-rl"></div>
           <div class="ghg-links">
-            <a class="btn-link" id="ghg-cx-open" target="_blank" rel="noopener noreferrer" hidden>Open on Chessable</a>
+            <a class="btn-link" id="ghg-rl-open" target="_blank" rel="noopener" hidden>Open in Repertoire Lab</a>
             <a class="btn-link" id="ghg-li" target="_blank" rel="noopener noreferrer" hidden>Open these moves on Lichess</a>
           </div>
+          <details class="ghg-rl-pick" id="ghg-rl-pick">
+            <summary id="ghg-rl-sum">Link a different chapter</summary>
+            <form class="ghg-rl-form" id="ghg-rl-form" novalidate>
+              <input class="text-input" id="ghg-rl-in" type="url" inputmode="url" maxlength="300" placeholder="Paste a Repertoire Lab chapter link" aria-label="A Repertoire Lab chapter link for this group" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button type="submit" class="btn btn-ghost" id="ghg-rl-save">Save</button>
+            </form>
+            <div class="ghg-rl-msg" id="ghg-rl-msg" role="status" aria-live="polite"></div>
+          </details>
         </div>
         <div class="ghg-star">
           <div class="ghg-board" id="ghg-board"></div>
@@ -6695,7 +6881,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" class="btn btn-ghost" id="gho-connect-btn">Connect Repertoire Lab</button>
       </div>
       <div class="gho-status" id="gho-status" role="status" aria-live="polite" tabindex="-1" hidden></div>
-      <div class="gho-ins" id="gho-ins" hidden></div>
+      <div class="gho-top" id="gho-top">
+        <section class="gho-brief" id="gho-brief" aria-labelledby="gho-brief-k" hidden>
+          <div class="gho-brief-head"><span class="gho-brief-k" id="gho-brief-k">Your last 7 days</span><span class="gho-brief-n" id="gho-brief-n"></span></div>
+          <div class="gho-brief-hero" id="gho-brief-hero" aria-live="polite">
+            <div class="gho-brief-fig" id="gho-brief-fig" aria-hidden="true"></div>
+            <div class="gho-brief-big" id="gho-brief-big"></div>
+            <div class="gho-brief-what" id="gho-brief-what"></div>
+            <div class="gho-brief-vs" id="gho-brief-vs"></div>
+          </div>
+          <div class="gho-brief-dots" id="gho-brief-dots" role="group" aria-label="Choose a number"></div>
+        </section>
+        <div class="gho-ins" id="gho-ins" hidden></div>
+      </div>
+      <ul class="gho-facts" id="gho-facts" aria-label="This week, in detail" hidden></ul>
+      <div class="gho-gaps" id="gho-gaps" hidden>
+        <section class="gho-gap-col" aria-labelledby="gho-gap-opp-h"><h3 class="gho-gap-h" id="gho-gap-opp-h">Not in your lines</h3><p class="gho-gap-sub">Your opponents&rsquo; moves that your Repertoire Lab lines don&rsquo;t answer</p><ul class="gho-gap-list" id="gho-gap-opp"></ul></section>
+        <section class="gho-gap-col" aria-labelledby="gho-gap-you-h"><h3 class="gho-gap-h" id="gho-gap-you-h">Forgot your line</h3><p class="gho-gap-sub">Where you played something other than your prepared move</p><ul class="gho-gap-list" id="gho-gap-you"></ul></section>
+      </div>
+      <section class="gho-ends" id="gho-ends" aria-labelledby="gho-ends-h" hidden>
+        <h3 class="gho-gap-h" id="gho-ends-h">Where your games end up</h3>
+        <div class="gho-ends-cols"><div class="gho-ends-col" id="gho-ends-white"></div><div class="gho-ends-col" id="gho-ends-black"></div></div>
+      </section>
       <div class="gho-tools"><div class="gho-q" role="search"><input type="search" class="text-input gho-q-in" id="gho-q" placeholder="Search openings" aria-label="Search your openings" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><button type="button" class="gh-combo-clear gho-q-x" id="gho-q-x" aria-label="Clear the search" hidden>&times;</button></div><span class="gho-q-n" id="gho-q-n" role="status" aria-live="polite"></span><span class="gho-sortw"><label class="field-label" for="gho-sort">Sort by</label><select class="select-input" id="gho-sort"></select></span></div>
       <div class="gho-side panel" id="gho-white"></div>
       <div class="gho-side panel" id="gho-black"></div>
@@ -6889,6 +7096,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="hv-prep-text" id="hv-prep-left"></div>
           <div class="hv-prep-text" id="hv-prep-also" hidden></div>
           <div class="hv-prep-acts" id="hv-prep-acts"><button type="button" class="btn-link" id="hv-prep-go"></button><button type="button" class="btn-link" id="hv-prep-show">Show my line</button><button type="button" class="btn-link" id="hv-prep-games">Games in this chapter</button></div>
+          <div class="hv-prep-rl" id="hv-prep-rl" hidden><span>In Repertoire Lab:</span><a class="btn-link" id="hv-prep-learn" target="_blank" rel="noopener">Learn this line</a><a class="btn-link" id="hv-prep-practice" target="_blank" rel="noopener">Practice it</a></div>
           <div class="hv-prep-key" id="hv-prep-key"></div>
         </div>
         <div class="hv-actions">
@@ -12394,7 +12602,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     drivethru: { field:'#2a1810', cool:'#ffc72c', warm:'#e8352b', light:'#fff6e3' },
     rose:      { field:'#3a1a2a', cool:'#fbe6eb', warm:'#f48fb1', light:'#fffcfd' },
     chessbook: { paper:'#f6f1e5', cool:'#2b2824', warm:'#7a2e1f', light:'#9a9384' },
-    uptown:    { field:'#141517', cool:'#2f6fe0', warm:'#ff6319', third:'#fccc0a', light:'#f2f1ec' }
+    // Uptown: a subway car (the user, 2026-10-31): black, brushed steel, MTA blue and yellow; the glow yellow and blue
+    uptown:    { field:'#101113', cool:'#c3c9d0', warm:'#2563d9', third:'#fccc0a', light:'#f4f5f7', metal:['#4c535c', '#eef1f4'], glow:['#fccc0a', '#2563d9'] }
   };
   let LOGO_IMG = null, LOGO_KEY = '';
   function logoRgb(c){
@@ -12430,13 +12639,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const key = skin + '|' + JSON.stringify(pal);
     if(key===LOGO_KEY) return;
     LOGO_KEY = key;
+    // the glow: the logo's two colours for this skin (paper skins glow softly)
+    const wrap = img.parentNode && img.parentNode.classList.contains('plaque-logo-wrap') ? img.parentNode : null;
+    const lg = (a, b, o)=>{ if(!wrap) return; wrap.style.setProperty('--lg-a', a); wrap.style.setProperty('--lg-b', b); wrap.style.setProperty('--lg-o', String(o)); };
+    const shine = (src)=>{ if(wrap) wrap.style.setProperty('--lg-mask', 'url("'+src+'")'); };
+    if(pal.glow) lg(pal.glow[0], pal.glow[1], .9);
+    else if(pal.steps) lg(pal.steps[3], pal.steps[2], .9);
+    else if(pal.paper) lg(pal.warm, pal.cool, .35);
+    else lg(pal.cool, pal.warm, 1);
     const draw = ()=>{ try{
       if(LOGO_KEY!==key) return;
       const W = LOGO_IMG.naturalWidth, H = LOGO_IMG.naturalHeight;
       const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
       const cx = cv.getContext('2d'); cx.drawImage(LOGO_IMG, 0, 0);
       const im = cx.getImageData(0, 0, W, H), p = im.data;
-      const C = {}; for(const k in pal) C[k] = k==='steps' ? pal.steps.map(logoRgb) : logoRgb(pal[k]);
+      const C = {}; for(const k in pal) C[k] = k==='steps' || k==='metal' || k==='glow' ? pal[k].map(logoRgb) : logoRgb(pal[k]);
       const third = C.third || C.warm, ink = !!C.paper, base = C.paper || C.field;
       const mix = (a, b, t)=> a + (b - a)*t;
       for(let i = 0; i < p.length; i += 4){
@@ -12455,15 +12672,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           continue;
         }
         const [wc, ww, wt] = logoSide(h);
+        // brushed steel for the cool side: its brightness picks a shade between dark and bright steel, with a fine
+        // horizontal grain like a subway car's siding
+        let steel = null;
+        if(C.metal && wc){
+          const y = Math.floor(i/4/W), grain = ((y*37) % 11)/11*.08 - .04;
+          const t = Math.max(0, Math.min(1, Math.pow(mx, 1.3) + grain));
+          steel = [0, 1, 2].map(k=> mix(C.metal[0][k], C.metal[1][k], t));
+        }
         for(let k = 0; k < 3; k++){
-          const side = C.cool[k]*wc + C.warm[k]*ww + third[k]*wt;
+          const side = (steel ? steel[k] : C.cool[k])*wc + C.warm[k]*ww + third[k]*wt;
           const col = mix(side, C.light[k], ink ? white*.8 : white);
           p[i + k] = Math.round(mix(base[k], col, shade));
         }
       }
       cx.putImageData(im, 0, 0);
       img.src = cv.toDataURL('image/png');
-    }catch(e){ img.src = img.dataset.src; } };
+      shine(img.src);
+    }catch(e){ img.src = img.dataset.src; shine(img.src); } };
     if(!LOGO_IMG){ LOGO_IMG = new Image(); LOGO_IMG.src = img.dataset.src; }
     if(LOGO_IMG.complete && LOGO_IMG.naturalWidth) draw(); else LOGO_IMG.onload = draw;
   }
@@ -23543,10 +23769,42 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       return sp;
     };
     pl.appendChild(side('white')); pl.appendChild(ghEl('span', 'ol-end-vs', 'vs')); pl.appendChild(side('black'));
+    olEndOpening(R);
     olAgainLabel();
     ov.classList.add('active');
     try{ document.getElementById('ol-end-review').focus({ preventScroll:true }); }catch(e){}
   }
+  // the opening of the game that just ended, read against your Repertoire Lab lines (step 2, 2026-10-31): how far your
+  // prep went, who left it, what your line has, and one tap to the move, or to learning the line. Games against
+  // people only (a game against the computer is never sorted by your repertoire), and only once the game is over.
+  let OL_END_G = null;
+  function olEndOpening(R){
+    const box = document.getElementById('ol-end-op');
+    box.hidden = true; OL_END_G = null;
+    if(!R || R.phase!=='ended' || !RP || !R.sanMoves || !R.sanMoves.length) return;
+    let g = null, r = null;
+    try{ g = olEndGame(R); r = rpResultNow(g); }catch(e){ r = null; }
+    if(!r || r.kind==='norep' || r.color!==R.color) return;
+    const t = hpTexts({ game:g, main:[] }, r), L = r.left || {};
+    document.getElementById('ol-end-op-name').textContent = t.name + (t.sub || '');
+    hpSet('ol-end-op-depth', t.depth);
+    hpSet('ol-end-op-left', t.left);
+    const go = document.getElementById('ol-end-op-go');
+    const at = (L.who==='you' || L.who==='opp') && L.atPly!=null && L.played ? L.atPly : null;
+    go.hidden = at==null;
+    go.textContent = at==null ? '' : 'Review from '+rpMoveText(at, L.played);
+    const l = rpLineFor(r), learn = document.getElementById('ol-end-op-learn'), pr = document.getElementById('ol-end-op-practice');
+    learn.hidden = pr.hidden = !l;
+    if(l) rlLineLinks(l, learn, pr);
+    OL_END_G = { g, at };
+    box.hidden = false;
+  }
+  document.getElementById('ol-end-op-go').addEventListener('click', ()=>{
+    const e = OL_END_G;
+    if(!e || e.at==null) return;
+    olEndClose(false);
+    ghOpenGame(e.g, { at:{ ply:e.at + 1 } });
+  });
   function olEndClose(refocus){
     clearTimeout(olEndTimer);
     const ov = document.getElementById('ol-end');
@@ -23556,8 +23814,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // the finished game as Game History knows a game; ghOpenGame fetches the whole one (opening,
   // clocks, PGN) from Lichess when it can, else opens this
-  function olEndGame(){
-    const R = roundOl, f = R.full || {};
+  function olEndGame(R){
+    R = R || roundOl;
+    const f = R.full || {};
     const P = (c)=>{
       const p = f[c] || {}, out = { rating:p.rating };
       if(p.ai!=null) out.aiLevel = p.ai; else out.user = { id:String(p.id || (c==='white' ? R.whiteName : R.blackName) || '').toLowerCase(), name:p.name || (c==='white' ? R.whiteName : R.blackName), title:p.title || undefined };
@@ -24353,14 +24612,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   /* ---- Filters: state, validation, storage, the #history link ---- */
-  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', len:'', date:'', variant:'', notes:false, rep:'' };
+  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', eg:'', len:'', date:'', variant:'', notes:false, rep:'' };
   const GH_F_SETS = { speed:['ultraBullet','bullet','blitz','rapid','classical','correspondence'], result:['win','loss','draw'],
     color:['white','black'], rated:['rated','casual'], gap:['higher','even','lower'], end:['mate','resign','time','draw','other'],
-    len:['short','medium','long'], date:['7','30','90','year'] };
-  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','len','date','variant','notes','rep'];
+    len:['short','medium','long'], date:['7','30','90','year'], eg:['yes','no','pawn','rook','queen','bishopOpp','bishopSame','knight','bishopKnight','minor','rookMinor','queenMix','uneven'] };
+  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','len','date','variant','notes','rep'];
+  var EG = new Map(), EG_JOB = null, EG_SIG = '';       // each game's endgame (where it begins, the kinds it went through): egEnsure
   // the repertoire filter (gho*, SPEC B.7): opening / trunk / course / chapter / line, outside, or a spot
   const GH_REP_RE = /^(?:[ot]\.[A-Za-z0-9_-]{1,64}|[kc]\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|l(?:\.[A-Za-z0-9_-]{1,64}){3}|x\.[wb](?:\.(?:none|[a-z0-9]+(?:-[a-z0-9]+)*))?|s\.[0-9a-f]{8}(?:\.(?:t\.[A-Za-z0-9_-]{1,64}|c\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|x\.[wb]))?)$/;
-  const GH_SECONDARY = ['rated','gap','end','len','date','opp','variant'];
+  const GH_SECONDARY = ['rated','gap','end','eg','len','date','opp','variant'];
   let GH_FILTERS = Object.assign({}, GH_F_DEFAULT);
   const GH_UI = { more:false, open:false, view:'games', osort:'games', site:'all' };   // site: the All | Lichess | Chess.com tab (chesscom SPEC B.1)
   // Typed text: what a link can carry safely (the hash is decoded twice).
@@ -24495,6 +24755,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
     }
     if(f.end && ghEndGroup(g.status)!==f.end) return false;
+    if(f.eg && egReady() && !egMatch(g, f.eg)) return false;           // kept but ignored until every game's endgame is known
     if(f.len){
       const mv = Math.ceil(ghPlies(g)/2);
       if(f.len==='short' ? mv>25 : f.len==='medium' ? (mv<26 || mv>50) : mv<51) return false;
@@ -24844,7 +25105,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const f = GH_FILTERS, fc = GH_STATE.facets || ghFacets([]);
     const setSel = (id, v)=>{ const el = document.getElementById(id); if(el && el.value!==v) el.value = v; };
     setSel('history-speed-filter', f.speed); setSel('history-result-filter', f.result);
-    setSel('gh-gap', f.gap); setSel('gh-end', f.end); setSel('gh-len', f.len); setSel('gh-date', f.date);
+    setSel('gh-gap', f.gap); setSel('gh-end', f.end); setSel('gh-eg', f.eg); setSel('gh-len', f.len); setSel('gh-date', f.date);
     // the exact time controls listed (one that isn't loaded yet still shows while picked)
     const tcEl = document.getElementById('gh-tc');
     const tcs = fc.tcs.slice();
@@ -24921,6 +25182,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GH_STATE.facets = ghFacetsFor(base);
     ghFixOldSlugs(base);
     if(typeof rpEnsure==='function') rpEnsure();     // games waiting to be sorted (a note synced for an older game) get sorted
+    egEnsure();                                      // the endgames, for the Endgame filter and the Openings tab
     ghSyncFilterUI();
     ghShowSub();
     // the Chess.com tab with no account: the setup card instead of the list (chesscom SPEC B.4)
@@ -24930,6 +25192,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ghg').hidden = !gv || only;
     document.getElementById('ghp').hidden = !pv || only;
     listEl.hidden = ov || gv || pv || only;
+    if(ov || gv || pv || only) ghLineCard(null);
     ['.gh-filters', '.history-footer'].forEach(q=>{ const el = document.querySelector('#view-history '+q); if(el) el.hidden = only || gv || (pv && q==='.gh-filters'); });
     document.getElementById('view-history').classList.toggle('is-gho', ov);
     document.getElementById('view-history').classList.toggle('is-ghg', gv);
@@ -24961,6 +25224,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     const active = ghActiveCount() > 0;
     const rows = active ? base.filter(g=> ghMatch(g, u, GH_FILTERS)) : base;
+    ghLineCard(rows);
     const total = base.length, plural = total===1 ? '' : 's';
     const cnt = document.getElementById('gh-count'), nc = document.createElement('div');
     nc.textContent = !total && !active && ghTabBusy() ? ''
@@ -25317,7 +25581,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const ghOppCombo = ghCombo(document.getElementById('gh-opp-wrap'), ghOppOptions,
     v=> ghSetFilters({ opp:v || '' }), t=> ghSetFilterText('opp', t));
   [['history-speed-filter','speed'], ['history-result-filter','result'], ['gh-tc','tc'], ['gh-gap','gap'],
-   ['gh-end','end'], ['gh-len','len'], ['gh-date','date'], ['gh-variant','variant']].forEach(([id, k])=>{
+   ['gh-end','end'], ['gh-eg','eg'], ['gh-len','len'], ['gh-date','date'], ['gh-variant','variant']].forEach(([id, k])=>{
     document.getElementById(id).addEventListener('change', e=> ghSetFilters({ [k]:e.target.value }));
   });
   [['gh-color','color'], ['gh-rated','rated']].forEach(([id, k])=>{
@@ -26848,7 +27112,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoApply(patch){
     if(!patch) return;
     if(ghoOn()) GHO_Y = window.scrollY;
-    const extra = ['len', 'end', 'gap', 'speed'].filter(k=> Object.prototype.hasOwnProperty.call(patch, k));
+    const extra = ['len', 'end', 'eg', 'gap', 'speed', 'color', 'date'].filter(k=> Object.prototype.hasOwnProperty.call(patch, k));
     if(ghoOn()) GHO_DRILL = extra.length ? extra.map(k=> [k, GH_FILTERS[k] || '', patch[k]]) : null;     // "Games in this chapter" (the review) keeps a pending one
     GH_UI.view = 'games';
     GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, { opening:'', oq:'', result:'', rep:'' }, patch));
@@ -26897,7 +27161,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!d || typeof d!=='object') return null;
     const ids = (a)=> Array.isArray(a) ? [...new Set(a.filter(x=> typeof x==='string' && /^(?:\w{8}|cc-d?\d{1,15})$/.test(x)))].slice(0, 1000) : [];
     return { id, hex:id.slice(3), name:String(d.name || 'Untitled group').slice(0, 60), fen: nbValidFen(String(d.fen || '')) ? String(d.fen) : '',
-      line:gnCleanSan(String(d.line || '')), flip:!!d.flip, inc:ids(d.inc), at:Number(d.at) || 0, cx:gpChessable(d.cx) };
+      line:gnCleanSan(String(d.line || '')), flip:!!d.flip, inc:ids(d.inc), at:Number(d.at) || 0, rl:gpRlLink(d.rl) };
   }
   function gpGet(id){ const n = typeof GN==='object' && GN ? GN.notes[id] : null; return n && n.text ? gpParse(id, n.text) : null; }
   function gpAll(){
@@ -26916,11 +27180,43 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     return out.sort((x, y)=> x.name.localeCompare(y.name));
   }
-  // your Chessable link for a group's line: only a chessable.com address (https added if it was pasted without)
-  function gpChessable(u){
-    let t = String(u || '').trim();
-    if(/^(?:www\.)?chessable\.com\//i.test(t)) t = 'https://'+t;
-    return /^https:\/\/(?:www\.)?chessable\.com\/\S{0,280}$/i.test(t) ? t : '';
+  // a Repertoire Lab chapter link (repertoirelabs.com/chapter/<opening>/<chapter>, the address bar of a chapter there),
+  // tidied to one form; anything else is ''
+  function gpRlLink(u){
+    const m = /^(?:https?:\/\/)?(?:www\.)?(?:repertoirelabs\.com|repertoirelab\.netlify\.app)\/chapter\/([A-Za-z0-9_-]{3,64})\/([A-Za-z0-9_-]{3,64})\/?(?:[?#]\S*)?$/i.exec(String(u || '').trim());
+    return m ? 'https://repertoirelabs.com/chapter/'+m[1]+'/'+m[2] : '';
+  }
+  // where a group's moves sit in your Repertoire Lab lines: the deepest of its positions your lines reach (by position,
+  // so another move order counts), looked for first on the side the board shows, then the other. A group kept as a
+  // position alone is looked up by that position.
+  function gpRlPlace(G){
+    if(!RP) return null;
+    const toks = String(G.line || '').trim() ? String(G.line).trim().split(/\s+/) : [];
+    let st = !toks.length && G.fen ? hvStateFromFen(G.fen) : pzStartPosition();
+    if(!st) return null;
+    const keys = [rpKey(st)];
+    for(let i = 0; i < toks.length; i++){
+      const mv = rpSanToMove(st, toks[i]);
+      if(!mv) break;
+      st = pzApplyMoveRaw(st, mv); keys.push(rpKey(st));
+    }
+    const sides = G.flip ? ['black', 'white'] : ['white', 'black'];
+    for(let k = 0; k < 2; k++){
+      const S = RP.side[sides[k]];
+      if(!S || !S.has) continue;
+      if(!S.idx) rpBuild(true);
+      for(let i = keys.length - 1; i >= 0; i--){
+        const u = rpUseful(S.idx.get(keys[i]) || RP_NONE);
+        if(!u.length) continue;
+        let first = u[0].o;
+        u.forEach(h=>{ if(RP.order.get(h.o.id) < RP.order.get(first.id)) first = h.o; });
+        const chs = [];
+        u.forEach(h=>{ if(h.o===first && chs.indexOf(h.c)<0) chs.push(h.c); });
+        chs.sort((a, b)=> first.chapters.indexOf(a) - first.chapters.indexOf(b));
+        return { o:first, chs, ply:i, all:i===keys.length - 1, toks };
+      }
+    }
+    return null;
   }
   // the same moves on Lichess's analysis board (1.d4_d5_2.Nc3...: Lichess reads the underscores as spaces); a position
   // with no moves opens as that position
@@ -26935,13 +27231,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let keep = {};
     try{ const n = GN.notes[G.id], o = n && n.text ? JSON.parse(n.text) : null; if(o && typeof o==='object' && !Array.isArray(o)) keep = o; }catch(e){ keep = {}; }
     const rec = Object.assign({}, keep, { v:1, name:G.name, fen:G.fen, line:G.line, flip:!!G.flip, inc:G.inc, at:G.at });
-    if(G.cx) rec.cx = G.cx; else delete rec.cx;
+    delete rec.cx;                                   // the Chessable link of 2026-10-31's first build (now Repertoire Lab)
+    if(G.rl) rec.rl = G.rl; else delete rec.rl;
     gnSetNote(G.id, JSON.stringify(rec),
       { id:G.id, _op:gnCleanG({ opening:G.name, san:G.line, variant:'standard' }) });
   }
   function gpNew(name, from){
     const hex = gnFnv(name+'|'+Date.now()+'|'+Math.random());
-    const G = { id:'gp-'+hex, hex, name, fen:(from && from.fen) || '', line:(from && from.line) || '', flip:!!(from && from.flip), inc:from && from.game ? [String(from.game)] : [], at:Date.now() };
+    const G = { id:'gp-'+hex, hex, name, fen:(from && from.fen) || '', line:(from && from.line) || '', flip:!!(from && from.flip),
+      inc:from && Array.isArray(from.games) ? [...new Set(from.games.map(String))].slice(0, 1000) : from && from.game ? [String(from.game)] : [], at:Date.now() };
     gpSave(G);
     return G;
   }
@@ -27003,14 +27301,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const name = document.getElementById('ghg-name');
     if(document.activeElement!==name) name.value = G.name;
     document.getElementById('ghg-meta').textContent = gpStats(G, u);
-    // the line card: the moves (or what the group was made from), your Chessable link, the moves on Lichess
+    // the line card: the moves (or what the group was made from), the Repertoire Lab chapter they're in, the moves on Lichess
     const line = document.getElementById('ghg-line');
     line.textContent = G.line ? gnMovetext(G.line) : (G.fen ? 'A position (no moves were kept with this group).' : 'No moves: this group was made without a position.');
     line.classList.toggle('is-none', !G.line);
-    const cx = document.getElementById('ghg-cx'), cxo = document.getElementById('ghg-cx-open'), li = document.getElementById('ghg-li');
-    if(document.activeElement!==cx && cx.dataset.g!==G.id+'|'+G.cx){ cx.value = G.cx || ''; cx.dataset.g = G.id+'|'+G.cx; }
-    if(cx.dataset.for!==G.id){ cx.dataset.for = G.id; const m = document.getElementById('ghg-cx-msg'); m.textContent = ''; m.classList.remove('is-bad'); }
-    cxo.hidden = !G.cx; if(G.cx) cxo.href = G.cx; else cxo.removeAttribute('href');
+    gpRlCard(G);
+    const li = document.getElementById('ghg-li');
     const lu = gpLichessUrl(G);
     li.hidden = !lu; if(lu) li.href = lu; else li.removeAttribute('href');
     li.textContent = G.line ? 'Open these moves on Lichess' : 'Open this position on Lichess';
@@ -27077,19 +27373,146 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(el) el.focus({ preventScroll:true });
     }
   }
-  // your Chessable link for the open group's line: saved with the group (synced with it); empty takes it off
-  document.getElementById('ghg-cx-form').addEventListener('submit', (e)=>{
+  // the group's Repertoire Lab chapter: the one a link you saved points at, otherwise the one its moves are in
+  function gpRlCard(G){
+    const el = document.getElementById('ghg-rl'), open = document.getElementById('ghg-rl-open');
+    const pick = document.getElementById('ghg-rl-pick'), sum = document.getElementById('ghg-rl-sum');
+    const inp = document.getElementById('ghg-rl-in'), msg = document.getElementById('ghg-rl-msg');
+    if(inp.dataset.for!==G.id){ inp.dataset.for = G.id; msg.textContent = ''; msg.classList.remove('is-bad'); pick.open = false; }
+    if(document.activeElement!==inp && inp.dataset.g!==G.id+'|'+G.rl){ inp.value = G.rl || ''; inp.dataset.g = G.id+'|'+G.rl; }
+    el.textContent = '';
+    const say = (lead, name, sub)=>{
+      el.append(lead);
+      if(name){ const b = document.createElement('b'); b.textContent = name; el.append(b); }
+      if(sub){ const s = document.createElement('span'); s.className = 'ghg-rl-sub'; s.textContent = sub; el.append(s); }
+    };
+    let href = '';
+    if(G.rl){
+      const m = /\/chapter\/([^/]+)\/([^/]+)$/.exec(G.rl), o = m && RP ? RP.ops.get(m[1]) : null, c = m && RP ? RP.chs.get(m[2]) : null;
+      href = G.rl;
+      say('Repertoire Lab: ', o && c && c.openingId===o.id ? rpChapterPath(o, c) : 'the chapter you linked', 'Your link, saved with this group.');
+      sum.textContent = 'Change or remove the link';
+    } else if(!RP){
+      say('Sign in to Repertoire Lab in Settings and this card links the chapter these moves are in.', '', '');
+      sum.textContent = 'Link a chapter';
+    } else {
+      const p = gpRlPlace(G);
+      if(!p){
+        say(G.line || G.fen ? 'None of your Repertoire Lab lines reach ' + (G.line ? 'these moves.' : 'this position.') : 'This group has no moves to look up in Repertoire Lab.', '', '');
+        sum.textContent = 'Link a chapter';
+      } else {
+        const c = p.chs[0];
+        href = 'https://repertoirelabs.com/chapter/'+encodeURIComponent(p.o.id)+'/'+encodeURIComponent(c.id);
+        const reach = !p.toks.length || !p.ply ? '' : p.all ? 'Your lines cover every move here.'
+          : 'Your lines reach the position after '+rpMoveText(p.ply - 1, p.toks[p.ply - 1])+'; '+rpMoveText(p.ply, p.toks[p.ply])+' isn\u2019t in them.';
+        if(p.chs.length===1) say('Repertoire Lab: ', rpChapterPath(p.o, c), reach);
+        else say('Repertoire Lab: ', p.o.name+', before the chapters split',
+          (reach ? reach+' ' : '')+'The position is in '+p.chs.length+' chapters; the link opens the first, '+c.short+'.');
+        sum.textContent = 'Link a different chapter';
+      }
+    }
+    open.hidden = !href;
+    if(href) open.href = href; else open.removeAttribute('href');
+  }
+  // ---- the line card over the Games list (2026-10-31): the list narrowed to one of your chapters (c.) or lines (l.) ----
+  var GH_LC = null;                                   // { key, F (the idea's note field), line, o, c, moves, color, rows }
+  // "1. d4 d5 2. Nc3": moves from ply off (a set-up line starts later)
+  function ghLcMovetext(moves, off){
+    let out = '';
+    moves.forEach((m, i)=>{ const p = off + i; if(p % 2===0) out += (out ? ' ' : '')+(p/2 + 1)+'. '+m; else out += (i===0 ? (Math.floor(p/2) + 1)+'... ' : ' ')+m; });
+    return out;
+  }
+  function ghLcIdeaId(kind, id){ return gnOpId('repertoire lab '+kind+' '+id); }
+  // the index into line's moves after which the position is in chapter c only (of the opening's chapters); -1 for none
+  function ghLcSplitAt(line, o, c){
+    const S = RP && RP.side[o.color];
+    if(!S || !S.has) return -1;
+    if(!S.idx) rpBuild(true);
+    let st = line.fen ? hvStateFromFen(line.fen) : pzStartPosition();
+    for(let i = 0; st && i < line.moves.length; i++){
+      const mv = rpSanToMove(st, line.moves[i]);
+      if(!mv) break;
+      st = pzApplyMoveRaw(st, mv);
+      const hs = (S.idx.get(rpKey(st)) || RP_NONE).filter(h=> h.o===o);
+      if(hs.length && hs.every(h=> h.c===c)) return i;
+    }
+    return -1;
+  }
+  function ghLineCard(rows){
+    const box = document.getElementById('gh-lc');
+    const rep = GH_FILTERS.rep || '', m = /^([cl])\.([^.]+)\.([^.]+)(?:\.([^.]+))?$/.exec(rep);
+    const off = ()=>{ box.hidden = true; if(GH_LC && GH_LC.F){ clearTimeout(GH_LC.F.timer); gnFieldSave(GH_LC.F); if(getLichessToken() && gnHasPending()) gnScheduleSync(800); } GH_LC = null; };
+    if(!rows || !m || !rpReady() || !RP) return off();
+    const o = RP.ops.get(m[2]), c = RP.chs.get(m[3]), L = m[1]==='l' ? RP.lns.get(m[4]) : null;
+    if(!o || !c || (m[1]==='l' && !L)) return off();
+    // the moves: the line itself, or for a chapter the line its games follow most (else its first line), the move where
+    // the chapter begins (its position is in no other chapter of the opening) in bold
+    let line = L;
+    if(!line){
+      const n = new Map();
+      rows.forEach(g=>{ const r = rpResult(g); if(r && r.lineId && r.chapterId===c.id) n.set(r.lineId, (n.get(r.lineId) || 0) + 1); });
+      const best = Array.from(n.entries()).sort((a, b)=> b[1] - a[1])[0];
+      line = (best && RP.lns.get(best[0])) || c.lines[0] || null;
+    }
+    const moves = line ? line.moves.slice(0, 40) : [], from = line ? line.off : 0, at = line ? ghLcSplitAt(line, o, c) : -1;
+    const key = rep+'|'+(line ? line.id : '');
+    const title = m[1]==='l' ? rpChapterPath(o, c)+' \u203a '+L.short : rpChapterPath(o, c);
+    document.getElementById('gh-lc-title').textContent = title;
+    const mv = document.getElementById('gh-lc-moves');
+    mv.textContent = '';
+    if(!moves.length) mv.textContent = 'No moves in this chapter yet.';
+    else ghLcMovetext(moves, from).split(/\s+/).reduce((acc, tok)=>{
+      // tokens: "1." numbers and moves; the moves count up from the line's own start
+      if(/^\d+\.+$/.test(tok)){ mv.appendChild(document.createTextNode((mv.childNodes.length ? ' ' : '')+tok+' ')); return acc; }
+      if(acc===at){ const b = ghEl('b', 'gh-lc-split', tok); b.title = 'Where this chapter begins'; mv.appendChild(b); }
+      else mv.appendChild(document.createTextNode(tok));
+      mv.appendChild(document.createTextNode(' '));
+      return acc + 1;
+    }, 0);
+    const rl = document.getElementById('gh-lc-rl');
+    rl.href = 'https://repertoirelabs.com/chapter/'+encodeURIComponent(o.id)+'/'+encodeURIComponent(c.id);
+    const learn = document.getElementById('gh-lc-learn'), pr = document.getElementById('gh-lc-practice');
+    learn.hidden = pr.hidden = !line;
+    if(line) rlLineLinks(line, learn, pr);
+    // the idea: one line of yours, kept like an opening note (synced with your notes)
+    if(!GH_LC || GH_LC.key!==key){
+      if(GH_LC && GH_LC.F){ clearTimeout(GH_LC.F.timer); gnFieldSave(GH_LC.F); }
+      const F = gnField(document.getElementById('gh-lc-idea'));
+      gnFieldLoad(F, { id:ghLcIdeaId(m[1]==='l' ? 'line' : 'chapter', m[1]==='l' ? L.id : c.id), _op:gnCleanG({ opening:title.slice(0, 120), san:moves.slice(0, 24).join(' '), variant:'standard' }) });
+      GH_LC = { key, F };
+    }
+    Object.assign(GH_LC, { line, o, c, moves, from, color:o.color, title, rows });
+    box.hidden = false;
+  }
+  (function ghLcWire(){
+    const inp = document.getElementById('gh-lc-idea');
+    inp.addEventListener('input', ()=>{ const F = GH_LC && GH_LC.F; if(!F) return; clearTimeout(F.timer); F.timer = setTimeout(()=> gnFieldSave(F), 600); });
+    inp.addEventListener('blur', ()=>{ const F = GH_LC && GH_LC.F; if(F){ gnFieldSave(F); if(getLichessToken() && gnHasPending()) gnScheduleSync(800); } });
+    inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } });
+    // a group from the line: its moves and position, and the games listed (what you're looking at)
+    document.getElementById('gh-lc-group').addEventListener('click', ()=>{
+      const X = GH_LC;
+      if(!X) return;
+      let st = X.from ? null : pzStartPosition(), fen = '';
+      if(st){ for(let i = 0; i < X.moves.length; i++){ const mv = rpSanToMove(st, X.moves[i]); if(!mv){ st = null; break; } st = pzApplyMoveRaw(st, mv); } }
+      if(st) fen = pzStateToFEN(st, X.moves.length);
+      const last = X.moves.length ? rpMoveText(X.from + X.moves.length - 1, X.moves[X.moves.length - 1]) : '';
+      gpNewDialog({ suggest:X.title.split(' \u203a ').pop().slice(0, 60), fen, line: st ? X.moves.join(' ') : '', flip:X.color==='black', label:last, games:(X.rows || []).map(g=> g.id) });
+    });
+  })();
+  // a Repertoire Lab chapter link for the open group: saved with the group (synced with it); empty takes it off
+  document.getElementById('ghg-rl-form').addEventListener('submit', (e)=>{
     e.preventDefault();
     const G = GH_UI.group ? gpGet(GH_UI.group) : null;
     if(!G) return;
-    const inp = document.getElementById('ghg-cx'), msg = document.getElementById('ghg-cx-msg');
-    const raw = inp.value.trim(), v = gpChessable(raw);
+    const inp = document.getElementById('ghg-rl-in'), msg = document.getElementById('ghg-rl-msg');
+    const raw = inp.value.trim(), v = gpRlLink(raw);
     msg.classList.remove('is-bad');
-    if(raw && !v){ msg.textContent = 'That isn\u2019t a Chessable link. Paste the address of the line on chessable.com (it starts with https://www.chessable.com/).'; msg.classList.add('is-bad'); return; }
-    if(v===(G.cx || '')){ msg.textContent = v ? 'Saved.' : ''; return; }
-    G.cx = v;
+    if(raw && !v){ msg.textContent = 'That isn\u2019t a Repertoire Lab chapter link. Open the chapter in Repertoire Lab and copy its address (it looks like repertoirelabs.com/chapter/\u2026).'; msg.classList.add('is-bad'); return; }
+    if(v===(G.rl || '')){ msg.textContent = v ? 'Saved.' : ''; return; }
+    G.rl = v;
     gpSave(G);
-    msg.textContent = v ? 'Saved.' : 'Link removed.';
+    msg.textContent = v ? 'Saved.' : 'Link removed. The card shows the chapter these moves are in.';
     inp.dataset.g = '';
     ghRender();
   });
@@ -27126,7 +27549,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!v){ name.focus(); name.setAttribute('aria-invalid', 'true'); return; }
     name.removeAttribute('aria-invalid');
     const board = document.getElementById('gp-new-board').checked && from.fen;
-    const G = gpNew(v, { fen: board ? from.fen : '', line: board ? from.line : '', flip:!!from.flip, game:from.game || '' });
+    const G = gpNew(v, { fen: board ? from.fen : '', line: board ? from.line : '', flip:!!from.flip, game:from.game || '', games:from.games || null });
     gpNewClose();
     if(currentView!=='history') showView('history');
     ghgOpen(G.id);
@@ -27821,7 +28244,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     box.style.setProperty('--lvl', String(lvl));
     box.setAttribute('role', 'listitem');
     box.setAttribute('aria-level', String(lvl + 1));
-    box.setAttribute('aria-label', 'Results by opponent and by speed: '+n.name);
+    box.setAttribute('aria-label', 'Results by opponent, speed and endgame: '+n.name);
     const group = (title, items)=>{
       items = items.filter(x=> x.list.length);
       if(!items.length) return;
@@ -27833,7 +28256,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const m = ghoMetrics(x.list), b = ghEl('button', 'gho-sp'+(m.n < GHO_MIN ? ' is-thin' : ''));
         b.type = 'button';
         b.dataset.key = n.key;
-        if(x.gap) b.dataset.gap = x.gap; else b.dataset.speed = x.speed;
+        if(x.gap) b.dataset.gap = x.gap; else if(x.eg) b.dataset.eg = x.eg; else b.dataset.speed = x.speed;
         b.appendChild(ghEl('span', 'gho-sp-k', x.name));
         b.appendChild(ghoBar(m));
         b.appendChild(ghEl('span', 'gho-sp-v', m.n+' \u00b7 '+ghoPct(m.score)));
@@ -27850,6 +28273,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       { name:'About even', gap:'even', list:L.filter(e=>{ const x = d(e); return x!=null && Math.abs(x) < 100; }) },
       { name:'Weaker (100+)', gap:'lower', list:L.filter(e=>{ const x = d(e); return x!=null && x <= -100; }) }]);
     group('Speed', GHO_SPEEDS.map(([k, w])=> ({ name:w, speed:k, list:L.filter(e=> e.g.speed===k) })));
+    // where this opening's games end up: the endgames reached, most first (step 2, 2026-10-31)
+    if(egReady()){
+      const G = egGroups(L);
+      if(G.reach.length) group('Endgame', [{ name:'Reached an endgame', eg:'yes', list:G.reach }].concat(G.kinds.slice(0, 5).map(([k, list])=> ({ name:EG_NAME[k], eg:k, list }))));
+    }
     return box;
   }
   function ghoFormWords(form){ return form.map(r=> r==='win' ? 'won' : r==='draw' ? 'drew' : 'lost').join(', '); }
@@ -28220,7 +28648,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // focus stays on the same control across a redraw
     const fa = document.activeElement, inSec = fa && sec.contains(fa);
     const fKey = inSec && fa.dataset ? (fa.dataset.key || '') : '', fCls = inSec ? (fa.classList.contains('gho-dis') ? 'gho-dis' : fa.classList.contains('gho-name') ? 'gho-name' : '') : '';
-    const spId = (e)=> e.dataset.gap ? 'g:'+e.dataset.gap : 's:'+(e.dataset.speed || ''), fSp = inSec && fa.classList.contains('gho-sp') ? spId(fa) : '', fMore = inSec && fa.id==='gho-more';
+    const spId = (e)=> e.dataset.gap ? 'g:'+e.dataset.gap : e.dataset.eg ? 'e:'+e.dataset.eg : 's:'+(e.dataset.speed || ''), fSp = inSec && fa.classList.contains('gho-sp') ? spId(fa) : '', fMore = inSec && fa.id==='gho-more';
     const fIns = inSec && fa.dataset && fa.dataset.ins!=null ? fa.dataset.ins : null;
     const fStat = inSec && (fa.classList.contains('gho-status-btn') || fa.id==='gho-status'), fOut = inSec && fa.classList.contains('gho-out-all') ? fa.dataset.rep : '';
     const st = rlState();
@@ -28252,7 +28680,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghoStatus(model);
     const ccN = ghCcUp() ? ccGames().length : 0;
     const loading = site==='chesscom' ? !ccN && ghCcBusy() : !GH_STATE.games.length && !(mix && ccN);
+    ghoDrawBrief(loading ? null : model);
     ghoDrawInsights(loading ? { ins:[] } : model);
+    ghoDrawGaps(loading || !model.rep ? null : model);
+    ghoDrawEnds(loading ? null : model);
     const sel = document.getElementById('gho-sort');
     const po = sel.querySelector('option[value="perf"]');
     if(po){ po.disabled = mix; const pt = mix ? 'Performance (pick a site)' : 'Performance'; if(po.textContent!==pt) po.textContent = pt; }
@@ -28351,6 +28782,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     sec.addEventListener('click', e=>{
       const card = e.target.closest('.gho-card');
       if(card){ const c = GHO_LAST && GHO_LAST.ins[Number(card.dataset.ins)]; if(c) ghoApply(c.f); return; }
+      const dot = e.target.closest('.gho-brief-dot');
+      if(dot){ ghoBriefShow(Number(dot.dataset.i), true); return; }
+      const fg = e.target.closest('.gho-fact-go');
+      if(fg){ const F = GHO_BRIEF.facts[Number(fg.dataset.fi)]; const a = F && F.acts[Number(fg.dataset.ai)]; if(a && a.go) a.go(); return; }
+      const fm = e.target.closest('.gho-facts-more');
+      if(fm){ GHO_BRIEF.allFacts = !GHO_BRIEF.allFacts; ghoDrawFacts(); const nb = document.querySelector('.gho-facts-more'); if(nb) try{ nb.focus({ preventScroll:true }); }catch(err){} return; }
+      const gap = e.target.closest('.gho-gap-go');
+      if(gap){
+        const y = GHO_LAST && GHO_LAST.gaps && GHO_LAST.gaps[gap.dataset.gapk] ? GHO_LAST.gaps[gap.dataset.gapk][Number(gap.dataset.gapi)] : null;
+        if(y) ghoApply({ rep:'s.'+y.s.spot+'.'+ghoSpotScope(y.s.where, y.color) });
+        return;
+      }
+      const gm = e.target.closest('.gho-gap-more');
+      if(gm){
+        const k = gm.dataset.gapmore;
+        GHO_GAPS_ALL[k] = !GHO_GAPS_ALL[k]; ghoRedraw();
+        const nb = document.querySelector('.gho-gap-more[data-gapmore="'+k+'"]');
+        if(nb) try{ nb.focus({ preventScroll:true }); }catch(err){}
+        return;
+      }
       const all = e.target.closest('.gho-out-all');
       if(all){ ghoApply({ rep:all.dataset.rep }); return; }
       const seg = e.target.closest('.gho-seg[data-res]');
@@ -28360,7 +28811,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         return;
       }
       const sp = e.target.closest('.gho-sp[data-key]');
-      if(sp){ const n = ghoFind(sp.dataset.key), f = n && ghoNodeFilter(n); if(f) ghoApply(Object.assign({}, f, sp.dataset.gap ? { gap:sp.dataset.gap } : { speed:sp.dataset.speed })); return; }
+      if(sp){ const n = ghoFind(sp.dataset.key), f = n && ghoNodeFilter(n); if(f) ghoApply(Object.assign({}, f, sp.dataset.gap ? { gap:sp.dataset.gap } : sp.dataset.eg ? { eg:sp.dataset.eg } : { speed:sp.dataset.speed })); return; }
+      const eb = e.target.closest('.gho-end-b');
+      if(eb){ ghoApply({ color:eb.dataset.egc, eg:eb.dataset.eg }); return; }
       const more = e.target.closest('#gho-more');
       if(more){ GHO_MORE = !GHO_MORE; ghoRedraw(); return; }
       const b = e.target.closest('.gho-dis, .gho-name[data-fold]');
@@ -28373,6 +28826,451 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(nb && nb.dataset.key){ const n = ghoFind(nb.dataset.key); if(n) ghoApply(ghoNodeFilter(n)); }
     });
   })();
+  // ---- the daily brief (step 2, 2026-10-31). Your last 7 days of the games the Openings tab counts (the filters you
+  // set apply); fewer than 5 games in them, your last 10 instead. A big number with a ring, cycling (every 7 s; still for
+  // reduced motion, and once you pick one) through the ones that say most, starting with the furthest from your usual;
+  // under the cards, a few facts, each naming one move, line or opening and opening it. The user's choices: score,
+  // prep depth, kept to prep, accuracy and games; unprepared, forgot your line, underperforming, seen a lot lately, the
+  // latest game's opening, middlegame drop-off (reviewed games only) and your notes. ----
+  var GHO_NOW = 0;                                    // a test's clock (0: now)
+  var GHO_BRIEF = { stats:[], i:0, user:false, facts:[], allFacts:false, timer:0, key:'', mg:null, model:null };
+  const GHO_FACTS_N = 4;
+  function ghoBriefNow(){ return GHO_NOW || Date.now(); }
+  // a ring: a fraction f of the circle in the accent, the rest a track; or arcs (wins, draws, losses)
+  function ghoRing(parts){
+    const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'), R = 40, C = 2*Math.PI*R;
+    svg.setAttribute('viewBox', '0 0 100 100');
+    const arc = (col, from, len)=>{
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', '50'); c.setAttribute('cy', '50'); c.setAttribute('r', String(R)); c.setAttribute('fill', 'none');
+      c.setAttribute('stroke-width', '11'); c.style.stroke = col;
+      c.setAttribute('stroke-dasharray', (len*C).toFixed(2)+' '+C.toFixed(2));
+      c.setAttribute('stroke-dashoffset', (-from*C).toFixed(2));
+      c.setAttribute('transform', 'rotate(-90 50 50)');
+      svg.appendChild(c);
+    };
+    arc('var(--line)', 0, 1);
+    let at = 0;
+    parts.forEach(([col, f])=>{ f = Math.max(0, Math.min(1, f)); if(f > 0) arc(col, at, f); at += f; });
+    return svg;
+  }
+  function ghoSignedTxt(x, dp){ const v = Math.abs(x).toFixed(dp); return (x > 0 ? '+' : x < 0 ? '\u2212' : '\u00b1')+v; }
+  function ghoBriefWindow(all){
+    const now = ghoBriefNow(), from = now - 7*86400e3;
+    const wk = all.filter(e=> e.at >= from && e.at <= now + 6e4);
+    if(wk.length >= 5) return { list:wk, week:true, label:'Your last 7 days' };
+    const last = all.slice().sort((a, b)=> b.at - a.at).slice(0, 10);
+    return { list:last, week:false, label:'Your last '+ghoN(last.length, 'game'), note:'Fewer than 5 in the last 7 days' };
+  }
+  function ghoBriefStats(W, all, rep){
+    const out = [], m = ghoMetrics(W), mu = ghoMetrics(all);
+    // score
+    out.push({ k:'score', dot:'Score', big:ghoPct(m.score), what:'Your score',
+      vs:m.W+' won, '+m.D+' drawn, '+m.L+' lost \u00b7 your usual '+ghoPct(mu.score),
+      fig:[['var(--good)', m.n ? m.W/m.n : 0], ['var(--ink-soft)', m.n ? m.D/m.n : 0], ['var(--bad)', m.n ? m.L/m.n : 0]], d:Math.abs(m.score - mu.score)/10 });
+    if(rep){
+      const inRep = (e)=> e.r && (e.r.kind==='chapter' || e.r.kind==='trunk');
+      const R = W.filter(inRep), RU = all.filter(inRep);
+      if(R.length){
+        const avg = (L)=> L.reduce((s, e)=> s + e.r.prepPly/2, 0)/Math.max(1, L.length);
+        const reachL = R.filter(e=> e.r.kind==='chapter' && e.r.lineEnd), reach = reachL.length ? reachL.reduce((s, e)=> s + Math.min(1, e.r.prepPly/e.r.lineEnd), 0)/reachL.length : null;
+        const p = avg(R), pu = avg(RU);
+        out.push({ k:'prep', dot:'Prep', big:p.toFixed(1), what:'Moves of prep, on average',
+          vs:(reach!=null ? 'Games got '+Math.round(100*reach)+'% of the way through your lines. ' : '')+'Your usual '+pu.toFixed(1)+' moves',
+          fig:[['var(--brass-soft)', reach!=null ? reach : 0]], d:Math.abs(p - pu)/1.5 });
+        const kept = (L)=> L.filter(e=> e.r.left && e.r.left.who!=='you').length;
+        const kw = kept(R), ku = kept(RU);
+        out.push({ k:'kept', dot:'Kept to prep', big:kw+' of '+R.length, what:'Kept to your prep',
+          vs:'Games where you never left your line first \u00b7 your usual '+ghoPct(100*ku/Math.max(1, RU.length)),
+          fig:[['var(--brass-soft)', kw/R.length]], d:Math.abs(100*kw/R.length - 100*ku/Math.max(1, RU.length))/10 });
+      }
+    }
+    const A = W.filter(e=> e.acc!=null), AU = all.filter(e=> e.acc!=null);
+    if(A.length){
+      const a = A.reduce((s, e)=> s + e.acc, 0)/A.length, au = AU.reduce((s, e)=> s + e.acc, 0)/AU.length;
+      out.push({ k:'acc', dot:'Accuracy', big:String(Math.round(a)), what:'Accuracy, in '+ghoN(A.length, 'reviewed game'),
+        vs:'Your usual '+Math.round(au)+' (Chess Arcade\u2019s review)', fig:[['var(--brass-soft)', a/100]], d:Math.abs(a - au)/5 });
+    }
+    // games, and how they went
+    const span = all.length ? Math.max(7, (ghoBriefNow() - Math.min(...all.map(e=> e.at)))/86400e3) : 7;
+    out.push({ k:'games', dot:'Games', big:String(W.length), what:W.length===1 ? 'Game' : 'Games',
+      vs:'Usually about '+Math.round(all.length/span*7)+' a week', fig:[['var(--good)', m.n ? m.W/m.n : 0], ['var(--ink-soft)', m.n ? m.D/m.n : 0], ['var(--bad)', m.n ? m.L/m.n : 0]], d:0 });
+    return out;
+  }
+  function ghoBriefShow(i, user, anim){
+    const B = GHO_BRIEF, S = B.stats;
+    if(!S.length) return;
+    B.i = ((i % S.length) + S.length) % S.length;
+    if(user) B.user = true;
+    const st = S[B.i], hero = document.getElementById('gho-brief-hero');
+    const fig = document.getElementById('gho-brief-fig');
+    fig.textContent = ''; fig.appendChild(ghoRing(st.fig));
+    document.getElementById('gho-brief-big').textContent = st.big;
+    document.getElementById('gho-brief-what').textContent = st.what;
+    document.getElementById('gho-brief-vs').textContent = st.vs;
+    document.querySelectorAll('#gho-brief-dots .gho-brief-dot').forEach((b, j)=> b.setAttribute('aria-pressed', j===B.i ? 'true' : 'false'));
+    if(anim!==false){ hero.classList.remove('is-in'); void hero.offsetWidth; hero.classList.add('is-in'); }
+  }
+  // the next number every 7 s, while the brief is on screen and you haven't picked one; never for reduced motion
+  function ghoBriefTick(){
+    const B = GHO_BRIEF, box = document.getElementById('gho-brief');
+    if(B.user || B.stats.length < 2 || !box || box.hidden || document.hidden || currentView!=='history' || !ghoOn()) return;
+    if(box.matches(':hover') || box.contains(document.activeElement)) return;
+    ghoBriefShow(B.i + 1, false);
+  }
+  function ghoBriefTimer(on){
+    const B = GHO_BRIEF;
+    const still = typeof matchMedia==='function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(on && !still && !B.timer) B.timer = setInterval(ghoBriefTick, 7000);
+    if((!on || still) && B.timer){ clearInterval(B.timer); B.timer = 0; }
+  }
+  // the facts under the cards: each { tag, cls, text (parts: strings or [move] in bold), acts: [{ t, go | href }] }
+  function ghoBriefFacts(W, rep, week){
+    const F = [], when = (n)=> (n===1 ? 'once' : n===2 ? 'twice' : n+' times')+(week ? ' this week' : ' in these games');
+    const games = (rep)=> ()=> ghoApply(week ? { rep, date:'7' } : { rep });
+    const inRep = W.filter(e=> e.r && (e.r.kind==='chapter' || e.r.kind==='trunk' || e.r.kind==='outside'));
+    // the latest game's opening
+    const last = inRep.slice().sort((a, b)=> b.at - a.at)[0];
+    if(last){
+      const t = hpTexts({ game:last.g, main:[] }, last.r), L = last.r.left || {}, acts = [];
+      const at = (L.who==='you' || L.who==='opp') && L.atPly!=null ? L.atPly : null;
+      acts.push({ t:at!=null ? 'Review from '+rpMoveText(at, L.played) : 'Review', go:()=> ghOpenGame(last.g, at!=null ? { at:{ ply:at + 1 } } : undefined) });
+      const l = rpLineFor(last.r);
+      if(l) acts.push({ t:'Learn', line:l, mode:'learn' });
+      F.push({ tag:'Latest game', text:[t.name+(t.sub || '')+'. ', [t.depth, t.left].filter(Boolean).join(' ')], acts });
+    }
+    if(rep){
+      const spots = (who)=>{
+        const m = new Map();
+        W.forEach(e=>{ const L = e.r && e.r.left; if(!L || L.who!==who || !L.spot || (who==='you' && e.r.kind==='outside')) return; const s = m.get(L.spot) || { L, r:e.r, color:e.color, list:[] }; s.list.push(e); m.set(L.spot, s); });
+        return Array.from(m.values()).sort((a, b)=> b.list.length - a.list.length || a.L.atPly - b.L.atPly);
+      };
+      const where = (s)=> s.r.kind==='chapter' ? 'in '+RP.chs.get(s.r.chapterId).short : s.r.kind==='trunk' ? 'against your '+RP.ops.get(s.r.openingId).name : 'when you have '+(s.color==='white' ? 'White' : 'Black');
+      const scope = (s)=> s.r.kind==='chapter' ? 'c.'+s.r.openingId+'.'+s.r.chapterId : s.r.kind==='trunk' ? 't.'+s.r.openingId : 'x.'+(s.color==='black' ? 'b' : 'w');
+      const u = spots('opp')[0];
+      if(u){
+        const acts = [{ t:'Games', go:games('s.'+u.L.spot+'.'+scope(u)) }];
+        if(u.r.kind==='chapter'){ const c = RP.chs.get(u.r.chapterId); acts.push({ t:'Repertoire Lab', href:'https://repertoirelabs.com/chapter/'+encodeURIComponent(c.openingId)+'/'+encodeURIComponent(c.id) }); }
+        F.push({ tag:'Unprepared', cls:'is-bad', text:[[rpMoveText(u.L.atPly, u.L.played)], ' '+where(u)+', '+when(u.list.length)+'. You scored '+ghoPts(ghoMetrics(u.list))+'. '
+          +((u.L.expected || []).length ? 'You prepared '+rpMovesList(u.L.atPly, u.L.expected)+'.' : 'Your lines have no answer to it.')], acts });
+      }
+      const f = spots('you')[0];
+      if(f){
+        const acts = [{ t:'Games', go:games('s.'+f.L.spot+'.'+scope(f)) }], l = rpLineFor(f.r);
+        if(l){ acts.push({ t:'Learn', line:l, mode:'learn' }); acts.push({ t:'Practice', line:l, mode:'practice' }); }
+        F.push({ tag:'Forgot your line', cls:'is-you', text:[[rpMoveText(f.L.atPly, f.L.played)], ' instead of '+rpMovesList(f.L.atPly, f.L.expected || [])+' '+where(f)+', '+when(f.list.length)+'.'], acts });
+      }
+      // chapters met in these games
+      const ch = new Map();
+      W.forEach(e=>{ if(!e.r || e.r.kind!=='chapter') return; const k = e.r.openingId+'.'+e.r.chapterId; const c = ch.get(k) || { k, o:RP.ops.get(e.r.openingId), c:RP.chs.get(e.r.chapterId), list:[] }; c.list.push(e); ch.set(k, c); });
+      const C = Array.from(ch.values()).filter(c=> c.o && c.c).map(c=> Object.assign(c, { m:ghoMetrics(c.list) }));
+      const lineOf = (c)=>{ const n = new Map(); c.list.forEach(e=>{ if(e.r.lineId) n.set(e.r.lineId, (n.get(e.r.lineId) || 0) + 1); }); const best = Array.from(n.entries()).sort((a, b)=> b[1] - a[1])[0]; return best ? RP.lns.get(best[0]) || null : null; };
+      const under = C.filter(c=> c.list.length >= 3 && ((c.m.xn >= 3 && c.m.xpts - c.m.xexp <= -1) || c.m.score <= 34))
+        .sort((a, b)=> (a.m.xpts - a.m.xexp) - (b.m.xpts - b.m.xexp) || a.m.score - b.m.score)[0];
+      if(under){
+        const acts = [{ t:'Games', go:games('c.'+under.k) }], l = lineOf(under);
+        if(l) acts.push({ t:'Practice', line:l, mode:'practice' });
+        F.push({ tag:'Underperforming', cls:'is-bad', text:[rpChapterPath(under.o, under.c)+': you scored '+ghoPts(under.m)
+          +(under.m.xn >= 3 ? ' ('+ghoSignedTxt(under.m.xpts - under.m.xexp, 1)+' against what the ratings predicted)' : '')+'.'], acts });
+      }
+      const seen = C.filter(c=> c.list.length >= 3 && c!==under).sort((a, b)=> b.list.length - a.list.length)[0];
+      if(seen){
+        const acts = [{ t:'Games', go:games('c.'+seen.k) }], l = lineOf(seen);
+        if(l) acts.push({ t:'Practice it', line:l, mode:'practice' });
+        F.push({ tag:'Seen a lot', text:[rpChapterPath(seen.o, seen.c)+': '+ghoN(seen.list.length, 'game')+(week ? ' this week' : '')+'. You scored '+ghoPts(seen.m)+'. Worth a brush-up.'], acts, seen });
+      }
+    }
+    // middlegame drop-off: reviewed games only (worked out after the brief draws)
+    const mg = GHO_BRIEF.mg;
+    if(mg && mg.res && mg.res.n >= 2 && mg.res.mid!=null && mg.res.open!=null && mg.res.open - mg.res.mid >= 5){
+      const last2 = mg.res.last;
+      F.push({ tag:'Middlegame', cls:'is-you', text:['Your accuracy drops after the opening: '+Math.round(mg.res.open)+' in the opening, '+Math.round(mg.res.mid)+' in the middlegame ('+ghoN(mg.res.n, 'reviewed game')+').'],
+        acts: last2 ? [{ t:'Review the latest', go:()=> ghOpenGame(last2) }] : [] });
+    }
+    // your notes on the opening you met most
+    const fam = new Map();
+    W.forEach(e=>{ const f = ghFamily(e.g); if(f) fam.set(f, (fam.get(f) || 0) + 1); });
+    const top = Array.from(fam.entries()).sort((a, b)=> b[1] - a[1])[0];
+    if(top){
+      const txt = gnNoteText(gnOpId(top[0]));
+      if(txt){ const line = gnFirstLine(txt); if(line) F.push({ tag:'Your notes', text:[top[0]+': \u201c'+line+'\u201d'], acts:[] }); }
+    }
+    return F;
+  }
+  // per-phase accuracy over the window's reviewed games: a few at a time after the brief draws (each replay ~20 ms)
+  function ghoBriefMg(W, key){
+    const B = GHO_BRIEF;
+    if(B.mg && B.mg.key===key) return;
+    let store = {};
+    try{ store = hrReadStore().g || {}; }catch(e){ store = {}; }
+    const list = W.filter(e=> e.acc!=null && store[e.g.id]).sort((a, b)=> b.at - a.at).slice(0, 12);
+    const job = B.mg = { key, res:null };
+    if(list.length < 2) return;
+    const acc = [[], [], []];
+    let i = 0;
+    const step = ()=>{
+      if(B.mg!==job) return;
+      const t = performance.now();
+      while(i < list.length && performance.now() - t < 12){
+        const e = list[i++];
+        let gr = null;
+        try{ gr = hpfGameGrades(e.g, store[e.g.id]); }catch(err){ gr = null; }
+        if(gr) gr.forEach((x, k)=>{ if(x && x.n && x.acc!=null) acc[k].push(x.acc); });
+      }
+      if(i < list.length){ setTimeout(step, 0); return; }
+      const avg = (a)=> a.length ? a.reduce((s, x)=> s + x, 0)/a.length : null;
+      job.res = { n:list.length, open:avg(acc[0]), mid:avg(acc[1]), last:list[0].g };
+      if(GHO_BRIEF.model) ghoDrawFacts();
+    };
+    setTimeout(step, 0);
+  }
+  function ghoDrawFacts(){
+    const B = GHO_BRIEF, ul = document.getElementById('gho-facts'), M = B.model;
+    if(!M){ ul.hidden = true; return; }
+    B.facts = ghoBriefFacts(M.W, M.rep, M.week);
+    ul.textContent = '';
+    ul.hidden = !B.facts.length;
+    const shown = B.allFacts ? B.facts : B.facts.slice(0, GHO_FACTS_N);
+    shown.forEach((f, fi)=>{
+      const li = ghEl('li', 'gho-fact');
+      li.appendChild(ghEl('span', 'gho-fact-tag'+(f.cls ? ' '+f.cls : ''), f.tag));
+      const t = ghEl('span', 'gho-fact-t');
+      f.text.forEach(p=> t.appendChild(Array.isArray(p) ? ghEl('b', '', p[0]) : document.createTextNode(p)));
+      li.appendChild(t);
+      if(f.acts.length){
+        const ls = ghEl('span', 'gho-fact-ls');
+        f.acts.forEach((a, ai)=>{
+          if(a.line){ const x = ghEl('a', 'gho-fact-l', a.t), y = document.createElement('a'); rlLineLinks(a.line, a.mode==='learn' ? x : y, a.mode==='learn' ? y : x); x.target = '_blank'; x.rel = 'noopener'; ls.appendChild(x); return; }
+          if(a.href){ const x = ghEl('a', 'gho-fact-l', a.t); x.href = a.href; x.target = '_blank'; x.rel = 'noopener'; ls.appendChild(x); return; }
+          const b = ghEl('button', 'gho-fact-go', a.t); b.type = 'button'; b.dataset.fi = String(fi); b.dataset.ai = String(ai); ls.appendChild(b);
+        });
+        li.appendChild(ls);
+      }
+      ul.appendChild(li);
+    });
+    if(B.facts.length > GHO_FACTS_N){
+      const m = ghEl('button', 'gho-facts-more', B.allFacts ? 'Show fewer' : 'Show '+(B.facts.length - GHO_FACTS_N)+' more');
+      m.type = 'button'; m.setAttribute('aria-expanded', B.allFacts ? 'true' : 'false');
+      const li = ghEl('li', ''); li.appendChild(m); ul.appendChild(li);
+    }
+  }
+  function ghoDrawBrief(model){
+    const B = GHO_BRIEF, box = document.getElementById('gho-brief'), top = document.getElementById('gho-top');
+    const all = model ? ['white', 'black'].flatMap(c=> model.sides[c] && !model.sides[c].hidden ? model.sides[c].list || [] : []) : [];
+    if(!model || !all.length){ box.hidden = true; top.classList.remove('has-brief'); B.model = null; ghoDrawFacts(); ghoBriefTimer(false); return; }
+    const Wn = ghoBriefWindow(all), W = Wn.list;
+    document.getElementById('gho-brief-k').textContent = Wn.label;
+    document.getElementById('gho-brief-n').textContent = Wn.week ? ghoN(W.length, 'game') : (Wn.note || '');
+    const key = model.rep+'|'+W.map(e=> e.g.id).join(',');
+    const prev = B.stats[B.i] ? B.stats[B.i].k : '';
+    B.stats = ghoBriefStats(W, all, model.rep);
+    B.model = { W, rep:model.rep, week:Wn.week };
+    if(B.key!==key){
+      // a new set of games: start on the number furthest from your usual, cycling again
+      B.key = key; B.user = false;
+      let best = 0; B.stats.forEach((st, j)=>{ if(st.d > B.stats[best].d) best = j; });
+      B.i = best;
+    } else { const j = B.stats.findIndex(st=> st.k===prev); B.i = j >= 0 ? j : 0; }
+    const dots = document.getElementById('gho-brief-dots'), fd = dots.contains(document.activeElement) ? document.activeElement.dataset.i : null;
+    dots.textContent = '';
+    B.stats.forEach((st, j)=>{ const b = ghEl('button', 'gho-brief-dot', st.dot); b.type = 'button'; b.dataset.i = String(j); b.setAttribute('aria-pressed', 'false'); dots.appendChild(b); });
+    box.hidden = false; top.classList.add('has-brief');
+    ghoBriefShow(B.i, false, false);                 // a redraw doesn't replay the entrance
+    if(fd!=null){ const b = dots.querySelector('.gho-brief-dot[data-i="'+fd+'"]'); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
+    ghoBriefMg(W, key);
+    ghoDrawFacts();
+    ghoBriefTimer(true);
+  }
+  // ---- prep gaps (step 2, 2026-10-31): the full lists behind "Opponents surprise you", "Biggest gap" and "You leave your
+  // prep". Each entry is one place games left your lines (the same move from the same position, in one chapter, before the
+  // split, or outside your openings for Black's first move), from the spots the model already grouped. ----
+  var GHO_GAPS_ALL = { opp:false, you:false };
+  const GHO_GAPS_N = 5;
+  function ghoGapList(model){
+    const out = { opp:[], you:[] };
+    ['white', 'black'].forEach(color=>{
+      const sd = model.sides[color];
+      if(!sd || sd.hidden) return;
+      sd.spots.forEach(s=>{
+        if(!s.m || !s.list.length) return;
+        if(s.who==='you' && s.where.kind==='outside') return;              // another first move as White is a choice, not a forgotten line
+        out[s.who==='opp' ? 'opp' : 'you'].push({ s, color });
+      });
+    });
+    const by = (a, b)=> b.s.list.length - a.s.list.length || a.s.m.score - b.s.m.score || a.s.atPly - b.s.atPly;
+    out.opp.sort(by); out.you.sort(by);
+    return out;
+  }
+  function ghoGapWhere(y){
+    const w = y.s.where;
+    if(w.kind==='chapter') return 'in '+w.c.short;
+    if(w.kind==='trunk') return 'against your '+w.o.name+', before the chapters split';
+    return 'when you have '+(y.color==='white' ? 'White' : 'Black');
+  }
+  // "1\u00bd of 3": your points in those games
+  function ghoPts(m){ const p = m.W + m.D/2, w = Math.floor(p); return (w || p===0 ? String(w) : '')+(p % 1 ? '\u00bd' : '')+' of '+m.n; }
+  function ghoDrawGaps(model){
+    const box = document.getElementById('gho-gaps');
+    const L = model ? ghoGapList(model) : null;
+    box.hidden = !L || (!L.opp.length && !L.you.length);
+    if(model) model.gaps = L;
+    if(box.hidden) return;
+    const draw = (key, list)=>{
+      const ul = document.getElementById('gho-gap-'+key);
+      ul.textContent = '';
+      if(!list.length){ ul.appendChild(ghEl('li', 'gho-gap-none', key==='opp' ? 'None: your lines answered every move your opponents played.' : 'None: you played your prepared move every time.')); return; }
+      const all = GHO_GAPS_ALL[key], shown = all ? list : list.slice(0, GHO_GAPS_N);
+      shown.forEach((y, i)=>{
+        const s = y.s, li = ghEl('li', 'gho-gap'), b = ghEl('button', 'gho-gap-go');
+        b.type = 'button'; b.dataset.gapk = key; b.dataset.gapi = String(i);
+        const t = ghEl('span', 'gho-gap-t');
+        t.appendChild(ghEl('b', '', rpMoveText(s.atPly, s.played)));
+        t.appendChild(document.createTextNode(key==='you' && s.expected.length ? ' instead of '+rpMovesList(s.atPly, s.expected)+' ' : ' '));
+        t.appendChild(document.createTextNode(ghoGapWhere(y)));
+        b.appendChild(t);
+        const met = s.list.length===1 ? 'once' : s.list.length+' times';
+        b.appendChild(ghEl('span', 'gho-gap-d', (key==='opp' ? 'Met '+met : 'Played '+met)+' \u00b7 you scored '+ghoPts(s.m)
+          + (key==='opp' ? ' \u00b7 '+(s.expected.length ? 'you prepared '+rpMovesList(s.atPly, s.expected) : 'no line for it') : '')));
+        b.title = 'Show '+(s.list.length===1 ? 'this game' : 'these '+s.list.length+' games')+', each on the move';
+        li.appendChild(b);
+        // Repertoire Lab: your opponents' move, the chapter to add an answer in; yours, the line to learn and practice
+        const ls = ghEl('span', 'gho-gap-ls');
+        if(key==='opp'){
+          const c = s.where.kind==='chapter' ? s.where.c : null;           // before the split: no one chapter is the place
+          if(c){ const a = ghEl('a', 'gho-gap-l', 'Repertoire Lab'); a.href = 'https://repertoirelabs.com/chapter/'+encodeURIComponent(c.openingId)+'/'+encodeURIComponent(c.id); a.target = '_blank'; a.rel = 'noopener'; a.title = 'Open '+c.short+' in Repertoire Lab'; ls.appendChild(a); }
+        } else {
+          const l = rpLineFor(s.list[0].r);
+          if(l){ const a = ghEl('a', 'gho-gap-l', 'Learn'), p = ghEl('a', 'gho-gap-l', 'Practice'); a.target = p.target = '_blank'; a.rel = p.rel = 'noopener'; rlLineLinks(l, a, p); ls.appendChild(a); ls.appendChild(p); }
+        }
+        if(ls.childNodes.length) li.appendChild(ls);
+        ul.appendChild(li);
+      });
+      if(list.length > GHO_GAPS_N){
+        const m = ghEl('button', 'gho-gap-more', all ? 'Show fewer' : 'Show all '+list.length);
+        m.type = 'button'; m.dataset.gapmore = key; m.setAttribute('aria-expanded', all ? 'true' : 'false');
+        const li = ghEl('li', ''); li.appendChild(m); ul.appendChild(li);
+      }
+    };
+    draw('opp', L.opp); draw('you', L.you);
+  }
+  /* ---- Where your games end up (step 2, 2026-10-31): each game's endgame, from its moves. It begins where the phase bar
+     puts it (hpfDivide: 6 or fewer pieces, or 8 or fewer once the queens are off). From there every kind of endgame
+     the game goes through counts (the user's choice): a kind that lasts past the reply, or the last position, so a
+     capture and its recapture don't add one. One pass over the games in the background, 10 ms at a time, kept for the
+     session; Game History draws once when it ends. ---- */
+  const EG_TYPES = [['rook', 'Rook endgame'], ['pawn', 'Pawn endgame'], ['queen', 'Queen endgame'], ['knight', 'Knight endgame'],
+    ['bishopOpp', 'Opposite-colored bishops'], ['bishopSame', 'Same-colored bishops'], ['bishopKnight', 'Bishop vs knight'],
+    ['minor', 'Minor pieces'], ['rookMinor', 'Rook and minor pieces'], ['queenMix', 'Queen and other pieces'], ['uneven', 'Uneven pieces']];
+  const EG_NAME = Object.fromEntries(EG_TYPES), EG_ORD = Object.fromEntries(EG_TYPES.map((x, i)=> [x[0], i]));
+  // the kind of endgame on board B: the same pieces on both sides (a bishop and a knight count alike), else "uneven"
+  function egType(B){
+    const w = { q:0, r:0, b:0, n:0, bc:-1 }, k = { q:0, r:0, b:0, n:0, bc:-1 };
+    for(let i = 0; i < 64; i++){
+      const p = B[i];
+      if(!p || p.type==='p' || p.type==='k') continue;
+      const x = p.color==='w' ? w : k;
+      x[p.type]++;
+      if(p.type==='b') x.bc = ((i >> 3) + (i & 7)) % 2;          // the square's color
+    }
+    const m = (x)=> x.b + x.n;
+    if(w.q!==k.q || w.r!==k.r || m(w)!==m(k)) return 'uneven';
+    if(!w.q && !w.r && !m(w)) return 'pawn';
+    if(w.q) return w.r || m(w) ? 'queenMix' : 'queen';
+    if(w.r) return m(w) ? 'rookMinor' : 'rook';
+    if(m(w)===1){
+      if(w.b && k.b) return w.bc===k.bc ? 'bishopSame' : 'bishopOpp';
+      if(w.n && k.n) return 'knight';
+      return 'bishopKnight';
+    }
+    return 'minor';
+  }
+  // { s: the ply the endgame begins (-1: none), t: the kinds it went through, in order }
+  function egOf(g){
+    const toks = String(g.moves || '').trim().split(/\s+/), out = { s:-1, t:[] };
+    if(!toks[0]) return out;
+    let st = pzStartPosition(), run = '', runN = 0;
+    for(let i = 0; i < toks.length; i++){
+      const mv = rpSanToMove(st, toks[i]);
+      if(!mv) break;
+      st = pzApplyMoveRaw(st, mv);
+      const B = st.board;
+      if(out.s < 0){ const n = hpfPieces(B); if(!(n <= 6 || (n <= 8 && !hpfQueens(B)))) continue; out.s = i + 1; }
+      const k = egType(B);
+      if(k===run) runN++; else { run = k; runN = 1; }
+      if(runN===2 && out.t.indexOf(k) < 0) out.t.push(k);
+    }
+    if(run && out.t.indexOf(run) < 0) out.t.push(run);          // the last position counts however long it lasted
+    return out;
+  }
+  function egReady(){ return !EG_JOB && EG.size > 0; }
+  function egMatch(g, v){
+    const e = EG.get(g.id);
+    if(!e) return false;                                    // a game the pass doesn't read (Chess960, no moves): no endgame setting matches it
+    return v==='yes' ? e.s >= 0 : v==='no' ? e.s < 0 : e.t.indexOf(v) >= 0;
+  }
+  // the games without an endgame yet get one; only when the filter or the Openings tab wants them, and only when the
+  // games changed (a draw costs nothing otherwise)
+  function egEnsure(){
+    if(!GH_FILTERS.eg && !ghoOn()) return;
+    if(EG_JOB){ EG_JOB.more = true; return; }
+    const sig = GH_STATE.games.length+'|'+(ghCcUp() ? ccGames().length : 0)+'|'+(typeof GN==='object' && GN && GN.notes ? Object.keys(GN.notes).length : 0);
+    if(sig===EG_SIG) return;
+    const list = rpGames().filter(g=> !EG.has(g.id));
+    EG_SIG = sig;
+    if(!list.length) return;
+    const job = EG_JOB = { list, i:0, more:false };
+    const tick = ()=>{
+      if(EG_JOB!==job) return;
+      const t = performance.now();
+      while(job.i < job.list.length && performance.now() - t < 10){ const g = job.list[job.i++]; if(!EG.has(g.id)) EG.set(g.id, egOf(g)); }
+      if(job.i < job.list.length){ setTimeout(tick, 0); return; }
+      if(job.more){ job.more = false; job.list = rpGames().filter(g=> !EG.has(g.id)); job.i = 0; if(job.list.length){ setTimeout(tick, 0); return; } }
+      EG_JOB = null;
+      if(currentView==='history' && (GH_FILTERS.eg || ghoOn())) ghoSoon('eg');      // drawn once, with every game's endgame
+    };
+    setTimeout(tick, 0);
+  }
+  // { reach: entries that reached an endgame, kinds: [[kind, entries], ...] most first } over entries L
+  function egGroups(L){
+    const reach = [], by = new Map();
+    L.forEach(e=>{ const x = EG.get(e.g.id); if(!x || x.s < 0) return; reach.push(e); x.t.forEach(k=>{ if(!by.has(k)) by.set(k, []); by.get(k).push(e); }); });
+    return { reach, kinds:Array.from(by.entries()).sort((a, b)=> b[1].length - a[1].length || EG_ORD[a[0]] - EG_ORD[b[0]]) };
+  }
+  function ghoDrawEnds(model){
+    const box = document.getElementById('gho-ends');
+    box.hidden = true;
+    if(!model || !egReady()) return;
+    let any = false;
+    ['white', 'black'].forEach(color=>{
+      const col = document.getElementById('gho-ends-'+color), sd = model.sides[color];
+      col.textContent = '';
+      col.hidden = !sd || sd.hidden || !sd.list || !sd.list.length;
+      if(col.hidden) return;
+      any = true;
+      const L = sd.list, G = egGroups(L), side = color==='white' ? 'White' : 'Black';
+      col.appendChild(ghEl('h4', '', 'As '+side));
+      const mr = ghoMetrics(G.reach);
+      col.appendChild(ghEl('p', 'gho-ends-sum', G.reach.length
+        ? G.reach.length+' of '+ghoN(L.length, 'game')+' reach an endgame ('+Math.round(100*G.reach.length/L.length)+'%). You score '+ghoPct(mr.score)+' in them.'
+        : 'None of your '+ghoN(L.length, 'game')+' as '+side+' reached an endgame.'));
+      const ul = ghEl('ul', 'gho-ends-list');
+      const row = (name, eg, list)=>{
+        const m = ghoMetrics(list), li = ghEl('li', ''), b = ghEl('button', 'gho-end-b'+(m.n < GHO_MIN ? ' is-thin' : ''));
+        b.type = 'button'; b.dataset.eg = eg; b.dataset.egc = color;
+        b.appendChild(ghEl('span', 'gho-end-k', name));
+        b.appendChild(ghoBar(m));
+        b.appendChild(ghEl('span', 'gho-end-v', m.n+' \u00b7 '+ghoPct(m.score)));
+        const lab = name+' as '+side+': '+ghoN(m.n, 'game')+', score '+ghoPct(m.score)+(m.n < GHO_MIN ? ' (few games)' : '')+'. Show them';
+        b.title = lab; b.setAttribute('aria-label', lab);
+        li.appendChild(b); ul.appendChild(li);
+      };
+      G.kinds.forEach(([k, list])=> row(EG_NAME[k], k, list));
+      const none = L.filter(e=>{ const x = EG.get(e.g.id); return !x || x.s < 0; });
+      if(none.length && G.reach.length) row('No endgame', 'no', none);
+      col.appendChild(ul);
+    });
+    box.hidden = !any;
+  }
   // a tap that changes only what's drawn (a row opened or closed, More): the last model drawn again, its games not read
   // again (a full redraw is ~140 ms at 4x CPU with 2,300 games); a background redraw still waiting stays waiting
   function ghoRedraw(){
@@ -33565,6 +34463,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     games.hidden = !t.games;
     if(t.games){ games.textContent = t.games.label; games.dataset.rep = t.games.rep; }
     document.getElementById('hv-prep-acts').hidden = go.hidden && show.hidden && games.hidden;
+    hpRlLinks(H);
     const m = H.marks.size > 0, d = H.dev > 0;
     hpSet('hv-prep-key', m && d ? 'In the moves, a dotted underline marks your prep and a dashed box the move that left it.'
       : m ? 'In the moves, a dotted underline marks your prep.' : d ? 'In the moves, a dashed box marks the move that left your prep.' : '');
@@ -33619,6 +34518,33 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvGoNode(first);
     hvAnnounce(first);
     hvRevealBoard();
+  }
+  // your line in Repertoire Lab: the one you were meant to play where you left it, else the line the game is filed
+  // under; Learn and Practice open straight on it there (repertoirelabs.com's ?line=&go= links)
+  function hpRlLine(H){
+    const r = H && H.r;
+    if(!r || (r.kind!=='chapter' && r.kind!=='trunk')) return null;         // outside your openings: no one line is yours to learn
+    if(r.left && r.left.who==='you'){ const st = hpShowState(H); if(st && st.L && st.L.line) return st.L.line; }
+    return r.kind==='chapter' && r.lineId ? RP.lns.get(r.lineId) || null : null;
+  }
+  // the same for a result with no review open (the end of a game): the line you were meant to play, else the game's
+  function rpLineFor(r){
+    if(!RP || !r || (r.kind!=='chapter' && r.kind!=='trunk')) return null;
+    if(r.left && r.left.who==='you'){ let f = null; try{ f = rpLineFrom(r); }catch(e){ f = null; } if(f && f.line) return f.line; }
+    return r.kind==='chapter' && r.lineId ? RP.lns.get(r.lineId) || null : null;
+  }
+  // a Repertoire Lab line's Learn and Practice links onto two anchors (repertoirelabs.com reads ?line=&go=)
+  function rlLineLinks(l, learn, pr){
+    const base = 'https://repertoirelabs.com/chapter/'+encodeURIComponent(l.openingId)+'/'+encodeURIComponent(l.chapterId)+'?line='+encodeURIComponent(l.id)+'&go=';
+    learn.href = base+'learn'; pr.href = base+'practice';
+    learn.title = 'Learn '+l.name+' in Repertoire Lab'; pr.title = 'Practice '+l.name+' in Repertoire Lab';
+  }
+  function hpRlLinks(H){
+    const box = document.getElementById('hv-prep-rl');
+    if(!box) return;
+    const l = hpRlLine(H);
+    box.hidden = !l;
+    if(l) rlLineLinks(l, document.getElementById('hv-prep-learn'), document.getElementById('hv-prep-practice'));
   }
   function hpGoDev(){
     const S = HV_STATE, H = hpFor(S);
@@ -37890,7 +38816,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvBoardEl.addEventListener('click', soon);
   })();
   // Whatever is being typed is saved before the page goes away.
-  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); hvAnnSave(); if(ghgF) gnFieldSave(ghgF); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
+  function gnFlushAll(){ try{ if(gnEd) gnFieldSave(gnEd.F); if(hvNote) gnFieldSave(hvNote); hvOpxFields().forEach(gnFieldSave); hvAnnSave(); if(ghgF) gnFieldSave(ghgF); if(GH_LC && GH_LC.F) gnFieldSave(GH_LC.F); if(gnOtherTabValue!=null || gnUnsaved) gnPersist(); }catch(e){} }
   document.addEventListener('visibilitychange', ()=>{ if(document.hidden) gnFlushAll(); });
   window.addEventListener('pagehide', gnFlushAll);
   // First sync a few seconds after the Saved Puzzles one.
