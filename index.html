@@ -3700,9 +3700,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-card-k{ font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
   .gho-card-t{ font-size:14px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
   .gho-card-d{ font-size:12px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
-  .gho-tools{ align-self:flex-end; display:flex; align-items:center; gap:8px; padding:5px 6px 5px 12px; }
-  .gho-tools .field-label{ margin:0; }
+  .gho-tools{ align-self:stretch; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:5px 6px; }
+  .gho-tools .field-label{ margin:0; padding-left:6px; flex:none; white-space:nowrap; }
+  /* Sort by keeps to the right, and shares a line with the count on a phone (it shrinks before it wraps) */
+  .gho-sortw{ flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:flex-end; gap:8px; }
   .gho-tools .select-input{ width:auto; padding:6px 9px; font-size:12.5px; }
+  /* the search box (left of Sort by): the rows whose names, or whose games' opening names, hold every word */
+  .gho-q{ position:relative; flex:0 1 340px; min-width:0; }
+  .gho-q-in{ padding:6px 32px 6px 9px; font-size:12.5px; -webkit-appearance:none; appearance:none; }
+  .gho-q-in::-webkit-search-cancel-button, .gho-q-in::-webkit-search-decoration{ -webkit-appearance:none; appearance:none; }
+  .gho-q-n{ font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+  .gho-q-n:empty{ display:none; }
+  @media (min-width:680px){
+    .gho-tools{ flex-wrap:nowrap; }
+    .gho-q{ min-width:140px; }
+    .gho-q-n{ flex:none; }
+    .gho-sortw{ flex:0 0 auto; margin-left:auto; }
+  }
+  /* the tint as an image over a plain colour: a browser without color-mix keeps the colour and the underline */
+  .gho-mk{ color:inherit; background-color:var(--surface-2); background-image:linear-gradient(color-mix(in srgb, var(--brass-soft) 34%, transparent), color-mix(in srgb, var(--brass-soft) 34%, transparent));
+    box-shadow:inset 0 -2px 0 var(--brass-soft); border-radius:2px; }
   .gho-side{ gap:10px; padding:16px 18px; }
   .gho-h{ margin:0; font-size:18px; font-weight:800; line-height:1.2; color:var(--ink); }
   .gho-sum{ font-size:12.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums; margin-top:-4px; }
@@ -3829,7 +3846,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-out-all{ align-self:flex-start; }
   .gho-foot{ padding:8px 12px; font-size:12px; line-height:1.45; color:var(--ink-soft); }
   :root[data-skin="bauhaus"] .gho-note, :root[data-skin="bauhaus"] .gho-status, :root[data-skin="bauhaus"] .gho-tools, :root[data-skin="bauhaus"] .gho-foot,
-  :root[data-skin="bauhaus"] .gho-card, :root[data-skin="bauhaus"] .gho-tag, :root[data-skin="bauhaus"] .gho-fq, :root[data-skin="bauhaus"] .gho-dis{ border-radius:0; }
+  :root[data-skin="bauhaus"] .gho-card, :root[data-skin="bauhaus"] .gho-tag, :root[data-skin="bauhaus"] .gho-fq, :root[data-skin="bauhaus"] .gho-dis, :root[data-skin="bauhaus"] .gho-mk{ border-radius:0; }
+  @media (pointer:coarse){
+    .gho-q-in{ font-size:16px; padding-right:42px; }    /* iOS zooms into anything smaller */
+  }
   /* 641-959px: Win, Acc. and Last fold into a line under the name */
   @media (max-width:959px){
     .gho-row{ grid-template-columns:minmax(0,1fr) 48px 100px 56px 40px 86px 72px; column-gap:8px; }
@@ -3878,6 +3898,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .gho-card{ padding:10px 11px; }
     .gho-card-t{ font-size:13.5px; }
     .gho-tools{ align-self:stretch; justify-content:space-between; min-width:0; }
+    .gho-q{ flex:1 1 100%; }
     .gho-tools .select-input{ flex:0 1 auto; min-width:0; max-width:100%; }    /* 320px: the longest option would push the page sideways */
     .gho-c-left .gho-v{ white-space:normal; }
   }
@@ -4993,10 +5014,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     display:flex; flex-direction:column; gap:5px; width:min(240px, 70%); margin:6px 0 8px;
     white-space:normal; cursor:default; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
   }
+  /* the board fills its square box from the box's corners: its height never hangs on a percentage of a height
+     that comes from aspect-ratio (Safari took that as no height and an empty Positions board shrank to its two
+     borders, 2026-10-30); the ::before keeps the box square in a browser without aspect-ratio */
   .nb-board-wrap{ position:relative; width:100%; aspect-ratio:1 / 1; }
+  .nb-board-wrap::before{ content:''; display:block; padding-top:100%; }
   .nb-board{
+    position:absolute; top:0; right:0; bottom:0; left:0;
     display:grid; grid-template-columns:repeat(8, 1fr); grid-template-rows:repeat(8, 1fr);
-    width:100%; height:100%; box-sizing:border-box; border:2px solid var(--board-border); border-radius:2px; overflow:hidden;
+    width:auto; height:auto; box-sizing:border-box; border:2px solid var(--board-border); border-radius:2px; overflow:hidden;
   }
   .nb-board .sq{ min-width:0; min-height:0; }
   .nb-board .piece-wrap{ width:88%; height:88%; }
@@ -6562,7 +6588,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
       <div class="gho-status" id="gho-status" role="status" aria-live="polite" tabindex="-1" hidden></div>
       <div class="gho-ins" id="gho-ins" hidden></div>
-      <div class="gho-tools"><label class="field-label" for="gho-sort">Sort by</label><select class="select-input" id="gho-sort"></select></div>
+      <div class="gho-tools"><div class="gho-q" role="search"><input type="search" class="text-input gho-q-in" id="gho-q" placeholder="Search openings" aria-label="Search your openings" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><button type="button" class="gh-combo-clear gho-q-x" id="gho-q-x" aria-label="Clear the search" hidden>&times;</button></div><span class="gho-q-n" id="gho-q-n" role="status" aria-live="polite"></span><span class="gho-sortw"><label class="field-label" for="gho-sort">Sort by</label><select class="select-input" id="gho-sort"></select></span></div>
       <div class="gho-side panel" id="gho-white"></div>
       <div class="gho-side panel" id="gho-black"></div>
       <div class="gho-foot" id="gho-foot" hidden></div>
@@ -24052,8 +24078,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function ghTcLabel(g){ return ghTcLabelKey(ghTcKey(g)); }
   function ghFormatClock(clock){ return clock ? ghTcLabelKey(ghTcKey({ clock })) : 'Correspondence'; }
+  var GH_DATE_FMT = null;
   function ghFormatDate(ts){
-    return new Date(ts).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+    // one formatter, made once: toLocaleDateString with options builds a new one on every call (a row each)
+    try{
+      if(!GH_DATE_FMT) GH_DATE_FMT = new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric', year:'numeric' });
+      return GH_DATE_FMT.format(new Date(ts));
+    }catch(e){ return new Date(ts).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }); }
   }
   async function ghEnsureUsername(){
     if(GH_STATE.username) return GH_STATE.username;
@@ -26085,7 +26116,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const k = GHO_SORTS.some(s=> s[0]===GH_UI.osort) ? GH_UI.osort : 'games';
     return k==='perf' && ghMixed() ? 'games' : k;      // All with chess.com: a stored Performance sort waits for a site tab
   }
-  function ghoN(n, w){ return n.toLocaleString('en-US')+' '+w+(n===1 ? '' : 's'); }
+  var GHO_NUM = null;
+  function ghoN(n, w){
+    let t;
+    try{ t = (GHO_NUM || (GHO_NUM = new Intl.NumberFormat('en-US'))).format(n); }catch(e){ t = n.toLocaleString('en-US'); }
+    return t+' '+w+(n===1 ? '' : 's');
+  }
   function ghoPct(v){ return v==null ? '\u2014' : Math.round(v)+'%'; }
   function ghoDp(p){ const q = Math.round(p*100); return q >= 50 ? GHO_DP[Math.min(50, q - 50)] : -GHO_DP[Math.min(50, 50 - q)]; }
   function ghoAgo(ts){
@@ -27269,9 +27305,127 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
   }
 
+  // ---- the search box (2026-10-30): a row shows when every word is in its name (with the names of the rows
+  // above it) or in the opening name of one of its games (with those names), or when a row inside it does ----
+  var GHO_Q = '';               // the box's text (memory only: a reload starts empty)
+  var GHO_QS = null;            // its words while there's a search, else null
+  var GHO_QTOG = new Map();     // rows opened or closed during this search (the usual ones come back after it)
+  // an apostrophe joins its word ("queens" finds Queen's Gambit); any other mark splits words
+  var GHO_QAPOS = /['\u2019\u02bc`]/g;
+  function ghoQNorm(s){ return ghFold(s).toLowerCase().replace(GHO_QAPOS, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function ghoQWords(q){ const t = ghoQNorm(q); return t ? Array.from(new Set(t.split(' '))) : null; }
+  // marks every row of the model (n.q); returns how many rows show why they match: a name match (not one inside
+  // another, whose rows all match too), or a match by its games' names with no match inside it
+  function ghoQMark(model){
+    if(!model || !model.sides || !GHO_QS) return 0;
+    const W = GHO_QS, seen = new Map();
+    const nn = (t)=>{ let v = seen.get(t); if(v==null){ v = ghoQNorm(t); seen.set(t, v); } return v; };
+    const has = (t)=> W.every(w=> t.indexOf(w) >= 0);
+    const as = (x)=>{ x.q = { vis:true, path:true, hit:false, kid:false, games:null }; };    // where games left it: comes with its row, never searched
+    let found = 0;
+    const walk = (n, path, dpath, inOwn)=>{
+      const p = path+' '+nn(n.name)+(n.full && n.full!==n.name ? ' '+nn(n.full) : ''), dp = dpath+' '+nn(n.name);
+      const own = has(p);
+      let games = null;
+      if(!own){
+        const by = new Map();
+        n.list.forEach(e=>{ const o = e.g && e.g.opening && e.g.opening.name; if(o) by.set(o, (by.get(o) || 0) + 1); });
+        by.forEach((k, o)=>{ if(has(p+' '+nn(o))) (games || (games = [])).push([o, k]); });
+        if(games) games.sort((a, b)=> b[1] - a[1] || a[0].localeCompare(b[0]));
+      }
+      const hit = own || !!games;
+      let kid = false;
+      if(n.kidsAreSpots) n.kids.forEach(as);
+      else n.kids.forEach(k=>{ if(walk(k, p, dp, inOwn || own)) kid = true; });
+      if(own ? !inOwn : games && !kid) found++;
+      if(n.spots) n.spots.forEach(as);
+      // found by its full name, not by the shorter one the row shows: the row says the full name
+      const hid = own && !inOwn && !!n.full && n.full!==n.name && !has(dp);
+      n.q = { vis:hit || kid, path:own, hit, kid, games, hid };
+      return n.q.vis;
+    };
+    ['white', 'black'].forEach(c=>{
+      const sd = model.sides[c], at = found;
+      sd.tops.forEach(n=> walk(n, '', '', false));
+      sd.out.forEach(n=> walk(n, '', '', false));
+      if(sd.hidden || !sd.m.n) found = at;          // a side that draws no rows (ghoDrawSide) adds none
+    });
+    return found;
+  }
+  // the words found in a name, marked (accents and case ignored, as in the search)
+  function ghoQPaint(el, text){
+    text = String(text || '');
+    const on = new Uint8Array(text.length), at = [];
+    let low = '';
+    for(let i = 0; i < text.length; i++){
+      const f = ghFold(text.charAt(i)).toLowerCase().replace(GHO_QAPOS, '').replace(/[^a-z0-9]/g, ' ');
+      for(let j = 0; j < f.length; j++){ low += f.charAt(j); at.push(i); }
+    }
+    // a word found marks its whole span ("Queen's" in one piece, the apostrophe inside)
+    GHO_QS.forEach(w=>{ for(let k = low.indexOf(w); k >= 0; k = low.indexOf(w, k + 1)) for(let j = at[k]; j <= at[k + w.length - 1]; j++) on[j] = 1; });
+    el.textContent = '';
+    for(let i = 0; i < text.length;){
+      let j = i + 1;
+      while(j < text.length && on[j]===on[i]) j++;
+      el.appendChild(on[i] ? ghEl('mark', 'gho-mk', text.slice(i, j)) : document.createTextNode(text.slice(i, j)));
+      i = j;
+    }
+  }
+  // a row found by its games' opening names: which names ("12 games named Sicilian Defense: Najdorf Variation")
+  function ghoQFound(games){
+    const el = ghEl('div', 'gho-sub gho-found');
+    el.appendChild(document.createTextNode(ghoN(games.reduce((t, x)=> t + x[1], 0), 'game')+' named '));
+    games.slice(0, 2).forEach((x, i)=>{
+      if(i) el.appendChild(document.createTextNode(', '));
+      const nm = ghEl('span', 'gho-found-n');
+      ghoQPaint(nm, x[0]);
+      el.appendChild(nm);
+      if(games.length > 1) el.appendChild(document.createTextNode(' ('+x[1]+')'));
+    });
+    if(games.length > 2) el.appendChild(document.createTextNode(', \u2026'));
+    return el;
+  }
+  // while searching, a row's extras (where games left it, ran past, the splits) come with a row that matches by
+  // name, or one with no match inside it; a row the search only passes through shows just the way down
+  function ghoQExtras(n){ return !GHO_QS || !n.q || n.q.path || !n.q.kid; }
+  function ghoQShow(n){
+    const inp = document.getElementById('gho-q'), x = document.getElementById('gho-q-x'), out = document.getElementById('gho-q-n');
+    if(!inp) return;
+    x.hidden = !inp.value;            // the box is the only source of GHO_Q: never written back (a pending pause would lose the text)
+    out.textContent = !GHO_QS ? '' : !n ? 'No matches' : n===1 ? '1 match' : n+' matches';
+  }
+  // the box changed: the model stays (a search only picks rows), so the two sides are drawn again from it
+  var GHO_QMS = 0;              // how long the last search redraw took (the pause before the next one grows with it)
+  var GHO_QDRAWN = null;        // the model and words last drawn by a search
+  function ghoQSet(v){
+    const w = ghoQWords(v), same = (GHO_QS || []).join(' ')===(w || []).join(' ');
+    if(!same) GHO_QTOG.clear();
+    GHO_Q = String(v || '');
+    GHO_QS = w;
+    if(!GHO_LAST || !document.getElementById('gho') || document.getElementById('gho').hidden){ ghoQShow(0); return; }
+    if(same && GHO_QDRAWN===GHO_LAST){ ghoQShow(GHO_QDRAWN.qn); return; }      // the same words on the same model: nothing to draw
+    const t0 = performance.now();
+    const n = ghoQMark(GHO_LAST), mode = { rep:GHO_LAST.rep, lichess:!GHO_LAST.rep };
+    ghoDrawSide(document.getElementById('gho-white'), GHO_LAST.sides.white, mode, false);
+    ghoDrawSide(document.getElementById('gho-black'), GHO_LAST.sides.black, mode, false);
+    ghoQShow(n);
+    GHO_LAST.qn = n; GHO_QDRAWN = GHO_LAST;
+    GHO_QMS = performance.now() - t0;
+  }
+  function ghoQPause(){
+    const touch = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
+    return Math.min(450, Math.max(touch ? 280 : 160, Math.round(GHO_QMS*3)));
+  }
+
   // ---- drawing ----
-  function ghoIsOpen(n){ const t = GHO_TOG.get(n.key); return t==null ? (n.type==='o') : t; }
-  function ghoHasKids(n){ return n.kids.length > 0 || !!(n.spots && n.spots.length) || !!(n.ends && (n.ends.end || n.ends.inbook)) || ghoSplitsOn(n); }
+  function ghoIsOpen(n){
+    if(GHO_QS && n.q){ const s = GHO_QTOG.get(n.key); if(s!=null) return s; if(!n.q.path && n.q.kid) return true; }    // the way down to a match stands open
+    const t = GHO_TOG.get(n.key); return t==null ? (n.type==='o') : t;
+  }
+  function ghoHasKids(n){
+    const ex = ghoQExtras(n), kids = n.kidsAreSpots ? ex && n.kids.length > 0 : GHO_QS && n.q ? n.q.kid : n.kids.length > 0;
+    return kids || (ex && (!!(n.spots && n.spots.length) || !!(n.ends && (n.ends.end || n.ends.inbook)) || ghoSplitsOn(n)));
+  }
   // a chapter (or a Lichess opening) opened: its results by opponent strength and by speed
   function ghoSplitsOn(n){ return (n.type==='c' || n.type==='lf') && !!n.m && n.m.n >= 2 && !!ghoNodeFilter(n); }
   var GHO_SPEEDS = [['ultraBullet', 'UltraBullet'], ['bullet', 'Bullet'], ['blitz', 'Blitz'], ['rapid', 'Rapid'], ['classical', 'Classical'], ['correspondence', 'Daily']];
@@ -27411,13 +27565,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else b.title = 'Show '+(m.n===1 ? 'this game' : 'these '+m.n+' games')+' in the list';
       line.appendChild(b);
     } else line.appendChild(ghEl('span', 'gho-name is-plain', n.name));
+    if(GHO_QS && n.type!=='s') ghoQPaint(line.querySelector('.gho-name'), n.name);
     if(m.small && m.n){
       const t = ghEl('span', 'gho-tag', 'small sample');
       t.title = 'Fewer than '+GHO_MIN+' games: these numbers can swing a lot';
       line.appendChild(t);
     }
     nc.appendChild(line);
-    if(n.sub) nc.appendChild(ghEl('div', 'gho-sub', n.type==='s' ? n.sub.charAt(0).toUpperCase()+n.sub.slice(1) : n.sub));
+    if(n.sub){
+      const sb = nc.appendChild(ghEl('div', 'gho-sub', n.type==='s' ? n.sub.charAt(0).toUpperCase()+n.sub.slice(1) : n.sub));
+      if(GHO_QS && n.type!=='s') ghoQPaint(sb, n.sub);
+    }
+    if(GHO_QS && n.q && n.q.games && !n.q.kid) nc.appendChild(ghoQFound(n.q.games));
+    if(GHO_QS && n.q && n.q.hid){
+      const fl = ghEl('div', 'gho-sub gho-found'), fn = ghEl('span', 'gho-found-n');
+      fl.appendChild(document.createTextNode('Full name: '));
+      ghoQPaint(fn, n.full);
+      fl.appendChild(fn);
+      nc.appendChild(fl);
+    }
     if(n.pre) nc.appendChild(ghEl('div', 'gho-pre', n.pre));
     if(m.n){
       const mid = [ 'Win '+ghoPct(m.win) ];
@@ -27504,10 +27670,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function ghoAddRows(box, nodes, lvl, sd, mode){
     nodes.forEach(n=>{
+      if(GHO_QS && n.q && !n.q.vis) return;
       box.appendChild(ghoRow(n, lvl, sd, mode));
       if(!ghoHasKids(n) || !ghoIsOpen(n)) return;
+      const ex = ghoQExtras(n);
+      if(n.kidsAreSpots && !ex) return;
       if(n.kidsAreSpots && n.kids.length) box.appendChild(ghoLabel('Where games left it', lvl + 1));
       ghoAddRows(box, n.kids, lvl + 1, sd, mode);
+      if(!ex) return;
       if(n.spots && n.spots.length){
         box.appendChild(ghoLabel('Where games left it', lvl + 1));
         ghoAddRows(box, n.spots, lvl + 1, sd, mode);
@@ -27551,9 +27721,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // the caption under the totals: half the games that left your prep had left it by this move
   function ghoSidePrep(sd){
+    if(sd.prepTxt!=null) return sd.prepTxt;           // once per model (a search draws the sides again)
     const lp = (sd.list || []).filter(e=> e.r && (e.r.kind==='chapter' || e.r.kind==='trunk') && e.r.left && (e.r.left.who==='you' || e.r.left.who==='opp' || e.r.left.who==='end'))
       .map(e=> e.r.prepPly).sort((a, c)=> a - c);
-    return lp.length >= 10 ? 'Half the games that leave your prep leave it by move '+(Math.floor(lp[Math.floor((lp.length - 1)/2)]/2) + 1)+'.' : '';
+    return (sd.prepTxt = lp.length >= 10 ? 'Half the games that leave your prep leave it by move '+(Math.floor(lp[Math.floor((lp.length - 1)/2)]/2) + 1)+'.' : '');
   }
   function ghoDrawSide(el, sd, mode, loading){
     el.textContent = '';
@@ -27569,7 +27740,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     el.appendChild(ghEl('div', 'gho-sum', ghoSideSum(sd)));
     const sp2 = mode.lichess ? '' : ghoSidePrep(sd);
     if(sp2) el.appendChild(ghEl('div', 'gho-sum2', sp2));
-    if(sd.tops.length){
+    // searching: only the rows that match (and the way down to them)
+    const tops = GHO_QS ? sd.tops.filter(n=> n.q && n.q.vis) : sd.tops, outs = GHO_QS ? sd.out.filter(n=> n.q && n.q.vis) : sd.out;
+    if(GHO_QS && !tops.length && !(mode.rep && outs.length)) el.appendChild(ghEl('div', 'gho-empty gho-q-none', 'Nothing as '+word+' matches \u201c'+GHO_Q.trim()+'\u201d.'));
+    if(tops.length){
       const tree = ghEl('div', 'gho-tree');
       tree.setAttribute('role', 'list');
       tree.setAttribute('aria-label', (mode.lichess ? 'Your openings as ' : 'Your repertoire as ')+word);
@@ -27577,7 +27751,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       ghoAddRows(tree, sd.tops, 0, sd, mode);
       el.appendChild(tree);
     }
-    if(mode.rep && (sd.outList.length || sd.norep)){
+    if(mode.rep && (sd.outList.length || sd.norep) && (!GHO_QS || outs.length)){
       const out = ghEl('div', 'gho-out');
       const h = ghEl('h3', 'gho-oh');
       h.appendChild(ghEl('span', 'gho-oh-t', 'Outside your repertoire'));
@@ -27651,6 +27825,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const model = ghoModel(base);
     GHO_LAST = model;
     GHO_STATS.renders++;
+    const qn = ghoQMark(model);
+    model.qn = qn; GHO_QDRAWN = model;
     const mode = { rep:model.rep, lichess:!model.rep };
     const site = GH_UI.site, mix = ghMixed(), named = site==='chesscom' || mix;     // chess.com's games are in this tab
     sec.classList.toggle('is-lichess', mode.lichess);
@@ -27698,6 +27874,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.querySelector('#gho .gho-tools').hidden = loading || !model.counted;
     ghoDrawSide(document.getElementById('gho-white'), model.sides.white, mode, loading);
     ghoDrawSide(document.getElementById('gho-black'), model.sides.black, mode, loading);
+    const qi = document.getElementById('gho-q'), qp = model.rep ? 'Search openings and chapters' : 'Search openings';
+    if(qi.placeholder!==qp) qi.placeholder = qp;
+    ghoQShow(qn);
     const foot = document.getElementById('gho-foot');
     let ft = '';
     if(!loading){
@@ -27733,13 +27912,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     GHO_STATS.ms = Math.round(performance.now() - t0);
   }
-  // re-draw when the repertoire or a sorting batch changes (batches at most every 250 ms)
+  // re-draw when the repertoire or a sorting batch changes (batches at most every 250 ms, and none while you
+  // type in the Openings search: they catch up 0.9 s after your last key, so a key never waits for a redraw)
+  var GHO_QAT = 0;              // when the search box last changed
   function ghoSoon(kind){
     if(currentView!=='history') return;
     const now = Date.now();
     if(kind!=='batch'){ clearTimeout(ghoTimer); ghoTimer = setTimeout(()=>{ ghoTimer = 0; ghoLastAt = Date.now(); if(currentView==='history') ghRender(); }, 0); return; }
     if(ghoTimer) return;
-    ghoTimer = setTimeout(()=>{ ghoTimer = 0; ghoLastAt = Date.now(); if(currentView==='history') ghRender(); }, Math.max(0, 250 - (now - ghoLastAt)));
+    const fire = ()=>{
+      const wait = GHO_QAT + 900 - Date.now();
+      if(wait > 0 && ghoOn()){ ghoTimer = setTimeout(fire, wait); return; }
+      ghoTimer = 0; ghoLastAt = Date.now(); if(currentView==='history') ghRender();
+    };
+    ghoTimer = setTimeout(fire, Math.max(0, 250 - (now - ghoLastAt)));
   }
   rpOnChange(ev=> ghoSoon(ev && ev.kind));
   (function ghoWire(){
@@ -27747,6 +27933,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GHO_SORTS.forEach(([v, t])=> sel.appendChild(new Option(t, v)));
     sel.value = ghoSortKey();
     sel.addEventListener('change', ()=>{ GH_UI.osort = sel.value; ghSaveFilters(); ghRender(); });
+    // the search box: as you type (a short pause first), Escape or the cross to clear it
+    const qi = document.getElementById('gho-q'), qx = document.getElementById('gho-q-x');
+    let qt = 0;
+    const qNow = (v)=>{ clearTimeout(qt); qt = 0; ghoQSet(v); };
+    qi.addEventListener('input', ()=>{ GHO_QAT = Date.now(); qx.hidden = !qi.value; clearTimeout(qt); qt = setTimeout(()=> qNow(qi.value), ghoQPause()); });
+    qi.addEventListener('keydown', e=>{
+      if(e.key==='Escape' && qi.value){ e.preventDefault(); e.stopPropagation(); qi.value = ''; qNow(''); }
+      else if(e.key==='Enter'){ e.preventDefault(); qNow(qi.value); if(matchMedia('(pointer:coarse)').matches) qi.blur(); }    // a phone's keyboard goes away
+    });
+    qx.addEventListener('click', ()=>{ qi.value = ''; qNow(''); try{ qi.focus({ preventScroll:true }); }catch(e){} });
     document.getElementById('gh-view').addEventListener('click', e=>{ const b = e.target.closest('.toggle'); if(b) ghoSetView(b.dataset.val); });
     document.getElementById('gh-rep-chip').addEventListener('click', ()=>{ if(!ghoOn()) ghSetFilters({ rep:'' }); });
     document.getElementById('gho-connect-btn').addEventListener('click', ()=>{
@@ -27771,7 +27967,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const b = e.target.closest('.gho-dis, .gho-name[data-fold]');
       if(b){
         const n = ghoFind(b.dataset.key);
-        if(n){ GHO_TOG.set(n.key, !ghoIsOpen(n)); ghRender(); }
+        if(n){ (GHO_QS ? GHO_QTOG : GHO_TOG).set(n.key, !ghoIsOpen(n)); ghRender(); }
         return;
       }
       const nb = e.target.closest('.gho-name');
