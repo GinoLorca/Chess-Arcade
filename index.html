@@ -6269,6 +6269,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
     <div class="modal-sep"></div>
 
+    <div class="field" id="gn-field">
+      <div class="field-label">Game notes</div>
+      <div class="saved-sync gn-sync" id="gn-sync" data-state="off" style="display:none;">
+        <span class="saved-sync-dot" aria-hidden="true"></span>
+        <span class="saved-sync-text" id="gn-sync-text"></span>
+        <button class="btn-link" id="gn-sync-now" type="button">Sync now</button>
+      </div>
+      <div class="field-hint">Your notes, analysis and groups from Game History. With Lichess connected, they sync to your other devices through a private Lichess study.</div>
+    </div>
+
+    <div class="modal-sep"></div>
+
     <div class="field" id="cc-field">
       <div class="field-label">Chess.com</div>
       <div class="token-status" id="cc-status" role="status" aria-live="polite">Not set</div>
@@ -6422,10 +6434,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="cc-setup-msg" id="cc-setup-msg" role="status" aria-live="polite"></div>
         <div class="cc-setup-notes" id="cc-setup-notes"></div>
       </div>
-      <div class="saved-sync gn-sync" id="gn-sync" data-state="off" style="display:none;">
+      <div class="saved-sync gn-warn" id="gn-warn" data-state="error" role="status" style="display:none;">
         <span class="saved-sync-dot" aria-hidden="true"></span>
-        <span class="saved-sync-text" id="gn-sync-text"></span>
-        <button class="btn-link" id="gn-sync-now" type="button">Sync now</button>
+        <span class="saved-sync-text" id="gn-warn-text"></span>
       </div>
       <div class="gh-filters">
         <div class="gh-fbar">
@@ -35105,8 +35116,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const any = Object.values(GN.notes).some(n=> n.text);
     box.style.display = !tok && !any ? 'none' : '';
     let st = tok ? gnSyncState.status : 'off';
-    let msg;
+    let msg, atRisk = false;
     if(gnUnsaved && any && st!=='busy'){
+      atRisk = true;
       const safe = tok && st==='ok' && !gnHasPending();
       msg = (gnStore==='blocked' ? 'This browser isn\u2019t letting the app save notes on this device.' : 'Couldn\u2019t save notes on this device: its storage is full.')
         + (safe ? ' They\u2019re synced with Lichess, so they\u2019re safe there.'
@@ -35123,6 +35135,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     t.textContent = msg;
     box.dataset.state = st;
     document.getElementById('gn-sync-now').style.display = st==='off' || st==='busy' ? 'none' : '';
+    // Game History says it only when it needs you: notes this device can't save, or a token that can't sync them
+    // (the routine line, its time and Sync now are in Settings: Game notes)
+    const warn = document.getElementById('gn-warn'), wt = document.getElementById('gn-warn-text');
+    if(warn && wt){
+      const need = atRisk || st==='scope';
+      warn.style.display = need ? '' : 'none';
+      if(need){ if(wt.textContent!==msg) wt.textContent = msg; warn.dataset.state = st; }
+    }
   }
   function gnTokenChanged(){
     gnSetSync(getLichessToken() ? 'idle' : 'off');
@@ -35383,6 +35403,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
   }
   document.getElementById('gn-sync-now').addEventListener('click', ()=> gnSync());
+  (function gnSettingsLine(){
+    const ov = document.getElementById('settings-overlay');
+    if(!ov || typeof MutationObserver!=='function') return;
+    let was = ov.classList.contains('active');
+    new MutationObserver(()=>{ const on = ov.classList.contains('active'); if(on && !was) gnRenderSync(); was = on; }).observe(ov, { attributes:true, attributeFilter:['class'] });
+  })();
 
   /* ---- Rich notes ----
      A game note stays ONE string in GN.notes[id].text (at most 10,000
