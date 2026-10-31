@@ -2415,6 +2415,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ol-end-op-text{ color:var(--ink-soft); }
   .ol-end-op-acts{ display:flex; flex-wrap:wrap; gap:2px 14px; margin-top:3px; }
   .ol-end-op-acts .btn-link{ color:var(--ink); text-transform:none; letter-spacing:0; font-size:13px; }
+  @media (pointer:coarse){ .ol-end-op-acts .btn-link, .hv-prep-rl .btn-link{ min-height:44px; display:inline-flex; align-items:center; } }
   .ol-end-acts .btn{ width:100%; min-height:44px; justify-content:center; }
 
   /* ---- Street-Fighter-style split-screen VS intro, before an online game ---- */
@@ -3793,7 +3794,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-brief-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
   .gho-brief-k{ font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
   .gho-brief-n{ font-size:12px; color:var(--ink-soft); text-align:right; }
-  .gho-brief-hero{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto 1fr; column-gap:16px; row-gap:2px; align-items:start; min-height:96px; }
+  .gho-brief-hero{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto 1fr; column-gap:16px; row-gap:2px; align-items:start; min-height:128px; }
   .gho-brief-fig{ grid-row:1 / span 3; width:92px; height:92px; }
   .gho-brief-fig svg{ display:block; width:100%; height:100%; overflow:visible; }
   .gho-brief-big{ font-size:46px; font-weight:800; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
@@ -3812,8 +3813,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-fact{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; padding:8px 0; border-top:1px solid var(--line); }
   .gho-fact:first-child{ border-top:0; }
   .gho-fact-tag{ flex:0 0 auto; font-family:"JetBrains Mono",monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:6px; background:var(--surface-2); color:var(--ink); }
-  .gho-fact-tag.is-bad{ background:var(--bad-soft); color:var(--bad); }
-  .gho-fact-tag.is-you{ background:var(--partial-soft); color:var(--partial); }
+  .gho-fact-tag.is-bad{ background:var(--bad-soft); color:color-mix(in srgb, var(--bad) 55%, var(--ink)); }
+  .gho-fact-tag.is-you{ background:var(--partial-soft); color:color-mix(in srgb, var(--partial) 45%, var(--ink)); }
   .gho-fact-t{ flex:1 1 280px; min-width:0; font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
   .gho-fact-t b{ font-family:"JetBrains Mono",monospace; font-weight:700; }
   .gho-fact-ls{ display:flex; flex-wrap:wrap; gap:4px 12px; flex:0 0 auto; }
@@ -3839,6 +3840,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (hover:hover){ .gho-gap-go:hover .gho-gap-t{ text-decoration:underline; text-underline-offset:2px; } }
   .gho-gap-ls{ display:flex; gap:12px; flex:0 0 auto; }
   .gho-gap-l{ font-size:12px; color:var(--ink); text-decoration:underline; text-underline-offset:2px; white-space:nowrap; }
+  .gho-gap-mores{ display:flex; flex-wrap:wrap; gap:4px 16px; }
   .gho-gap-more{ align-self:flex-start; margin-top:4px; font:inherit; font-size:12.5px; color:var(--ink); background:none; border:0; padding:4px 0; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
   .gho-gap-none{ font-size:12.5px; color:var(--ink-soft); padding:6px 0 2px; border-top:1px solid var(--line); }
   @media (max-width:760px){ .gho-gaps{ grid-template-columns:minmax(0,1fr); } }
@@ -3856,7 +3858,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (hover:hover){ .gho-end-b:hover .gho-end-k{ text-decoration:underline; text-underline-offset:2px; } }
   .gho-end-k{ font-size:13px; line-height:1.3; overflow-wrap:anywhere; }
   .gho-end-v{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); text-align:right; white-space:nowrap; }
-  .gho-end-b.is-thin .gho-end-v{ opacity:.75; }
+  .gho-end-b.is-thin .gho-end-v{ font-style:italic; }
+  .gho-end-b.is-thin .gho-bar{ opacity:.6; }
   @media (max-width:760px){ .gho-ends-cols{ grid-template-columns:minmax(0,1fr); } }
   @media (pointer:coarse){ .gho-end-b{ min-height:44px; } }
   @media (pointer:coarse){ .gho-gap-go, .gho-gap-l, .gho-gap-more{ min-height:44px; } .gho-gap-l{ display:inline-flex; align-items:center; } }
@@ -6884,7 +6887,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="gho-top" id="gho-top">
         <section class="gho-brief" id="gho-brief" aria-labelledby="gho-brief-k" hidden>
           <div class="gho-brief-head"><span class="gho-brief-k" id="gho-brief-k">Your last 7 days</span><span class="gho-brief-n" id="gho-brief-n"></span></div>
-          <div class="gho-brief-hero" id="gho-brief-hero" aria-live="polite">
+          <div class="gho-brief-hero" id="gho-brief-hero" aria-live="off">
             <div class="gho-brief-fig" id="gho-brief-fig" aria-hidden="true"></div>
             <div class="gho-brief-big" id="gho-brief-big"></div>
             <div class="gho-brief-what" id="gho-brief-what"></div>
@@ -23850,9 +23853,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.getElementById('ol-end').addEventListener('keydown', (e)=>{
     if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); olEndClose(true); }
     else if(e.key==='Tab'){
-      const f = [...e.currentTarget.querySelectorAll('button')];
+      const f = [...e.currentTarget.querySelectorAll('button, a[href]')].filter(el=> !el.closest('[hidden]') && el.offsetParent!==null);
       const i = f.indexOf(document.activeElement);
-      if(e.shiftKey && i<=0){ e.preventDefault(); f[f.length-1].focus(); }
+      if(!f.length || i < 0) return;                                  // somewhere else: the browser moves on
+      if(e.shiftKey && i===0){ e.preventDefault(); f[f.length-1].focus(); }
       else if(!e.shiftKey && i===f.length-1){ e.preventDefault(); f[0].focus(); }
     }
   });
@@ -24617,7 +24621,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     color:['white','black'], rated:['rated','casual'], gap:['higher','even','lower'], end:['mate','resign','time','draw','other'],
     len:['short','medium','long'], date:['7','30','90','year'], eg:['yes','no','pawn','rook','queen','bishopOpp','bishopSame','knight','bishopKnight','minor','rookMinor','queenMix','uneven'] };
   const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','len','date','variant','notes','rep'];
-  var EG = new Map(), EG_JOB = null, EG_SIG = '';       // each game's endgame (where it begins, the kinds it went through): egEnsure
+  var EG = new Map(), EG_JOB = null, EG_SIG = '', EG_DONE = false;       // each game's endgame (where it begins, the kinds it went through): egEnsure
   // the repertoire filter (gho*, SPEC B.7): opening / trunk / course / chapter / line, outside, or a spot
   const GH_REP_RE = /^(?:[ot]\.[A-Za-z0-9_-]{1,64}|[kc]\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|l(?:\.[A-Za-z0-9_-]{1,64}){3}|x\.[wb](?:\.(?:none|[a-z0-9]+(?:-[a-z0-9]+)*))?|s\.[0-9a-f]{8}(?:\.(?:t\.[A-Za-z0-9_-]{1,64}|c\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|x\.[wb]))?)$/;
   const GH_SECONDARY = ['rated','gap','end','eg','len','date','opp','variant'];
@@ -25215,6 +25219,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       ghRenderFooter(0, false);        // Loading more / Load more games: Positions searches what's loaded
       return;
     }
+    if(!ov) ghoBriefTimer(false);                  // the brief's 7 s cycle runs only on the Openings tab
     if(ov){
       document.getElementById('gh-list-note').hidden = true;
       ghoRender(base);
@@ -27433,8 +27438,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const mv = rpSanToMove(st, line.moves[i]);
       if(!mv) break;
       st = pzApplyMoveRaw(st, mv);
-      const hs = (S.idx.get(rpKey(st)) || RP_NONE).filter(h=> h.o===o);
-      if(hs.length && hs.every(h=> h.c===c)) return i;
+      const hs = (S.idx.get(rpKey(st)) || RP_NONE).filter(h=> h.o.id===o.id);       // by id: a reused index keeps older objects
+      if(hs.length && hs.every(h=> h.c.id===c.id)) return i;
     }
     return -1;
   }
@@ -27512,7 +27517,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(v===(G.rl || '')){ msg.textContent = v ? 'Saved.' : ''; return; }
     G.rl = v;
     gpSave(G);
-    msg.textContent = v ? 'Saved.' : 'Link removed. The card shows the chapter these moves are in.';
+    msg.textContent = v ? 'Saved.' : RP && gpRlPlace(G) ? 'Link removed. The card shows the chapter these moves are in.' : 'Link removed.';
     inp.dataset.g = '';
     ghRender();
   });
@@ -28650,6 +28655,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const fKey = inSec && fa.dataset ? (fa.dataset.key || '') : '', fCls = inSec ? (fa.classList.contains('gho-dis') ? 'gho-dis' : fa.classList.contains('gho-name') ? 'gho-name' : '') : '';
     const spId = (e)=> e.dataset.gap ? 'g:'+e.dataset.gap : e.dataset.eg ? 'e:'+e.dataset.eg : 's:'+(e.dataset.speed || ''), fSp = inSec && fa.classList.contains('gho-sp') ? spId(fa) : '', fMore = inSec && fa.id==='gho-more';
     const fIns = inSec && fa.dataset && fa.dataset.ins!=null ? fa.dataset.ins : null;
+    const fFid = inSec && fa.dataset && fa.dataset.fid ? fa.dataset.fid : '';      // the step 2 controls (gaps, endgames, facts)
     const fStat = inSec && (fa.classList.contains('gho-status-btn') || fa.id==='gho-status'), fOut = inSec && fa.classList.contains('gho-out-all') ? fa.dataset.rep : '';
     const st = rlState();
     const conn = document.getElementById('gho-connect');
@@ -28713,7 +28719,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const p = rpProgress();
       if(p.running || p.done < p.total){ cnt.appendChild(document.createTextNode(' ')); cnt.appendChild(ghEl('span', 'gh-count-hint', 'still sorting games by your repertoire')); }
     }
-    if(fKey || fIns!=null){
+    if(fFid){
+      const el = Array.from(sec.querySelectorAll('[data-fid]')).find(e=> e.dataset.fid===fFid);
+      if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+    } else if(fKey || fIns!=null){
       const el = fIns!=null ? sec.querySelector('.gho-card[data-ins="'+fIns+'"]')
         : (fSp && Array.from(sec.querySelectorAll('.gho-sp')).find(e=> e.dataset.key===fKey && spId(e)===fSp))      // the same split, else its row's name
           || Array.from(sec.querySelectorAll('.'+(fCls || 'gho-name'))).find(e=> e.dataset.key===fKey);
@@ -28796,9 +28805,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       const gm = e.target.closest('.gho-gap-more');
       if(gm){
-        const k = gm.dataset.gapmore;
-        GHO_GAPS_ALL[k] = !GHO_GAPS_ALL[k]; ghoRedraw();
-        const nb = document.querySelector('.gho-gap-more[data-gapmore="'+k+'"]');
+        const k = gm.dataset.gapmore, more = gm.dataset.gapdir==='more';
+        GHO_GAPS_SHOW[k] = more ? Math.max(GHO_GAPS_N, GHO_GAPS_SHOW[k] || GHO_GAPS_N) + GHO_GAPS_STEP : GHO_GAPS_N;
+        ghoRedraw();
+        // focus: the same button, else the other one, else the list's first entry
+        const nb = document.querySelector('.gho-gap-more[data-fid="'+(more ? 'gapmore|' : 'gapfewer|')+k+'"]') || document.querySelector('#gho-gap-'+k+' .gho-gap-more') || document.querySelector('#gho-gap-'+k+' .gho-gap-go');
         if(nb) try{ nb.focus({ preventScroll:true }); }catch(err){}
         return;
       }
@@ -28862,7 +28873,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const last = all.slice().sort((a, b)=> b.at - a.at).slice(0, 10);
     return { list:last, week:false, label:'Your last '+ghoN(last.length, 'game'), note:'Fewer than 5 in the last 7 days' };
   }
-  function ghoBriefStats(W, all, rep){
+  function ghoBriefStats(W, all, rep, week){
     const out = [], m = ghoMetrics(W), mu = ghoMetrics(all);
     // score
     out.push({ k:'score', dot:'Score', big:ghoPct(m.score), what:'Your score',
@@ -28885,16 +28896,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           fig:[['var(--brass-soft)', kw/R.length]], d:Math.abs(100*kw/R.length - 100*ku/Math.max(1, RU.length))/10 });
       }
     }
-    const A = W.filter(e=> e.acc!=null), AU = all.filter(e=> e.acc!=null);
+    const A = W.filter(e=> e.acc!=null), AU = all.filter(e=> e.acc!=null), cc = GH_UI.site==='chesscom';
     if(A.length){
       const a = A.reduce((s, e)=> s + e.acc, 0)/A.length, au = AU.reduce((s, e)=> s + e.acc, 0)/AU.length;
-      out.push({ k:'acc', dot:'Accuracy', big:String(Math.round(a)), what:'Accuracy, in '+ghoN(A.length, 'reviewed game'),
-        vs:'Your usual '+Math.round(au)+' (Chess Arcade\u2019s review)', fig:[['var(--brass-soft)', a/100]], d:Math.abs(a - au)/5 });
+      // the Chess.com tab's accuracies are chess.com's own (ghoEntries); the others, Chess Arcade's review
+      out.push({ k:'acc', dot:'Accuracy', big:String(Math.round(a)), what: cc ? 'chess.com accuracy, in '+ghoN(A.length, 'game')+' that have one' : 'Accuracy, in '+ghoN(A.length, 'reviewed game'),
+        vs:'Your usual '+Math.round(au)+(cc ? ' (chess.com\u2019s accuracy)' : ' (Chess Arcade\u2019s review)'), fig:[['var(--brass-soft)', a/100]], d:Math.abs(a - au)/5 });
     }
     // games, and how they went
     const span = all.length ? Math.max(7, (ghoBriefNow() - Math.min(...all.map(e=> e.at)))/86400e3) : 7;
+    // the last 10 games (a quiet week): over how many days they were played, beside the weekly rate
+    const wd = W.length ? Math.max(1, Math.round((Math.max(...W.map(e=> e.at)) - Math.min(...W.map(e=> e.at)))/86400e3)) : 0;
     out.push({ k:'games', dot:'Games', big:String(W.length), what:W.length===1 ? 'Game' : 'Games',
-      vs:'Usually about '+Math.round(all.length/span*7)+' a week', fig:[['var(--good)', m.n ? m.W/m.n : 0], ['var(--ink-soft)', m.n ? m.D/m.n : 0], ['var(--bad)', m.n ? m.L/m.n : 0]], d:0 });
+      vs:(week ? '' : 'Played over '+ghoN(wd, 'day')+'. ')+'Usually about '+Math.round(all.length/span*7)+' a week', fig:[['var(--good)', m.n ? m.W/m.n : 0], ['var(--ink-soft)', m.n ? m.D/m.n : 0], ['var(--bad)', m.n ? m.L/m.n : 0]], d:0 });
     return out;
   }
   function ghoBriefShow(i, user, anim){
@@ -28903,6 +28917,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     B.i = ((i % S.length) + S.length) % S.length;
     if(user) B.user = true;
     const st = S[B.i], hero = document.getElementById('gho-brief-hero');
+    hero.setAttribute('aria-live', user ? 'polite' : 'off');             // the 7 s cycle is never read out; a number you pick is
     const fig = document.getElementById('gho-brief-fig');
     fig.textContent = ''; fig.appendChild(ghoRing(st.fig));
     document.getElementById('gho-brief-big').textContent = st.big;
@@ -28928,16 +28943,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoBriefFacts(W, rep, week){
     const F = [], when = (n)=> (n===1 ? 'once' : n===2 ? 'twice' : n+' times')+(week ? ' this week' : ' in these games');
     const games = (rep)=> ()=> ghoApply(week ? { rep, date:'7' } : { rep });
+    const GT = week ? 'Games' : 'All games';                        // the last 10 games aren't a date range: the link opens every game there
     const inRep = W.filter(e=> e.r && (e.r.kind==='chapter' || e.r.kind==='trunk' || e.r.kind==='outside'));
-    // the latest game's opening
-    const last = inRep.slice().sort((a, b)=> b.at - a.at)[0];
+    // the latest game's opening ("in your openings" when your newest game isn't in them)
+    const last = inRep.slice().sort((a, b)=> b.at - a.at)[0], newest = W.slice().sort((a, b)=> b.at - a.at)[0];
     if(last){
       const t = hpTexts({ game:last.g, main:[] }, last.r), L = last.r.left || {}, acts = [];
       const at = (L.who==='you' || L.who==='opp') && L.atPly!=null ? L.atPly : null;
       acts.push({ t:at!=null ? 'Review from '+rpMoveText(at, L.played) : 'Review', go:()=> ghOpenGame(last.g, at!=null ? { at:{ ply:at + 1 } } : undefined) });
       const l = rpLineFor(last.r);
       if(l) acts.push({ t:'Learn', line:l, mode:'learn' });
-      F.push({ tag:'Latest game', text:[t.name+(t.sub || '')+'. ', [t.depth, t.left].filter(Boolean).join(' ')], acts });
+      F.push({ tag:last===newest ? 'Latest game' : 'Latest in your openings', text:[t.name+(t.sub || '')+'. ', [t.depth, t.left].filter(Boolean).join(' ')], acts });
     }
     if(rep){
       const spots = (who)=>{
@@ -28949,14 +28965,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const scope = (s)=> s.r.kind==='chapter' ? 'c.'+s.r.openingId+'.'+s.r.chapterId : s.r.kind==='trunk' ? 't.'+s.r.openingId : 'x.'+(s.color==='black' ? 'b' : 'w');
       const u = spots('opp')[0];
       if(u){
-        const acts = [{ t:'Games', go:games('s.'+u.L.spot+'.'+scope(u)) }];
+        const acts = [{ t:GT, go:games('s.'+u.L.spot+'.'+scope(u)) }];
         if(u.r.kind==='chapter'){ const c = RP.chs.get(u.r.chapterId); acts.push({ t:'Repertoire Lab', href:'https://repertoirelabs.com/chapter/'+encodeURIComponent(c.openingId)+'/'+encodeURIComponent(c.id) }); }
         F.push({ tag:'Unprepared', cls:'is-bad', text:[[rpMoveText(u.L.atPly, u.L.played)], ' '+where(u)+', '+when(u.list.length)+'. You scored '+ghoPts(ghoMetrics(u.list))+'. '
           +((u.L.expected || []).length ? 'You prepared '+rpMovesList(u.L.atPly, u.L.expected)+'.' : 'Your lines have no answer to it.')], acts });
       }
       const f = spots('you')[0];
       if(f){
-        const acts = [{ t:'Games', go:games('s.'+f.L.spot+'.'+scope(f)) }], l = rpLineFor(f.r);
+        const acts = [{ t:GT, go:games('s.'+f.L.spot+'.'+scope(f)) }], l = rpLineFor(f.r);
         if(l){ acts.push({ t:'Learn', line:l, mode:'learn' }); acts.push({ t:'Practice', line:l, mode:'practice' }); }
         F.push({ tag:'Forgot your line', cls:'is-you', text:[[rpMoveText(f.L.atPly, f.L.played)], ' instead of '+rpMovesList(f.L.atPly, f.L.expected || [])+' '+where(f)+', '+when(f.list.length)+'.'], acts });
       }
@@ -28965,24 +28981,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       W.forEach(e=>{ if(!e.r || e.r.kind!=='chapter') return; const k = e.r.openingId+'.'+e.r.chapterId; const c = ch.get(k) || { k, o:RP.ops.get(e.r.openingId), c:RP.chs.get(e.r.chapterId), list:[] }; c.list.push(e); ch.set(k, c); });
       const C = Array.from(ch.values()).filter(c=> c.o && c.c).map(c=> Object.assign(c, { m:ghoMetrics(c.list) }));
       const lineOf = (c)=>{ const n = new Map(); c.list.forEach(e=>{ if(e.r.lineId) n.set(e.r.lineId, (n.get(e.r.lineId) || 0) + 1); }); const best = Array.from(n.entries()).sort((a, b)=> b[1] - a[1])[0]; return best ? RP.lns.get(best[0]) || null : null; };
-      const under = C.filter(c=> c.list.length >= 3 && ((c.m.xn >= 3 && c.m.xpts - c.m.xexp <= -1) || c.m.score <= 34))
+      // with 3+ rated games, only a point or more below what the ratings predicted counts (a low score against stronger
+      // players isn't underperforming); without, a score of 34% or less
+      const under = C.filter(c=> c.list.length >= 3 && (c.m.xn >= 3 ? c.m.xpts - c.m.xexp <= -1 : c.m.score <= 34))
         .sort((a, b)=> (a.m.xpts - a.m.xexp) - (b.m.xpts - b.m.xexp) || a.m.score - b.m.score)[0];
       if(under){
-        const acts = [{ t:'Games', go:games('c.'+under.k) }], l = lineOf(under);
+        const acts = [{ t:GT, go:games('c.'+under.k) }], l = lineOf(under);
         if(l) acts.push({ t:'Practice', line:l, mode:'practice' });
         F.push({ tag:'Underperforming', cls:'is-bad', text:[rpChapterPath(under.o, under.c)+': you scored '+ghoPts(under.m)
           +(under.m.xn >= 3 ? ' ('+ghoSignedTxt(under.m.xpts - under.m.xexp, 1)+' against what the ratings predicted)' : '')+'.'], acts });
       }
       const seen = C.filter(c=> c.list.length >= 3 && c!==under).sort((a, b)=> b.list.length - a.list.length)[0];
       if(seen){
-        const acts = [{ t:'Games', go:games('c.'+seen.k) }], l = lineOf(seen);
+        const acts = [{ t:GT, go:games('c.'+seen.k) }], l = lineOf(seen);
         if(l) acts.push({ t:'Practice it', line:l, mode:'practice' });
         F.push({ tag:'Seen a lot', text:[rpChapterPath(seen.o, seen.c)+': '+ghoN(seen.list.length, 'game')+(week ? ' this week' : '')+'. You scored '+ghoPts(seen.m)+'. Worth a brush-up.'], acts, seen });
       }
     }
     // middlegame drop-off: reviewed games only (worked out after the brief draws)
     const mg = GHO_BRIEF.mg;
-    if(mg && mg.res && mg.res.n >= 2 && mg.res.mid!=null && mg.res.open!=null && mg.res.open - mg.res.mid >= 5){
+    if(mg && mg.res && mg.res.n >= 2 && mg.res.open - mg.res.mid >= 5){
       const last2 = mg.res.last;
       F.push({ tag:'Middlegame', cls:'is-you', text:['Your accuracy drops after the opening: '+Math.round(mg.res.open)+' in the opening, '+Math.round(mg.res.mid)+' in the middlegame ('+ghoN(mg.res.n, 'reviewed game')+').'],
         acts: last2 ? [{ t:'Review the latest', go:()=> ghOpenGame(last2) }] : [] });
@@ -28997,42 +29015,58 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     return F;
   }
-  // per-phase accuracy over the window's reviewed games: a few at a time after the brief draws (each replay ~20 ms)
+  // per-phase accuracy over the window's games reviewed in Chess Arcade (never chess.com's figure): the phases from a
+  // fast replay of the moves (the review's own replay is ~20 ms a game), and only games with both an opening and a
+  // middlegame graded, so the two averages come from the same games. Worked out a few at a time after the brief draws.
+  function ghoGradeFast(g, e){
+    if(!ghIsStd(g) || g.initialFen) return null;
+    const toks = String(g.moves || '').trim() ? String(g.moves).trim().split(/\s+/) : [];
+    if(toks.length!==e.n || gnFnv(toks.join(' '))!==e.h) return null;           // the review is of these moves
+    let st = pzStartPosition();
+    const states = [st];
+    for(let i = 0; i < toks.length; i++){ const mv = rpSanToMove(st, toks[i]); if(!mv) return null; st = pzApplyMoveRaw(st, mv); states.push(st); }
+    const u = ghMe(), me = g._me || (u ? ghMyColor(g, u) : null);
+    return me ? hpfGrade(e.e.split(',').map(hrDecScore), null, hpfDivide(states), me.charAt(0)) : null;
+  }
   function ghoBriefMg(W, key){
     const B = GHO_BRIEF;
-    if(B.mg && B.mg.key===key) return;
     let store = {};
     try{ store = hrReadStore().g || {}; }catch(e){ store = {}; }
-    const list = W.filter(e=> e.acc!=null && store[e.g.id]).sort((a, b)=> b.at - a.at).slice(0, 12);
-    const job = B.mg = { key, res:null };
+    const list = W.filter(e=> store[e.g.id]).sort((a, b)=> b.at - a.at).slice(0, 12);
+    const mk = key+'|'+list.map(e=> e.g.id+':'+(store[e.g.id].h || '')+':'+(store[e.g.id].at || '')).join(',');    // a new review: worked out again
+    if(B.mg && B.mg.key===mk) return;
+    const job = B.mg = { key:mk, res:null };
     if(list.length < 2) return;
-    const acc = [[], [], []];
+    const pairs = [];
     let i = 0;
     const step = ()=>{
       if(B.mg!==job) return;
       const t = performance.now();
-      while(i < list.length && performance.now() - t < 12){
+      while(i < list.length && performance.now() - t < 8){
         const e = list[i++];
         let gr = null;
-        try{ gr = hpfGameGrades(e.g, store[e.g.id]); }catch(err){ gr = null; }
-        if(gr) gr.forEach((x, k)=>{ if(x && x.n && x.acc!=null) acc[k].push(x.acc); });
+        try{ gr = ghoGradeFast(e.g, store[e.g.id]); }catch(err){ gr = null; }
+        if(gr && gr[0] && gr[1] && gr[0].n && gr[1].n && gr[0].acc!=null && gr[1].acc!=null) pairs.push([gr[0].acc, gr[1].acc, e.g]);
       }
       if(i < list.length){ setTimeout(step, 0); return; }
-      const avg = (a)=> a.length ? a.reduce((s, x)=> s + x, 0)/a.length : null;
-      job.res = { n:list.length, open:avg(acc[0]), mid:avg(acc[1]), last:list[0].g };
+      if(pairs.length >= 2){
+        const avg = (k)=> pairs.reduce((s, p)=> s + p[k], 0)/pairs.length;
+        job.res = { n:pairs.length, open:avg(0), mid:avg(1), last:pairs[0][2] };
+      }
       if(GHO_BRIEF.model) ghoDrawFacts();
     };
     setTimeout(step, 0);
   }
   function ghoDrawFacts(){
     const B = GHO_BRIEF, ul = document.getElementById('gho-facts'), M = B.model;
+    const fa = document.activeElement, ff = fa && ul.contains(fa) && fa.dataset ? fa.dataset.fid || '' : '';     // kept across an async redraw
     if(!M){ ul.hidden = true; return; }
     B.facts = ghoBriefFacts(M.W, M.rep, M.week);
     ul.textContent = '';
     ul.hidden = !B.facts.length;
     const shown = B.allFacts ? B.facts : B.facts.slice(0, GHO_FACTS_N);
     shown.forEach((f, fi)=>{
-      const li = ghEl('li', 'gho-fact');
+      const li = ghEl('li', 'gho-fact'), fid = 'fact|'+f.tag;
       li.appendChild(ghEl('span', 'gho-fact-tag'+(f.cls ? ' '+f.cls : ''), f.tag));
       const t = ghEl('span', 'gho-fact-t');
       f.text.forEach(p=> t.appendChild(Array.isArray(p) ? ghEl('b', '', p[0]) : document.createTextNode(p)));
@@ -29040,9 +29074,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(f.acts.length){
         const ls = ghEl('span', 'gho-fact-ls');
         f.acts.forEach((a, ai)=>{
-          if(a.line){ const x = ghEl('a', 'gho-fact-l', a.t), y = document.createElement('a'); rlLineLinks(a.line, a.mode==='learn' ? x : y, a.mode==='learn' ? y : x); x.target = '_blank'; x.rel = 'noopener'; ls.appendChild(x); return; }
-          if(a.href){ const x = ghEl('a', 'gho-fact-l', a.t); x.href = a.href; x.target = '_blank'; x.rel = 'noopener'; ls.appendChild(x); return; }
-          const b = ghEl('button', 'gho-fact-go', a.t); b.type = 'button'; b.dataset.fi = String(fi); b.dataset.ai = String(ai); ls.appendChild(b);
+          if(a.line){ const x = ghEl('a', 'gho-fact-l', a.t), y = document.createElement('a'); rlLineLinks(a.line, a.mode==='learn' ? x : y, a.mode==='learn' ? y : x); x.target = '_blank'; x.rel = 'noopener'; x.dataset.fid = fid+'|'+a.t; ls.appendChild(x); return; }
+          if(a.href){ const x = ghEl('a', 'gho-fact-l', a.t); x.href = a.href; x.target = '_blank'; x.rel = 'noopener'; x.dataset.fid = fid+'|'+a.t; ls.appendChild(x); return; }
+          const b = ghEl('button', 'gho-fact-go', a.t); b.type = 'button'; b.dataset.fi = String(fi); b.dataset.ai = String(ai); b.dataset.fid = fid+'|'+a.t; ls.appendChild(b);
         });
         li.appendChild(ls);
       }
@@ -29050,9 +29084,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     if(B.facts.length > GHO_FACTS_N){
       const m = ghEl('button', 'gho-facts-more', B.allFacts ? 'Show fewer' : 'Show '+(B.facts.length - GHO_FACTS_N)+' more');
-      m.type = 'button'; m.setAttribute('aria-expanded', B.allFacts ? 'true' : 'false');
+      m.type = 'button'; m.setAttribute('aria-expanded', B.allFacts ? 'true' : 'false'); m.dataset.fid = 'factsmore';
       const li = ghEl('li', ''); li.appendChild(m); ul.appendChild(li);
     }
+    if(ff){ const el = Array.from(ul.querySelectorAll('[data-fid]')).find(e=> e.dataset.fid===ff); if(el) try{ el.focus({ preventScroll:true }); }catch(e){} }
   }
   function ghoDrawBrief(model){
     const B = GHO_BRIEF, box = document.getElementById('gho-brief'), top = document.getElementById('gho-top');
@@ -29060,10 +29095,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!model || !all.length){ box.hidden = true; top.classList.remove('has-brief'); B.model = null; ghoDrawFacts(); ghoBriefTimer(false); return; }
     const Wn = ghoBriefWindow(all), W = Wn.list;
     document.getElementById('gho-brief-k').textContent = Wn.label;
+    document.getElementById('gho-facts').setAttribute('aria-label', Wn.week ? 'Your last 7 days, in detail' : Wn.label+', in detail');
     document.getElementById('gho-brief-n').textContent = Wn.week ? ghoN(W.length, 'game') : (Wn.note || '');
     const key = model.rep+'|'+W.map(e=> e.g.id).join(',');
     const prev = B.stats[B.i] ? B.stats[B.i].k : '';
-    B.stats = ghoBriefStats(W, all, model.rep);
+    B.stats = ghoBriefStats(W, all, model.rep, Wn.week);
     B.model = { W, rep:model.rep, week:Wn.week };
     if(B.key!==key){
       // a new set of games: start on the number furthest from your usual, cycling again
@@ -29084,8 +29120,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // ---- prep gaps (step 2, 2026-10-31): the full lists behind "Opponents surprise you", "Biggest gap" and "You leave your
   // prep". Each entry is one place games left your lines (the same move from the same position, in one chapter, before the
   // split, or outside your openings for Black's first move), from the spots the model already grouped. ----
-  var GHO_GAPS_ALL = { opp:false, you:false };
-  const GHO_GAPS_N = 5;
+  var GHO_GAPS_SHOW = { opp:5, you:5 };              // how many of each list show: 5, then 20 more a tap
+  const GHO_GAPS_N = 5, GHO_GAPS_STEP = 20;
   function ghoGapList(model){
     const out = { opp:[], you:[] };
     ['white', 'black'].forEach(color=>{
@@ -29119,10 +29155,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const ul = document.getElementById('gho-gap-'+key);
       ul.textContent = '';
       if(!list.length){ ul.appendChild(ghEl('li', 'gho-gap-none', key==='opp' ? 'None: your lines answered every move your opponents played.' : 'None: you played your prepared move every time.')); return; }
-      const all = GHO_GAPS_ALL[key], shown = all ? list : list.slice(0, GHO_GAPS_N);
+      const shown = list.slice(0, Math.max(GHO_GAPS_N, GHO_GAPS_SHOW[key] || GHO_GAPS_N));
       shown.forEach((y, i)=>{
-        const s = y.s, li = ghEl('li', 'gho-gap'), b = ghEl('button', 'gho-gap-go');
-        b.type = 'button'; b.dataset.gapk = key; b.dataset.gapi = String(i);
+        const s = y.s, li = ghEl('li', 'gho-gap'), b = ghEl('button', 'gho-gap-go'), fid = 'gap|'+key+'|'+s.spot+'|'+ghoSpotScope(s.where, y.color);
+        b.type = 'button'; b.dataset.gapk = key; b.dataset.gapi = String(i); b.dataset.fid = fid;
         const t = ghEl('span', 'gho-gap-t');
         t.appendChild(ghEl('b', '', rpMoveText(s.atPly, s.played)));
         t.appendChild(document.createTextNode(key==='you' && s.expected.length ? ' instead of '+rpMovesList(s.atPly, s.expected)+' ' : ' '));
@@ -29137,18 +29173,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const ls = ghEl('span', 'gho-gap-ls');
         if(key==='opp'){
           const c = s.where.kind==='chapter' ? s.where.c : null;           // before the split: no one chapter is the place
-          if(c){ const a = ghEl('a', 'gho-gap-l', 'Repertoire Lab'); a.href = 'https://repertoirelabs.com/chapter/'+encodeURIComponent(c.openingId)+'/'+encodeURIComponent(c.id); a.target = '_blank'; a.rel = 'noopener'; a.title = 'Open '+c.short+' in Repertoire Lab'; ls.appendChild(a); }
+          if(c){ const a = ghEl('a', 'gho-gap-l', 'Repertoire Lab'); a.dataset.fid = fid+'|rl'; a.href = 'https://repertoirelabs.com/chapter/'+encodeURIComponent(c.openingId)+'/'+encodeURIComponent(c.id); a.target = '_blank'; a.rel = 'noopener'; a.title = 'Open '+c.short+' in Repertoire Lab'; ls.appendChild(a); }
         } else {
           const l = rpLineFor(s.list[0].r);
-          if(l){ const a = ghEl('a', 'gho-gap-l', 'Learn'), p = ghEl('a', 'gho-gap-l', 'Practice'); a.target = p.target = '_blank'; a.rel = p.rel = 'noopener'; rlLineLinks(l, a, p); ls.appendChild(a); ls.appendChild(p); }
+          if(l){ const a = ghEl('a', 'gho-gap-l', 'Learn'), p = ghEl('a', 'gho-gap-l', 'Practice'); a.dataset.fid = fid+'|learn'; p.dataset.fid = fid+'|practice'; a.target = p.target = '_blank'; a.rel = p.rel = 'noopener'; rlLineLinks(l, a, p); ls.appendChild(a); ls.appendChild(p); }
         }
         if(ls.childNodes.length) li.appendChild(ls);
         ul.appendChild(li);
       });
       if(list.length > GHO_GAPS_N){
-        const m = ghEl('button', 'gho-gap-more', all ? 'Show fewer' : 'Show all '+list.length);
-        m.type = 'button'; m.dataset.gapmore = key; m.setAttribute('aria-expanded', all ? 'true' : 'false');
-        const li = ghEl('li', ''); li.appendChild(m); ul.appendChild(li);
+        const li = ghEl('li', 'gho-gap-mores');
+        if(shown.length < list.length){
+          const n = Math.min(GHO_GAPS_STEP, list.length - shown.length), m = ghEl('button', 'gho-gap-more', 'Show '+n+' more');
+          m.type = 'button'; m.dataset.gapmore = key; m.dataset.gapdir = 'more'; m.dataset.fid = 'gapmore|'+key;
+          m.setAttribute('aria-label', 'Show '+n+' more of '+list.length); li.appendChild(m);
+        }
+        if(shown.length > GHO_GAPS_N){
+          const f = ghEl('button', 'gho-gap-more', 'Show fewer');
+          f.type = 'button'; f.dataset.gapmore = key; f.dataset.gapdir = 'fewer'; f.dataset.fid = 'gapfewer|'+key; li.appendChild(f);
+        }
+        ul.appendChild(li);
       }
     };
     draw('opp', L.opp); draw('you', L.you);
@@ -29202,7 +29246,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(run && out.t.indexOf(run) < 0) out.t.push(run);          // the last position counts however long it lasted
     return out;
   }
-  function egReady(){ return !EG_JOB && EG.size > 0; }
+  function egReady(){ return EG_DONE; }       // from the first finished pass on; a game read later just matches no setting until then
   function egMatch(g, v){
     const e = EG.get(g.id);
     if(!e) return false;                                    // a game the pass doesn't read (Chess960, no moves): no endgame setting matches it
@@ -29226,7 +29270,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(job.i < job.list.length){ setTimeout(tick, 0); return; }
       if(job.more){ job.more = false; job.list = rpGames().filter(g=> !EG.has(g.id)); job.i = 0; if(job.list.length){ setTimeout(tick, 0); return; } }
       EG_JOB = null;
-      if(currentView==='history' && (GH_FILTERS.eg || ghoOn())) ghoSoon('eg');      // drawn once, with every game's endgame
+      const first = !EG_DONE;
+      EG_DONE = true;
+      // drawn once with the new endgames: right away the first time, else after a pause (never while you type a search)
+      const draw = ()=>{ if(currentView!=='history' || !(GH_FILTERS.eg || ghoOn())) return; if(Date.now() - GHO_QAT < 900){ setTimeout(draw, 900); return; } ghRender(); };
+      setTimeout(draw, first ? 0 : 400);
     };
     setTimeout(tick, 0);
   }
@@ -29256,7 +29304,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const ul = ghEl('ul', 'gho-ends-list');
       const row = (name, eg, list)=>{
         const m = ghoMetrics(list), li = ghEl('li', ''), b = ghEl('button', 'gho-end-b'+(m.n < GHO_MIN ? ' is-thin' : ''));
-        b.type = 'button'; b.dataset.eg = eg; b.dataset.egc = color;
+        b.type = 'button'; b.dataset.eg = eg; b.dataset.egc = color; b.dataset.fid = 'end|'+color+'|'+eg;
         b.appendChild(ghEl('span', 'gho-end-k', name));
         b.appendChild(ghoBar(m));
         b.appendChild(ghEl('span', 'gho-end-v', m.n+' \u00b7 '+ghoPct(m.score)));
@@ -38049,6 +38097,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(hvNote){ gnFieldRefresh(hvNote); gnRenderField(hvNote); }
     hvOpxFields().forEach(F=>{ gnFieldRefresh(F); gnRenderField(F); });
     if(ghgF){ gnFieldRefresh(ghgF); gnRenderField(ghgF); }
+    if(GH_LC && GH_LC.F) gnFieldRefresh(GH_LC.F);      // the line card's idea (a field you're typing in is left alone)
     hvAnnRefresh();
   }
   var gnOverlay = document.getElementById('gn-overlay');
