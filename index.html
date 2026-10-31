@@ -3513,6 +3513,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ghp-fen{ font-size:12.5px; }
   .ghp-mode .toggle, .ghp-color .toggle{ flex:1 1 auto; }
   .ghp-go{ align-self:flex-start; min-width:160px; }
+  .ghp-acts{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .ghp-px-msg{ font-size:12.5px; color:var(--bad); min-height:0; }
+  .ghp-px-msg:empty{ display:none; }
+  .px-note{ font-size:12px; line-height:1.35; color:var(--bad); white-space:normal; }
   .ghp .panel.ghp-results{ gap:10px; padding:16px 20px; }
   .ghp-summary{ font-size:14px; color:var(--ink); }
   .ghp-summary b{ font-family:"Big Shoulders Display",sans-serif; font-size:22px; margin-right:6px; }
@@ -3840,6 +3844,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (hover:hover){ .gho-gap-go:hover .gho-gap-t{ text-decoration:underline; text-underline-offset:2px; } }
   .gho-gap-ls{ display:flex; gap:12px; flex:0 0 auto; }
   .gho-gap-l{ font-size:12px; color:var(--ink); text-decoration:underline; text-underline-offset:2px; white-space:nowrap; }
+  button.gho-gap-l{ background:none; border:0; padding:0; font:inherit; font-size:12px; cursor:pointer; }
   .gho-gap-mores{ display:flex; flex-wrap:wrap; gap:4px 16px; }
   .gho-gap-more{ align-self:flex-start; margin-top:4px; font:inherit; font-size:12.5px; color:var(--ink); background:none; border:0; padding:4px 0; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
   .gho-gap-none{ font-size:12.5px; color:var(--ink-soft); padding:6px 0 2px; border-top:1px solid var(--line); }
@@ -4732,6 +4737,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* The cog's pop-up: which of the engine's top three moves get an arrow.
      Each color is the dot beside its line, as in Repertoire Lab. */
   #hv-engine{ position:relative; }
+  /* Play it out (px*): the card over the engine's while a position is played out against it */
+  .hv-px{ padding:10px 12px; display:flex; flex-direction:column; gap:10px; }
+  .hv-px-status{ font-size:14px; font-weight:700; line-height:1.35; color:var(--ink); min-height:1.35em; }
+  .hv-px-status.is-wait{ color:var(--ink-soft); font-weight:600; font-size:13px; }
+  .hv-px-str{ display:flex; flex-direction:column; gap:2px; }
+  .hv-px-str .field-label{ margin:0; }
+  .hv-px-acts{ display:flex; flex-wrap:wrap; gap:8px; }
+  .hv-px-acts .btn{ padding:7px 12px; font-size:13px; }
+  .hv-px-acts .btn:disabled{ opacity:.5; cursor:default; }
+  @media (pointer:coarse){ .hv-px-acts .btn{ min-height:44px; } }
+  /* until the game's over and Analyze is pressed: no engine card, arrows or eval, no Explorer (they'd give moves away);
+     never the review, notes, prep or phase cards (a position played out here isn't one of your games) */
+  #view-play-history.is-px :is(#hv-opx, #hv-prep, #hpf, #hv-tab-review, #hv-tab-notes, #hv-notes-card){ display:none !important; }
+  #view-play-history.is-px-play :is(#hv-engine, #hv-tab-explorer){ display:none !important; }
+  #view-play-history.is-px-play .hv-eval{ visibility:hidden; }          /* kept for its room: the board doesn't move when Analyze shows it */
+  /* the row wraps where it can't hold the button too (a phone): it takes a line of its own under the arrows */
+  #hv-controls{ flex-wrap:wrap; row-gap:8px; }
+  #hv-controls .hv-px-here{ margin-left:6px; }
+  @media (max-width:599.98px){ #hv-controls .hv-px-here{ margin-left:0; } }
   .hv-eng-pop{ right:8px; min-width:210px; }
   .hv-pop-head{ padding:6px 10px 4px; font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
   .hv-pop-check{ display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:5px; cursor:pointer; font-size:13px; color:var(--ink); }
@@ -4911,6 +4935,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .hv-sidecol-review:has(> #hpf:not([hidden])) > #hv-head{ flex:1 1 0; min-height:96px; }
     #hpf{ flex:0 1 auto; min-height:0; overflow:auto; }
     #hpf > *{ flex-shrink:0; }       /* the card scrolls; the field keeps its shape */
+    #view-play-history.is-px #hv-head{ flex:0 0 auto; }      /* played out: nothing under the header, so it keeps its own height */
     /* with the header turned off, Notes takes the room */
     .hv-sidecol-review:has(> #hv-head.hv-card-off) > .hv-notes-card{ flex:1 1 auto; }
     .hv-opx-toggle{ display:none; }
@@ -4941,7 +4966,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hv-row-bottom{ order:4; }
     #hv-controls{ order:5; }
     #hv-anno-hint{ order:5; }
-    #hv-engine{ order:6; }
+    #hv-px, #hv-engine{ order:6; }
     #hv-tabs{ order:7; overflow:visible; }
     #hpf{ order:8; }
     #hv-head{ order:9; }
@@ -6788,6 +6813,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <a class="btn-link" id="gh-lc-learn" target="_blank" rel="noopener">Learn</a>
         <a class="btn-link" id="gh-lc-practice" target="_blank" rel="noopener">Practice</a>
         <button type="button" class="btn-link" id="gh-lc-group">Make a group from it</button>
+        <button type="button" class="btn-link" id="gh-lc-px">Play it out</button>
       </div>
     </section>
     <div class="history-list panel gh-list" id="history-list" role="tabpanel" aria-labelledby="gh-site-all"></div>
@@ -6814,6 +6840,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="ghg-links">
             <a class="btn-link" id="ghg-rl-open" target="_blank" rel="noopener" hidden>Open in Repertoire Lab</a>
             <a class="btn-link" id="ghg-li" target="_blank" rel="noopener noreferrer" hidden>Open these moves on Lichess</a>
+            <button type="button" class="btn-link" id="ghg-px" hidden>Play it out</button>
           </div>
           <details class="ghg-rl-pick" id="ghg-rl-pick">
             <summary id="ghg-rl-sum">Link a different chapter</summary>
@@ -6869,7 +6896,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
             <div class="field-label" id="ghp-color-l">Your games as</div>
             <div class="toggle-row gh-seg ghp-color" id="ghp-color" role="group" aria-labelledby="ghp-color-l"><button type="button" class="toggle" data-val="" aria-pressed="false">Either</button><button type="button" class="toggle" data-val="white" aria-pressed="false">White</button><button type="button" class="toggle" data-val="black" aria-pressed="false">Black</button></div>
           </div>
-          <button type="button" class="btn btn-primary ghp-go" id="ghp-go">Find games</button>
+          <div class="ghp-acts">
+            <button type="button" class="btn btn-primary ghp-go" id="ghp-go">Find games</button>
+            <button type="button" class="btn btn-ghost ghp-px" id="ghp-px">Play it out</button>
+          </div>
+          <div class="ghp-px-msg" id="ghp-px-msg" role="status" aria-live="polite"></div>
         </div>
       </div>
       <div class="panel ghp-results" id="ghp-results" hidden>
@@ -7044,6 +7075,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="btn btn-ghost" id="hv-prev" type="button" title="Previous move (&larr;)" aria-label="Previous move">&#8592;</button>
         <button class="btn btn-ghost" id="hv-next" type="button" title="Next move (&rarr;)" aria-label="Next move">&#8594;</button>
         <button class="btn btn-ghost" id="hv-end" type="button" title="End of the line (End)" aria-label="End of the line">&#8677;</button>
+        <button class="btn btn-ghost hv-px-here" id="hv-px-here" type="button" title="Play this position out against Stockfish, on this device">Play it out</button>
       </div>
       <!-- Only shown while an arrow color profile is on, so the profile label
            has a home under this board too; in Default the view is unchanged. -->
@@ -7136,6 +7168,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
 
       <div class="hv-sidecol hv-sidecol-analysis">
+      <!-- Play it out (px*): a position played out against Stockfish 16 on this device, at the strength you set -->
+      <div class="hv-card hv-px" id="hv-px" hidden>
+        <div class="hv-px-status" id="hv-px-status" role="status" aria-live="polite"></div>
+        <div class="hv-px-str">
+          <label class="field-label" for="hv-px-elo">Engine strength</label>
+          <div class="slider-row">
+            <input type="range" id="hv-px-elo" min="0" max="38" step="1" value="4" aria-valuetext="1500">
+            <span class="slider-val" id="hv-px-elo-v">1500</span>
+          </div>
+        </div>
+        <div class="hv-px-acts">
+          <button type="button" class="btn btn-ghost" id="hv-px-undo">Take back</button>
+          <button type="button" class="btn btn-ghost" id="hv-px-again">Start again</button>
+          <button type="button" class="btn btn-primary" id="hv-px-stop">Stop and analyze</button>
+        </div>
+      </div>
       <div class="hv-card hv-engine" id="hv-engine">
         <div class="hv-eng-head">
           <button class="hv-switch" id="hv-eng-toggle" type="button" role="switch" aria-checked="true" aria-keyshortcuts="L" title="Engine on or off (L) &#183; E hides the suggested moves">
@@ -27315,6 +27363,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const lu = gpLichessUrl(G);
     li.hidden = !lu; if(lu) li.href = lu; else li.removeAttribute('href');
     li.textContent = G.line ? 'Open these moves on Lichess' : 'Open this position on Lichess';
+    const pf = pxGroupFen(G);
+    document.getElementById('ghg-px').hidden = !pf || !!pxCheck(pf);        // (a group kept at a checkmate has nothing to play)
     const bd = document.getElementById('ghg-board'), sig = G.fen+'|'+G.flip;
     document.getElementById('ghg-page').classList.toggle('ghg-noboard', !G.fen);
     if(bd.dataset.sig!==sig){
@@ -27487,6 +27537,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       GH_LC = { key, F };
     }
     Object.assign(GH_LC, { line, o, c, moves, from, color:o.color, title, rows });
+    // Play it out from where the line ends, once that position replays and can be played (worked out once per line)
+    if(GH_LC.pxKey!==key){ GH_LC.pxKey = key; const f = line ? pxAfter(line.moves, line.moves.length, line.fen || null) : null; GH_LC.pxOk = !!f && !pxCheck(f); }
+    document.getElementById('gh-lc-px').hidden = !GH_LC.pxOk;
     box.hidden = false;
   }
   (function ghLcWire(){
@@ -27717,6 +27770,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function ghpDraw(){
     ghpBuild();
+    const pm = document.getElementById('ghp-px-msg');
+    if(pm.textContent && pm.dataset.k!==pxSetupKey()) pm.textContent = '';      // Play it out's reason, about a board that's since changed
     const bd = document.getElementById('ghp-board');
     [...bd.children].forEach((el, k)=>{
       const row = Math.floor(k/8), col = k % 8;
@@ -28794,9 +28849,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const dot = e.target.closest('.gho-brief-dot');
       if(dot){ ghoBriefShow(Number(dot.dataset.i), true); return; }
       const fg = e.target.closest('.gho-fact-go');
-      if(fg){ const F = GHO_BRIEF.facts[Number(fg.dataset.fi)]; const a = F && F.acts[Number(fg.dataset.ai)]; if(a && a.go) a.go(); return; }
+      if(fg){ const F = GHO_BRIEF.facts[Number(fg.dataset.fi)]; const a = F && F.acts[Number(fg.dataset.ai)]; if(a && a.go){ const why = a.go(); if(typeof why==='string') pxNote(fg, why); } return; }
       const fm = e.target.closest('.gho-facts-more');
       if(fm){ GHO_BRIEF.allFacts = !GHO_BRIEF.allFacts; ghoDrawFacts(); const nb = document.querySelector('.gho-facts-more'); if(nb) try{ nb.focus({ preventScroll:true }); }catch(err){} return; }
+      const gpx = e.target.closest('.gho-gap-px');
+      if(gpx){
+        const y = GHO_LAST && GHO_LAST.gaps && GHO_LAST.gaps[gpx.dataset.gapk] ? GHO_LAST.gaps[gpx.dataset.gapk][Number(gpx.dataset.gapi)] : null;
+        if(y) pxNote(gpx, pxFromSpot(y.s, y.s.list, y.color, ghoGapWhere(y), gpx.dataset.fid));
+        return;
+      }
       const gap = e.target.closest('.gho-gap-go');
       if(gap){
         const y = GHO_LAST && GHO_LAST.gaps && GHO_LAST.gaps[gap.dataset.gapk] ? GHO_LAST.gaps[gap.dataset.gapk][Number(gap.dataset.gapi)] : null;
@@ -28967,6 +29028,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(u){
         const acts = [{ t:GT, go:games('s.'+u.L.spot+'.'+scope(u)) }];
         if(u.r.kind==='chapter'){ const c = RP.chs.get(u.r.chapterId); acts.push({ t:'Repertoire Lab', href:'https://repertoirelabs.com/chapter/'+encodeURIComponent(c.openingId)+'/'+encodeURIComponent(c.id) }); }
+        acts.push({ t:'Play it out', go:()=> pxFromSpot(u.L, u.list, u.color, where(u), 'fact|Unprepared|Play it out') });
         F.push({ tag:'Unprepared', cls:'is-bad', text:[[rpMoveText(u.L.atPly, u.L.played)], ' '+where(u)+', '+when(u.list.length)+'. You scored '+ghoPts(ghoMetrics(u.list))+'. '
           +((u.L.expected || []).length ? 'You prepared '+rpMovesList(u.L.atPly, u.L.expected)+'.' : 'Your lines have no answer to it.')], acts });
       }
@@ -28974,6 +29036,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(f){
         const acts = [{ t:GT, go:games('s.'+f.L.spot+'.'+scope(f)) }], l = rpLineFor(f.r);
         if(l){ acts.push({ t:'Learn', line:l, mode:'learn' }); acts.push({ t:'Practice', line:l, mode:'practice' }); }
+        acts.push({ t:'Play it out', go:()=> pxFromSpot(f.L, f.list, f.color, where(f), 'fact|Forgot your line|Play it out') });
         F.push({ tag:'Forgot your line', cls:'is-you', text:[[rpMoveText(f.L.atPly, f.L.played)], ' instead of '+rpMovesList(f.L.atPly, f.L.expected || [])+' '+where(f)+', '+when(f.list.length)+'.'], acts });
       }
       // chapters met in these games
@@ -28987,14 +29050,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         .sort((a, b)=> (a.m.xpts - a.m.xexp) - (b.m.xpts - b.m.xexp) || a.m.score - b.m.score)[0];
       if(under){
         const acts = [{ t:GT, go:games('c.'+under.k) }], l = lineOf(under);
-        if(l) acts.push({ t:'Practice', line:l, mode:'practice' });
+        if(l){ acts.push({ t:'Practice', line:l, mode:'practice' }); acts.push({ t:'Play it out', go:()=> pxFromLine(l, { y:window.scrollY, fid:'fact|Underperforming|Play it out' }) }); }
         F.push({ tag:'Underperforming', cls:'is-bad', text:[rpChapterPath(under.o, under.c)+': you scored '+ghoPts(under.m)
           +(under.m.xn >= 3 ? ' ('+ghoSignedTxt(under.m.xpts - under.m.xexp, 1)+' against what the ratings predicted)' : '')+'.'], acts });
       }
       const seen = C.filter(c=> c.list.length >= 3 && c!==under).sort((a, b)=> b.list.length - a.list.length)[0];
       if(seen){
         const acts = [{ t:GT, go:games('c.'+seen.k) }], l = lineOf(seen);
-        if(l) acts.push({ t:'Practice it', line:l, mode:'practice' });
+        if(l){ acts.push({ t:'Practice it', line:l, mode:'practice' }); acts.push({ t:'Play it out', go:()=> pxFromLine(l, { y:window.scrollY, fid:'fact|Seen a lot|Play it out' }) }); }
         F.push({ tag:'Seen a lot', text:[rpChapterPath(seen.o, seen.c)+': '+ghoN(seen.list.length, 'game')+(week ? ' this week' : '')+'. You scored '+ghoPts(seen.m)+'. Worth a brush-up.'], acts, seen });
       }
     }
@@ -29178,7 +29241,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           const l = rpLineFor(s.list[0].r);
           if(l){ const a = ghEl('a', 'gho-gap-l', 'Learn'), p = ghEl('a', 'gho-gap-l', 'Practice'); a.dataset.fid = fid+'|learn'; p.dataset.fid = fid+'|practice'; a.target = p.target = '_blank'; a.rel = p.rel = 'noopener'; rlLineLinks(l, a, p); ls.appendChild(a); ls.appendChild(p); }
         }
-        if(ls.childNodes.length) li.appendChild(ls);
+        // Play it out: the position itself, against Stockfish
+        const px = ghEl('button', 'gho-gap-l gho-gap-px', 'Play it out');
+        px.type = 'button'; px.dataset.gapk = key; px.dataset.gapi = String(i); px.dataset.fid = fid+'|px';
+        px.title = 'Play this position out against Stockfish, on this device';
+        ls.appendChild(px);
+        li.appendChild(ls);
         ul.appendChild(li);
       });
       if(list.length > GHO_GAPS_N){
@@ -31207,6 +31275,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function hvStartState(game){
     const f = game && typeof game.initialFen==='string' ? game.initialFen.trim() : '';
+    if(f && game._practice && nbValidFen(f)) return hvStateFromFen(f);      // Play it out: a standard game from a set position
     if(!f || ghIsStd(game)) return pzStartPosition();
     // Chess960's Shredder castling letters (HFhf) aren't standard rights
     const p = f.split(/\s+/);
@@ -31250,7 +31319,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }catch(e){}
     return p;
   })();
-  function hvSavePrefs(){ try{ localStorage.setItem(HV_PREFS_KEY, JSON.stringify(hvPrefs)); }catch(e){} }
+  function hvSavePrefs(){
+    // the engine Analyze turned on for a played-out position only (PX.engWas) is never the saved setting
+    const o = PX && PX.engWas===false ? Object.assign({}, hvPrefs, { engine:false }) : hvPrefs;
+    try{ localStorage.setItem(HV_PREFS_KEY, JSON.stringify(o)); }catch(e){}
+  }
 
   // ---- state ----
   let HV_STATE = null;
@@ -31300,6 +31373,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(have && have.sig===sig){ HV_TREES.delete(key); HV_TREES.set(key, have); return have; }
     const built = hvBuildPlyStates(sig ? sig.split(/\s+/) : [], hvStartState(game));
     const root = hvMkNode(null, null, built.plyStates[0], null, 'root', true);
+    if(game._practice) pxRoot(root, game.initialFen);
     const nodes = new Map([['root', root]]), main = [];
     let prev = root;
     built.moves.forEach((mv, i)=>{
@@ -31453,7 +31527,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   // ---- the board ----
-  function hvCanMove(){ return !!(HV_STATE && HV_STATE.std && !hvPromoOpen); }
+  function hvCanMove(){ return !!(HV_STATE && HV_STATE.std && !hvPromoOpen && !pxWaits()); }
   function hvRenderBoard(){
     const S = HV_STATE;
     if(!S) return;
@@ -31601,6 +31675,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvShowPromo(hvBoardEl.querySelector('[data-idx="'+to+'"]'), st.turn, cands);
   }
   function hvMoveMade(move){
+    if(pxPlaying()){ pxUserMove(move); return; }      // Play it out: your move in the game, then the engine's reply
     const n = hvPlay(HV_STATE.cur, move);
     if(n) hvGoNode(n, { sound:true });
   }
@@ -31811,6 +31886,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const off = { 'hv-start':back, 'hv-prev':back, 'hv-next':fwd, 'hv-end':fwd };
     const a = document.activeElement, aid = a && a.id;
     Object.keys(off).forEach(id=>{ document.getElementById(id).disabled = off[id]; });
+    // Play it out: not on a finished position, not while one is played, not while the game review runs (it would end it)
+    const ph = document.getElementById('hv-px-here'), phOff = !S.std || pxPlaying() || !!hvTerminal(n) || !!(hrJob && hrJob.S===S);
+    if(phOff && document.activeElement===ph) try{ document.getElementById('hv-flip').focus({ preventScroll:true }); }catch(e){}
+    if(ph.hidden!==phOff) ph.hidden = phOff;
     // the focused step button just ran out of moves: the keys stay on the
     // controls (a disabled button would drop them on the page)
     if(aid && Object.prototype.hasOwnProperty.call(off, aid) && off[aid]){
@@ -31852,16 +31931,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the back link (to where Analyze was pressed), Notes (a puzzle has nowhere
   // to keep them; hidden also hides the pinned pane) and the clocks (none).
   function hvModeUi(){
-    const Z = HV_STATE ? HV_STATE.game._puzzle : null;
-    document.querySelector('#hv-head .eyebrow').textContent = Z ? 'Puzzle analysis' : 'Game review';
+    const Z = HV_STATE ? HV_STATE.game._puzzle : null, P = HV_STATE ? HV_STATE.game._practice : null;
+    document.querySelector('#hv-head .eyebrow').textContent = P ? 'Play it out' : Z ? 'Puzzle analysis' : 'Game review';
     const back = document.querySelector('#view-play-history .back-link');
-    back.textContent = '\u2190 '+(Z ? Z.back : 'Game History');
-    back.dataset.nav = Z ? Z.view : 'history';
-    ['hv-top-clock', 'hv-bottom-clock', 'hv-groups'].forEach(id=>{ document.getElementById(id).hidden = !!Z; });
+    back.textContent = '\u2190 '+(P ? pxBackText(P) : Z ? Z.back : 'Game History');
+    back.dataset.nav = Z && !P ? Z.view : 'history';
+    ['hv-top-clock', 'hv-bottom-clock', 'hv-groups'].forEach(id=>{ document.getElementById(id).hidden = !!(Z || P); });
+    pxModeClass();
     ['hv-tab-notes', 'hv-pane-notes', 'hv-notes-card'].forEach(id=>{ document.getElementById(id).hidden = hvNotesOff(); });
   }
   function hvRenderHead(){
     const S = HV_STATE, g = S.game;
+    if(g._practice) return pxRenderHead(S);
     if(g._puzzle) return hvRenderPuzzleHead(S);
     document.getElementById('hv-title').textContent = S.whiteName+' vs '+S.blackName;
     const res = document.getElementById('hv-result');
@@ -31896,6 +31977,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const S = HV_STATE, a = document.getElementById('hv-lichess');
     const id = S && S.game.id ? String(S.game.id) : '';
     const cu = S ? ccGameUrl(id) : null;
+    if(S && S.game._practice){ a.hidden = true; a.removeAttribute('href'); return; }     // played out here: no page anywhere
     // a puzzle: its own page (the source game's id is never this board's)
     if(S && S.game._puzzle){ if(a.textContent!=='Open on Lichess') a.textContent = 'Open on Lichess'; a.hidden = false; a.href = 'https://lichess.org/training/'+S.game._puzzle.id; return; }
     if(cu){ if(a.textContent!=='Open on chess.com') a.textContent = 'Open on chess.com'; a.hidden = false; a.href = cu; return; }
@@ -31983,23 +32065,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const frag = document.createDocumentFragment();
     const cf = hvAnnConflictRow();
     if(cf) frag.appendChild(cf);
-    // a set position where Black moves first starts '1. ... Kf5'
-    const off = S.root.off || 0, main = (off ? [null] : []).concat(S.main), rows = Math.ceil(main.length/2);
+    // a set position where Black moves first starts '1. ... Kf5'; one played out from a game keeps its move numbers
+    const off = S.root.off || 0, pad = off % 2, base = (off - pad)/2, main = (pad ? [null] : []).concat(S.main), rows = Math.ceil(main.length/2);
     const alts = (i)=> main[i] ? main[i].parent.children.filter(c=> c!==main[i]) : [];
     for(let r=0;r<rows;r++){
-      frag.appendChild(hvEl('div', 'mv-num', (r+1)+'.'));
+      frag.appendChild(hvEl('div', 'mv-num', (base+r+1)+'.'));
       frag.appendChild(main[2*r] ? hvMoveCell(main[2*r]) : hvEl('div', 'mv-san', '\u2026'));
       frag.appendChild(main[2*r+1] ? hvMoveCell(main[2*r+1]) : hvEl('div', 'mv-san'));
       [main[2*r], main[2*r+1]].forEach(n=>{ if(n && n.comment) frag.appendChild(hvComRow(n)); });
       alts(2*r).concat(alts(2*r+1)).forEach(b=> frag.appendChild(hvVarRow(b)));
     }
     // moves tried after the game's last move
-    (main.length ? main[main.length-1] : S.root).children.forEach(b=> frag.appendChild(hvVarRow(b)));
-    const g = S.game, Z = g._puzzle, bits = Z ? ['Puzzle'] : [hvResultText(g)];
-    if(Z){ if(PZA_OUT[Z.outcome]) bits.push(PZA_OUT[Z.outcome][1]); }     // a puzzle: how it went, never a result
+    (S.main.length ? S.main[S.main.length-1] : S.root).children.forEach(b=> frag.appendChild(hvVarRow(b)));      // (main's first slot is a gap when Black moved first)
+    const g = S.game, Z = g._puzzle, bits = g._practice ? pxResultBits(g._practice) : Z ? ['Puzzle'] : [hvResultText(g)];
+    if(g._practice){}
+    else if(Z){ if(PZA_OUT[Z.outcome]) bits.push(PZA_OUT[Z.outcome][1]); }     // a puzzle: how it went, never a result
     else if(g.winner==='white') bits.push('White wins'); else if(g.winner==='black') bits.push('Black wins');
     else if(bits[0]!=='*') bits.push('Draw');
-    if(g.status && g.status!=='draw') bits.push(OL_STATUS_LABELS[g.status] || String(g.status));
+    if(g._practice){}
+    else if(g.status && g.status!=='draw') bits.push(OL_STATUS_LABELS[g.status] || String(g.status));
     else if(g.status==='draw') bits.push(OL_STATUS_LABELS.draw);
     frag.appendChild(hvEl('div', 'hv-result-row', bits.join(' \u00b7 ')));
     el.textContent = '';
@@ -32061,6 +32145,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     // your games that reach this position or its pawn structure (Game History's Positions)
     if(S.std) add('Find games with this position', ()=> ghpFrom(node.fen, S.flipped), 'hv-pop-findpos');
+    // Play it out: this position against Stockfish (not while one is being played)
+    if(S.std && !pxPlaying() && !hvTerminal(node) && !(hrJob && hrJob.S===S)) add('Play it out from here', ()=> pxFromBoard(node), 'hv-pop-px');
     if(!node.main){
       if(typeof nbInsertLine==='function' && !hvNotesOff()) add('Add this line to notes', ()=>{ try{ nbInsertLine(root); }catch(e){} }, 'hv-pop-notes');
       if(!root.parent.main && root.parent.children[0]!==root) add('Promote this line', ()=> hvPromote(root), 'hv-pop-promote');
@@ -32094,7 +32180,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // one from this game (gpNewDialog: its name, this game, the position on the board if you like) ----
   function hvGroupsMenu(btn){
     const S = HV_STATE;
-    if(!S || S.game._puzzle) return;
+    if(!S || S.game._puzzle || S.game._practice) return;
     gpMenu(btn, S.game, hvGroupFrom);
   }
   // A game's groups, from the board's Groups button or a Game History row's: a tick beside the
@@ -32252,9 +32338,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   const hvMqPhone = window.matchMedia ? matchMedia('(max-width:899.98px)') : { matches:false };
   function hvNotesPinned(){ return !!hvMqPinned.matches; }
-  // A puzzle on the board (pzaOpen) has no Notes: its id isn't a game's.
-  let hvTabAway = null;      // 'notes' while a puzzle stood in for it: hvOpen gives it back to the next game
-  function hvNotesOff(){ return !!(HV_STATE && HV_STATE.game._puzzle) || !hvPrefs.cards.notes; }      // a puzzle, or Notes turned off in Settings
+  // A puzzle on the board (pzaOpen) or a position played out (px*) has no Notes: its id isn't a game's.
+  let hvTabAway = null;      // the tab a puzzle or a played-out position stood in for: hvOpen gives it back to the next game
+  function hvNotesOff(){ return !!(HV_STATE && (HV_STATE.game._puzzle || HV_STATE.game._practice)) || !hvPrefs.cards.notes; }      // a puzzle, played out, or Notes off in Settings
   function hvVisiblePanes(){
     if(!HV_STATE || !hvViewActive()) return [];
     const v = hvPrefs.cards.tabs ? [hvTab] : [];          // the tabs card turned off: none of its panes is on screen (the explorer asks nothing)
@@ -32265,9 +32351,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvPaneShown(name){ return hvVisiblePanes().indexOf(name)>=0; }
   function hvSetTab(name, opts){
     if(HV_TABS.indexOf(name)<0) name = 'moves';
+    const px = !!(HV_STATE && HV_STATE.game._practice);
+    if(px && !pxTabOk(name)) name = 'moves';
     if(name==='notes' && hvNotesOff() && !(opts && opts.save)) hvTabAway = 'notes';
     if(name==='notes' && (hvNotesPinned() || hvNotesOff())) name = 'moves';
-    if(opts && opts.save) hvTabAway = null;      // a tab picked by hand is the one to keep
+    if(opts && opts.save && !px) hvTabAway = null;      // a tab picked by hand is the one to keep
     const before = hvVisiblePanes();
     hvTab = name;
     HV_TABS.forEach(t=>{
@@ -32278,7 +32366,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       tab.classList.toggle('active', on);
       pane.classList.toggle('active', on);
     });
-    if(opts && opts.save){ hvPrefs.tab = name; hvSavePrefs(); }
+    if(opts && opts.save && !px){ hvPrefs.tab = name; hvSavePrefs(); }
     if(opts && opts.silent) return;
     if(opts && opts.focus) try{ document.getElementById('hv-tab-'+name).focus({ preventScroll:true }); }catch(e){}
     if(name==='moves') requestAnimationFrame(hvKeepInView);
@@ -32294,7 +32382,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const t = e.target.closest('.hv-tab');
       if(!t || (e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Home' && e.key!=='End')) return;
       e.preventDefault(); e.stopPropagation();
-      const vis = HV_TABS.filter(x=> !(x==='notes' && (hvNotesPinned() || hvNotesOff())));
+      const vis = HV_TABS.filter(x=> !(x==='notes' && (hvNotesPinned() || hvNotesOff())) && !(HV_STATE && HV_STATE.game._practice && !pxTabOk(x)));
       let i = vis.indexOf(t.id.slice(7));
       if(e.key==='ArrowLeft') i = (i-1+vis.length) % vis.length;
       else if(e.key==='ArrowRight') i = (i+1) % vis.length;
@@ -32318,7 +32406,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // while the review is open and needed, terminated on leaving.
   const hve = {
     state:'off', multiPV:3, worker:null, ready:null, currentFen:null, pendingFen:null, pendingDepth:null,
-    searching:false, owner:'live', loadStart:0,
+    searching:false, owner:'live', loadStart:0, kind:'', limited:false, _pxCb:null, _thinkSeq:0,
     _ls:new Set(), _ss:new Set(), _done:new Set(), _readyRes:null, _readyWait:[], _bestWait:[], _stopSent:false, _uciok:false, _t1:0, _t2:0, _stopT:0,
     onInfo(cb){ this._ls.add(cb); return ()=> this._ls.delete(cb); },
     onState(cb){ this._ss.add(cb); return ()=> this._ss.delete(cb); },
@@ -32337,6 +32425,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     stop(){
       this.pendingFen = null;
       if(this.searching) hveSendStop();
+    },
+    // Play it out (px*): one move from Stockfish at a set strength (UCI_LimitStrength + UCI_Elo), handed to
+    // cb(fen, uci). Not an analysis: its lines go to no listener, and the next analysis puts full strength back first.
+    async think(fen, o, cb){
+      const w = this.worker, my = ++this._thinkSeq;
+      if(!w) return false;
+      await this.ready;
+      // only the newest request goes on (Take back / Start again pressed while it loads or thinks)
+      if(this.worker!==w || this.state!=='ready' || my!==this._thinkSeq) return false;
+      this.pendingFen = null;
+      for(let k = 0; k < 5 && this.searching && this.worker===w && my===this._thinkSeq; k++){
+        hveSendStop();
+        await new Promise(res=>{ const t = setTimeout(res, 1000); this._bestWait.push(()=>{ clearTimeout(t); res(); }); });
+      }
+      if(this.worker!==w || this.searching || this.state!=='ready' || my!==this._thinkSeq) return false;
+      this.pendingFen = null;
+      this.send('setoption name MultiPV value 1');
+      this.send('setoption name UCI_LimitStrength value true');
+      this.send('setoption name UCI_Elo value '+o.elo);
+      this.limited = true;
+      this.kind = 'px'; this._pxCb = cb;
+      this.currentFen = fen; this.searching = true; this._stopSent = false;
+      this.send('position fen '+fen);
+      this.send('go movetime '+o.ms);
+      return true;
     },
     // A fresh hash, like Repertoire Lab's new Engine for a review.
     async reset(){
@@ -32381,6 +32494,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hveDrop(state){
     clearTimeout(hve._t1); clearTimeout(hve._t2); clearTimeout(hve._stopT);
     hve.worker = null; hve.searching = false; hve.pendingFen = null; hve.pendingDepth = null; hve.currentFen = null;
+    hve.kind = ''; hve._pxCb = null; hve.limited = false;          // a new worker starts at full strength
     const rr = hve._readyRes; hve._readyRes = null; if(rr) rr(false);
     hve._readyWait.splice(0).forEach(f=> f(false));
     hve._bestWait.splice(0).forEach(f=> f());
@@ -32400,6 +32514,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const depth = hve.pendingDepth!=null ? hve.pendingDepth : 24;
     hve.pendingFen = null; hve.pendingDepth = null;
     hve.searching = true; hve._stopSent = false;
+    // after a move played out (think): full strength and three lines again
+    if(hve.limited){ hve.limited = false; hve.send('setoption name UCI_LimitStrength value false'); hve.send('setoption name MultiPV value '+hve.multiPV); }
+    hve.kind = '';
     hve.send('position fen '+hve.currentFen);
     hve.send('go depth '+depth);
   }
@@ -32436,15 +32553,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       return;
     }
     if(line.indexOf('bestmove')===0){
-      const fen = hve.currentFen, natural = !hve._stopSent;
-      hve.searching = false;
+      const fen = hve.currentFen, natural = !hve._stopSent, px = hve.kind==='px' ? hve._pxCb : null;
+      hve.searching = false; hve.kind = ''; hve._pxCb = null;
       clearTimeout(hve._stopT);
       hve._bestWait.splice(0).forEach(f=> f());
-      if(natural && fen) hve._done.forEach(cb=>{ try{ cb(fen); }catch(e){} });
+      if(px){ if(natural) try{ px(fen, line.split(/\s+/)[1] || ''); }catch(e){} }
+      else if(natural && fen) hve._done.forEach(cb=>{ try{ cb(fen); }catch(e){} });
       hveStartNext();
       return;
     }
     if(line.indexOf('info ')===0 && line.indexOf(' pv ')>=0){
+      if(hve.kind==='px') return;          // a move being played out isn't analysis
       const info = hveParse(line);
       if(info) hve._ls.forEach(cb=>{ try{ cb(info); }catch(e){} });
     }
@@ -32491,7 +32610,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const HV_EVAL_CACHE = new Map();   // fen4 -> { depth, lines:[, line1, line2, line3], done }
   function hvFen4(fen){ return String(fen||'').split(' ').slice(0, 4).join(' '); }
   function hvLiveFor(node){ return node ? HV_EVAL_CACHE.get(node.fen4) || null : null; }
-  function hvLiveWanted(){ return !!(HV_STATE && HV_STATE.std && hvPrefs.engine && hvViewActive() && !document.hidden); }
+  function hvLiveWanted(){ return !!(HV_STATE && HV_STATE.std && hvPrefs.engine && hvViewActive() && !document.hidden && !pxPlaying()); }
   function hvLiveAnalyze(){
     if(!hvLiveWanted() || hve.owner==='review') return;
     const n = HV_STATE.cur;
@@ -32539,7 +32658,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   });
   document.addEventListener('visibilitychange', ()=>{
     if(!HV_STATE || !hvViewActive()) return;
-    if(document.hidden){ if(hve.owner==='live' && hve.state==='ready') hve.stop(); }
+    if(document.hidden){ if(hve.owner==='live' && hve.state==='ready' && hve.kind!=='px') hve.stop(); }      // a move being played out still comes
     else hvLiveAnalyze();
   });
   // RL formatScore: +0.35, -1.20, #3, #-2
@@ -32600,6 +32719,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvRenderLines();
     hvRenderEval();
     hvDrawEngArrow();
+    pxRender();
   }
   // Three steady rows, updated in place (never rebuilt): a line keeps being
   // the same button while the engine deepens, so a click on it lands.
@@ -32698,7 +32818,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const bar = document.getElementById('hv-eval'), fill = document.getElementById('hv-eval-w'), lab = document.getElementById('hv-eval-label');
     const n = S.cur, term = hvTerminal(n);
     let score = null;
-    if(!term && S.std){
+    if(!term && S.std && !pxPlaying()){
       const c = hvLiveFor(n), live = hvPrefs.engine && c && c.lines[1] ? c.lines[1] : null, rv = hvReviewScore(n);
       if(rv && (!live || live.depth < 15)) score = rv;
       else if(live) score = live.score;
@@ -32779,7 +32899,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvDrawEngArrow(){
     while(hvEngSvg.firstChild) hvEngSvg.removeChild(hvEngSvg.firstChild);
     const S = HV_STATE;
-    if(!S || hvPrefs.hide) return;
+    if(!S || hvPrefs.hide || pxPlaying()) return;
     const cx = (i)=>{ const c = i%8; return (S.flipped ? 7-c : c) + 0.5; };
     const cy = (i)=>{ const r = Math.floor(i/8); return (S.flipped ? r : 7-r) + 0.5; };
     const shaft = 0.26*0.7;
@@ -32869,6 +32989,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvToggleEngine(){
     if(!HV_STATE || !HV_STATE.std) return;
     hvPrefs.engine = !hvPrefs.engine;
+    if(PX) PX.engWas = undefined;            // switched by hand: that's the setting to keep
     hvSavePrefs();
     if(hvPrefs.engine){
       if(hve.state==='failed') hve.state = 'off';   // switching it on again is the retry
@@ -32927,6 +33048,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ hvNoteFlush(); }catch(e){}      // the previous game's note, if one was open
     hvMenuClose();
     hvRemovePromo();
+    if(PX && game._practice!==PX){
+      pxDrop();       // a position being played out gives way (its engine switch and tab back as they were)
+      if(!game._practice && !hvPrefs.engine && hve.owner!=='review' && hve.state!=='off') hve.quit();     // nothing here wants the engine now
+    }
     // Show the view first: leaving another play view runs its leave hooks
     // (ours included) before this game's state exists.
     if(currentView!=='play-history') showView('play-history');
@@ -32945,7 +33070,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvRenderHead();
     hvNoteLoad(game);
     hvBuildLabels();
-    if(!game._puzzle && hvTabAway){ if(hvTab==='moves') hvTab = hvTabAway; hvTabAway = null; }
+    if(game._practice){ if(hvTab!=='moves'){ game._practice.tabWas = hvTab; hvTab = 'moves'; } }      // pxDrop gives it back
+    else if(!game._puzzle && hvTabAway){ if(hvTab==='moves') hvTab = hvTabAway; hvTabAway = null; }
     hvSetTab(hvTab, { silent:true });
     hvGoNode(tree.root);
     if(opts.at) hvGoRef(opts.at);
@@ -32999,6 +33125,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(e.ctrlKey || e.metaKey || e.altKey) return;
     if(a && a.closest && a.closest('.hv-pop')) return;
     const k = e.key;
+    if(pxPlaying() && (k==='l' || k==='L' || k==='e' || k==='E' || k===' ' || k==='Spacebar' || hvArrowKeyOf(e))){
+      if((k===' ' || k==='Spacebar') && (tag==='BUTTON' || tag==='A')) return;   // Space presses a focused button
+      e.preventDefault(); return;
+    }
     if(k==='ArrowLeft'){ e.preventDefault(); hvStep(-1); }
     else if(k==='ArrowRight'){ e.preventDefault(); hvStep(1); }
     else if(k==='Home' || k==='ArrowUp'){ e.preventDefault(); hvGoNode(HV_STATE.root); }
@@ -33011,7 +33141,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(tag==='BUTTON' || tag==='A') return;   // Space presses a focused button
       e.preventDefault(); hvPlayBest();
     }
-    else if(k==='Escape'){ e.preventDefault(); if(HV_STATE.game._puzzle) pzaReturn(); else showView('history'); }
+    else if(k==='Escape'){ e.preventDefault(); if(HV_STATE.game._practice) pxBack(); else if(HV_STATE.game._puzzle) pzaReturn(); else showView('history'); }
   });
   onLeavePlay(()=>{ try{ hvNoteFlush(); }catch(e){} try{ hvMenuClose(); }catch(e){} });   // before HV_STATE goes (and a menu open on the page goes with it)
   onLeavePlay(()=>{
@@ -33019,6 +33149,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvMenuClose();
     hvRemovePromo();
     hvSelected = null;
+    pxDrop();
     hve.owner = 'live';
     if(hve.state!=='off') hve.quit();
   });
@@ -33292,6 +33423,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const job = { ctrl, S, done:0, total:S.main.length, t0:0, prev: S.review && !S.review.partial ? S.review : null, depth:hrDepth, cancelled:false };
     hrJob = job;
     hrNotice = '';
+    hvRenderControls();            // Play it out steps aside while the review runs
     S.review = { ev:[], b:[], acc:{ white:null, black:null }, at:0, d:job.depth, partial:true };
     hveSetOwner('review');         // live lines pause; the eval bar reads the review's scores
     hveGet();                      // a failed engine is tried again here
@@ -33316,6 +33448,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     offState();
     if(hrJob!==job) return;          // left the review or opened another game meanwhile
     hrJob = null;
+    hvRenderControls();
     if(res && !ctrl.signal.aborted){
       S.review = { ev:res.ev, b:res.b, acc:res.acc, at:Date.now(), d:job.depth, partial:false };
       try{ hrSave(S, S.review); }catch(e){}
@@ -33566,7 +33699,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return bits.length ? bits.join(', ') : 'No mistakes';
   }
   function hpfMine(S){ return String(S.me || (S.flipped ? 'black' : 'white')).charAt(0); }
-  function hpfOn(S){ return !!(hvPrefs.cards.phase && S && S.std && S.game && !S.game._puzzle && S.main.length > 0 && Array.isArray(S.plyStates)); }
+  function hpfOn(S){ return !!(hvPrefs.cards.phase && S && S.std && S.game && !S.game._puzzle && !S.game._practice && S.main.length > 0 && Array.isArray(S.plyStates)); }
   function hpfGraded(S){ const R = S.review; return !!(R && !R.partial && Array.isArray(R.ev) && R.ev.length===S.main.length + 1); }
   // ---- drawing ----
   function hpfSvg(tag, attrs, parent){ const el = hrSvgEl(tag, attrs); parent.appendChild(el); return el; }
@@ -38585,7 +38718,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     clearTimeout(hvMvTimer);
     hvMvLinks = [];
     const S = HV_STATE, play = [], alt = [];
-    if(S && S.std && !S.game._puzzle && hvViewActive()){
+    if(S && S.std && !S.game._puzzle && !S.game._practice && hvViewActive()){
       HV_MV_EDS.forEach(id=>{
         const ed = document.getElementById(id);
         if(!ed || !ed.isConnected) return;
@@ -39741,6 +39874,433 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }, true);
   })();
   phRenderLeft();
+
+  /* ---- Play it out (step 3, 2026-10-31) ----
+     A position you struggled with, played out against Stockfish 16 on this device at the strength you set (the
+     user: "not a memorization... just practical chess from that position"). Nothing reaches Lichess and nothing
+     is kept (the user's choices: no clock, games not kept). It runs on the review board (hv*) as a game from a set
+     position: until it's over and you press Analyze, the engine's lines, arrows and eval stay hidden and its keys do
+     nothing; then the engine turns on there. You play the color you had; Take back and Start again any time. The
+     engine is the review's one worker (hve.think): its strength is UCI_Elo, Stockfish's own scale (1320-3190,
+     anchored to engine rating lists, so not a Lichess rating). Started from the review (any move), prep gaps and
+     the brief's facts, the line card, a group's page and Positions. */
+  var PX = null;               // the position being played out: { fen, color:'w'|'b', title, meta, back, phase:'play'|'over'|'analysis', end, thinking, gen, game }
+  const PX_ELO_KEY = 'wavyChessPrepPlayOutElo';
+  const PX_ELOS = [1320].concat(Array.from({ length:37 }, (_, i)=> 1350 + 50*i), [3190]);     // 1320, 1350, 1400 ... 3150, 3190
+  const PX_MS = 1000, PX_MIN_MS = 450;     // the engine's time a move; a reply never lands quicker than this
+  function pxPlaying(){ return !!(PX && HV_STATE && HV_STATE.game._practice===PX && PX.phase!=='analysis'); }
+  // the board takes no move while the engine thinks or it isn't your turn on the move shown
+  function pxWaits(){ return pxPlaying() && (PX.thinking || HV_STATE.cur.state.turn!==PX.color); }
+  function pxTabOk(t){ return t==='moves' || (t==='explorer' && !pxPlaying()); }
+  function pxElo(){ return PX_ELOS[Number(document.getElementById('hv-px-elo').value)] || 1500; }
+  function pxEloShow(){
+    const r = document.getElementById('hv-px-elo'), v = String(pxElo());
+    document.getElementById('hv-px-elo-v').textContent = v;
+    r.setAttribute('aria-valuetext', v);
+  }
+  (function(){
+    const r = document.getElementById('hv-px-elo');
+    let v = 1500;
+    try{ const n = Number(localStorage.getItem(PX_ELO_KEY)); if(PX_ELOS.indexOf(n) >= 0) v = n; }catch(e){}
+    r.value = String(PX_ELOS.indexOf(v));
+    pxEloShow();
+    // the next move the engine plays is at the new strength
+    r.addEventListener('input', ()=>{
+      pxEloShow();
+      try{ localStorage.setItem(PX_ELO_KEY, String(pxElo())); }catch(e){}
+      const S = HV_STATE, P = S && S.game._practice;
+      if(P){ const sf = S.game.players[P.color==='w' ? 'black' : 'white']; sf.rating = pxElo(); hvRenderStrips(); }
+    });
+  })();
+  // the set position's move number, halfmove clock and FEN on the root (hvMkNode starts every set position at move 1)
+  function pxRoot(root, fen){
+    const f = String(fen).trim().split(/\s+/);
+    root.off = rpPlyOffset(fen);
+    root.half = Math.max(0, parseInt(f[4], 10) || 0);
+    const g = pzStateToFEN(root.state, root.off).split(' ');
+    g[4] = String(root.half);
+    root.fen = g.join(' '); root.fen4 = g.slice(0, 4).join(' ');
+  }
+  // the FEN after the first n of SAN moves toks, from the start or from fen; null when a move doesn't replay
+  function pxAfter(toks, n, fen){
+    if(!Array.isArray(toks) || n > toks.length) return null;
+    let st = fen ? hvStateFromFen(fen) : pzStartPosition(), half = fen ? Math.max(0, parseInt(String(fen).split(/\s+/)[4], 10) || 0) : 0;
+    for(let i = 0; i < n; i++){
+      const mv = rpSanToMove(st, toks[i]);
+      if(!mv) return null;
+      half = (mv.piece==='p' || mv.captured || mv.isEP) ? 0 : half + 1;
+      st = pzApplyMoveRaw(st, mv);
+    }
+    const f = pzStateToFEN(st, (fen ? rpPlyOffset(fen) : 0) + n).split(' ');
+    f[4] = String(half);
+    return f.join(' ');
+  }
+  // why a position can't be played out ('' when it can)
+  function pxCheck(fen){
+    if(!nbValidFen(fen)) return 'A position needs one king of each color.';
+    const st = hvStateFromFen(fen);
+    for(let c = 0; c < 8; c++){ const a = st.board[c], b = st.board[56 + c]; if((a && a.type==='p') || (b && b.type==='p')) return 'A pawn can\u2019t stand on the first or last rank.'; }
+    // each side: 15 pieces besides the king, 8 pawns, and pawns plus promoted extras 8 at most (as Lichess counts standard material)
+    for(const c of ['w', 'b']){
+      const k = { p:0, n:0, b:0, r:0, q:0 };
+      let all = 0;
+      st.board.forEach(x=>{ if(x && x.color===c && x.type!=='k'){ k[x.type]++; all++; } });
+      const extra = Math.max(0, k.q - 1) + Math.max(0, k.r - 2) + Math.max(0, k.b - 2) + Math.max(0, k.n - 2);
+      if(all > 15 || k.p > 8 || k.p + extra > 8) return 'That\u2019s more pieces than a game can have.';
+    }
+    if(pzIsInCheck(st, st.turn==='w' ? 'b' : 'w')) return 'The side that just moved can\u2019t be left in check.';
+    if(!pzAllLegalMoves(st).length) return pzIsInCheck(st, st.turn) ? 'That position is already checkmate.' : 'That position is already stalemate.';
+    if(hvInsufficient(st.board)) return 'Neither side has enough pieces left to win.';
+    return '';
+  }
+  // o = { fen, color:'white'|'black' (yours), title, meta, back }: back is { game, user, at, flip } (a board to reopen)
+  // or { y, fid | sel } (Game History, scrolled and focused as it was). '' once the board is open, else why not.
+  function pxOpen(o){
+    const why = pxCheck(o.fen);
+    if(why) return why;
+    const color = o.color==='black' ? 'b' : 'w';
+    const P = { fen:o.fen, color, title:o.title || 'A position', meta:o.meta || '', back:o.back || {}, phase:'play', end:null, thinking:false, gen:0 };
+    const me = { user:{ name:'You' } }, sf = { user:{ name:'Stockfish 16' }, rating:pxElo() };
+    // no id: nothing (notes, side lines, reviews) is ever kept for it
+    P.game = { id:'', variant:'standard', moves:'', initialFen:o.fen, players: color==='w' ? { white:me, black:sf } : { white:sf, black:me },
+      _me: color==='w' ? 'white' : 'black', _practice:P };
+    const had = document.activeElement;
+    pxDrop();
+    PX = P;
+    hvOpen(P.game, null, { flip: color==='b' });
+    if(!HV_STATE || HV_STATE.game!==P.game){ PX = null; return 'The board couldn\u2019t open.'; }
+    hveBoot();                   // loading while you look at the position (the first time downloads the 40 MB network)
+    if(HV_STATE.root.state.turn!==color) pxThink(); else pxRender();
+    // the button pressed is gone (another screen, or hidden while you play): the focus goes to the card
+    if(!had || had===document.body || !had.isConnected || !had.offsetParent || had.id==='hv-px-here' || (had.closest && had.closest('.hv-pop')))
+      try{ document.getElementById('hv-px-again').focus({ preventScroll:true }); }catch(e){}
+    return '';
+  }
+  function pxDrop(){
+    const P = PX;
+    if(!P) return;
+    P.gen++; P.thinking = false;
+    PX = null;
+    if(hve.kind==='px') hve.stop();
+    if(P.engWas===false) hvPrefs.engine = false;                 // Analyze turned it on for that board only
+    if(P.tabWas && hvTab==='moves') hvTab = P.tabWas;
+    const v = views['play-history'];
+    if(v){ v.classList.remove('is-px', 'is-px-play'); }
+  }
+  function pxBackText(P){ const g = P.back && P.back.game; return g ? (g._puzzle ? 'Back to the puzzle' : 'Back to the game') : 'Game History'; }
+  // back where Play it out was pressed: the game or puzzle on the board at that move, or Game History as it was
+  function pxBack(){
+    const P = HV_STATE && HV_STATE.game._practice, b = (P && P.back) || {};
+    if(b.game){
+      hvOpen(b.game, b.user, { at:b.at, flip:b.flip });
+      const h = document.getElementById('hv-px-here');
+      try{ (h.hidden ? document.getElementById('hv-flip') : h).focus({ preventScroll:true }); }catch(e){}
+      return;
+    }
+    showView('history');
+    const put = ()=>{
+      if(currentView!=='history') return;
+      if(b.y!=null) window.scrollTo({ top:b.y });
+      const el = b.fid ? Array.from(document.querySelectorAll('#view-history [data-fid]')).find(e=> e.dataset.fid===b.fid) : (b.sel ? document.querySelector(b.sel) : null);
+      if(el && !el.hidden) try{ el.focus({ preventScroll:true }); }catch(e){}
+    };
+    put();
+    requestAnimationFrame(put);
+  }
+  function pxModeClass(){
+    const v = views['play-history'], P = HV_STATE ? HV_STATE.game._practice : null;
+    v.classList.toggle('is-px', !!P);
+    v.classList.toggle('is-px-play', !!P && P.phase!=='analysis');
+  }
+  // back to playing (a move, Take back, Start again): the engine and the explorer out of sight again
+  function pxToPlay(P){
+    P.phase = 'play'; P.end = null;
+    if(hve.state==='failed') hveBoot();          // the retry the failure text promises
+    pxModeClass();
+    if(hvTab==='explorer') hvSetTab('moves');
+  }
+  function pxEnd(S){ return S.main.length ? S.main[S.main.length - 1] : S.root; }
+  // everything after node goes: the game ends there
+  function pxCut(node){
+    const S = HV_STATE;
+    const drop = (n)=>{ n.children.forEach(drop); S.nodes.delete(n.id); };
+    node.children.forEach(drop);
+    node.children = [];
+    S.main.length = node.ply;          // main[i] is ply i+1
+  }
+  // a move (object or uci) after `from`, as the game's next move; what followed `from` goes (playing on from an
+  // earlier move of yours takes the rest back)
+  function pxAppend(from, mv){
+    const S = HV_STATE;
+    let move = null;
+    if(typeof mv==='string'){ try{ move = pzApplyUCI(from.state, mv).move; }catch(e){ return null; } }
+    else move = pzAllLegalMoves(from.state).find(m=> m.from===mv.from && m.to===mv.to && (m.promotion || null)===(mv.promotion || null)) || null;
+    if(!move) return null;
+    pxCut(from);
+    const next = pzApplyMoveRaw(from.state, move);
+    const node = hvMkNode(from, move, next, pzMoveToSAN(from.state, move, next), 'm'+(++hvSeq), true);
+    from.children.push(node); S.nodes.set(node.id, node); S.main.push(node);
+    return node;
+  }
+  function pxUserMove(move){
+    const S = HV_STATE, P = PX, from = S.cur;
+    if(P.thinking || from.state.turn!==P.color) return;
+    const n = pxAppend(from, move);
+    if(!n) return;
+    pxToPlay(P);
+    hvGoNode(n, { sound:true });
+    hvRenderHead();
+    pxAfterMove(n);
+  }
+  function pxAfterMove(n){
+    const t = hvTerminal(n);
+    if(t) return pxOver(t);
+    if(n.state.turn!==PX.color) pxThink(); else pxRender();
+  }
+  async function pxThink(){
+    const P = PX, S = HV_STATE;
+    if(!P || !S || S.game._practice!==P || P.phase==='analysis') return;
+    const node = pxEnd(S);
+    if(node.state.turn===P.color || hvTerminal(node)) return;
+    const gen = ++P.gen;
+    P.thinking = true;
+    hveBoot();                   // the first time downloads the 40 MB network (the status says so)
+    pxRender(); hvRenderControls();
+    const t0 = Date.now();
+    const ok = await hve.think(node.fen, { elo:pxElo(), ms:PX_MS }, (fen, uci)=>{
+      if(PX!==P || P.gen!==gen) return;
+      setTimeout(()=> pxReply(P, gen, node, uci), Math.max(0, PX_MIN_MS - (Date.now() - t0)));
+    });
+    if(!ok && PX===P && P.gen===gen){
+      P.thinking = false;
+      // still the move to make and the engine's there (a stop that never landed): asked again, a few times at most
+      if(hve.state==='ready' && (P.retries = (P.retries || 0) + 1) <= 3) setTimeout(()=>{ if(PX===P && P.gen===gen) pxThink(); }, 300);
+      pxRender();
+    }
+  }
+  function pxReply(P, gen, node, uci){
+    const S = HV_STATE;
+    if(PX!==P || P.gen!==gen || !S || S.game._practice!==P) return;
+    P.thinking = false; P.retries = 0;
+    const n = /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(uci || '') && node===pxEnd(S) ? pxAppend(node, uci) : null;
+    if(!n){ pxRender(); return; }
+    if(S.cur===node) hvGoNode(n, { sound:true });
+    else { hvRenderMoveList(); hvRenderControls(); }     // you're looking back at an earlier move: the reply waits at the end
+    pxAfterMove(n);
+  }
+  function pxOver(t){
+    const P = PX;
+    P.phase = 'over'; P.thinking = false;
+    P.end = { kind:t.kind, win: t.kind==='mate' ? (t.score.value > 0 ? 'w' : 'b') : null };
+    pxModeClass(); hvRenderHead(); hvRenderMoveList(); hvRenderControls(); pxRender();
+  }
+  // the engine's move stops coming (Take back, Start again, Analyze)
+  function pxCancel(){
+    const P = PX;
+    if(P){ P.gen++; P.thinking = false; }
+    if(hve.searching) hve.stop();
+  }
+  // your last move and the engine's reply go (or just your move, while it thinks)
+  function pxUndoTo(){
+    const S = HV_STATE, P = PX;
+    if(!S || !P) return null;
+    let n = pxEnd(S).parent;
+    while(n && n.parent && n.state.turn!==P.color) n = n.parent;
+    return n && n.state.turn===P.color ? n : null;
+  }
+  function pxUndo(){
+    const P = PX, n = pxPlaying() ? pxUndoTo() : null;
+    if(!n) return;
+    pxCancel(); pxCut(n);
+    pxToPlay(P);
+    hvGoNode(n); hvRenderHead(); pxRender();
+  }
+  function pxAgain(){
+    const P = PX, S = HV_STATE;
+    if(!P || !S || S.game._practice!==P) return;
+    pxCancel(); pxCut(S.root);
+    pxToPlay(P);
+    hvGoNode(S.root); hvRenderHead();
+    if(S.root.state.turn!==P.color) pxThink(); else pxRender();
+  }
+  // the engine on, at full strength, over the game as it stands (stopped mid-game: as far as it went)
+  function pxAnalyze(){
+    const P = PX;
+    if(!P || P.phase==='analysis') return;
+    if(P.phase==='play') P.end = { kind:'stopped', win:null };
+    pxCancel();
+    P.phase = 'analysis';
+    if(!hvPrefs.engine){ P.engWas = false; hvPrefs.engine = true; }     // for this board only: never saved (hvSavePrefs), put back by pxDrop
+    if(hve.state==='failed') hve.state = 'off';      // as the engine switch's own retry
+    pxModeClass(); hvRenderHead(); hvRenderMoveList(); hvRenderControls();
+    hvLiveAnalyze(); hvRenderEngineNow();
+  }
+  function pxEndText(P, S){
+    const e = P.end;
+    if(e.kind==='stopped'){ const n = pxEnd(S); return n.parent ? 'Stopped after '+hvNodeLabel(n)+'.' : 'Stopped before a move.'; }
+    if(e.kind==='mate') return e.win===P.color ? 'Checkmate. You won.' : 'Checkmate. Stockfish won.';
+    return { stalemate:'Stalemate: a draw.', threefold:'A draw by repetition.', insufficient:'A draw: neither side can mate.', fifty:'A draw by the fifty-move rule.' }[e.kind] || 'Game over.';
+  }
+  // the move list's last row: Play it out, then who won and how
+  function pxResultBits(P){
+    const e = P.end, b = ['Play it out'];
+    if(!e) return b.concat('In progress');
+    if(e.kind==='stopped') return b.concat('Stopped');
+    if(e.kind==='mate') return b.concat(e.win==='w' ? 'White wins' : 'Black wins', 'Checkmate');
+    return b.concat('Draw', { stalemate:'Stalemate', threefold:'Repetition', insufficient:'Insufficient material', fifty:'Fifty-move rule' }[e.kind] || '');
+  }
+  function pxRenderHead(S){
+    const P = S.game._practice;
+    document.getElementById('hv-title').textContent = P.title;
+    const res = document.getElementById('hv-result');
+    res.textContent = '';
+    const e = P.end;
+    if(e && e.kind!=='stopped'){
+      const r = e.kind!=='mate' ? 'draw' : e.win===P.color ? 'win' : 'loss';
+      res.appendChild(hvEl('span', 'history-result-pill history-result-'+r, r==='draw' ? 'DRAW' : (r==='win' ? 'WON' : 'LOST')));
+    }
+    document.getElementById('hv-meta').textContent = P.meta;
+    const op = document.getElementById('hv-opening');
+    op.textContent = ''; op.hidden = true; op.removeAttribute('title');
+    document.getElementById('hv-prep').hidden = true;
+    document.getElementById('hv-pgn').value = pxPgn(S);
+  }
+  // the game as PGN from its set position (Copy PGN)
+  function pxPgn(S){
+    const P = S.game._practice, sf = 'Stockfish 16 ('+pxElo()+')', e = P.end;
+    const res = !e || e.kind==='stopped' ? '*' : e.win==='w' ? '1-0' : e.win==='b' ? '0-1' : '1/2-1/2';
+    const tags = [['Event', 'Play it out'], ['Site', 'Chess Arcade'], ['White', P.color==='w' ? 'You' : sf], ['Black', P.color==='b' ? 'You' : sf],
+      ['Result', res], ['SetUp', '1'], ['FEN', P.fen]];
+    let mt = '';
+    S.main.forEach((n, i)=>{
+      const a = n.ply + (n.off || 0), num = Math.ceil(a/2);
+      mt += a % 2===1 ? (mt ? ' ' : '')+num+'. '+n.san : (i===0 ? num+'... ' : ' ')+n.san;
+    });
+    return tags.map(t=> '['+t[0]+' "'+t[1]+'"]').join('\n')+'\n\n'+(mt ? mt+' ' : '')+res;
+  }
+  // the card: how it stands, the strength, Take back / Start again / Stop and analyze
+  function pxRender(){
+    const S = HV_STATE, P = S ? S.game._practice : null, card = document.getElementById('hv-px');
+    if(card.hidden!==!P) card.hidden = !P;          // (called with every engine redraw: a review's touches nothing)
+    if(!P) return;
+    const st = document.getElementById('hv-px-status');
+    let t = '', wait = false;
+    if(P.end) t = pxEndText(P, S);
+    else if(hve.state==='failed') t = hve.failWhy==='slow' ? 'Stockfish didn\u2019t finish downloading. Check your connection, then press Start again.'
+      : 'Stockfish isn\u2019t available here, so this position can\u2019t be played out.';
+    else if(P.thinking){ wait = true; t = hve.state==='ready' ? 'Stockfish is thinking\u2026' : hvLoadingText(); }
+    else t = pxEnd(S).state.turn===P.color ? 'Your move.' : 'Stockfish to move.';
+    if(st.textContent!==t) st.textContent = t;
+    st.classList.toggle('is-wait', wait);
+    const undo = document.getElementById('hv-px-undo'), stop = document.getElementById('hv-px-stop'), fa = document.activeElement;
+    undo.hidden = P.phase==='analysis';
+    undo.disabled = !pxUndoTo();
+    stop.hidden = P.phase==='analysis';
+    stop.textContent = P.phase==='play' ? 'Stop and analyze' : 'Analyze';
+    // the button pressed went away (Analyze) or can't be pressed again (Take back to the start): the focus moves to Start again
+    if((fa===undo && (undo.hidden || undo.disabled)) || (fa===stop && stop.hidden)) try{ document.getElementById('hv-px-again').focus({ preventScroll:true }); }catch(e){}
+    const pk = S.main.length+'|'+(P.end ? P.end.kind : '')+'|'+pxElo();
+    if(P.pgnKey!==pk){ P.pgnKey = pk; document.getElementById('hv-pgn').value = pxPgn(S); }
+  }
+  document.getElementById('hv-px-undo').addEventListener('click', pxUndo);
+  document.getElementById('hv-px-again').addEventListener('click', pxAgain);
+  document.getElementById('hv-px-stop').addEventListener('click', pxAnalyze);
+  document.getElementById('hv-px-here').addEventListener('click', ()=>{ if(HV_STATE) pxFromBoard(HV_STATE.cur); });
+  // the board's back link goes back the same way while a position is played out (as the puzzle one does)
+  (function(){
+    const back = document.querySelector('#view-play-history .back-link');
+    document.addEventListener('click', (e)=>{
+      if(!back.contains(e.target) || !HV_STATE || !HV_STATE.game._practice) return;
+      e.preventDefault();
+      e.stopPropagation();
+      pxBack();
+    }, true);
+  })();
+
+  // ---- where Play it out starts ----
+  const PX_NO_REPLAY = 'The moves to this position don\u2019t replay here, so it can\u2019t be played out.';
+  // why it couldn't start, beside the button pressed (the next redraw of that list takes it away)
+  function pxNote(btn, text){
+    const box = btn && btn.parentNode;
+    if(!box || !text) return;
+    let n = box.querySelector('.px-note');
+    if(!n){ n = document.createElement('span'); n.className = 'px-note'; n.setAttribute('role', 'alert'); box.appendChild(n); }
+    n.textContent = text;
+  }
+  // the review (any move: under the board, the move menu), a puzzle's analysis, or a played-out game's own analysis
+  function pxFromBoard(node){
+    const S = HV_STATE;
+    if(!S || !node || !S.std) return;
+    const P = S.game._practice, g = S.game;
+    const color = P ? (P.color==='b' ? 'black' : 'white') : (S.me || (S.flipped ? 'black' : 'white'));
+    const back = P ? P.back : { game:g, user:S.username, at:hvNodeRef(node), flip:S.flipped };
+    const d = g.createdAt ? new Date(g.createdAt).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) : '';
+    const meta = P ? P.meta : g._puzzle ? 'From puzzle #'+g._puzzle.id : 'From '+[S.whiteName+' vs '+S.blackName, d].filter(Boolean).join(' \u00b7 ');
+    const why = pxOpen({ fen:node.fen, color, title: node.parent ? 'After '+hvNodeLabel(node) : P ? P.title : 'The starting position', meta, back });
+    if(why) hvSay(why);
+  }
+  // a prep gap or a brief fact's spot: L = { who, atPly, played }, the games that reached it (the first replays it);
+  // your opponents' move: the position after it; yours: the position you played it in
+  function pxFromSpot(L, list, color, where, fid){
+    const e = list && list[0];
+    if(!e || !L || L.atPly==null) return PX_NO_REPLAY;
+    const toks = String(e.g.moves || '').trim().split(/\s+/), n = L.who==='opp' ? L.atPly + 1 : L.atPly;
+    const fen = pxAfter(toks, n, null);
+    if(!fen) return PX_NO_REPLAY;
+    const mv = rpMoveText(L.atPly, L.played);
+    return pxOpen({ fen, color, title: n ? 'After '+rpMoveText(n - 1, toks[n - 1]) : 'The starting position',
+      meta: (L.who==='opp' ? mv+' isn\u2019t in your lines' : 'You played '+mv+' here')+(where ? ' '+where : ''), back:{ y:window.scrollY, fid } });
+  }
+  // the end of one of your Repertoire Lab lines, as its color
+  function pxFromLine(l, back){
+    if(!l || !RP) return PX_NO_REPLAY;
+    const o = RP.ops.get(l.openingId), c = RP.chs.get(l.chapterId);
+    const fen = o ? pxAfter(l.moves, l.moves.length, l.fen || null) : null;
+    if(!fen) return PX_NO_REPLAY;
+    const k = l.moves.length;
+    return pxOpen({ fen, color:o.color, title: k ? 'After '+rpMoveText(l.off + k - 1, l.moves[k - 1]) : 'Where your line starts',
+      meta:'The end of your line: '+(c ? rpChapterPath(o, c)+' \u203a ' : '')+l.short, back });
+  }
+  // a group: its position, else where its moves end; the side it shows at the bottom
+  function pxGroupFen(G){
+    if(G.fen && nbValidFen(G.fen)) return G.fen;
+    const t = G.line ? G.line.split(/\s+/) : [];
+    return t.length ? pxAfter(t, t.length, null) : null;
+  }
+  function pxFromGroup(G){
+    const fen = G ? pxGroupFen(G) : null;
+    if(!fen) return PX_NO_REPLAY;
+    const t = G.line ? G.line.split(/\s+/) : [];
+    return pxOpen({ fen, color:G.flip ? 'black' : 'white', title:G.name, meta: t.length ? 'Your group, after '+rpMoveText(t.length - 1, t[t.length - 1]) : 'Your group\u2019s position',
+      back:{ y:window.scrollY, sel:'#ghg-px' } });
+  }
+  // Positions: the board set up there, you to move (as the color picked under "Your games as", else the side at the bottom)
+  function pxSetupFen(turn){
+    const B = GHP.board, rows = [];
+    for(let r = 7; r >= 0; r--){
+      let row = '', gap = 0;
+      for(let c = 0; c < 8; c++){
+        const p = B[r*8 + c];
+        if(!p){ gap++; continue; }
+        if(gap){ row += gap; gap = 0; }
+        row += p.charAt(0)==='w' ? p.charAt(1) : p.charAt(1).toLowerCase();
+      }
+      rows.push(row + (gap || ''));
+    }
+    const cs = (B[4]==='wK' && B[7]==='wR' ? 'K' : '')+(B[4]==='wK' && B[0]==='wR' ? 'Q' : '')+(B[60]==='bK' && B[63]==='bR' ? 'k' : '')+(B[60]==='bK' && B[56]==='bR' ? 'q' : '');
+    return rows.join('/')+' '+turn+' '+(cs || '-')+' - 0 1';
+  }
+  function pxSetupKey(){ return GHP.board.join(',')+'|'+(GHP.color || (GHP.flip ? 'black' : 'white')); }
+  function pxFromSetup(){
+    const msg = document.getElementById('ghp-px-msg'), color = GHP.color || (GHP.flip ? 'black' : 'white');
+    const why = pxOpen({ fen:pxSetupFen(color.charAt(0)), color, title:'Your position', meta:'Set up in Positions \u00b7 you move first',
+      back:{ y:window.scrollY, sel:'#ghp-px' } });
+    msg.textContent = ''; msg.dataset.k = pxSetupKey();
+    if(why) setTimeout(()=>{ if(msg.dataset.k===pxSetupKey()) msg.textContent = why; }, 60);
+  }
+  document.getElementById('ghp-px').addEventListener('click', pxFromSetup);
+  document.getElementById('ghg-px').addEventListener('click', (e)=>{ const G = GH_UI.group ? gpGet(GH_UI.group) : null; if(G) pxNote(e.currentTarget, pxFromGroup(G)); });
+  document.getElementById('gh-lc-px').addEventListener('click', (e)=>{ const X = GH_LC, b = e.currentTarget; if(X && X.line) pxNote(b, pxFromLine(X.line, { y:window.scrollY, sel:'#gh-lc-px' })); });
 
   annoMountLabels();
   (function wireAnnoHintCollapse(){
