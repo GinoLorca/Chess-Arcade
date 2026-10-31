@@ -30892,6 +30892,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(typeof nbInsertLine==='function' && !hvNotesOff()) add('Add this line to notes', ()=>{ try{ nbInsertLine(root); }catch(e){} }, 'hv-pop-notes');
       if(!root.parent.main && root.parent.children[0]!==root) add('Promote this line', ()=> hvPromote(root), 'hv-pop-promote');
       add(node===root ? 'Delete this line' : 'Delete from this move', ()=> hvDeleteFrom(node), 'hv-pop-delete');
+    } else {
+      // a game move: the side lines that branch here (in its place, or in place of the next move) can be deleted from it too,
+      // each by its first move ("Delete the line 13...Qe8"), so a line is never only reachable through its own row
+      const alts = [...new Set(node.parent.children.concat(node.children).filter(c=> !c.main))];
+      alts.slice(0, 4).forEach(c=> add('Delete the line '+hvNodeLabel(c), ()=> hvDeleteFrom(c), 'hv-pop-delete-alt'));
     }
     pane.appendChild(el);
     const pr = pane.getBoundingClientRect();
