@@ -1603,7 +1603,10 @@
      used rather than a border so it costs no layout, and rather than a
      pseudo-element because ::before/::after are already spoken for by the
      drills' own square markers. */
-  .sq{ outline:1px solid var(--sq-stroke, transparent); outline-offset:-1px; }
+  /* the outline only while Square stroke is on: off, a transparent one was still painted on every square (64 a mini board);
+     :where() keeps this at .sq's own weight, so every other square outline still beats it */
+  .sq{ outline-offset:-1px; }
+  :where(:root[data-sq-stroke]) .sq{ outline:1px solid var(--sq-stroke, transparent); }
   :root[data-sq-stroke="white"]{ --sq-stroke:rgba(255,255,255,.8); }
   :root[data-sq-stroke="black"]{ --sq-stroke:rgba(0,0,0,.7); }
 
@@ -3279,6 +3282,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   .history-row:last-child{ border-bottom:none; }
   .history-thumb{ --tsq:7px; flex:0 0 auto; }
+  .history-thumb.gh-thumb-wait{ background:var(--board-light); }   /* filled as it comes near the screen (ghThumbsFill) */
 
   /* ---- Saved Puzzles: the Save control on a puzzle, the library, the save
      dialog. Built from the app's own tokens and classes (.toggle, .chip,
@@ -10895,12 +10899,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return params;
   }
   function dlSyncHash(slug, withStart){
-    if(!slug){ history.replaceState(null, '', location.pathname+location.search); return; }
+    if(!slug){ if(location.hash){ try{ history.replaceState(null, '', location.pathname+location.search); }catch(e){} } return; }
     const route = DEEP_LINKS[slug];
     const params = route ? (route.getParams ? route.getParams() : dlCurrentParamsForRoute(route)) : new URLSearchParams();
     if(withStart) params.set('start','1');
-    const str = params.toString();
-    history.replaceState(null, '', '#'+slug+(str?'?'+str:''));
+    const str = params.toString(), h = '#'+slug+(str?'?'+str:'');
+    // the same address: nothing to write (Safari allows 100 replaceState calls per 10 s, then throws; a write after a
+    // redraw also forces the browser to restyle the page there and then)
+    if(location.hash===h) return;
+    try{ history.replaceState(null, '', h); }catch(e){}
   }
   // showView('menu') below immediately rewrites the address bar, wiping any
   // incoming #hash before the page-bottom deep-link handler ever runs -- so
@@ -24215,8 +24222,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GH_STATE.shown = GH_WINDOW;
     ghSaveFilters();
     clearTimeout(ghTextTimer);
-    if(now){ ghComboForce = true; try{ ghRender(); } finally{ ghComboForce = false; } ghSyncHash(); }
-    else { ghSyncFilterUI(); ghTextTimer = setTimeout(()=>{ ghRender(); ghSyncHash(); }, 120); }
+    // the link first, then the redraw: written while the page is still clean, the address costs nothing
+    if(now){ ghSyncHash(); ghComboForce = true; ghUserGo = true; try{ ghRender(); } finally{ ghComboForce = false; ghUserGo = false; } }
+    else { ghSyncFilterUI(); ghTextTimer = setTimeout(()=>{ ghSyncHash(); ghRender(); }, ghTextPause()); }     // typed: it still waits for a finger scrolling the list
+  }
+  // the pause after a letter before the list follows: longer on a touch keyboard and after a slow redraw, so it lands
+  // when you stop typing, not between letters
+  function ghTextPause(){
+    const touch = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
+    return Math.min(450, Math.max(touch ? 250 : 150, Math.round(GH_RENDER_MS*3)));
   }
   function ghSetFilters(patch){
     GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, patch));
@@ -24248,14 +24262,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GH_OQ_GROUPS = { li, nl:li.length, cc, nc:cc.length, set };
     return set;
   }
+  var ghOmQ = null, ghOmT = '';
+  const GH_NAME_FOLD = new WeakMap();      // game -> { n, c, nf, cf }: its names folded once
+  function ghNameFold(g){
+    const n = g.opening && g.opening.name || '', c = g.opening && g.opening.cc || '';
+    let f = GH_NAME_FOLD.get(g);
+    if(!f || f.n!==n || f.c!==c){ f = { n, c, nf:ghFold(n).toLowerCase(), cf:c ? ghFold(c).toLowerCase() : '' }; GH_NAME_FOLD.set(g, f); }
+    return f;
+  }
   function ghOpeningMatchesText(g, q){
-    const t = ghFold(q).toLowerCase().trim();
+    if(q!==ghOmQ){ ghOmQ = q; ghOmT = ghFold(q).toLowerCase().trim(); }      // the same text for every game of a redraw
+    const t = ghOmT;
     if(!t) return true;
     // the whole name of a variation group (an Openings row, or typed out in full): that group only, so "Englund Gambit
     // Complex: Soller Gambit" leaves out "... Soller Gambit Deferred" (verify3 V3-1); other text matches anywhere in the name
     if(t.indexOf(':')>0 && ghOqGroups().has(t)) return ghOqKey(g)===t;
-    if(ghFold(g.opening && g.opening.name || '').toLowerCase().indexOf(t) >= 0) return true;
-    if(g.opening && g.opening.cc && ghFold(g.opening.cc).toLowerCase().indexOf(t) >= 0) return true;     // chess.com's own name ("Indian Game")
+    const nf = ghNameFold(g);
+    if(nf.nf.indexOf(t) >= 0) return true;
+    if(nf.cf && nf.cf.indexOf(t) >= 0) return true;     // chess.com's own name ("Indian Game")
     const eco = String(g.opening && g.opening.eco || '').toUpperCase();
     return !!eco && /^[a-e]\d{0,2}$/i.test(t) && eco.indexOf(t.toUpperCase())===0;
   }
@@ -24347,6 +24371,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     m = /^corr-(\d+)$/.exec(k);
     return m ? [1e9 + Number(m[1]), 0] : [2e9, 0];
   }
+  // The option lists only change with the games listed: the same games (the same objects, in the same order) for the
+  // same player reuse the last ones (a real chess.com history has ~2,000 different opponents to sort: ~12 ms at 4x CPU a redraw)
+  var GH_FACETS_MEMO = null;
+  function ghFacetsFor(base){
+    const me = ghMe(), m = GH_FACETS_MEMO;
+    if(m && m.me===me && m.base.length===base.length && m.base.every((g, i)=> g===base[i])) return m.facets;
+    const facets = ghFacets(base);
+    GH_FACETS_MEMO = { base, me, facets };
+    return facets;
+  }
   // Option lists, counted over everything listed (not narrowed by the other filters).
   function ghFacets(list){
     const u = ghMe();
@@ -24423,8 +24457,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // Add to group: a stack of cards; filled when the game is in a group of yours
   const GH_GROUP_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
     +'<rect x="3" y="8" width="14" height="12" rx="2"/><path d="M7 4h12a2 2 0 0 1 2 2v10"/></svg>';
+  // your groups, read once for all the rows of a redraw (each read goes through every note); any note change drops it
+  var GH_GP_NOW = null;
+  function ghGroupsNow(){
+    if(!GH_GP_NOW){ const all = gpAll(); GH_GP_NOW = all; Promise.resolve().then(()=>{ if(GH_GP_NOW===all) GH_GP_NOW = null; }); }
+    return GH_GP_NOW;
+  }
   function ghGroupBtnState(b, g){
-    const names = gpAll().filter(G=> gpIn(G, g)).map(G=> G.name);
+    const names = ghGroupsNow().filter(G=> gpIn(G, g)).map(G=> G.name);
+    const row = b.closest('.history-row');
+    if(row) row._ghMark = '';            // changed in place: the next redraw builds this row again (ghKeepRows)
     b.classList.toggle('in-group', names.length > 0);
     b.title = names.length ? 'In '+names.join(', ')+' \u00b7 add to a group' : 'Add to group';
     b.setAttribute('aria-label', b.title);
@@ -24435,17 +24477,60 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(ghThumbStyle!==PIECE_SVG){ GH_THUMBS.clear(); ghThumbStyle = PIECE_SVG; }   // a new piece set redraws them
     const key = g.id+'|'+(g.lastFen||'');
     let t = GH_THUMBS.get(key);
-    if(t) return t;
+    if(t){ GH_THUMBS.delete(key); GH_THUMBS.set(key, t); return t; }      // the newest at the end
+    if(GH_THUMBS.size >= 200) GH_THUMBS.delete(GH_THUMBS.keys().next().value);
     t = ghEl('div', 'plaque-board history-thumb');
     t.setAttribute('aria-hidden', 'true');
     if(g.lastFen){ try{ ghBuildMiniBoard(t, boardFromFENChecks(g.lastFen).board); }catch(e){} }
     GH_THUMBS.set(key, t);
     return t;
   }
+  // A row's mini board is ~230 elements (Uptown adds a tile per square and a shadow per piece): 50 rows of them made every
+  // filter click and every letter typed restyle 12,000-21,000 elements (2,300 games, 2026-10-30). A row starts with an empty
+  // board of the same size; ghThumbsFill fills the ones on screen (and a screen-half around it) at once, the rest as you scroll.
+  const GH_THUMB_WAIT = new Map();          // empty board -> its game, while it waits
+  let ghThumbIO = null;
+  function ghThumbSlot(g){
+    const t = ghEl('div', 'plaque-board history-thumb gh-thumb-wait');
+    t.setAttribute('aria-hidden', 'true');
+    GH_THUMB_WAIT.set(t, g);
+    return t;
+  }
+  function ghThumbFill(slot){
+    const g = GH_THUMB_WAIT.get(slot);
+    GH_THUMB_WAIT.delete(slot);
+    if(ghThumbIO) ghThumbIO.unobserve(slot);
+    if(!g || !slot.parentNode) return;
+    const t = ghThumb(g);
+    slot.replaceWith(t.isConnected ? t.cloneNode(true) : t);
+  }
+  function ghThumbsFill(root){
+    // boards of rows rebuilt away: let go of them
+    GH_THUMB_WAIT.forEach((g, slot)=>{ if(!slot.isConnected && !(root && root.contains(slot))){ GH_THUMB_WAIT.delete(slot); if(ghThumbIO) ghThumbIO.unobserve(slot); } });
+    if(!root) return;
+    const slots = root.querySelectorAll('.gh-thumb-wait');
+    if(!slots.length) return;
+    if(!ghThumbIO && typeof IntersectionObserver==='function'){
+      // the document as the root: its margin also holds inside a frame (the hosted copy), where the implicit root drops it
+      const cb = (es)=> es.forEach(e=>{ if(e.isIntersecting) ghThumbFill(e.target); });
+      try{ ghThumbIO = new IntersectionObserver(cb, { root:document, rootMargin:'600px 0px' }); }
+      catch(e){ try{ ghThumbIO = new IntersectionObserver(cb, { rootMargin:'600px 0px' }); }catch(e2){ ghThumbIO = null; } }
+    }
+    if(!ghThumbIO){ slots.forEach(ghThumbFill); return; }
+    // all the reads, then all the writes: one layout of the light rows, none per board
+    const vh = window.innerHeight || document.documentElement.clientHeight || 800, near = [];
+    slots.forEach(t=>{
+      const r = t.getBoundingClientRect();
+      if((r.width || r.height) && r.bottom > -600 && r.top < vh + 600) near.push(t);
+      else ghThumbIO.observe(t);          // hidden (another view) or further down: filled when it comes near
+    });
+    near.forEach(ghThumbFill);
+  }
   function ghRow(g, u){
     const P = ghPlayers(g, u), result = ghGameResult(g, u);
     const row = ghEl('div', 'history-row'+(g._summary ? ' gh-summary' : ''));
     row.dataset.gid = g.id;
+    row._ghG = g;
     row.style.cursor = 'pointer';
     if(g.opening && g.opening.name) row.title = String(g.opening.name)
       +(ccIsId(g.id) && g.opening.cc && ghSlug(g.opening.cc)!==ghSlug(g.opening.name) ? ' (chess.com: '+String(g.opening.cc)+')' : '');
@@ -24457,7 +24542,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       e.preventDefault(); e.stopPropagation();
       ghOpenGame(g, ghoOpenOpts(g));
     });
-    row.appendChild(ghThumb(g));
+    row.appendChild(ghThumbSlot(g));
 
     const main = ghEl('div', 'history-main');
     const l1 = ghEl('div', 'history-line1');
@@ -24625,15 +24710,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.addEventListener('touchcancel', (e)=>{ if(!e.touches || !e.touches.length) ghTouching = false; }, { capture:true, passive:true });
   window.addEventListener('scroll', ()=>{ if(performance.now() - ghTouchMoveAt < 3000) ghTouchScrollAt = performance.now(); }, { passive:true });
   function ghScrollBusy(){ return ghTouching || performance.now() - ghTouchScrollAt < 350; }
+  var ghUserGo = false;          // a redraw you asked for (a filter, a tab): a tap comes after the scroll stopped, so it never waits
+  var GH_RENDER_MS = 0, GH_RENDER_SEQ = 0;     // how long the last Games-list redraw took (the typing pause grows with it)
   function ghRender(){
     const listEl = document.getElementById('history-list');
     if(!listEl) return;
     clearTimeout(ghRenderWait); ghRenderWait = 0;
-    if(currentView==='history' && ghScrollBusy()){ ghRenderWait = setTimeout(ghRender, 400); return; }
+    if(currentView==='history' && !ghUserGo && ghScrollBusy()){ ghRenderWait = setTimeout(ghRender, 400); return; }
+    // this redraw shows all the waiting background ones would (a sorting batch, chess.com news): they're dropped
+    if(ghoTimer){ clearTimeout(ghoTimer); ghoTimer = 0; ghoLastAt = Date.now(); }
+    if(ghCcT){ clearTimeout(ghCcT); ghCcT = 0; ghCcAt = Date.now(); }
+    const t0 = performance.now();
     const u = ghMe();
     GH_MARKS = ghMixed();                            // All with chess.com in it: rows say their site
     const base = ghBaseList();
-    GH_STATE.facets = ghFacets(base);
+    GH_STATE.facets = ghFacetsFor(base);
     ghFixOldSlugs(base);
     if(typeof rpEnsure==='function') rpEnsure();     // games waiting to be sorted (a note synced for an older game) get sorted
     ghSyncFilterUI();
@@ -24677,31 +24768,69 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const active = ghActiveCount() > 0;
     const rows = active ? base.filter(g=> ghMatch(g, u, GH_FILTERS)) : base;
     const total = base.length, plural = total===1 ? '' : 's';
-    const cnt = document.getElementById('gh-count');
-    cnt.textContent = !total && !active && ghTabBusy() ? ''
+    const cnt = document.getElementById('gh-count'), nc = document.createElement('div');
+    nc.textContent = !total && !active && ghTabBusy() ? ''
       : (active ? rows.length.toLocaleString('en-US')+' of '+total.toLocaleString('en-US')+' game'+plural : total.toLocaleString('en-US')+' game'+plural);
     const hint = active ? ghCountHintText() : '';
     if(hint){
-      cnt.appendChild(document.createTextNode(' '));
-      cnt.appendChild(ghEl('span', 'gh-count-hint', hint));
+      nc.appendChild(document.createTextNode(' '));
+      nc.appendChild(ghEl('span', 'gh-count-hint', hint));
     }
-    ghoCountHint(cnt);
+    ghoCountHint(nc);
+    if(cnt.innerHTML!==nc.innerHTML){ cnt.textContent = ''; while(nc.firstChild) cnt.appendChild(nc.firstChild); }
     document.getElementById('gh-list-note').hidden = !(GH_STATE.offline && base.some(g=> g._summary));
     // The rows are rebuilt (a page loaded, a sync finished): the keyboard
     // stays on the same row, note line or note button instead of falling to <body>.
     const fa = document.activeElement, fRow = fa && fa!==listEl && listEl.contains(fa) ? fa.closest('.history-row') : null;
     const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-grp-btn') ? '.gh-grp-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : '')));
-    listEl.textContent = '';
-    const frag = document.createDocumentFragment();
-    rows.slice(0, GH_STATE.shown).forEach(g=> frag.appendChild(ghRow(g, u)));
-    listEl.appendChild(frag);
-    if(fRow && gnIdOk(fRow.dataset.gid||'')){
+    const shownG = rows.slice(0, GH_STATE.shown);
+    ghKeepRows(listEl, shownG.map(g=> ghRow(g, u)));
+    ghThumbsFill(listEl);
+    // what the rows' repertoire lines were drawn from: a sorting batch that changes none of them redraws nothing (ghoSoon)
+    GH_DRAWN = { games:shownG, rp:shownG.map(g=> rpReady() ? rpResult(g) : null) };
+    if(fRow && !fa.isConnected && gnIdOk(fRow.dataset.gid||'')){
       const r = listEl.querySelector('.history-row[data-gid="'+CSS.escape(fRow.dataset.gid)+'"]');
       const el = r && ((fSel && r.querySelector(fSel)) || r);
       if(el) el.focus({ preventScroll:true });
     }
     ghRenderFooter(rows.length, active);
     try{ ghOpeningCombo.refresh(); ghOppCombo.refresh(); }catch(e){}   // an open list follows newly loaded games
+    GH_RENDER_MS = performance.now() - t0;
+    // through the paint, for the latest redraw only, and only on screen (a hidden tab holds the frame back: that wait isn't the redraw's)
+    const seq = ++GH_RENDER_SEQ;
+    if(!document.hidden) try{ requestAnimationFrame(()=> setTimeout(()=>{ if(seq===GH_RENDER_SEQ && !document.hidden) GH_RENDER_MS = Math.max(GH_RENDER_MS, Math.min(1000, performance.now() - t0)); }, 0)); }catch(e){}
+  }
+  var GH_DRAWN = null;
+  // the Games list is on screen and a sorting batch gave none of its rows a new line (no repertoire filter, sorting goes on):
+  // nothing to redraw. The batch that ends the sorting always redraws.
+  function ghRpBatchIdle(){
+    if(currentView!=='history' || ghoOn() || ghgOn() || GH_UI.view==='positions' || GH_FILTERS.rep || !RP_JOB || !GH_DRAWN) return false;
+    const L = document.getElementById('history-list');
+    if(!L || L.hidden) return false;
+    return GH_DRAWN.games.every((g, i)=> rpResult(g)===GH_DRAWN.rp[i]);
+  }
+  // The rows a redraw wants, put in the list keeping every row already there that shows the same thing for the same game
+  // (and the same board): a redraw from a sync, the repertoire sorting or chess.com's check that changed nothing touches
+  // nothing, and a narrower filter only takes rows out, so the page restyles only what's new (2,300 games, 2026-10-30).
+  // A row's mark is what it shows (its markup, the waiting board's game position) and the piece set its board was drawn with.
+  function ghRowMark(r){
+    const g = GH_THUMB_WAIT.get(r.querySelector('.gh-thumb-wait'));
+    return r.outerHTML+'|'+(g ? g.lastFen || '' : '');
+  }
+  var GH_ROWS_PS = null;            // the piece set the list's rows were drawn with (a board filled since may have reset ghThumbStyle)
+  function ghKeepRows(listEl, want){
+    const same = GH_ROWS_PS===PIECE_SVG;                  // a new piece set: every row and board is drawn again
+    GH_ROWS_PS = PIECE_SVG;
+    want.forEach(r=>{ r._ghMark = ghRowMark(r); });
+    const ids = new Set(want.map(r=> r.dataset.gid));
+    let p = listEl.firstChild;
+    want.forEach(r=>{
+      while(p && !(p._ghMark && ids.has(p.dataset.gid))){ const nx = p.nextSibling; p.remove(); p = nx; }    // rows no longer wanted
+      if(same && p && p.dataset.gid===r.dataset.gid && p._ghMark===r._ghMark && p._ghG===r._ghG){ p = p.nextSibling; return; }
+      listEl.insertBefore(r, p);
+      if(p && p.dataset.gid===r.dataset.gid){ const nx = p.nextSibling; p.remove(); p = nx; }                 // that game's row, changed
+    });
+    while(p){ const nx = p.nextSibling; p.remove(); p = nx; }
   }
   function ghFilling(){
     return !!getLichessToken() && !GH_STATE.error && !GH_STATE.exhausted && !GH_STATE.capped
@@ -24923,10 +25052,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const input = wrap.querySelector('input'), list = wrap.querySelector('[role="listbox"]'), clear = wrap.querySelector('.gh-combo-clear');
     let opts = [], act = -1, open = false;
     const base = list.id+'-o';
+    let drawn = null;
     function render(){
-      list.textContent = '';
       opts = getOptions(wrap.dataset.picked ? '' : input.value);
       if(act >= opts.length) act = opts.length - 1;
+      // the same options, the same one highlighted: nothing to build again (a redraw of the games under an open list)
+      const sig = act+'\n'+opts.map(o=> o.value+'\t'+o.label+'\t'+(o.sub || '')+'\t'+(o.count==null ? '' : o.count)).join('\n');
+      if(sig===drawn && list.firstChild) return;
+      drawn = sig;
+      list.textContent = '';
       opts.forEach((o, i)=>{
         const d = ghEl('div', 'gh-opt');
         d.id = base+i;
@@ -24999,7 +25133,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.getElementById('gh-clear').addEventListener('click', ghClearFilters);
   document.getElementById('gh-filter-toggle').addEventListener('click', ()=>{ GH_UI.open = !GH_UI.open; ghSyncFilterUI(); });
   document.getElementById('gh-more-toggle').addEventListener('click', ()=>{ GH_UI.more = !GH_UI.more; ghSaveFilters(); ghSyncFilterUI(); });
-  document.getElementById('gh-show-more').addEventListener('click', ()=>{ GH_STATE.shown += GH_WINDOW; ghRender(); });
+  document.getElementById('gh-show-more').addEventListener('click', ()=>{ GH_STATE.shown += GH_WINDOW; ghUserGo = true; try{ ghRender(); } finally{ ghUserGo = false; } });
   document.getElementById('history-load-more').addEventListener('click', ghLoadMoreClick);
 
   /* ---- Repertoire Lab: your repertoire, read only ----
@@ -25716,6 +25850,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function rpQueue(){
     if(!RP) return;
     if(RP_JOB && RP_JOB.R===RP){ RP_JOB.more = true; return; }
+    // every game already sorted: no job (its end would redraw Game History for nothing)
+    if(RP.built){ const p = rpProgress(); if(p.done===p.total) return; }
     const R = RP, job = RP_JOB = { R, more:true, list:[], i:0 };
     rpBuild().then(ok=>{
       if(!ok || RP!==R){ if(RP_JOB===job) RP_JOB = null; return; }
@@ -26547,8 +26683,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     GH_UI.view = v;
     ghSaveFilters();
-    ghRender();
     ghSyncHash();
+    ghUserGo = true; try{ ghRender(); } finally{ ghUserGo = false; }      // a tap: drawn now, never held for a scroll
     if(v==='openings'){
       rpQueue();
       if(GHO_Y!=null){ const y = GHO_Y; GHO_Y = null; window.scrollTo({ top:y }); }     // back where you were in the tree
@@ -26682,7 +26818,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // rebuilt when the games or what a row shows (its note, your analysis) change
     const list = document.getElementById('ghg-list');
     const lsig = have.map(g=> g.id+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)).concat(miss).join('\u0001');
-    if(list.dataset.sig===lsig && list.dataset.group===G.id) return;
+    if(list.dataset.sig===lsig && list.dataset.group===G.id){ ghThumbsFill(list); return; }
     list.dataset.sig = lsig; list.dataset.group = G.id;
     // the keyboard stays on the same row or button through a rebuild, as in the Games list
     const fa = document.activeElement, fRow = fa && fa!==list && list.contains(fa) ? fa.closest('.history-row') : null;
@@ -26714,6 +26850,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       frag.appendChild(out(row, id));
     });
     list.appendChild(frag);
+    ghThumbsFill(list);
     if(fRow && gnIdOk(fRow.dataset.gid || '')){
       const r = list.querySelector('.history-row[data-gid="'+CSS.escape(fRow.dataset.gid)+'"]');
       const el = r && ((fSel && r.querySelector(fSel)) || r);
@@ -27037,7 +27174,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const shown = R.list.slice(0, 200);
     const list = document.getElementById('ghp-list');
     const sig = R.q.fen+'|'+R.q.mode+'|'+R.q.color+'|'+R.list.length+'|'+shown.map(({ g, m })=> g.id+':'+m.ply+':'+m.d+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)).join('\u0001');
-    if(list.dataset.sig===sig) return;
+    if(list.dataset.sig===sig){ ghThumbsFill(list); return; }      // the same rows: boards that came on screen meanwhile get filled
     list.dataset.sig = sig;
     // the keyboard stays on the same row or button through a rebuild, as in the Games list
     const fa = document.activeElement, fRow = fa && fa!==list && list.contains(fa) ? fa.closest('.history-row') : null;
@@ -27061,6 +27198,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(el) el.focus({ preventScroll:true });
     }
     if(R.list.length > 200) list.appendChild(ghEl('div', 'ghp-more', 'And '+(R.list.length - 200)+' more: narrow it down (your color, Exact position).'));
+    ghThumbsFill(list);
   }
   // from a game on the board: its position, ready to search
   function ghpFrom(fen, flip){
@@ -27817,12 +27955,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       box.appendChild(mb);
     }
   }
-  function ghoRender(base){
+  function ghoRender(base, reuse){
     const sec = document.getElementById('gho');
     if(!sec) return;
     const t0 = performance.now();
-    if(!base) base = ghBaseList();
-    const model = ghoModel(base);
+    const model = reuse || ghoModel(base || ghBaseList());
     GHO_LAST = model;
     GHO_STATS.renders++;
     const qn = ghoQMark(model);
@@ -27917,22 +28054,27 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var GHO_QAT = 0;              // when the search box last changed
   function ghoSoon(kind){
     if(currentView!=='history') return;
+    if(kind==='batch' && ghRpBatchIdle()) return;
     const now = Date.now();
     if(kind!=='batch'){ clearTimeout(ghoTimer); ghoTimer = setTimeout(()=>{ ghoTimer = 0; ghoLastAt = Date.now(); if(currentView==='history') ghRender(); }, 0); return; }
-    if(ghoTimer) return;
+    // while sorting goes on the Openings view redraws at most once a second (each redraw is the whole model); the batch
+    // that ends the sorting is drawn on the usual 250 ms (a redraw already waiting is brought forward)
+    const gap = ghoOn() && RP_JOB ? 1000 : 250;
+    if(ghoTimer){ if(RP_JOB) return; clearTimeout(ghoTimer); ghoTimer = 0; }
     const fire = ()=>{
       const wait = GHO_QAT + 900 - Date.now();
       if(wait > 0 && ghoOn()){ ghoTimer = setTimeout(fire, wait); return; }
-      ghoTimer = 0; ghoLastAt = Date.now(); if(currentView==='history') ghRender();
+      ghoTimer = 0; ghoLastAt = Date.now();
+      if(currentView==='history' && !ghRpBatchIdle()) ghRender();
     };
-    ghoTimer = setTimeout(fire, Math.max(0, 250 - (now - ghoLastAt)));
+    ghoTimer = setTimeout(fire, Math.max(0, gap - (now - ghoLastAt)));
   }
   rpOnChange(ev=> ghoSoon(ev && ev.kind));
   (function ghoWire(){
     const sel = document.getElementById('gho-sort');
     GHO_SORTS.forEach(([v, t])=> sel.appendChild(new Option(t, v)));
     sel.value = ghoSortKey();
-    sel.addEventListener('change', ()=>{ GH_UI.osort = sel.value; ghSaveFilters(); ghRender(); });
+    sel.addEventListener('change', ()=>{ GH_UI.osort = sel.value; ghSaveFilters(); ghUserGo = true; try{ ghRender(); } finally{ ghUserGo = false; } });
     // the search box: as you type (a short pause first), Escape or the cross to clear it
     const qi = document.getElementById('gho-q'), qx = document.getElementById('gho-q-x');
     let qt = 0;
@@ -27963,17 +28105,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const sp = e.target.closest('.gho-sp[data-key]');
       if(sp){ const n = ghoFind(sp.dataset.key), f = n && ghoNodeFilter(n); if(f) ghoApply(Object.assign({}, f, sp.dataset.gap ? { gap:sp.dataset.gap } : { speed:sp.dataset.speed })); return; }
       const more = e.target.closest('#gho-more');
-      if(more){ GHO_MORE = !GHO_MORE; ghRender(); return; }
+      if(more){ GHO_MORE = !GHO_MORE; ghoRedraw(); return; }
       const b = e.target.closest('.gho-dis, .gho-name[data-fold]');
       if(b){
         const n = ghoFind(b.dataset.key);
-        if(n){ (GHO_QS ? GHO_QTOG : GHO_TOG).set(n.key, !ghoIsOpen(n)); ghRender(); }
+        if(n){ (GHO_QS ? GHO_QTOG : GHO_TOG).set(n.key, !ghoIsOpen(n)); ghoRedraw(); }
         return;
       }
       const nb = e.target.closest('.gho-name');
       if(nb && nb.dataset.key){ const n = ghoFind(nb.dataset.key); if(n) ghoApply(ghoNodeFilter(n)); }
     });
   })();
+  // a tap that changes only what's drawn (a row opened or closed, More): the last model drawn again, its games not read
+  // again (a full redraw is ~140 ms at 4x CPU with 2,300 games); a background redraw still waiting stays waiting
+  function ghoRedraw(){
+    const sec = document.getElementById('gho');
+    if(!GHO_LAST || !sec || sec.hidden || !ghoOn() || currentView!=='history'){ ghRender(); return; }
+    ghoRender(null, GHO_LAST);
+  }
   function ghoFind(key){
     if(!GHO_LAST || !key) return null;
     let hit = null;
@@ -29280,7 +29429,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     // your display name: chess.com's own spelling in your newest game
     const renamed = newest ? ccTakeCanon(newest.e, newest.name) : false;
-    const g = await ccNormList(gen, keep);
+    // the same games as last time (the routine check of the current month): the ones already made, not new copies, so
+    // Game History keeps their rows and boards
+    const prev = CC.months.get(ym);
+    const same = !!prev && !renamed && Array.isArray(prev.g) && prev.c.length===keep.length && JSON.stringify(prev.c)===JSON.stringify(keep);
+    const g = same ? prev.g : await ccNormList(gen, keep);
     if(!g || gen!==CC_GEN) return false;
     const final = now >= ccMonthEnd(ym) + CC_FINAL_MS;
     CC.months.set(ym, { at:now, final, c:keep, g, skip });
@@ -29591,8 +29744,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     GH_UI.site = s;
     GH_STATE.shown = GH_WINDOW;
     ghSaveFilters();
-    ghRender();
     ghSyncHash();
+    ghUserGo = true; try{ ghRender(); } finally{ ghUserGo = false; }
     if(ghoOn()) rpQueue();
   }
   function ghSyncSites(){
@@ -34611,6 +34764,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // what is on screen (the sync line and the editor say so).
   var gnUnsaved = false;
   function gnPersist(){
+    GH_GP_NOW = null;
     let json, src = GN;
     if(gnOtherTabValue!=null){
       // Another tab saved while this one syncs (its copy is merged when the
@@ -34667,6 +34821,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // The one way a note changes on this device. '' (after a trim) is a
   // tombstone. Returns whether the text changed.
   function gnSetNote(gid, text, game){
+    GH_GP_NOW = null;
     if(!gnIdOk(gid)) return false;
     let t = String(text==null ? '' : text).replace(/\r\n?/g, '\n').slice(0, GN_MAX);
     if(nbBlank(t)) t = '';
