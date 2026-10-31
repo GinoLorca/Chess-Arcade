@@ -3303,6 +3303,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .saved-sync[data-state="busy"] .saved-sync-dot{ background:var(--brass); }
   .saved-sync[data-state="error"] .saved-sync-dot, .saved-sync[data-state="scope"] .saved-sync-dot{ background:var(--bad); }
   .saved-sync-text{ flex:1 1 240px; min-width:0; }
+  /* Settings: which line is which (Puzzles: saved puzzles, puzzle history) */
+  .set-sync-sub{ font-size:12.5px; font-weight:600; color:var(--ink); margin:10px 0 4px; }
+  .set-sync-sub:first-of-type{ margin-top:2px; }
   .saved-cols .toggle .saved-count{ opacity:.7; margin-left:5px; font-variant-numeric:tabular-nums; }
   .saved-col-tools{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
   .saved-col-tools .text-input{ flex:1 1 200px; min-width:0; }
@@ -6281,6 +6284,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
     <div class="modal-sep"></div>
 
+    <div class="field" id="pz-sync-field">
+      <div class="field-label">Puzzles</div>
+      <div class="set-sync-sub">Saved puzzles</div>
+      <div class="saved-sync" id="saved-sync" data-state="idle">
+        <span class="saved-sync-dot" aria-hidden="true"></span>
+        <span class="saved-sync-text" id="saved-sync-text">Saved on this device.</span>
+        <button class="btn-link" id="saved-sync-now">Sync now</button>
+      </div>
+      <div class="set-sync-sub">Puzzle history</div>
+      <div class="saved-sync" id="ph-sync" data-state="off" aria-live="polite">
+        <span class="saved-sync-dot" aria-hidden="true"></span>
+        <span class="saved-sync-text" id="ph-sync-text"></span>
+      </div>
+    </div>
+
+    <div class="modal-sep"></div>
+
     <div class="field" id="cc-field">
       <div class="field-label">Chess.com</div>
       <div class="token-status" id="cc-status" role="status" aria-live="polite">Not set</div>
@@ -6635,10 +6655,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <button class="btn btn-ghost" id="saved-ph-btn">History</button>
         </div>
       </div>
-      <div class="saved-sync" id="saved-sync" data-state="idle">
+      <div class="saved-sync" id="saved-warn" data-state="error" role="status" style="display:none;">
         <span class="saved-sync-dot" aria-hidden="true"></span>
-        <span class="saved-sync-text" id="saved-sync-text">Saved on this device.</span>
-        <button class="btn-link" id="saved-sync-now">Sync now</button>
+        <span class="saved-sync-text" id="saved-warn-text"></span>
       </div>
       <div class="field">
         <div class="field-label">Collections</div>
@@ -6675,9 +6694,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="saved-head-actions"><button class="btn btn-ghost" id="ph-saved-btn">Saved puzzles</button></div>
       </div>
       <div class="field-hint" id="ph-notice" role="status" hidden></div>
-      <div class="saved-sync" id="ph-sync" data-state="off" aria-live="polite">
+      <div class="saved-sync" id="ph-warn" data-state="scope" role="status" style="display:none;">
         <span class="saved-sync-dot" aria-hidden="true"></span>
-        <span class="saved-sync-text" id="ph-sync-text"></span>
+        <span class="saved-sync-text" id="ph-warn-text"></span>
       </div>
       <div class="toggle-row" id="ph-show-row" role="group" aria-label="Show">
         <button class="toggle active" data-val="all">All</button>
@@ -33520,6 +33539,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function spNotice(msg){
     const t = document.getElementById('saved-sync-text');
     if(t) t.textContent = msg;
+    spWarn(msg);                            // storage full: on the Saved screen too
     if(views['play-puzzle'] && views['play-puzzle'].classList.contains('active')) pzStatusEl.textContent = msg;
   }
   // After any change: store it, redraw what shows it, and (unless it's only
@@ -34139,6 +34159,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     t.textContent = msg;
     box.dataset.state = st;
     document.getElementById('saved-sync-now').style.display = st==='off' || st==='busy' ? 'none' : '';
+    spWarn(st==='scope' ? msg : '');
+  }
+  // the Saved Puzzles screen says it only when it needs you (the routine line and Sync now are in Settings: Puzzles)
+  function spWarn(msg){
+    const w = document.getElementById('saved-warn'), wt = document.getElementById('saved-warn-text');
+    if(!w || !wt) return;
+    w.style.display = msg ? '' : 'none';
+    if(msg && wt.textContent!==msg) wt.textContent = msg;
   }
   async function spApi(path, opts){
     const token = getLichessToken();
@@ -35407,7 +35435,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const ov = document.getElementById('settings-overlay');
     if(!ov || typeof MutationObserver!=='function') return;
     let was = ov.classList.contains('active');
-    new MutationObserver(()=>{ const on = ov.classList.contains('active'); if(on && !was) gnRenderSync(); was = on; }).observe(ov, { attributes:true, attributeFilter:['class'] });
+    new MutationObserver(()=>{
+      const on = ov.classList.contains('active');
+      if(on && !was){ gnRenderSync(); try{ spRenderSync(); }catch(e){} try{ phRenderSync(); }catch(e){} }
+      was = on;
+    }).observe(ov, { attributes:true, attributeFilter:['class'] });
   })();
 
   /* ---- Rich notes ----
@@ -38084,6 +38116,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const st = !tok || !act || act.token!==tok ? 'off' : act.state;
       box.dataset.state = st;
       t.textContent = st==='error' ? (PH_SYNC_TEXT[act.detail] || PH_SYNC_TEXT.net) : (PH_SYNC_TEXT[st] || PH_SYNC_TEXT.off);
+      // the Puzzle History screen says it only when the token can't read it (the routine line is in Settings: Puzzles)
+      const w = document.getElementById('ph-warn'), wt = document.getElementById('ph-warn-text');
+      if(w && wt){ w.style.display = st==='scope' ? '' : 'none'; if(st==='scope' && wt.textContent!==t.textContent) wt.textContent = t.textContent; }
     }catch(e){}
   }
 
