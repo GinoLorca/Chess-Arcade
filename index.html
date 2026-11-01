@@ -3301,6 +3301,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      now and then a quick change like a cut), never in step, so the light's colour shifts; the badge brightens and dims a
      touch with it. Only opacity, transform and the badge's filter move; still for reduced motion. --lg-a/--lg-b/--lg-o come
      from paintThemeLogo. */
+  /* the glow spills past the screen's edge on phones and tablets: cut it there, so the page never scrolls sideways
+     (clip, not hidden: no scroll box, so the sticky panels still stick) */
+  html, body{ overflow-x:clip; }
   .plaque-logo-wrap{ position:relative; flex:0 0 auto; display:block; width:108px; height:108px; margin:-4px -2px -4px 0; isolation:isolate;   /* 25% smaller (the user, 2026-10-31) */
     --lg-sh:drop-shadow(0 0 7px color-mix(in srgb, var(--lg-a, #29d3ff) 45%, transparent)) drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
   .plaque-logo{ display:block; width:100%; height:100%; filter:var(--lg-sh); animation:plaqueTvScreen 6.7s linear infinite; }
@@ -3866,6 +3869,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-brief-vs{ font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
   .gho-brief-dots{ display:flex; flex-wrap:wrap; gap:6px; }
   .gho-brief-dot{ font:inherit; font-size:12px; line-height:1.2; padding:4px 10px; border:1px solid var(--line); border-radius:999px; background:none; color:var(--ink-soft); cursor:pointer; }
+  /* Work on next (ghw*): under the brief's number, one chapter per color */
+  .gho-work{ display:flex; flex-direction:column; gap:7px; margin-top:2px; padding-top:11px; border-top:1px solid var(--line); }
+  .gho-work[hidden]{ display:none; }
+  .gho-work-k{ margin:0; font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .gho-work-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
+  .gho-work-i{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .gho-work-ctx{ display:flex; align-items:center; gap:6px; font-size:11.5px; line-height:1.3; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .gho-work-t{ font-size:14px; font-weight:700; line-height:1.3; overflow-wrap:anywhere; }
+  .gho-work-d{ font-size:12px; line-height:1.4; color:var(--ink-soft); }
+  .gho-work-ls{ display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:4px; }
   .gho-brief-dot[aria-pressed="true"]{ color:var(--ink); border-color:var(--ink); font-weight:600; }
   .gho-brief-dot:focus-visible, .gho-fact-go:focus-visible, .gho-fact-l:focus-visible, .gho-facts-more:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
   :root[data-skin="bauhaus"] .gho-brief-dot{ border-radius:0; }
@@ -3928,6 +3941,64 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-oj-sub{ grid-column:1 / -1; margin-top:-2px; font-size:12px; line-height:1.35; color:var(--ink-soft); }
   .gho-oj-note{ margin:6px 0 0; font-size:12px; line-height:1.4; color:var(--ink-soft); }
   .gho-c-job .gho-share{ display:block; }
+  /* Openings -> Variations (ghv*): one card, the controls on top, then the ranked list; a row opens its games under it */
+  .gho.is-var > :not(.gho-note):not(.gho-status):not(.ghv):not(.gho-foot){ display:none !important; }
+  .ghv{ display:flex; flex-direction:column; gap:12px; padding:14px 16px 10px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  .ghv[hidden]{ display:none; }
+  :root[data-skin="bauhaus"] .ghv{ border-radius:0; border-width:2px; }
+  .ghv-ctl{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:10px 22px; }
+  .ghv-g{ display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .ghv-k{ font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .ghv-chips{ gap:4px; }
+  .ghv-chips .toggle{ padding:7px 10px; font-size:12.5px; white-space:nowrap; }
+  .ghv-chip-n{ margin-left:6px; font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:500; opacity:.75; font-variant-numeric:tabular-nums; }
+  .ghv-sum{ margin:0; font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
+  .ghv-sum:empty{ display:none; }
+  .ghv-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .ghv-item{ border-top:1px solid var(--line); }
+  .ghv-row{ width:100%; display:grid; grid-template-columns:28px minmax(0,1fr) 64px minmax(90px,170px) 52px; grid-template-areas:"rk nm n bar v" "rk meta meta meta meta";
+    align-items:center; gap:3px 14px; padding:11px 6px 10px 2px; border:0; border-radius:6px; background:none; color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .ghv-row:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; }
+  @media (hover:hover){ .ghv-row:hover .ghv-t{ text-decoration:underline; text-underline-offset:2px; } }
+  .ghv-rk{ grid-area:rk; align-self:start; padding-top:15px; font-family:"JetBrains Mono",monospace; font-size:13px; font-weight:700; color:var(--ink-soft); text-align:right; font-variant-numeric:tabular-nums; }
+  .ghv-nm{ grid-area:nm; display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .ghv-ctx{ display:flex; align-items:center; gap:6px; font-size:11.5px; line-height:1.3; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .ghv-dot{ flex:none; width:9px; height:9px; border-radius:2px; border:1px solid var(--ink-soft); }
+  .ghv-dot.is-w{ background:#f6f4ee; }
+  .ghv-dot.is-b{ background:#1c1c1e; }
+  .ghv-t{ font-size:14.5px; font-weight:700; line-height:1.3; overflow-wrap:anywhere; }
+  .ghv-pre{ font-family:"JetBrains Mono",monospace; font-size:11px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .ghv-n{ grid-area:n; text-align:right; font-size:11px; line-height:1.2; color:var(--ink-soft); white-space:nowrap; }
+  .ghv-n b{ display:block; font-size:14.5px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ghv-bar{ grid-area:bar; display:flex; min-width:0; }
+  .ghv-v{ grid-area:v; text-align:right; font-family:"JetBrains Mono",monospace; font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .ghv-meta{ grid-area:meta; font-family:"JetBrains Mono",monospace; font-size:11px; line-height:1.4; color:var(--ink-soft); }
+  .ghv-item.is-thin .ghv-v{ font-style:italic; font-weight:600; color:var(--ink-soft); }
+  .ghv-item.is-thin .gho-bar{ opacity:.6; }
+  .ghv-item.is-open > .ghv-row{ background:var(--surface-2); }
+  .ghv-lbl{ padding:16px 4px 7px; border-top:1px solid var(--line); font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .ghv-games{ display:flex; flex-direction:column; gap:8px; padding:6px 0 16px 42px; }
+  .ghv-acts{ display:flex; flex-wrap:wrap; gap:6px 18px; }
+  .ghv-act{ font-size:13px; }
+  @media (pointer:coarse){ .ghv-act{ min-height:44px; display:inline-flex; align-items:center; } }
+  .ghv-glist{ margin-top:0; }
+  .ghv-glist .gh-open .gh-open-name, .ghv-glist .gh-open.is-rep .gh-open-name{ display:none; }      /* every game here is in the row's chapter: its ECO and prep depth stay (beats the phone's -webkit-box) */
+  .ghv-more{ align-self:flex-start; padding:7px 14px; font-size:12.5px; }
+  .ghv-note{ margin:2px 0 0; font-size:12px; line-height:1.45; color:var(--ink-soft); }
+  .ghv-note[hidden]{ display:none; }
+  .ghv-empty{ padding:14px 4px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-soft); }
+  @media (max-width:679px){
+    .ghv{ padding:12px 12px 8px; }
+    .ghv-ctl{ gap:10px; }
+    .ghv-g{ flex:1 1 100%; }
+    .ghv-seg .toggle{ flex:1 1 0; }
+    #ghv-rank{ flex-wrap:wrap; }
+    #ghv-rank .toggle{ flex:1 1 40%; }      /* two by two: four words don't fit one row */
+    .ghv-row{ grid-template-columns:22px minmax(0,1fr) auto; grid-template-areas:"rk nm v" "rk bar n" "rk meta meta"; gap:5px 10px; padding:11px 2px 10px 0; }
+    .ghv-rk{ padding-top:14px; }
+    .ghv-n b{ display:inline; font-size:12px; }
+    .ghv-games{ padding-left:0; }
+  }
   .gho-c-job.is-thin .gho-v{ color:var(--ink-soft); font-style:italic; }
   @media (max-width:760px){ .gho-ends-cols{ grid-template-columns:minmax(0,1fr); } }
   @media (pointer:coarse){ .gho-end-b{ min-height:44px; } }
@@ -6745,6 +6816,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" role="tab" id="gh-site-chesscom" class="gh-site-tab" data-site="chesscom" aria-selected="false" tabindex="-1" aria-controls="history-list gho cc-setup">Chess.com <span class="gh-site-n"></span></button>
       </div>
       <div class="gh-sub" id="gh-sub" role="group" aria-label="Games: what to show"><button type="button" class="gh-sub-b is-on" data-val="games" aria-pressed="true">All games</button><button type="button" class="gh-sub-b" data-val="groups" aria-pressed="false">Groups</button><button type="button" class="gh-sub-b" data-val="positions" aria-pressed="false">Positions</button></div>
+      <div class="gh-sub" id="gho-sub" role="group" aria-label="Openings: what to show" hidden><button type="button" class="gh-sub-b is-on" data-val="overview" aria-pressed="true">Overview</button><button type="button" class="gh-sub-b" data-val="variations" aria-pressed="false">Variations</button></div>
       <div class="cc-progress" id="cc-progress" hidden>
         <span class="cc-progress-t" id="cc-progress-t" aria-hidden="true"></span>
         <button type="button" class="btn-link cc-progress-retry" id="cc-progress-retry" hidden>Try again</button>
@@ -7015,6 +7087,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" class="btn btn-ghost" id="gho-connect-btn">Connect Repertoire Lab</button>
       </div>
       <div class="gho-status" id="gho-status" role="status" aria-live="polite" tabindex="-1" hidden></div>
+      <!-- Variations (ghv*): your chapters (or lines) ranked by games, score or the opening's job, for a speed and color; a row opens its games -->
+      <section class="ghv" id="ghv" aria-labelledby="ghv-h" hidden>
+        <h3 class="ph-sr" id="ghv-h">Your variations, ranked</h3>
+        <div class="ghv-ctl">
+          <div class="ghv-g"><span class="ghv-k" id="ghv-rank-k">Rank by</span><div class="toggle-row gh-seg ghv-seg" id="ghv-rank" role="group" aria-labelledby="ghv-rank-k"><button type="button" class="toggle" data-val="played" aria-pressed="false">Most played</button><button type="button" class="toggle" data-val="best" aria-pressed="false">Best</button><button type="button" class="toggle" data-val="worst" aria-pressed="false">Struggling</button><button type="button" class="toggle" data-val="job" aria-pressed="false">Job done</button></div></div>
+          <div class="ghv-g"><span class="ghv-k" id="ghv-sp-k">Speed</span><div class="toggle-row ghv-chips" id="ghv-speed" role="group" aria-labelledby="ghv-sp-k"></div></div>
+          <div class="ghv-g"><span class="ghv-k" id="ghv-col-k">Color</span><div class="toggle-row gh-seg ghv-seg" id="ghv-color" role="group" aria-labelledby="ghv-col-k"><button type="button" class="toggle" data-val="" aria-pressed="false">Both</button><button type="button" class="toggle" data-val="white" aria-pressed="false">White</button><button type="button" class="toggle" data-val="black" aria-pressed="false">Black</button></div></div>
+          <div class="ghv-g"><span class="ghv-k" id="ghv-lvl-k">Show</span><div class="toggle-row gh-seg ghv-seg" id="ghv-lvl" role="group" aria-labelledby="ghv-lvl-k"><button type="button" class="toggle" data-val="c" aria-pressed="false">Chapters</button><button type="button" class="toggle" data-val="l" aria-pressed="false">Lines</button></div></div>
+        </div>
+        <p class="ghv-sum" id="ghv-sum"></p>
+        <ol class="ghv-list" id="ghv-list" role="list"></ol>
+        <p class="ghv-note" id="ghv-note" hidden></p>
+      </section>
       <div class="gho-top" id="gho-top">
         <section class="gho-brief" id="gho-brief" aria-labelledby="gho-brief-k" hidden>
           <div class="gho-brief-head"><span class="gho-brief-k" id="gho-brief-k">Your last 7 days</span><span class="gho-brief-n" id="gho-brief-n"></span></div>
@@ -7025,6 +7110,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
             <div class="gho-brief-vs" id="gho-brief-vs"></div>
           </div>
           <div class="gho-brief-dots" id="gho-brief-dots" role="group" aria-label="Choose a number"></div>
+          <div class="gho-work" id="gho-work" hidden>
+            <h3 class="gho-work-k" id="gho-work-k">Work on next</h3>
+            <ul class="gho-work-list" id="gho-work-list" aria-labelledby="gho-work-k"></ul>
+          </div>
         </section>
         <div class="gho-ins" id="gho-ins" hidden></div>
       </div>
@@ -24776,10 +24865,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','oj','len','date','variant','notes','rep'];
   var EG = new Map(), EG_JOB = null, EG_SIG = '', EG_DONE = false;       // each game's endgame (where it begins, the kinds it went through): egEnsure
   // the repertoire filter (gho*, SPEC B.7): opening / trunk / course / chapter / line, outside, or a spot
-  const GH_REP_RE = /^(?:[ot]\.[A-Za-z0-9_-]{1,64}|[kc]\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|l(?:\.[A-Za-z0-9_-]{1,64}){3}|x\.[wb](?:\.(?:none|[a-z0-9]+(?:-[a-z0-9]+)*))?|s\.[0-9a-f]{8}(?:\.(?:t\.[A-Za-z0-9_-]{1,64}|c\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|x\.[wb]))?)$/;
+  const GH_REP_RE = /^(?:w\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}\.(?:[0-9a-f]{32}|n)\.[0-9a-z]{1,12}|[ot]\.[A-Za-z0-9_-]{1,64}|[kc]\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|l(?:\.[A-Za-z0-9_-]{1,64}){3}|x\.[wb](?:\.(?:none|[a-z0-9]+(?:-[a-z0-9]+)*))?|s\.[0-9a-f]{8}(?:\.(?:t\.[A-Za-z0-9_-]{1,64}|c\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|x\.[wb]))?)$/;
   const GH_SECONDARY = ['rated','gap','end','eg','oj','len','date','opp','variant'];
   let GH_FILTERS = Object.assign({}, GH_F_DEFAULT);
-  const GH_UI = { more:false, open:false, view:'games', osort:'games', site:'all' };   // site: the All | Lichess | Chess.com tab (chesscom SPEC B.1)
+  const GH_UI = { more:false, open:false, view:'games', osort:'games', site:'all', osub:'overview', vrank:'played', vlvl:'c' };   // site: the All | Lichess | Chess.com tab (chesscom SPEC B.1)
   // Typed text: what a link can carry safely (the hash is decoded twice).
   function ghCleanText(s){ return ghFold(s).replace(/[^A-Za-z0-9 _.:'-]/g, '').replace(/\s{2,}/g, ' ').replace(/^\s+/, '').slice(0, 40); }
   function ghValidFilters(f){
@@ -24804,11 +24893,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(d.ui && typeof d.ui.osort==='string' && /^[a-z]{1,8}$/.test(d.ui.osort)) GH_UI.osort = d.ui.osort;
         if(d.ui && /^(all|lichess|chesscom)$/.test(String(d.ui.site))) GH_UI.site = d.ui.site;
         GH_UI.boards = !!(d.ui && d.ui.boards); GH_UI.bmom = d.ui && d.ui.bmom==='b' ? 'b' : 'a';
+        GH_UI.osub = d.ui && d.ui.osub==='variations' ? 'variations' : 'overview';     // Openings: Overview | Variations
+        if(d.ui && /^(played|best|worst|job)$/.test(String(d.ui.vrank))) GH_UI.vrank = d.ui.vrank;
+        GH_UI.vlvl = d.ui && d.ui.vlvl==='l' ? 'l' : 'c';
       }
     }catch(e){}
   })();
   function ghSaveFilters(){
-    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more, view:GH_UI.view, osort:GH_UI.osort, site:GH_UI.site, boards:!!GH_UI.boards, bmom:GH_UI.bmom==='b' ? 'b' : 'a' } })); }catch(e){}
+    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more, view:GH_UI.view, osort:GH_UI.osort, site:GH_UI.site, boards:!!GH_UI.boards, bmom:GH_UI.bmom==='b' ? 'b' : 'a', osub:GH_UI.osub==='variations' ? 'variations' : 'overview', vrank:GH_UI.vrank, vlvl:GH_UI.vlvl==='l' ? 'l' : 'c' } })); }catch(e){}
   }
   function ghIsOn(k){ return k==='oq' ? (!GH_FILTERS.opening && !!GH_FILTERS.oq) : !!GH_FILTERS[k]; }
   function ghActiveCount(){ return GH_PARAM_KEYS.filter(ghIsOn).length; }
@@ -26596,6 +26688,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(t==='l') return r.kind==='chapter' && r.openingId===p[1] && r.chapterId===p[2] && r.lineId===p[3];
     if(t==='x') return !inRep && r.color===(p[1]==='b' ? 'black' : 'white') && (p.length < 3 || ghOpeningSlug(g)===p[2]);
     if(t==='s') return (r.left.who==='you' || r.left.who==='opp') && r.left.spot===p[1] && (p.length < 3 || rpRepMatch(g, p.slice(2).join('.')));
+    if(t==='w') return p.length===5 && ghwMatch(g, r, p);         // Work on next: a chapter + the same pawn structure, since a time
     return false;
   }
 
@@ -27312,7 +27405,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const top = bar.getBoundingClientRect().top;
       if(top < 0 || top > innerHeight*0.6) window.scrollTo({ top:Math.max(0, scrollY + top - 12) });
     }
-    const first = document.querySelector('#history-list .history-row');
+    const first = ghbOn() ? document.querySelector('#ghb .ghb-card, #ghb button') : document.querySelector('#history-list .history-row');     // Boards: the list is hidden
     const chip = document.getElementById('gh-rep-chip');
     try{ (first || (chip && !chip.hidden ? chip : null) || document.getElementById('gh-count')).focus({ preventScroll:true }); }catch(e){}
   }
@@ -27338,6 +27431,248 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(GHO_Y!=null){ const y = GHO_Y; GHO_Y = null; window.scrollTo({ top:y }); }     // back where you were in the tree
     }
   }
+  /* ---- Openings -> Variations (ghv*, 2026-10-31): your chapters (or their lines; signed out, Lichess's openings or
+     their variations) in one ranked list: by games, by score (Best: highest first; Struggling: lowest first) or by how
+     often the opening did its job, for the speed and color you pick. Speed and Color are the Filters' own, so the two
+     always agree, and the Games list a row opens keeps them. Best, Struggling and Job done rank the rows with 5+ games
+     (5+ scored games for Job done); fewer go under them, unnumbered, as small samples. A row opens its games, newest
+     first, with links to the same games in the Games list and as Boards. ---- */
+  var GHV_RANKS = [['played', 'Most played'], ['best', 'Best'], ['worst', 'Struggling'], ['job', 'Job done']];
+  var GHV_OPEN = '';            // the row whose games are open (one at a time; memory only)
+  var GHV_ALL = '';             // that row showing all its games, not the newest GHV_FIRST
+  var GHV_FIRST = 10;
+  var GHV_PS = null;            // the piece set the open row's boards were drawn with
+  function ghvOn(){ return ghoOn() && GH_UI.osub==='variations'; }
+  function ghvRank(){ return GHV_RANKS.some(r=> r[0]===GH_UI.vrank) ? GH_UI.vrank : 'played'; }
+  function ghvLvl(){ return GH_UI.vlvl==='l' ? 'l' : 'c'; }
+  function ghvSetSub(v){
+    v = v==='variations' ? 'variations' : 'overview';
+    if((GH_UI.osub==='variations' ? 'variations' : 'overview')===v) return;
+    GH_UI.osub = v;
+    ghSaveFilters();
+    ghUserGo = true; try{ ghRender(); } finally{ ghUserGo = false; }
+  }
+  // the games at each speed with every other filter on (the chips' counts), for the colors shown; once per model
+  function ghvSpeeds(model){
+    if(model.vsp) return model.vsp;
+    const u = ghMe(), fo = Object.assign({}, GH_FILTERS, { opening:'', oq:'', result:'', rep:'', speed:'' }), c = new Map();
+    let all = 0;
+    ghBaseList().forEach(g=>{ if(!ghMatch(g, u, fo) || !rpCounted(g)) return; all++; c.set(g.speed, (c.get(g.speed) || 0) + 1); });
+    return (model.vsp = { all, c });
+  }
+  // the rows: every played chapter (or line) of the colors shown, ranked; the small samples apart
+  function ghvRows(model){
+    const lvl = ghvLvl(), want = model.rep ? lvl : (lvl==='l' ? 'lv' : 'lf'), k = ghvRank(), rows = [];
+    let unk = 0, idle = 0, out = 0, nov = 0;
+    ['white', 'black'].forEach((color, ci)=>{
+      const sd = model.sides[color];
+      if(sd.hidden) return;
+      if(model.rep) out += sd.list.filter(e=> e.r && e.r.kind!=='chapter').length;     // sorted ones only: the count line says when sorting goes on
+      const walk = (n, up)=>{
+        if(want==='lv' && n.type==='lf') nov += n.m.n - n.kids.reduce((s, x)=> s + x.m.n, 0);     // Lichess's name has no variation part
+        if(n.type===want){
+          if(n.li && n.li.opening==='none'){ unk += n.m.n; return; }
+          if(!n.m.n){ if(n.type==='c' && n.ch.lines.length) idle++; return; }
+          let ctx = '', ord = ci*1e9;
+          if(n.type==='c'){ ctx = n.op.name+(n.ch.section ? ' \u203a '+n.ch.section : ''); ord += (RP.order.get(n.op.id) || 0)*1e6 + n.op.chapters.indexOf(n.ch)*1000; }
+          else if(n.type==='l' && up){ ctx = up.op.name+' \u203a '+up.name; ord += (RP.order.get(up.op.id) || 0)*1e6 + up.op.chapters.indexOf(up.ch)*1000 + n.ord; }
+          else if(n.type==='lv' && up) ctx = up.name;
+          rows.push({ n, color, ctx, ord });
+          return;
+        }
+        n.kids.forEach(x=> walk(x, n.type==='c' || n.type==='lf' ? n : up));
+      };
+      sd.tops.forEach(n=> walk(n, null));
+    });
+    const thin = (m)=> k==='job' ? m.jn < GHO_MIN : k!=='played' && m.n < GHO_MIN;
+    const val = (m)=> k==='best' ? m.score : k==='worst' ? -m.score : k==='job' ? m.job : m.n;
+    const cmp = (a, b)=>{
+      const x = val(a.n.m), y = val(b.n.m);
+      if(x==null || y==null){ if(x!=null) return -1; if(y!=null) return 1; }
+      else if(y!==x) return y - x;
+      return b.n.m.n - a.n.m.n || a.ord - b.ord || a.n.name.localeCompare(b.n.name);
+    };
+    return { lvl, k, ranked:rows.filter(r=> !thin(r.n.m)).sort(cmp), small:rows.filter(r=> thin(r.n.m)).sort(cmp),
+      games:rows.reduce((s, r)=> s + r.n.m.n, 0), unk, idle, out, nov };
+  }
+  function ghvAgo(ts){ const a = ghoAgo(ts); return a==='now' ? 'within the hour' : a+' ago'; }
+  function ghvItem(r, rank, k, open, u){
+    const n = r.n, m = n.m, side = r.color==='white' ? 'White' : 'Black';
+    const li = ghEl('li', 'ghv-item'+(rank ? '' : ' is-thin')+(open ? ' is-open' : ''));
+    li.dataset.key = n.key;
+    const b = ghEl('button', 'ghv-row');
+    b.type = 'button';
+    b.dataset.key = n.key;
+    b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    b.appendChild(ghEl('span', 'ghv-rk', rank ? String(rank) : ''));
+    const nm = ghEl('span', 'ghv-nm'), cx = ghEl('span', 'ghv-ctx'), dot = ghEl('span', 'ghv-dot is-'+(r.color==='white' ? 'w' : 'b'));
+    dot.setAttribute('aria-hidden', 'true');
+    cx.appendChild(dot);
+    cx.appendChild(ghEl('span', '', side+(r.ctx ? ' \u00b7 '+r.ctx : '')));
+    nm.appendChild(cx);
+    nm.appendChild(ghEl('span', 'ghv-t', n.name));
+    if(n.pre) nm.appendChild(ghEl('span', 'ghv-pre', n.pre));
+    b.appendChild(nm);
+    const gn = ghEl('span', 'ghv-n');
+    gn.appendChild(ghEl('b', '', String(m.n)));
+    gn.appendChild(document.createTextNode(m.n===1 ? ' game' : ' games'));
+    b.appendChild(gn);
+    const bar = ghEl('span', 'ghv-bar');
+    bar.appendChild(ghoBar(m));
+    b.appendChild(bar);
+    const job = m.jn ? 'Job done '+ghoPct(m.job)+' of '+m.jn : 'Job done \u2014';
+    b.appendChild(ghEl('span', 'ghv-v', k==='job' ? (m.jn ? ghoPct(m.job) : '\u2014') : ghoPct(m.score)));
+    const meta = k==='job' ? [m.jn ? 'did its job in '+m.jd+' of '+m.jn : 'not scored yet', 'score '+ghoPct(m.score), 'W '+m.W+' \u00b7 D '+m.D+' \u00b7 L '+m.L]
+      : ['W '+m.W+' \u00b7 D '+m.D+' \u00b7 L '+m.L, job];
+    if(m.last) meta.push('last played '+ghvAgo(m.last));
+    b.appendChild(ghEl('span', 'ghv-meta', meta.map(t=> t.replace(/ /g, '\u00a0')).join(' \u00b7 ')));      // breaks only between them
+    b.setAttribute('aria-label', (rank ? rank+'. ' : '')+n.name+' ('+side+(r.ctx ? ', '+r.ctx : '')+'): '+ghoN(m.n, 'game')+', score '+ghoPct(m.score)
+      +', '+(m.jn ? 'job done '+ghoPct(m.job)+' of '+m.jn+' scored' : 'job not scored')+(rank ? '' : ', a small sample')
+      +'. '+m.W+' won, '+m.D+' drawn, '+m.L+' lost'+(m.last ? ', last played '+ghvAgo(m.last) : '')+(n.pre ? '. Moves: '+n.pre : '')+'. '+(open ? 'Hide' : 'Show')+' its games');
+    li.appendChild(b);
+    if(!open) return li;
+    const box = ghEl('div', 'ghv-games'), acts = ghEl('div', 'ghv-acts');
+    [['list', 'Show in Games'], ['boards', 'Show as boards']].forEach(([a, t])=>{
+      const x = ghEl('button', 'btn-link ghv-act', t);
+      x.type = 'button'; x.dataset.act = a; x.dataset.key = n.key;
+      acts.appendChild(x);
+    });
+    box.appendChild(acts);
+    const L = n.list.slice().sort((x, y)=> y.at - x.at), shown = GHV_ALL===n.key ? L : L.slice(0, GHV_FIRST);
+    const gl = ghEl('div', 'history-list ghv-glist');
+    gl.setAttribute('aria-label', 'Games: '+n.name);
+    shown.forEach(e=> gl.appendChild(ghRow(e.g, u)));
+    box.appendChild(gl);
+    if(L.length > shown.length){
+      const mb = ghEl('button', 'btn btn-ghost ghv-more', 'Show all '+ghoN(L.length, 'game'));
+      mb.type = 'button'; mb.dataset.act = 'all'; mb.dataset.key = n.key;
+      box.appendChild(mb);
+    }
+    li.appendChild(box);
+    return li;
+  }
+  function ghvChips(model){
+    const el = document.getElementById('ghv-speed'), cur = GH_FILTERS.speed || '', sp = ghvSpeeds(model);
+    const items = [['', 'All', sp.all]].concat(GHO_SPEEDS.filter(([s])=> sp.c.get(s) || s===cur).map(([s, w])=> [s, w, sp.c.get(s) || 0]));
+    const sig = cur+'|'+items.map(x=> x[0]+':'+x[2]).join(',');
+    if(el.dataset.sig===sig) return;
+    const fa = document.activeElement, fv = fa && el.contains(fa) ? fa.dataset.val : null;
+    el.dataset.sig = sig;
+    el.textContent = '';
+    items.forEach(([s, w, c])=>{
+      const b = ghEl('button', 'toggle'+(s===cur ? ' active' : ''));
+      b.type = 'button';
+      b.dataset.val = s;
+      b.setAttribute('aria-pressed', s===cur ? 'true' : 'false');
+      b.appendChild(document.createTextNode(w));
+      b.appendChild(ghEl('span', 'ghv-chip-n', c.toLocaleString('en-US')));
+      b.setAttribute('aria-label', (s ? w : 'All speeds')+': '+ghoN(c, 'game'));
+      el.appendChild(b);
+    });
+    if(fv!=null){ const b = Array.from(el.children).find(x=> x.dataset.val===fv); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
+  }
+  function ghvRender(model, loading){
+    const list = document.getElementById('ghv-list'), sum = document.getElementById('ghv-sum'), note = document.getElementById('ghv-note');
+    const k = ghvRank(), lvl = ghvLvl(), f = GH_FILTERS;
+    const seg = (id, v)=> document.querySelectorAll('#'+id+' .toggle').forEach(b=>{
+      const a = b.dataset.val===v;
+      b.classList.toggle('active', a);
+      b.setAttribute('aria-pressed', a ? 'true' : 'false');
+    });
+    seg('ghv-rank', k); seg('ghv-color', f.color || ''); seg('ghv-lvl', lvl);
+    const lw = model.rep ? ['Chapters', 'Lines'] : ['Openings', 'Variations'];
+    document.querySelectorAll('#ghv-lvl .toggle').forEach((b, i)=>{ if(b.textContent!==lw[i]) b.textContent = lw[i]; });
+    if(loading){
+      const sp = document.getElementById('ghv-speed');
+      list.textContent = ''; list.dataset.sig = ''; sum.textContent = ''; note.hidden = true; sp.textContent = ''; sp.dataset.sig = '';
+      return;
+    }
+    ghvChips(model);
+    const R = ghvRows(model), u = ghMe(), all = R.ranked.concat(R.small);
+    if(!all.some(r=> r.n.key===GHV_OPEN)) GHV_OPEN = '';
+    const word = model.rep ? (lvl==='l' ? 'line' : 'chapter') : (lvl==='l' ? 'variation' : 'opening');
+    const spw = f.speed ? (GHO_SPEEDS.find(s=> s[0]===f.speed) || ['', ''])[1] : '';
+    const how = { played:'most games first', best:'highest score first', worst:'lowest score first', job:'highest Job done first' }[k];
+    const st = all.length ? ghoN(all.length, word)+' played'+(spw ? ' in '+spw : '')+(f.color ? ' as '+(f.color==='white' ? 'White' : 'Black') : '')
+      +' \u00b7 '+ghoN(R.games, 'game')+' \u00b7 '+how : '';
+    if(sum.textContent!==st) sum.textContent = st;
+    // what isn't in the list, in numbers
+    const nb = [];
+    if(model.rep && R.out) nb.push(R.out===1 ? '1 game isn\u2019t in a chapter: it left your lines before your chapters split, or isn\u2019t in your repertoire (Overview has it).'
+      : ghoN(R.out, 'game')+' aren\u2019t in a chapter: they left your lines before your chapters split, or aren\u2019t in your repertoire (Overview has them).');
+    if(model.rep && lvl==='c' && R.idle) nb.push((R.idle===1 ? '1 of your chapters has' : R.idle+' of your chapters have')+' no games with these filters.');
+    if(!model.rep && R.unk) nb.push(R.unk===1 ? '1 game with no opening name isn\u2019t listed.' : ghoN(R.unk, 'game')+' with no opening name aren\u2019t listed.');
+    if(!model.rep && R.nov) nb.push(R.nov===1 ? '1 game has an opening name but no variation, so it isn\u2019t listed (Openings has it).'
+      : ghoN(R.nov, 'game')+' have an opening name but no variation, so they aren\u2019t listed (Openings has them).');
+    if(k==='job' && all.length && !all.some(r=> r.n.m.jn)) nb.push(ojHint());
+    const nt = nb.join(' ');
+    if(note.textContent!==nt) note.textContent = nt;
+    note.hidden = !nt;
+    const open = all.find(r=> r.n.key===GHV_OPEN);
+    const GS = open ? ghGroupsNow() : [];
+    const gsig = open ? open.n.list.map(e=> e.g.id+':'+gnFirstLine(gnNoteText(e.g.id))+':'+(gnWaiting(e.g.id) ? 1 : 0)+':'+gnAnnSummary(e.g.id)+':'+GS.filter(G=> gpIn(G, e.g)).map(G=> G.name).join(';')).join(',') : '';
+    const rs = (r)=>{ const m = r.n.m; return r.n.key+':'+r.n.name+':'+r.ctx+':'+m.n+':'+m.W+':'+m.D+':'+m.jn+':'+m.jd+':'+(m.last ? ghoAgo(m.last) : ''); };
+    const sig = [k, lvl, model.rep ? 1 : 0, GH_MARKS ? 1 : 0, GHV_OPEN, GHV_ALL===GHV_OPEN ? 1 : 0, R.ranked.map(rs).join(','), R.small.map(rs).join(','), gsig].join('|');
+    if(list.dataset.sig===sig && GHV_PS===PIECE_SVG){ ghThumbsFill(list); return; }
+    // the keyboard stays where it was: the same row, link or game (and the same button on it)
+    const fa = document.activeElement, inL = fa && fa!==list && list.contains(fa);
+    const fRow = inL && fa.classList.contains('ghv-row') ? fa.dataset.key : '';
+    const fAct = inL && fa.dataset.act ? fa.dataset.act : '';
+    const fGame = inL && !fRow && !fAct ? fa.closest('.history-row') : null;
+    const fSel = !fGame || fa===fGame ? '' : ['.gh-note-btn', '.gh-grp-btn', '.gh-note-line'].find(q=> fa.matches(q)) || '';
+    list.dataset.sig = sig;
+    GHV_PS = PIECE_SVG;
+    list.textContent = '';
+    const frag = document.createDocumentFragment();
+    if(!all.length){
+      frag.appendChild(ghEl('li', 'ghv-empty', model.rep ? 'No games in your '+(lvl==='l' ? 'lines' : 'chapters')+' with these filters.'
+        : R.nov ? 'None of these games has a variation name: Openings lists them.' : 'No games with these filters.'));
+    }
+    R.ranked.forEach((r, i)=> frag.appendChild(ghvItem(r, i + 1, k, r.n.key===GHV_OPEN, u)));
+    if(R.small.length){
+      frag.appendChild(ghEl('li', 'ghv-lbl', k==='job' ? 'Fewer than '+GHO_MIN+' scored games' : 'Small samples: fewer than '+GHO_MIN+' games'));
+      R.small.forEach(r=> frag.appendChild(ghvItem(r, 0, k, r.n.key===GHV_OPEN, u)));
+    }
+    list.appendChild(frag);
+    ghThumbsFill(list);
+    let el = null;
+    if(fRow) el = Array.from(list.querySelectorAll('.ghv-row')).find(x=> x.dataset.key===fRow);
+    else if(fAct && GHV_OPEN) el = Array.from(list.querySelectorAll('[data-act]')).find(x=> x.dataset.act===fAct && x.dataset.key===GHV_OPEN)
+      || Array.from(list.querySelectorAll('.ghv-row')).find(x=> x.dataset.key===GHV_OPEN);
+    else if(fGame && fGame.dataset.gid){ const r = list.querySelector('.history-row[data-gid="'+CSS.escape(fGame.dataset.gid)+'"]'); el = r && ((fSel && r.querySelector(fSel)) || r); }
+    if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+  }
+  (function ghvWire(){
+    document.getElementById('gho-sub').addEventListener('click', e=>{ const b = e.target.closest('.gh-sub-b'); if(b) ghvSetSub(b.dataset.val); });
+    const sec = document.getElementById('ghv');
+    sec.addEventListener('click', e=>{
+      const t = e.target.closest('button');
+      if(!t || !sec.contains(t)) return;
+      const grp = t.classList.contains('toggle') ? t.closest('[role="group"]') : null;
+      if(grp){
+        const v = t.dataset.val || '';
+        if(grp.id==='ghv-rank'){ if(ghvRank()!==v){ GH_UI.vrank = v; ghSaveFilters(); ghoRedraw(); } }
+        else if(grp.id==='ghv-lvl'){ if(ghvLvl()!==v){ GH_UI.vlvl = v; ghSaveFilters(); ghoRedraw(); } }
+        else if(grp.id==='ghv-color'){ if((GH_FILTERS.color || '')!==v) ghSetFilters({ color:v }); }
+        else if(grp.id==='ghv-speed'){ if((GH_FILTERS.speed || '')!==v) ghSetFilters({ speed:v }); }
+        return;
+      }
+      const key = t.dataset.key;
+      if(!key) return;
+      if(t.classList.contains('ghv-row')){ GHV_OPEN = GHV_OPEN===key ? '' : key; GHV_ALL = ''; ghoRedraw(); return; }
+      if(t.dataset.act==='all'){
+        // all of them: the keyboard goes on to the first game that wasn't shown
+        GHV_ALL = key; ghoRedraw();
+        const g = document.querySelectorAll('#ghv-list .ghv-item.is-open .ghv-glist .history-row')[GHV_FIRST];
+        if(g) try{ g.focus({ preventScroll:true }); }catch(e2){}
+        return;
+      }
+      const n = ghoFind(key), fl = n && ghoNodeFilter(n);
+      if(!fl || (t.dataset.act!=='list' && t.dataset.act!=='boards')) return;
+      GH_UI.boards = t.dataset.act==='boards';
+      ghoApply(fl);
+    });
+  })();
   /* ---- Groups (gp*): games you gather yourself under a name of yours ("vs 3...c5"). You make
      a group and add games to it, one by one, from a game on the board (its Groups button); a
      group's page has its north star on top (gq-<the group's hex>, a note of its own: the line's
@@ -28249,6 +28584,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(t==='o') return o.name;
     if(t==='t') return o.name+' \u203a before the chapters split';
     if(t==='k'){ const k = (o.courses || []).find(x=> x.id===p[2]); return k ? o.name+' \u203a '+k.name : o.name; }
+    if(t==='w'){ const c = RP.chs.get(p[2]); return c ? rpChapterPath(o, c)+(p[3]==='n' ? '' : ' + the same pawn structure')+', since '+ghFormatDate(parseInt(p[4], 36)) : 'Not in your repertoire any more'; }
     const c = RP.chs.get(p[2]);
     if(!c) return 'Not in your repertoire any more';
     if(t==='c') return rpChapterPath(o, c);
@@ -28271,6 +28607,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       sub.hidden = on;
       sub.querySelectorAll('.gh-sub-b').forEach(b=>{
         const a = !on && b.dataset.val===GH_GSUB;
+        b.classList.toggle('is-on', a);
+        b.setAttribute('aria-pressed', a ? 'true' : 'false');
+      });
+    }
+    // and in the Openings view: Overview | Variations
+    const os = document.getElementById('gho-sub');
+    if(os){
+      os.hidden = !on;
+      const ov = GH_UI.osub==='variations' ? 'variations' : 'overview';
+      os.querySelectorAll('.gh-sub-b').forEach(b=>{
+        const a = on && b.dataset.val===ov;
         b.classList.toggle('is-on', a);
         b.setAttribute('aria-pressed', a ? 'true' : 'false');
       });
@@ -28851,6 +29198,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const site = GH_UI.site, mix = ghMixed(), named = site==='chesscom' || mix;     // chess.com's games are in this tab
     sec.classList.toggle('is-lichess', mode.lichess);
     sec.classList.toggle('is-all', mix);
+    const vOn = ghvOn();          // Variations: the ranked list in place of the overview
+    sec.classList.toggle('is-var', vOn);
+    document.getElementById('ghv').hidden = !vOn;
     // focus stays on the same control across a redraw
     const fa = document.activeElement, inSec = fa && sec.contains(fa);
     const fKey = inSec && fa.dataset ? (fa.dataset.key || '') : '', fCls = inSec ? (fa.classList.contains('gho-dis') ? 'gho-dis' : fa.classList.contains('gho-name') ? 'gho-name' : '') : '';
@@ -28887,18 +29237,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghoStatus(model);
     const ccN = ghCcUp() ? ccGames().length : 0;
     const loading = site==='chesscom' ? !ccN && ghCcBusy() : !GH_STATE.games.length && !(mix && ccN);
-    ghoDrawBrief(loading ? null : model);
-    ghoDrawInsights(loading ? { ins:[] } : model);
-    ghoDrawGaps(loading || !model.rep ? null : model);
-    ghoDrawOj(loading ? null : model);
-    ghoDrawEnds(loading ? null : model);
+    if(vOn){ ghoBriefTimer(false); ghvRender(model, loading); }
+    else {
+      ghoDrawBrief(loading ? null : model);
+      ghoDrawInsights(loading ? { ins:[] } : model);
+      ghoDrawGaps(loading || !model.rep ? null : model);
+      ghoDrawOj(loading ? null : model);
+      ghoDrawEnds(loading ? null : model);
+    }
     const sel = document.getElementById('gho-sort');
     const po = sel.querySelector('option[value="perf"]');
     if(po){ po.disabled = mix; const pt = mix ? 'Performance (pick a site)' : 'Performance'; if(po.textContent!==pt) po.textContent = pt; }
     if(sel.value!==ghoSortKey()) sel.value = ghoSortKey();
     document.querySelector('#gho .gho-tools').hidden = loading || !model.counted;
-    ghoDrawSide(document.getElementById('gho-white'), model.sides.white, mode, loading);
-    ghoDrawSide(document.getElementById('gho-black'), model.sides.black, mode, loading);
+    if(!vOn){
+      ghoDrawSide(document.getElementById('gho-white'), model.sides.white, mode, loading);
+      ghoDrawSide(document.getElementById('gho-black'), model.sides.black, mode, loading);
+    }
     const qi = document.getElementById('gho-q'), qp = model.rep ? 'Search openings and chapters' : 'Search openings';
     if(qi.placeholder!==qp) qi.placeholder = qp;
     ghoQShow(qn);
@@ -28921,7 +29276,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const p = rpProgress();
       if(p.running || p.done < p.total){ cnt.appendChild(document.createTextNode(' ')); cnt.appendChild(ghEl('span', 'gh-count-hint', 'still sorting games by your repertoire')); }
     }
-    if(fFid){
+    if(vOn && !fStat){ /* the Variations view keeps its own focus (ghvRender) */ }
+    else if(fFid){
       const el = Array.from(sec.querySelectorAll('[data-fid]')).find(e=> e.dataset.fid===fFid);
       if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
     } else if(fKey || fIns!=null){
@@ -28991,6 +29347,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     const sec = document.getElementById('gho');
     sec.addEventListener('click', e=>{
+      const wk = e.target.closest('.gho-work-go');
+      if(wk){ const w = GHO_BRIEF.work && GHO_BRIEF.work[Number(wk.dataset.wi)]; if(w){ GH_UI.boards = wk.dataset.act==='boards'; ghoApply({ rep:w.rep }); } return; }
       const card = e.target.closest('.gho-card');
       if(card){ const c = GHO_LAST && GHO_LAST.ins[Number(card.dataset.ins)]; if(c) ghoApply(c.f); return; }
       const dot = e.target.closest('.gho-brief-dot');
@@ -29054,7 +29412,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // prep depth, kept to prep, accuracy and games; unprepared, forgot your line, underperforming, seen a lot lately, the
   // latest game's opening, middlegame drop-off (reviewed games only) and your notes. ----
   var GHO_NOW = 0;                                    // a test's clock (0: now)
-  var GHO_BRIEF = { stats:[], i:0, user:false, facts:[], allFacts:false, timer:0, key:'', mg:null, model:null };
+  var GHO_BRIEF = { stats:[], i:0, user:false, facts:[], allFacts:false, timer:0, key:'', mg:null, model:null, work:[] };
   const GHO_FACTS_N = 4;
   function ghoBriefNow(){ return GHO_NOW || Date.now(); }
   // a ring: a fraction f of the circle in the accent, the rest a track; or arcs (wins, draws, losses)
@@ -29269,6 +29627,122 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     setTimeout(step, 0);
   }
+  // ---- Work on next (2026-10-31): in the brief, one of your chapters to practice for each color. The user: the openings
+  // you keep meeting where you don't get the most out of them, counting similar structures too. Their choices: the last 30
+  // days (a quiet month, under 15 games of that color: your last 40 games of it); ranked by the points you dropped there
+  // (losses and half your draws), so how often and how it went count together, 65% and better left out; a chapter's games
+  // plus your other games of that color whose pawns where the opening ends are within 2 pawns of the chapter's usual
+  // structure (Boards' count); Practice in Repertoire Lab, its games, Boards. Its games are the filter 'w.<opening>.<chapter>.
+  // <its pawns, 32 hex or n>.<since, base 36>', so the Games list and Boards open exactly the games the card counts. ----
+  const GHW_DAYS = 30, GHW_QUIET = 15, GHW_LAST = 40, GHW_OWN = 3, GHW_MIN = 5, GHW_TOP = 65;
+  var GHW_PW = new Map();       // game id -> { fa, pw }: its pawns where the opening ends (EG's checkpoint), or pw null
+  function ghwPawns(g){
+    const id = String(g.id), x = EG.get(id);
+    if(!x || !x.all || !(x.qa >= 0) || !x.fa || !ghIsStd(g) || g.initialFen) return null;
+    const c = GHW_PW.get(id);
+    if(c && c.fa===x.fa) return c.pw;
+    let pw = null;
+    try{ pw = ghbPawns(x.fa); }catch(e){ pw = null; }
+    GHW_PW.set(id, { fa:x.fa, pw });
+    return pw;
+  }
+  function ghwNear(p, sp){ return ghpApart(p[0], p[1], sp[0], sp[1]) + ghpApart(p[2], p[3], sp[2], sp[3]) <= 2; }
+  function ghwHex(sp){ return sp ? sp.map(x=> (x >>> 0).toString(16).padStart(8, '0')).join('') : 'n'; }
+  function ghwUnhex(h){ return /^[0-9a-f]{32}$/.test(h) ? [0, 1, 2, 3].map(i=> parseInt(h.slice(i*8, i*8 + 8), 16) | 0) : null; }
+  // rpRepMatch's 'w' scope: the chapter's games, or (same color, sorted) pawns within 2 of its structure; since the start
+  function ghwMatch(g, r, p){
+    if(!(Number(g.createdAt) >= parseInt(p[4], 36))) return false;
+    if(r.kind==='chapter' && r.openingId===p[1] && r.chapterId===p[2]) return true;
+    const o = RP && RP.ops.get(p[1]), sp = ghwUnhex(p[3]);
+    if(!o || !sp || r.color!==o.color) return false;
+    const pw = ghwPawns(g);
+    return !!pw && ghwNear(pw, sp);
+  }
+  // the games of one color the card looks at: the last 30 days, or (a quiet month) the last 40
+  function ghwWindow(L){
+    const now = ghoBriefNow(), from = now - GHW_DAYS*86400e3;
+    const m = L.filter(e=> e.at >= from && e.at <= now + 6e4);
+    if(m.length >= GHW_QUIET) return { list:m, since:from, days:true };
+    const last = L.filter(e=> e.at <= now + 6e4).sort((a, b)=> b.at - a.at).slice(0, GHW_LAST);
+    return { list:last, since:last.length ? last[last.length - 1].at : from, days:false };
+  }
+  function ghwPick(color, L){
+    const Wn = ghwWindow(L), W = Wn.list;
+    if(W.length < GHW_MIN) return null;
+    const by = new Map();
+    W.forEach(e=>{
+      const r = e.r;
+      if(!r || r.kind!=='chapter') return;
+      const k = r.openingId+'.'+r.chapterId;
+      let c = by.get(k);
+      if(!c){ c = { k, o:RP.ops.get(r.openingId), c:RP.chs.get(r.chapterId), own:[] }; by.set(k, c); }
+      c.own.push(e);
+    });
+    const pws = new Map(W.map(e=> [e, ghwPawns(e.g)]));
+    const out = [];
+    by.forEach(c=>{
+      if(!c.o || !c.c || c.own.length < GHW_OWN) return;
+      // its usual structure: the commonest among its games (ties: the one met most recently)
+      const cnt = new Map(), newest = c.own.slice().sort((a, b)=> b.at - a.at);
+      newest.forEach(e=>{ const p = pws.get(e); if(p){ const k = p.join(','); cnt.set(k, (cnt.get(k) || 0) + 1); } });
+      let key = null, best = 0;
+      newest.forEach(e=>{ const p = pws.get(e); if(!p) return; const k = p.join(','), n = cnt.get(k); if(n > best){ best = n; key = k; } });
+      const sp = key ? key.split(',').map(Number) : null, own = new Set(c.own);
+      const sim = sp ? W.filter(e=> !own.has(e) && e.r && pws.get(e) && ghwNear(pws.get(e), sp)) : [];
+      const all = c.own.concat(sim), m = ghoMetrics(all);
+      if(all.length < GHW_MIN || m.score >= GHW_TOP) return;
+      out.push({ c, sp, sim, all, m, drop:m.L + m.D/2, ord:(RP.order.get(c.o.id) || 0)*1e5 + c.o.chapters.indexOf(c.c) });
+    });
+    out.sort((a, b)=> b.drop - a.drop || b.c.own.length - a.c.own.length || b.all.length - a.all.length || a.ord - b.ord);
+    const w = out[0];
+    if(!w) return null;
+    // Practice opens its line met most in these games
+    const n = new Map();
+    w.c.own.forEach(e=>{ if(e.r.lineId) n.set(e.r.lineId, (n.get(e.r.lineId) || 0) + 1); });
+    const top = Array.from(n.entries()).sort((a, b)=> b[1] - a[1])[0];
+    return Object.assign(w, { color, win:Wn, line: top ? RP.lns.get(top[0]) || null : null,
+      rep:'w.'+w.c.o.id+'.'+w.c.c.id+'.'+ghwHex(w.sp)+'.'+Math.floor(Wn.since).toString(36) });
+  }
+  function ghwDraw(model){
+    const box = document.getElementById('gho-work'), ul = document.getElementById('gho-work-list'), B = GHO_BRIEF;
+    const P = model && model.rep && rpReady() ? ['white', 'black'].map(c=> model.sides[c] && !model.sides[c].hidden ? ghwPick(c, model.sides[c].list || []) : null).filter(Boolean) : [];
+    B.work = P;
+    const sig = P.map(w=> [w.rep, w.c.own.length, w.sim.length, w.m.W, w.m.D, w.m.L, w.line ? w.line.id : ''].join(':')).join('|');
+    box.hidden = !P.length;
+    if(ul.dataset.sig===sig) return;
+    const fa = document.activeElement, ff = fa && ul.contains(fa) && fa.dataset ? fa.dataset.fid || '' : '';
+    ul.dataset.sig = sig;
+    ul.textContent = '';
+    P.forEach((w, i)=>{
+      const side = w.color==='white' ? 'White' : 'Black', li = ghEl('li', 'gho-work-i'), fid = 'work|'+w.color;
+      const cx = ghEl('span', 'gho-work-ctx'), dot = ghEl('span', 'ghv-dot is-'+(w.color==='white' ? 'w' : 'b'));
+      dot.setAttribute('aria-hidden', 'true');
+      cx.appendChild(dot);
+      cx.appendChild(ghEl('span', '', 'As '+side+' \u00b7 '+w.c.o.name+(w.c.c.section ? ' \u203a '+w.c.c.section : '')));
+      li.appendChild(cx);
+      li.appendChild(ghEl('span', 'gho-work-t', (w.c.c.subsection ? w.c.c.subsection+': ' : '')+w.c.c.short));
+      const own = w.c.own.length, ws = w.win.days ? ghoN(own, 'game')+' in '+GHW_DAYS+' days' : own+' of your last '+w.win.list.length+' games as '+side;
+      li.appendChild(ghEl('span', 'gho-work-d', ws+(w.sim.length ? ' (+'+w.sim.length+' with the same structure)' : '')));
+      li.appendChild(ghEl('span', 'gho-work-d', 'dropped '+ghoHalf(w.drop)+' of '+ghoN(w.all.length, 'point')+' \u00b7 score '+ghoPct(w.m.score)));
+      const ls = ghEl('span', 'gho-work-ls');
+      if(w.line){
+        const x = ghEl('a', 'gho-fact-l', 'Practice'), y = document.createElement('a');
+        rlLineLinks(w.line, y, x);
+        x.target = '_blank'; x.rel = 'noopener'; x.dataset.fid = fid+'|practice';
+        x.setAttribute('aria-label', 'Practice '+w.line.name+' in Repertoire Lab');
+        ls.appendChild(x);
+      }
+      [['games', 'Games'], ['boards', 'Boards']].forEach(([a, t])=>{
+        const b = ghEl('button', 'gho-fact-go gho-work-go', t);
+        b.type = 'button'; b.dataset.wi = String(i); b.dataset.act = a; b.dataset.fid = fid+'|'+a;
+        b.setAttribute('aria-label', (a==='games' ? 'Show the games' : 'Show the games as boards')+': '+(w.all.length===1 ? '1 game' : w.all.length+' games')+' as '+side);
+        ls.appendChild(b);
+      });
+      li.appendChild(ls);
+      ul.appendChild(li);
+    });
+    if(ff){ const el = Array.from(ul.querySelectorAll('[data-fid]')).find(e=> e.dataset.fid===ff); if(el) try{ el.focus({ preventScroll:true }); }catch(e){} }
+  }
   function ghoDrawFacts(){
     const B = GHO_BRIEF, ul = document.getElementById('gho-facts'), M = B.model;
     const fa = document.activeElement, ff = fa && ul.contains(fa) && fa.dataset ? fa.dataset.fid || '' : '';     // kept across an async redraw
@@ -29304,7 +29778,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoDrawBrief(model){
     const B = GHO_BRIEF, box = document.getElementById('gho-brief'), top = document.getElementById('gho-top');
     const all = model ? ['white', 'black'].flatMap(c=> model.sides[c] && !model.sides[c].hidden ? model.sides[c].list || [] : []) : [];
-    if(!model || !all.length){ box.hidden = true; top.classList.remove('has-brief'); B.model = null; ghoDrawFacts(); ghoBriefTimer(false); return; }
+    if(!model || !all.length){ box.hidden = true; top.classList.remove('has-brief'); B.model = null; B.work = []; ghoDrawFacts(); ghoBriefTimer(false); return; }
     const Wn = ghoBriefWindow(all), W = Wn.list;
     document.getElementById('gho-brief-k').textContent = Wn.label;
     document.getElementById('gho-facts').setAttribute('aria-label', Wn.week ? 'Your last 7 days, in detail' : Wn.label+', in detail');
@@ -29327,6 +29801,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(fd!=null){ const b = dots.querySelector('.gho-brief-dot[data-i="'+fd+'"]'); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
     ghoBriefMg(W, key);
     ghoDrawFacts();
+    ghwDraw(model);
     ghoBriefTimer(true);
   }
   // ---- prep gaps (step 2, 2026-10-31): the full lists behind "Opponents surprise you", "Biggest gap" and "You leave your
