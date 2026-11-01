@@ -3653,6 +3653,41 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   .gh-list-note{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); }
   .gh-foot-note{ font-size:12.5px; color:var(--ink-soft); text-align:center; }
+  /* Boards (ghb*) */
+  .gh-bv{ margin-left:auto; flex:0 0 auto; }
+  .gh-bv[hidden]{ display:none; }
+  .ghb{ display:flex; flex-direction:column; gap:12px; }
+  .ghb[hidden]{ display:none; }
+  .ghb-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 16px; }
+  .ghb-head .gho-gap-h{ margin:0; }
+  .ghb-sum{ margin:0; font-size:12.5px; line-height:1.45; color:var(--ink-soft); }
+  .ghb-side{ display:flex; flex-direction:column; gap:12px; }
+  .ghb-side > h4{ margin:4px 0 0; font-size:14px; font-weight:800; }
+  .ghb-grp{ border-top:1px solid var(--line); padding-top:12px; display:flex; flex-direction:column; gap:10px; }
+  .ghb-gh{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .ghb-pawns{ width:72px; flex:0 0 auto; }
+  .ghb-gt{ flex:1 1 220px; min-width:0; display:flex; flex-direction:column; gap:5px; }
+  .ghb-gk{ font-size:13.5px; font-weight:700; line-height:1.3; }
+  .ghb-gm{ font-size:12px; line-height:1.35; color:var(--ink-soft); }
+  .ghb-gt .gho-bar{ max-width:260px; }
+  .ghb-acts{ display:flex; flex-wrap:wrap; gap:4px 16px; }
+  .ghb-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(148px, 1fr)); gap:10px; }
+  .ghb-card{ display:flex; flex-direction:column; gap:5px; min-width:0; padding:6px 6px 7px; border:1px solid var(--line); border-left:4px solid var(--ink-soft);
+    border-radius:8px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  .ghb-card.is-win{ border-left-color:var(--good); }
+  .ghb-card.is-loss{ border-left-color:var(--bad); }
+  .ghb-card:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  @media (hover:hover){ .ghb-card:hover{ border-color:var(--ink-soft); } .ghb-card.is-win:hover{ border-left-color:var(--good); } .ghb-card.is-loss:hover{ border-left-color:var(--bad); } }
+  .ghb-bd{ width:100%; }
+  .ghb-bd:empty::before{ content:''; display:block; padding-top:100%; background:var(--surface-2); border-radius:2px; }
+  .ghb-cap{ display:flex; justify-content:space-between; align-items:baseline; gap:6px; font-size:12px; line-height:1.3; }
+  .ghb-cap b{ font-family:"JetBrains Mono",monospace; font-weight:600; white-space:nowrap; }
+  .ghb-opp{ font-size:11.5px; line-height:1.3; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  :root[data-skin="bauhaus"] .ghb-card{ border-radius:0; }
+  .ghb-rw{ font-weight:700; color:var(--ink); }
+  .ghb-sum[hidden]{ display:none; }
+  @media (max-width:520px){ .ghb-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; } .ghb-vs{ display:none; } .ghb-pawns{ width:60px; } }
+  @media (pointer:coarse){ .ghb-acts .btn-link{ min-height:44px; display:inline-flex; align-items:center; } }
   .gh-filters{ display:flex; flex-direction:column; gap:10px; }
   .gh-fbar{ display:flex; align-items:center; gap:8px 14px; flex-wrap:wrap; }
   .gh-filter-toggle{ display:none; align-items:center; gap:7px; padding:8px 14px; font-size:13.5px; }
@@ -3865,6 +3900,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-end-v{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); text-align:right; white-space:nowrap; }
   .gho-end-b.is-thin .gho-end-v{ font-style:italic; }
   .gho-end-b.is-thin .gho-bar{ opacity:.6; }
+  .gho-oj-sub{ grid-column:1 / -1; margin-top:-2px; font-size:12px; line-height:1.35; color:var(--ink-soft); }
+  .gho-oj-note{ margin:6px 0 0; font-size:12px; line-height:1.4; color:var(--ink-soft); }
+  .gho-c-job .gho-share{ display:block; }
+  .gho-c-job.is-thin .gho-v{ color:var(--ink-soft); font-style:italic; }
   @media (max-width:760px){ .gho-ends-cols{ grid-template-columns:minmax(0,1fr); } }
   @media (pointer:coarse){ .gho-end-b{ min-height:44px; } }
   @media (pointer:coarse){ .gho-gap-go, .gho-gap-l, .gho-gap-more{ min-height:44px; } .gho-gap-l{ display:inline-flex; align-items:center; } }
@@ -5115,6 +5154,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @container hpf (max-width:339px){ .hpf-ph-marks{ display:none; } .hpf-ph-marks + .hpf-ph-avg::before{ content:none !important; } }
   .hpf-go{ align-self:flex-start; font-size:12.5px; }
   .hpf-season{ font-size:12px; line-height:1.4; color:var(--ink-soft); }
+  .hpf-src{ font-size:12px; line-height:1.35; color:var(--ink-soft); }
+  .hpf-src[hidden]{ display:none; }
   .hpf-season b{ color:var(--ink); font-weight:700; }
   :root[data-skin="bauhaus"] :is(.hpf-field, .hpf-ph){ border-radius:0; }
   .hpf-bar-top .hpf-now{ min-width:0; }
@@ -6449,6 +6490,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
     <div class="modal-sep"></div>
 
+    <!-- Did the opening do its job? (oj*): Stockfish scores where each game leaves the opening, in the background -->
+    <div class="field" id="oj-field">
+      <div class="field-label" id="oj-label">Opening checks</div>
+      <div class="toggle-row" id="oj-row" role="group" aria-labelledby="oj-label">
+        <button type="button" class="toggle" data-val="on" aria-pressed="false">On</button>
+        <button type="button" class="toggle" data-val="off" aria-pressed="false">Off</button>
+      </div>
+      <div class="bg-status" id="oj-status" aria-live="polite"></div>
+      <div class="field-hint">Stockfish scores the position where each of your games leaves the opening, on this device, while Game History&#8217;s Openings tab is open. Games you reviewed here or had Lichess analyze need no check. The first time takes about an hour on a laptop; after that, seconds a game.</div>
+    </div>
+
+    <div class="modal-sep"></div>
+
     <div class="field">
       <div class="field-label">Sound Effects</div>
       <div class="toggle-row" id="sound-enabled-row">
@@ -6699,6 +6753,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="gh-fbar">
           <button type="button" class="btn btn-ghost gh-filter-toggle" id="gh-filter-toggle" aria-expanded="false" aria-controls="gh-fpanel">Filters<span class="gh-badge" id="gh-filter-badge" hidden></span></button>
           <div class="gh-count" id="gh-count" aria-live="polite"></div>
+          <div class="toggle-row gh-seg gh-bv" id="gh-bv" role="group" aria-label="Show the games as"><button type="button" class="toggle" data-v="list" aria-pressed="true">List</button><button type="button" class="toggle" data-v="boards" aria-pressed="false">Boards</button></div>
           <button type="button" class="toggle gh-chip gh-rep-chip" id="gh-rep-chip" hidden></button>
           <button type="button" class="btn-link gh-clear" id="gh-clear" hidden>Clear filters</button>
         </div>
@@ -6754,6 +6809,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
               <option value="time">Out of time</option>
               <option value="draw">Draw</option>
               <option value="other">Other endings</option>
+            </select>
+            <select class="select-input" id="gh-oj" aria-label="The opening's job">
+              <option value="">Opening&#8217;s job: any</option>
+              <option value="done">Opening did its job</option>
+              <option value="not">Opening didn&#8217;t do its job</option>
+              <option value="lost">Did its job, then lost</option>
+              <option value="open">Over before a middlegame</option>
             </select>
             <select class="select-input" id="gh-eg" aria-label="Endgame">
               <option value="">Endgame: any</option>
@@ -6817,6 +6879,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
     </section>
     <div class="history-list panel gh-list" id="history-list" role="tabpanel" aria-labelledby="gh-site-all"></div>
+    <!-- Boards (ghb*): the listed games as boards at one moment (out of the opening, into the endgame), your side at the
+         bottom, grouped by pawn structure; a board opens the review at that move -->
+    <section class="panel ghb" id="ghb" aria-labelledby="ghb-h" hidden>
+      <div class="ghb-head">
+        <h3 class="gho-gap-h" id="ghb-h">Boards</h3>
+        <div class="toggle-row gh-seg ghb-mom" id="ghb-mom" role="group" aria-label="Which moment">
+          <button type="button" class="toggle" data-m="a" aria-pressed="true">Out of the opening</button>
+          <button type="button" class="toggle" data-m="b" aria-pressed="false">Into the endgame</button>
+        </div>
+      </div>
+      <p class="ghb-sum" id="ghb-sum"></p>
+      <div class="ghb-groups" id="ghb-groups"></div>
+    </section>
     <!-- Groups (gp*): games you gather under names of yours. The index lists them; a group's
          page has its north star (a note of its own) on top of its games. -->
     <section class="ghg" id="ghg" hidden>
@@ -6933,6 +7008,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <section class="gho-gap-col" aria-labelledby="gho-gap-opp-h"><h3 class="gho-gap-h" id="gho-gap-opp-h">Not in your lines</h3><p class="gho-gap-sub">Your opponents&rsquo; moves that your Repertoire Lab lines don&rsquo;t answer</p><ul class="gho-gap-list" id="gho-gap-opp"></ul></section>
         <section class="gho-gap-col" aria-labelledby="gho-gap-you-h"><h3 class="gho-gap-h" id="gho-gap-you-h">Forgot your line</h3><p class="gho-gap-sub">Where you played something other than your prepared move</p><ul class="gho-gap-list" id="gho-gap-you"></ul></section>
       </div>
+      <!-- Did the opening do its job? (oj*): each color's games by the score where they left the opening -->
+      <section class="gho-ends gho-oj" id="gho-oj" aria-labelledby="gho-oj-h" hidden>
+        <h3 class="gho-gap-h" id="gho-oj-h">Did the opening do its job?</h3>
+        <div class="gho-ends-cols"><div class="gho-ends-col" id="gho-oj-white"></div><div class="gho-ends-col" id="gho-oj-black"></div></div>
+      </section>
       <section class="gho-ends" id="gho-ends" aria-labelledby="gho-ends-h" hidden>
         <h3 class="gho-gap-h" id="gho-ends-h">Where your games end up</h3>
         <div class="gho-ends-cols"><div class="gho-ends-col" id="gho-ends-white"></div><div class="gho-ends-col" id="gho-ends-black"></div></div>
@@ -7159,6 +7239,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="hpf-queens" id="hpf-queens" hidden></div>
           <div class="hpf-phases" id="hpf-phases"></div>
           <button type="button" class="btn-link hpf-go" id="hpf-go" hidden>Analyze game to grade each phase</button>
+          <div class="hpf-src" id="hpf-src" hidden></div>
           <div class="hpf-season" id="hpf-season" hidden></div>
           <button type="button" class="btn-link hpf-info" id="hpf-info" aria-expanded="false" aria-controls="hpf-how">How the phases are split</button>
           <p class="hpf-how" id="hpf-how" hidden>The phases follow the pieces, as on Lichess: the middlegame starts once the pieces are developed or traded, the endgame with 6 or fewer pieces left (not counting pawns and kings), or 8 or fewer once both queens are off. A move counts in the phase it was played in; the averages are your other reviewed games.</p>
@@ -11279,6 +11360,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const initialHash = decodeURIComponent(location.hash.slice(1));
 
   function showView(name){
+    if(currentView==='history' && name!=='history' && typeof ojLeave==='function') ojLeave(name);
     if(currentView !== name && currentView.indexOf('play')===0){
       leaveHooks.forEach(fn=>{ try{ fn(); }catch(e){} });
     }
@@ -24664,15 +24746,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   /* ---- Filters: state, validation, storage, the #history link ---- */
-  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', eg:'', len:'', date:'', variant:'', notes:false, rep:'' };
+  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', eg:'', oj:'', len:'', date:'', variant:'', notes:false, rep:'' };
   const GH_F_SETS = { speed:['ultraBullet','bullet','blitz','rapid','classical','correspondence'], result:['win','loss','draw'],
     color:['white','black'], rated:['rated','casual'], gap:['higher','even','lower'], end:['mate','resign','time','draw','other'],
-    len:['short','medium','long'], date:['7','30','90','year'], eg:['yes','no','pawn','rook','queen','bishopOpp','bishopSame','knight','bishopKnight','minor','rookMinor','queenMix','uneven'] };
-  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','len','date','variant','notes','rep'];
+    len:['short','medium','long'], date:['7','30','90','year'], oj:['done','not','lost','open'], eg:['yes','no','pawn','rook','queen','bishopOpp','bishopSame','knight','bishopKnight','minor','rookMinor','queenMix','uneven'] };
+  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','oj','len','date','variant','notes','rep'];
   var EG = new Map(), EG_JOB = null, EG_SIG = '', EG_DONE = false;       // each game's endgame (where it begins, the kinds it went through): egEnsure
   // the repertoire filter (gho*, SPEC B.7): opening / trunk / course / chapter / line, outside, or a spot
   const GH_REP_RE = /^(?:[ot]\.[A-Za-z0-9_-]{1,64}|[kc]\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|l(?:\.[A-Za-z0-9_-]{1,64}){3}|x\.[wb](?:\.(?:none|[a-z0-9]+(?:-[a-z0-9]+)*))?|s\.[0-9a-f]{8}(?:\.(?:t\.[A-Za-z0-9_-]{1,64}|c\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|x\.[wb]))?)$/;
-  const GH_SECONDARY = ['rated','gap','end','eg','len','date','opp','variant'];
+  const GH_SECONDARY = ['rated','gap','end','eg','oj','len','date','opp','variant'];
   let GH_FILTERS = Object.assign({}, GH_F_DEFAULT);
   const GH_UI = { more:false, open:false, view:'games', osort:'games', site:'all' };   // site: the All | Lichess | Chess.com tab (chesscom SPEC B.1)
   // Typed text: what a link can carry safely (the hash is decoded twice).
@@ -24698,11 +24780,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         GH_UI.view = d.ui && (d.ui.view==='openings' || d.ui.view==='groups' || d.ui.view==='positions') ? d.ui.view : 'games';
         if(d.ui && typeof d.ui.osort==='string' && /^[a-z]{1,8}$/.test(d.ui.osort)) GH_UI.osort = d.ui.osort;
         if(d.ui && /^(all|lichess|chesscom)$/.test(String(d.ui.site))) GH_UI.site = d.ui.site;
+        GH_UI.boards = !!(d.ui && d.ui.boards); GH_UI.bmom = d.ui && d.ui.bmom==='b' ? 'b' : 'a';
       }
     }catch(e){}
   })();
   function ghSaveFilters(){
-    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more, view:GH_UI.view, osort:GH_UI.osort, site:GH_UI.site } })); }catch(e){}
+    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more, view:GH_UI.view, osort:GH_UI.osort, site:GH_UI.site, boards:!!GH_UI.boards, bmom:GH_UI.bmom==='b' ? 'b' : 'a' } })); }catch(e){}
   }
   function ghIsOn(k){ return k==='oq' ? (!GH_FILTERS.opening && !!GH_FILTERS.oq) : !!GH_FILTERS[k]; }
   function ghActiveCount(){ return GH_PARAM_KEYS.filter(ghIsOn).length; }
@@ -24808,6 +24891,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     if(f.end && ghEndGroup(g.status)!==f.end) return false;
     if(f.eg && egReady() && !egMatch(g, f.eg)) return false;           // kept but ignored until every game's endgame is known
+    if(f.oj && ojReady() && !ojMatch(g, f.oj)) return false;           // the opening's job: a game not scored yet matches no setting
     if(f.len){
       const mv = Math.ceil(ghPlies(g)/2);
       if(f.len==='short' ? mv>25 : f.len==='medium' ? (mv<26 || mv>50) : mv<51) return false;
@@ -25157,7 +25241,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const f = GH_FILTERS, fc = GH_STATE.facets || ghFacets([]);
     const setSel = (id, v)=>{ const el = document.getElementById(id); if(el && el.value!==v) el.value = v; };
     setSel('history-speed-filter', f.speed); setSel('history-result-filter', f.result);
-    setSel('gh-gap', f.gap); setSel('gh-end', f.end); setSel('gh-eg', f.eg); setSel('gh-len', f.len); setSel('gh-date', f.date);
+    setSel('gh-gap', f.gap); setSel('gh-end', f.end); setSel('gh-eg', f.eg); setSel('gh-oj', f.oj); setSel('gh-len', f.len); setSel('gh-date', f.date);
     // the exact time controls listed (one that isn't loaded yet still shows while picked)
     const tcEl = document.getElementById('gh-tc');
     const tcs = fc.tcs.slice();
@@ -25235,6 +25319,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghFixOldSlugs(base);
     if(typeof rpEnsure==='function') rpEnsure();     // games waiting to be sorted (a note synced for an older game) get sorted
     egEnsure();                                      // the endgames, for the Endgame filter and the Openings tab
+    ojEnsure();                                      // the opening checks (Openings tab, the filter, Boards): only scores what's missing
     ghSyncFilterUI();
     ghShowSub();
     // the Chess.com tab with no account: the setup card instead of the list (chesscom SPEC B.4)
@@ -25243,7 +25328,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('gho').hidden = !ov || only;
     document.getElementById('ghg').hidden = !gv || only;
     document.getElementById('ghp').hidden = !pv || only;
-    listEl.hidden = ov || gv || pv || only;
+    const bv = ghbOn() && !(ov || gv || pv || only);
+    listEl.hidden = ov || gv || pv || only || bv;
+    document.getElementById('ghb').hidden = !bv;
+    document.getElementById('gh-bv').hidden = ov || gv || pv || only;
+    ghbSyncToggle();
     if(ov || gv || pv || only) ghLineCard(null);
     ['.gh-filters', '.history-footer'].forEach(q=>{ const el = document.querySelector('#view-history '+q); if(el) el.hidden = only || gv || (pv && q==='.gh-filters'); });
     document.getElementById('view-history').classList.toggle('is-gho', ov);
@@ -25277,6 +25366,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     const active = ghActiveCount() > 0;
     const rows = active ? base.filter(g=> ghMatch(g, u, GH_FILTERS)) : base;
+    // with the opening's job as a filter: how many of the games it would list aren't scored yet (the footer says)
+    GH_OJ_WAIT = 0;
+    if(GH_FILTERS.oj && ojReady()){ const fo = Object.assign({}, GH_FILTERS, { oj:'' }); base.forEach(g=>{ const r = ojOf(g); if(r && r.k==='wait' && ghMatch(g, u, fo)) GH_OJ_WAIT++; }); }
     ghLineCard(rows);
     const total = base.length, plural = total===1 ? '' : 's';
     const cnt = document.getElementById('gh-count'), nc = document.createElement('div');
@@ -25294,6 +25386,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // stays on the same row, note line or note button instead of falling to <body>.
     const fa = document.activeElement, fRow = fa && fa!==listEl && listEl.contains(fa) ? fa.closest('.history-row') : null;
     const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-grp-btn') ? '.gh-grp-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : '')));
+    if(bv){
+      ghbRender(rows);
+      ghRenderFooter(rows.length, active);
+      try{ ghOpeningCombo.refresh(); ghOppCombo.refresh(); }catch(e){}
+      GH_RENDER_MS = performance.now() - t0;
+      return;
+    }
     const shownG = rows.slice(0, GH_STATE.shown);
     ghKeepRows(listEl, shownG.map(g=> ghRow(g, u)));
     ghThumbsFill(listEl);
@@ -25311,10 +25410,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const seq = ++GH_RENDER_SEQ;
     if(!document.hidden) try{ requestAnimationFrame(()=> setTimeout(()=>{ if(seq===GH_RENDER_SEQ && !document.hidden) GH_RENDER_MS = Math.max(GH_RENDER_MS, Math.min(1000, performance.now() - t0)); }, 0)); }catch(e){}
   }
-  var GH_DRAWN = null;
+  var GH_DRAWN = null, GH_OJ_WAIT = 0;
   // the Games list is on screen and a sorting batch gave none of its rows a new line (no repertoire filter, sorting goes on):
   // nothing to redraw. The batch that ends the sorting always redraws.
   function ghRpBatchIdle(){
+    if(currentView==='history' && ghbOn() && !GH_FILTERS.rep && !ghoOn()) return true;     // Boards shows no repertoire lines
     if(currentView!=='history' || ghoOn() || ghgOn() || GH_UI.view==='positions' || GH_FILTERS.rep || !RP_JOB || !GH_DRAWN) return false;
     const L = document.getElementById('history-list');
     if(!L || L.hidden) return false;
@@ -25390,6 +25490,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else if(backoff && GH_STATE.error==='429') msg = 'Lichess asked to slow down. Try again in a minute.';
     else if(GH_STATE.error==='load' && GH_STATE.games.length) msg = 'Couldn\u2019t load more games. Try again in a moment.';
     else if(GH_STATE.capped) msg = 'Showing your newest '+GH_CAP.toLocaleString('en-US')+' games.';
+    // the opening's job: the games this list would show that it can't place yet (never a silent gap)
+    if(!ghoOn() && GH_FILTERS.oj && GH_OJ_WAIT > 0){
+      msg = (msg ? msg+' ' : '')+ghoN(GH_OJ_WAIT, 'game')+' not scored yet. '+(OJ_NOENG ? 'Stockfish can\u2019t run here.' : OJ_ON ? 'They join this list once the Openings tab has checked them.' : 'Turn on Opening checks in Settings to score them.');
+    }
     note.textContent = msg;
     note.hidden = !msg;
     const showLoad = liOn && !!getLichessToken() && !GH_STATE.loading && !filling && !GH_STATE.exhausted && !GH_STATE.capped
@@ -25398,6 +25502,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     load.textContent = GH_STATE.games.length ? (mix ? 'Load more Lichess games' : 'Load more games') : 'Try again';
     load.disabled = backoff;
     if(ghoOn() || GH_UI.view==='positions'){ more.style.display = 'none'; empty.style.display = 'none'; }
+    if(ghbOn()) more.style.display = 'none';         // Boards shows every listed game, by structure
     clearTimeout(ghBackoffTimer);
     if(backoff && showLoad) ghBackoffTimer = setTimeout(()=>{ if(currentView==='history') ghRender(); }, spBackoffUntil - Date.now() + 100);
   }
@@ -25446,7 +25551,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           GH_STATE.games = []; GH_STATE.ids = new Set(); GH_STATE.cursor = null; GH_STATE.extras = new Map(); GH_THUMBS.clear();
         }
         const want = Math.max(1, Math.min(max, GH_CAP - GH_STATE.games.length));
-        let path = '/api/games/user/'+encodeURIComponent(username)+'?max='+want+'&opening=true&moves=true&lastFen=true&pgnInJson=true&clocks=true&sort=dateDesc';
+        let path = '/api/games/user/'+encodeURIComponent(username)+'?max='+want+'&opening=true&moves=true&lastFen=true&pgnInJson=true&clocks=true&evals=true&sort=dateDesc';
         if(GH_STATE.cursor) path += '&until='+GH_STATE.cursor;
         const res = await spApi(path, { headers:{ Accept:'application/x-ndjson' } });
         if(!res.ok){ const err = new Error('status '+res.status); err.status = res.status; throw err; }
@@ -25456,7 +25561,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const page = text.split('\n').map(l=> l.trim()).filter(Boolean)
           .map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).filter(g=> g && typeof g.id==='string' && g.players);
         if(page.length < want) GH_STATE.exhausted = true;
-        page.forEach(g=>{ if(GH_STATE.ids.has(g.id)) return; GH_STATE.ids.add(g.id); GH_STATE.games.push(g); });
+        page.forEach(g=>{ if(GH_STATE.ids.has(g.id)) return; ojTakeEvals(g); GH_STATE.ids.add(g.id); GH_STATE.games.push(g); });
         rpQueue();
         const oldest = page.reduce((m, g)=> Math.min(m, Number(g.createdAt) || Infinity), Infinity);
         if(isFinite(oldest)) GH_STATE.cursor = oldest - 1;
@@ -25541,11 +25646,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       await ghWaitIdle();
       ghFetching = true;
       try{
-        const res = await spApi('/api/games/export/_ids?moves=true&pgnInJson=true&clocks=true&opening=true&lastFen=true',
+        const res = await spApi('/api/games/export/_ids?moves=true&pgnInJson=true&clocks=true&opening=true&lastFen=true&evals=true',
           { method:'POST', headers:{ Accept:'application/x-ndjson', 'Content-Type':'text/plain' }, body:g.id });
         if(res.ok){
           const full = (await res.text()).split('\n').map(l=>{ try{ return JSON.parse(l); }catch(e){ return null; } }).find(x=> x && x.id===g.id && x.players);
           if(full){
+            ojTakeEvals(full);
+            if(Array.isArray(full._ev)) OJ_VER++;
             full._me = g._me;
             GH_STATE.extras.set(g.id, full);
             ghFetching = false;
@@ -25634,7 +25741,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const ghOppCombo = ghCombo(document.getElementById('gh-opp-wrap'), ghOppOptions,
     v=> ghSetFilters({ opp:v || '' }), t=> ghSetFilterText('opp', t));
   [['history-speed-filter','speed'], ['history-result-filter','result'], ['gh-tc','tc'], ['gh-gap','gap'],
-   ['gh-end','end'], ['gh-eg','eg'], ['gh-len','len'], ['gh-date','date'], ['gh-variant','variant']].forEach(([id, k])=>{
+   ['gh-end','end'], ['gh-eg','eg'], ['gh-oj','oj'], ['gh-len','len'], ['gh-date','date'], ['gh-variant','variant']].forEach(([id, k])=>{
     document.getElementById(id).addEventListener('change', e=> ghSetFilters({ [k]:e.target.value }));
   });
   [['gh-color','color'], ['gh-rated','rated']].forEach(([id, k])=>{
@@ -26748,7 +26855,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var GHO_MIN = 5;
   var GHO_FLOOR = { li:400, cc:100 };   // each site's lowest rating: a performance below it reads "under 400" / "under 100"
   var GHO_DP = [0,7,14,21,29,36,43,50,57,65,72,80,87,95,102,110,117,125,133,141,149,158,166,175,184,193,202,211,220,230,240,251,262,273,284,296,309,322,336,351,366,383,401,422,444,470,501,538,589,677,800];
-  var GHO_SORTS = [['games','Most games'], ['best','Best score'], ['worst','Worst score'], ['win','Win %'], ['perf','Performance'], ['xr','Beats the ratings'],
+  var GHO_SORTS = [['games','Most games'], ['best','Best score'], ['worst','Worst score'], ['job','Job done %'], ['perf','Performance'], ['xr','Beats the ratings'],
     ['prep','Deepest prep'], ['you','Left most by you'], ['opp','Left most by opponents'], ['last','Last played'], ['rep','Repertoire order']];
   var GHO_TOG = new Map();      // row key -> expanded (memory only); openings start expanded, the rest collapsed
   var GHO_LAST = null;          // the model last drawn (focus, tests)
@@ -26804,6 +26911,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const n = list.length, left = { you:0, opp:0, end:0, inbook:0 };
     let W = 0, D = 0, rn = 0, rsum = 0, rpts = 0, prep = 0, pn = 0, an = 0, asum = 0, last = 0, xn = 0, xpts = 0, xexp = 0;
     let Lq = 0, Lt = 0, LtAll = 0, lineN = 0, lineSum = 0, reachSum = 0;
+    let jg = 0, jn = 0, jd = 0, jl = 0, jm = 0, je = 0, jo = 0;          // the opening's job: graded, scored, did it, then lost (where), over early
     const ps = { li:{ rn:0, sum:0, pts:0 }, cc:{ rn:0, sum:0, pts:0 } };
     list.forEach(e=>{
       const pt = e.res==='win' ? 1 : e.res==='draw' ? 0.5 : 0;
@@ -26822,6 +26930,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(r && r.left && r.left.who in left) left[r.left.who]++;
       if(e.acc!=null){ an++; asum += e.acc; }
       if(e.at > last) last = e.at;
+      const j = e.j;
+      if(j){ jg++; if(j.k!=='wait'){ jn++; if(j.k==='done') jd++; if(j.open) jo++; if(j.lost){ jl++; if(j.slip==='mid') jm++; else if(j.slip==='end') je++; } } }
     });
     const avg = rn ? rsum/rn : null;
     const form = list.slice().sort((a, b)=> b.at - a.at).slice(0, 5).reverse().map(e=> e.res);
@@ -26839,7 +26949,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       avgOpp: one ? one.avgOpp : null, perf: one ? one.perf : null, perfLow: !!(one && one.low), floor: one ? one.floor : null,
       prep: pn ? Math.round(prep/pn/2*10)/10 : null, left, acc: an ? Math.round(asum/an) : null, accN:an, form, last: last || null, small: n < GHO_MIN,
       xn, xpts, xexp, xr: xn ? Math.round((xpts - xexp)*10)/10 : null,
-      Lq, Lt, LtAll, lineLen: lineN ? Math.round(lineSum/lineN/2*10)/10 : null, reach: lineN ? reachSum/lineN : null };
+      Lq, Lt, LtAll, lineLen: lineN ? Math.round(lineSum/lineN/2*10)/10 : null, reach: lineN ? reachSum/lineN : null,
+      jg, jn, jd, jl, jm, je, jo, job: jn ? Math.round(1000*jd/jn)/10 : null };
   }
   // one record per counted game: the facts every row needs
   function ghoEntries(games, u, rep){
@@ -26851,7 +26962,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const P = ghPlayers(g, u), or = P.opp && P.opp.rating!=null ? Number(P.opp.rating) : NaN, mr = P.mine && P.mine.rating!=null ? Number(P.mine.rating) : NaN;
       const h = acc[g.id], a = ccTab ? (g.ccAcc ? g.ccAcc[color] : null) : (h && Array.isArray(h.a) ? h.a[color==='white' ? 0 : 1] : null);
       return { g, color, site:ccSiteOf(g), res:ghGameResult(g, u), opp: isFinite(or) ? or : null, me: isFinite(mr) ? mr : null, at:Number(g.createdAt) || 0,
-        acc: typeof a==='number' && isFinite(a) ? a : null, r: rep ? rpResult(g) : null, mv:Math.ceil(ghPlies(g)/2), end:ghEndGroup(g.status) };
+        acc: typeof a==='number' && isFinite(a) ? a : null, r: rep ? rpResult(g) : null, mv:Math.ceil(ghPlies(g)/2), end:ghEndGroup(g.status), j:ojOf(g) };
     });
   }
   function ghoNode(key, type, name, ord, rep){ return { key, type, name, ord, rep, list:[], kids:[], sub:'', pre:'', full:'', m:null }; }
@@ -27052,7 +27163,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoSortNodes(nodes, key, byName){
     const val = (m)=>{
       switch(key){
-        case 'best': return m.score; case 'worst': return m.score==null ? null : -m.score; case 'win': return m.win;
+        case 'best': return m.score; case 'worst': return m.score==null ? null : -m.score; case 'job': return m.job;
         case 'perf': return m.perf; case 'prep': return m.prep; case 'you': return m.left.you; case 'opp': return m.left.opp;
         case 'last': return m.last; case 'rep': return 0; case 'xr': return ghoXrRank(m); default: return m.n;
       }
@@ -27062,7 +27173,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!!a.pin!==!!b.pin) return a.pin ? -1 : 1;
       if(key!=='rep' && (!a.m.n)!==(!b.m.n)) return a.m.n ? -1 : 1;
       // a rate over 1-4 games is noise: by score, win % or performance the small samples go after the rest
-      if((key==='best' || key==='worst' || key==='win' || key==='perf' || key==='xr') && !!a.m.small!==!!b.m.small) return a.m.small ? 1 : -1;
+      if((key==='best' || key==='worst' || key==='perf' || key==='xr') && !!a.m.small!==!!b.m.small) return a.m.small ? 1 : -1;
+      if(key==='job' && (a.m.jn < GHO_MIN)!==(b.m.jn < GHO_MIN)) return a.m.jn < GHO_MIN ? 1 : -1;     // under 5 scored games: after the rest
       if(key==='rep') return byName ? tie(a, b) : a.ord - b.ord;
       const x = val(a.m), y = val(b.m);
       if(x==null || y==null){ if(x!=null) return -1; if(y!=null) return 1; return tie(a, b); }
@@ -27145,6 +27257,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(ql) cards.push({ k:'Quick losses', t:path(ql), d:ql.n.m.Lq+' of '+ql.n.m.L+' losses in 25 moves or fewer', x:ql, drill:{ result:'loss', len:'short' } });
     const tl = !GH_FILTERS.end && rows.filter(x=> x.n.m.LtAll >= 3 && x.n.m.LtAll >= 0.3*x.n.m.L).sort((a, b)=> b.n.m.LtAll - a.n.m.LtAll || gOrd(a) - gOrd(b))[0];
     if(tl) cards.push({ k:'Losing on time', t:path(tl), d:tl.n.m.LtAll+' of '+tl.n.m.L+' losses on time', x:tl, drill:{ result:'loss', end:'time' } });
+    const jx = !GH_FILTERS.oj && rows.filter(x=> x.n.m.jl >= 3 && x.n.m.jl >= 0.3*x.n.m.L).sort((a, b)=> b.n.m.jl - a.n.m.jl || b.n.m.jl/b.n.m.L - a.n.m.jl/a.n.m.L || gOrd(a) - gOrd(b))[0];
+    if(jx) cards.push({ k:'Did its job, then lost', t:path(jx), d:jx.n.m.jl+' of '+jx.n.m.L+' losses came after the opening did its job', x:jx, drill:{ oj:'lost' } });
     if(rep){
       // a long line the games leave early: 10+ games, under 40% of the way through
       const dl = rows.filter(x=> x.n.m.n >= 10 && x.n.m.lineLen >= 8 && x.n.m.reach!=null && x.n.m.reach < 0.4).sort((a, b)=> a.n.m.reach - b.n.m.reach || gOrd(a) - gOrd(b))[0];
@@ -27165,7 +27279,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoApply(patch){
     if(!patch) return;
     if(ghoOn()) GHO_Y = window.scrollY;
-    const extra = ['len', 'end', 'eg', 'gap', 'speed', 'color', 'date'].filter(k=> Object.prototype.hasOwnProperty.call(patch, k));
+    const extra = ['len', 'end', 'eg', 'oj', 'gap', 'speed', 'color', 'date'].filter(k=> Object.prototype.hasOwnProperty.call(patch, k));
     if(ghoOn()) GHO_DRILL = extra.length ? extra.map(k=> [k, GH_FILTERS[k] || '', patch[k]]) : null;     // "Games in this chapter" (the review) keeps a pending one
     GH_UI.view = 'games';
     GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, { opening:'', oq:'', result:'', rep:'' }, patch));
@@ -28371,6 +28485,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(m.small) b.push('Fewer than '+GHO_MIN+' games: these numbers can swing a lot');
     return b.join('\n');
   }
+  // Did the opening do its job: the share of the row's scored games, with how many were scored
+  function ghoJobCell(m){
+    const c = ghoCell('gho-c-win gho-c-job gho-pctc'+(m.jn && m.jn < GHO_MIN ? ' is-thin' : ''), 'Job done', m.jn ? ghoPct(m.job) : '\u2014', m.jn ? ghEl('span', 'gho-share', 'of '+m.jn) : null);
+    const wait = m.jg - m.jn;
+    c.title = m.jn ? 'The opening did its job in '+m.jd+' of '+ghoN(m.jn, 'scored game')+(wait > 0 ? ' ('+wait+' not scored yet)' : '')
+      +': as White +0.50 or better where the opening ends, as Black \u22120.30 or better'
+      : m.jg ? 'Not scored yet' : 'Not scored (Chess960, set positions, aborted games)';
+    return c;
+  }
   function ghoCell(cls, label, value, extra){
     const c = ghEl('div', 'gho-c '+cls);
     if(label) c.appendChild(ghEl('span', 'gho-lab', label));
@@ -28461,7 +28584,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     if(n.pre) nc.appendChild(ghEl('div', 'gho-pre', n.pre));
     if(m.n){
-      const mid = [ 'Win '+ghoPct(m.win) ];
+      const mid = [ m.job!=null ? 'Job done '+ghoPct(m.job)+' of '+m.jn : 'Job done \u2014' ];
       if(m.acc!=null) mid.push('Acc. '+m.acc);
       if(m.last) mid.push(ghoAgo(m.last));
       nc.appendChild(ghEl('div', 'gho-mid', mid.join(' \u00b7 ')));
@@ -28477,7 +28600,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     sc.appendChild(ghEl('span', 'gho-wdl', 'W '+m.W+' \u00b7 D '+m.D+' \u00b7 L '+m.L));      // a touch screen has no tooltips: the counts under the bar
     if(m.L) sc.title = 'Losses: '+[m.Lq ? m.Lq+' in 25 moves or fewer' : '', m.Lt ? m.Lt+' on time after move 25' : '', m.L - m.Lq - m.Lt ? (m.L - m.Lq - m.Lt)+' later' : ''].filter(Boolean).join(' \u00b7 ');
     row.appendChild(sc);
-    row.appendChild(ghoCell('gho-c-win gho-pctc', 'Win', ghoPct(m.win)));
+    row.appendChild(ghoJobCell(m));
     if(m.all){
       // one line per site with rated games ("Lichess 1637", "Chess.com 1545"); the averages are in the row's title
       const pc = ghoCell('gho-c-perf gho-c-psite', 'Perf.', ''), pv = pc.querySelector('.gho-v');
@@ -28566,7 +28689,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const h = ghEl('div', 'gho-row gho-head');
     h.setAttribute('aria-hidden', 'true');
     const cols = [['gho-c-name', mode.lichess || mode.outside ? 'Opening' : 'Line', ''], ['gho-c-n', 'Games', 'Games, and their share of this color'],
-      ['gho-c-score', 'Score', 'Won, drawn, lost; points scored'], ['gho-c-win', 'Win', 'Games won'],
+      ['gho-c-score', 'Score', 'Won, drawn, lost; points scored'], ['gho-c-win', 'Job done', 'Did the opening do its job: the share of scored games with White +0.50 or better, Black \u22120.30 or better, where the opening ends'],
       ['gho-c-perf', 'Perf.', (ghMixed() ? 'Performance rating on each site (Lichess and chess.com ratings are on different scales)' : 'Performance rating, and the average opponent')+'; under it, the points you scored above (or below) what the ratings expected']];
     if(!mode.lichess) cols.push(['gho-c-prep', 'Prep', 'Moves in your prep, on average'], ['gho-c-left', 'Left first', 'Who left your prep first: you \u00b7 your opponent \u00b7 ran past your line']);
     cols.push(['gho-c-acc', 'Acc.', GH_UI.site==='chesscom' ? 'chess.com\u2019s accuracy: average of the games that have one' : 'Average accuracy of the games reviewed on this device'],
@@ -28744,6 +28867,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghoDrawBrief(loading ? null : model);
     ghoDrawInsights(loading ? { ins:[] } : model);
     ghoDrawGaps(loading || !model.rep ? null : model);
+    ghoDrawOj(loading ? null : model);
     ghoDrawEnds(loading ? null : model);
     const sel = document.getElementById('gho-sort');
     const po = sel.querySelector('option[value="perf"]');
@@ -28884,6 +29008,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       const sp = e.target.closest('.gho-sp[data-key]');
       if(sp){ const n = ghoFind(sp.dataset.key), f = n && ghoNodeFilter(n); if(f) ghoApply(Object.assign({}, f, sp.dataset.gap ? { gap:sp.dataset.gap } : sp.dataset.eg ? { eg:sp.dataset.eg } : { speed:sp.dataset.speed })); return; }
+      const ob = e.target.closest('.gho-oj-b');
+      if(ob){ ghoApply({ color:ob.dataset.ojc, oj:ob.dataset.oj }); return; }
       const eb = e.target.closest('.gho-end-b');
       if(eb){ ghoApply({ color:eb.dataset.egc, eg:eb.dataset.eg }); return; }
       const more = e.target.closest('#gho-more');
@@ -28978,7 +29104,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     B.i = ((i % S.length) + S.length) % S.length;
     if(user) B.user = true;
     const st = S[B.i], hero = document.getElementById('gho-brief-hero');
-    hero.setAttribute('aria-live', user ? 'polite' : 'off');             // the 7 s cycle is never read out; a number you pick is
+    hero.setAttribute('aria-live', user || B.user ? 'polite' : 'off');   // the 7 s cycle is never read out; a number you pick is (a redraw keeps it)
     const fig = document.getElementById('gho-brief-fig');
     fig.textContent = ''; fig.appendChild(ghoRing(st.fig));
     document.getElementById('gho-brief-big').textContent = st.big;
@@ -29300,18 +29426,35 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function egOf(g){
     const toks = String(g.moves || '').trim().split(/\s+/), out = { s:-1, t:[] };
     if(!toks[0]) return out;
-    let st = pzStartPosition(), run = '', runN = 0;
+    let st = pzStartPosition(), run = '', runN = 0, half = 0, n = 0;
+    // the opening's checkpoints (oj*): where the middlegame begins (the phase bar's rule, hpfDivide), then the first
+    // calm position from there (the move into it no capture or promotion, no check), its FEN; the same from the endgame
+    let mid = -1;
+    const win = { a:[], b:[] };          // [position, calm, fen] in each window (up to 5 positions)
     for(let i = 0; i < toks.length; i++){
       const mv = rpSanToMove(st, toks[i]);
       if(!mv) break;
       st = pzApplyMoveRaw(st, mv);
-      const B = st.board;
-      if(out.s < 0){ const n = hpfPieces(B); if(!(n <= 6 || (n <= 8 && !hpfQueens(B)))) continue; out.s = i + 1; }
+      n = i + 1;
+      half = (mv.piece==='p' || mv.captured || mv.isEP) ? 0 : half + 1;
+      const B = st.board, p = i + 1;
+      if(mid < 0 && (hpfPieces(B) <= 10 || hpfBackSparse(B) || hpfMixed(B) > 150)) mid = p;
+      const calm = !mv.captured && !mv.isEP && !mv.promotion && !pzIsInCheck(st, st.turn);
+      const keep = (w, from)=>{ if(from >= 0 && p - from < 5 && !w.some(x=> x[1])){ const f = pzStateToFEN(st, p).split(' '); f[4] = String(half); w.push([p, calm, f.join(' ')]); } };
+      keep(win.a, mid);
+      if(out.s < 0){ const pc = hpfPieces(B); if(!(pc <= 6 || (pc <= 8 && !hpfQueens(B)))) continue; out.s = p; }
+      keep(win.b, out.s);
       const k = egType(B);
       if(k===run) runN++; else { run = k; runN = 1; }
       if(runN===2 && out.t.indexOf(k) < 0) out.t.push(k);
     }
     if(run && out.t.indexOf(run) < 0) out.t.push(run);          // the last position counts however long it lasted
+    // straight from the opening into an endgame (the phase bar's rule): no middlegame
+    const m = out.s >= 0 && !(mid < out.s) ? -1 : mid;
+    // a checkpoint needs a move played after it, else the game was over there
+    const pick = (w, at)=>{ if(at < 0 || at >= n) return null; const c = w.filter(x=> x[0] < n); return c.find(x=> x[1]) || c[0] || null; };
+    const A = pick(m >= 0 ? win.a : win.b, m >= 0 ? m : out.s), Bq = m >= 0 ? pick(win.b, out.s) : null;
+    Object.assign(out, { m, n, h:gnFnv(toks.join(' ')), all:n===toks.length, qa: A ? A[0] : -1, fa: A ? A[2] : '', qb: Bq ? Bq[0] : -1, fb: Bq ? Bq[2] : '' });
     return out;
   }
   function egReady(){ return EG_DONE; }       // from the first finished pass on; a game read later just matches no setting until then
@@ -29323,7 +29466,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the games without an endgame yet get one; only when the filter or the Openings tab wants them, and only when the
   // games changed (a draw costs nothing otherwise)
   function egEnsure(){
-    if(!GH_FILTERS.eg && !ghoOn()) return;
+    if(!GH_FILTERS.eg && !ghoOn() && !(GH_UI.view==='games' && (GH_FILTERS.oj || ghbOn()))) return;
     if(EG_JOB){ EG_JOB.more = true; return; }
     const sig = GH_STATE.games.length+'|'+(ghCcUp() ? ccGames().length : 0)+'|'+(typeof GN==='object' && GN && GN.notes ? Object.keys(GN.notes).length : 0);
     if(sig===EG_SIG) return;
@@ -29334,23 +29477,543 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const tick = ()=>{
       if(EG_JOB!==job) return;
       const t = performance.now();
-      while(job.i < job.list.length && performance.now() - t < 10){ const g = job.list[job.i++]; if(!EG.has(g.id)) EG.set(g.id, egOf(g)); }
+      while(job.i < job.list.length && performance.now() - t < 10){ const g = job.list[job.i++]; if(!EG.has(g.id)){ EG.set(g.id, egOf(g)); job.added = true; } }
       if(job.i < job.list.length){ setTimeout(tick, 0); return; }
       if(job.more){ job.more = false; job.list = rpGames().filter(g=> !EG.has(g.id)); job.i = 0; if(job.list.length){ setTimeout(tick, 0); return; } }
       EG_JOB = null;
       const first = !EG_DONE;
       EG_DONE = true;
+      if(job.added) OJ_VER++;                                  // games read: the opening's job grades them (oj*)
       // drawn once with the new endgames: right away the first time, else after a pause (never while you type a search)
-      const draw = ()=>{ if(currentView!=='history' || !(GH_FILTERS.eg || ghoOn())) return; if(Date.now() - GHO_QAT < 900){ setTimeout(draw, 900); return; } ghRender(); };
+      const draw = ()=>{ if(currentView!=='history' || !(GH_FILTERS.eg || GH_FILTERS.oj || ghoOn() || GH_UI.boards)) return; if(Date.now() - GHO_QAT < 900){ setTimeout(draw, 900); return; } OJ_VER++; ghRender(); };
       setTimeout(draw, first ? 0 : 400);
     };
     setTimeout(tick, 0);
+  }
+  /* ---- Did the opening do its job? (2026-10-31, the user: "a grade judging if an opening did its job ... white at least a
+     slight advantage out of the opening, black at least even or slightly worse (-0.3); the failure then must happen in the
+     middlegame and endgame"). Each game's checkpoint is the first calm position once the middlegame begins (the phase bar's
+     rule; egOf finds it), scored from your side: as White +0.50 or better, as Black -0.30 or better (the user's numbers) is
+     "did its job". The score comes from a review on this device, else Lichess's own analysis (games you had Lichess analyze),
+     else a background check: Stockfish 16 on this device, one position at a time at a fixed node count, only while Game
+     History's Openings tab (or the filter, or Boards) is open, kept in IndexedDB. A game over before any middlegame counts by
+     its result (the user's choice): a win did its job, a draw did for Black, a loss didn't. Where a game that did its job was
+     lost: the bigger drop in your winning chances, the middlegame (to the endgame's first calm position) or the endgame. ---- */
+  const OJ_V = 1;                                   // the checkpoint rules' version: a change scores every game again
+  var OJ_NODES = 150000;                            // about depth 16-18 in a middlegame, a second or so on a laptop
+  const OJ_BAR = { w:50, b:-30 };                   // did its job: your side's score (centipawns) at the checkpoint
+  const OJ_SKIP = new Set(['aborted', 'noStart', 'cheat', 'timeout', 'abandoned', 'unknownFinish', 'created', 'started']);    // no real result
+  const OJ_KEY = 'wavyChessPrepOpeningChecksOn', OJ_DBN = 'wavyChessPrepOpeningChecks';
+  var OJ_DB = new Map(), OJ_LOADED = false, OJ_LOADING = false, OJ_VER = 0, OJ_JOB = null, OJ_NOENG = false, OJ_DRAWN = 0, OJ_DRAWT = 0, OJ_IDBP = null;
+  var OJ_C = new Map(), OJ_FAIL = new Set(), OJ_RS = null, OJ_IDLE = '';
+  var OJ_ON = (function(){ let v = null; try{ v = localStorage.getItem(OJ_KEY); }catch(e){} if(v==='on' || v==='off') return v==='on';
+    try{ return !matchMedia('(pointer:coarse)').matches; }catch(e){ return true; } })();          // off on phones and tablets until you turn it on
+  // Lichess's analysis (evals=true): a score per position after each move, White's side; the judgments as review codes
+  function ojTakeEvals(g){
+    const A = g && g.analysis;
+    if(!Array.isArray(A)) return;
+    g._ev = A.map(x=> x && typeof x.eval==='number' ? { type:'cp', value:x.eval } : x && typeof x.mate==='number' ? { type:'mate', value:x.mate } : null);
+    g._evj = A.map(x=>{ const n = x && x.judgment && x.judgment.name; return n==='Inaccuracy' ? 'inaccuracy' : n==='Mistake' ? 'mistake' : n==='Blunder' ? 'blunder' : null; });
+    delete g.analysis;
+  }
+  function ojMine(g){ const u = ghMe(), c = g._me || (u ? ghMyColor(g, u) : null); return c==='white' ? 'w' : c==='black' ? 'b' : null; }
+  // the reviews on this device, read again at most every 5 s
+  function ojRevs(){
+    if(!OJ_RS || Date.now() - OJ_RS.at > 5000){ let g = {}; try{ g = hrReadStore().g || {}; }catch(e){ g = {}; } OJ_RS = { at:Date.now(), g }; }
+    return OJ_RS.g;
+  }
+  // the score (White's side) at position p of game g: { s, src } or null (never a made-up 0)
+  function ojEvalAt(g, x, p){
+    if(p < 1 || p > x.n) return null;
+    const e = ojRevs()[g.id];
+    if(e && e.h===x.h && e.n===x.n && typeof e.e==='string'){ const t = e.e.split(',')[p]; if(t!=null && t!=='') return { s:hrDecScore(t), src:'review' }; }
+    if(Array.isArray(g._ev) && g._ev.length===x.n && g._ev[p - 1]) return { s:g._ev[p - 1], src:'lichess' };
+    const r = OJ_DB.get(String(g.id));
+    if(r && r.h===x.h && r.v===OJ_V){ const c = r.a && r.a.p===p ? r.a : r.b && r.b.p===p ? r.b : null; if(c) return { s:hrDecScore(c.s), src:c.src || 'sf' }; }
+    return null;
+  }
+  // { k:'done'|'not'|'wait', open, res, my, src, lost, slip:'mid'|'end'|null } or null for a game that's never graded
+  function ojOf(g){
+    const id = String(g.id), c = OJ_C.get(id);
+    if(!EG.has(id)) return null;                          // not read yet: nothing kept, so it's graded once it is
+    if(c && c.ver===OJ_VER) return c.r;
+    let r = null;
+    try{ r = ojClassify(g); }catch(e){ r = null; }
+    OJ_C.set(id, { ver:OJ_VER, r });
+    return r;
+  }
+  function ojClassify(g){
+    if(!ghIsStd(g) || g.initialFen || OJ_SKIP.has(g.status) || ghVsComputer(g)) return null;
+    const x = EG.get(String(g.id)), mine = ojMine(g);
+    if(!x || x.qa==null || !x.all || !mine) return null;
+    const res = ghGameResult(g, ghMe() || '');
+    if(x.qa < 0){      // over before any middlegame: by the result, as if it were the score there
+      const done = res==='win' || (res==='draw' && mine==='b');
+      return { k: done ? 'done' : 'not', open:true, res, lost:false, slip:null };
+    }
+    const A = ojEvalAt(g, x, x.qa);
+    if(!A) return { k:'wait', res, lost:false, slip:null };
+    const my = hrMoverScore(A.s, mine), done = my >= OJ_BAR[mine];
+    const r = { k: done ? 'done' : 'not', open:false, res, my, src:A.src, lost: done && res==='loss', slip:null };
+    if(r.lost){
+      if(x.qb < 0) r.slip = x.m < 0 ? 'end' : 'mid';           // no endgame: the middlegame; straight into one: the endgame
+      else {
+        const B = ojEvalAt(g, x, x.qb);
+        if(B){ const wa = hpfWinPct(A.s, mine), wb = hpfWinPct(B.s, mine); r.slip = (wa - wb) >= wb ? 'mid' : 'end'; r.myB = hrMoverScore(B.s, mine); }
+      }
+    }
+    return r;
+  }
+  function ojReady(){ return egReady() && OJ_LOADED; }
+  function ojMatch(g, v){
+    const r = ojOf(g);
+    if(!r || r.k==='wait') return false;                       // not checked yet (or never graded): matches no setting
+    return v==='done' ? r.k==='done' : v==='not' ? r.k==='not' : v==='lost' ? !!r.lost : v==='open' ? !!r.open : false;
+  }
+  // ---- the store: one record a game, { id, h, v, a:{ p, s, src, d }, b } ----
+  function ojIdb(){
+    return OJ_IDBP || (OJ_IDBP = new Promise((res)=>{
+      try{
+        const q = indexedDB.open(OJ_DBN, 1);
+        q.onupgradeneeded = ()=>{ try{ q.result.createObjectStore('c', { keyPath:'id' }); }catch(e){} };
+        q.onsuccess = ()=> res(q.result); q.onerror = ()=> res(null); q.onblocked = ()=> res(null);
+      }catch(e){ res(null); }
+    }));
+  }
+  function ojLoad(){
+    if(OJ_LOADED || OJ_LOADING) return;
+    OJ_LOADING = true;
+    ojIdb().then(db=> new Promise(res=>{
+      if(!db) return res();
+      try{ const q = db.transaction('c').objectStore('c').getAll(); q.onsuccess = ()=>{ (q.result || []).forEach(r=>{ if(r && r.id) OJ_DB.set(String(r.id), r); }); res(); }; q.onerror = ()=> res(); }catch(e){ res(); }
+    })).then(()=>{ OJ_LOADED = true; OJ_VER++; ojStatus(); if(currentView==='history' && OJ_DB.size && (ghoOn() || GH_FILTERS.oj || ghbOn())) ghRender(); });
+  }
+  function ojPut(rec){ ojIdb().then(db=>{ if(!db) return; try{ db.transaction('c', 'readwrite').objectStore('c').put(rec); }catch(e){} }); }
+  function ojKeep(g, x, which, score, src, d){
+    const id = String(g.id);
+    let rec = OJ_DB.get(id);
+    if(!rec || rec.h!==x.h || rec.v!==OJ_V) rec = { id, h:x.h, v:OJ_V };
+    rec[which] = { p: which==='a' ? x.qa : x.qb, s:hrEncScore(score), src, d:d || 0 };
+    OJ_DB.set(id, rec);
+    ojPut(rec);
+  }
+  // ---- the background checks ----
+  function ojWanted(){
+    return OJ_ON && !OJ_NOENG && OJ_LOADED && egReady() && currentView==='history' && !document.hidden && (ghoOn() || (GH_UI.view==='games' && (ghbOn() || !!GH_FILTERS.oj)));
+  }
+  // what's left to score: each game's checkpoint, then (games that did their job and were lost) the endgame's; newest first
+  // (so the numbers on screen are fair while the checks run). A score from a review or Lichess is kept too, so it outlasts
+  // the review (reviews give way to notes).
+  function ojTodo(){
+    const out = [], keep = [];
+    rpGames().forEach(g=>{
+      const x = EG.get(String(g.id));
+      if(!x || !x.all || x.qa < 0 || OJ_FAIL.has(String(g.id))) return;
+      const r = ojOf(g);
+      if(!r) return;
+      if(r.k==='wait') out.push({ g, x, which:'a', fen:x.fa, loss:r.res==='loss' });
+      else {
+        const rec = OJ_DB.get(String(g.id));
+        if(r.src!=='sf' && !(rec && rec.h===x.h && rec.v===OJ_V && rec.a)) keep.push({ g, x, which:'a' });
+        if(r.lost && !r.slip && x.qb >= 0) out.push({ g, x, which:'b', fen:x.fb, loss:true });
+      }
+    });
+    keep.forEach(t=>{ const A = ojEvalAt(t.g, t.x, t.x.qa); if(A && A.src!=='sf') ojKeep(t.g, t.x, 'a', A.s, A.src, 0); });
+    return out.sort((a, b)=> (Number(b.g.createdAt) || 0) - (Number(a.g.createdAt) || 0) || (a.which < b.which ? -1 : 1));
+  }
+  function ojEnsure(){
+    ojLoad();
+    if(OJ_JOB || !ojWanted() || OJ_IDLE===ojIdleSig()) return;
+    clearTimeout(ojEnsure.t);
+    ojEnsure.t = setTimeout(()=>{ if(!OJ_JOB && ojWanted()) ojRun(); }, 1500);          // after the lists have drawn
+  }
+  async function ojRun(){
+    const job = OJ_JOB = { wake:null, todo:ojTodo(), i:0, done:0 };
+    ojStatus();
+    while(OJ_JOB===job && ojWanted()){
+      // the list done: what's left now (an endgame to score for a game that just turned out to be "did its job, then lost")
+      if(job.i >= job.todo.length){ job.todo = ojTodo(); job.i = 0; if(!job.todo.length){ job.empty = true; break; } }
+      const t = job.todo[job.i++], id = String(t.g.id);
+      const r = ojOf(t.g);
+      if(!r || (t.which==='a' && r.k!=='wait') || (t.which==='b' && (!r.lost || r.slip))) continue;      // scored meanwhile
+      hveBoot();
+      let off = null, dog = 0;
+      const info = await new Promise(resolve=>{
+        job.wake = resolve;
+        off = hve.onState((st)=>{ if(st==='failed' || st==='off') resolve(st==='failed' ? false : null); });
+        dog = setTimeout(()=>{ if(hve.kind==='ck') hve.stop(); resolve(null); }, 60000);
+        hve.check(t.fen, OJ_NODES, (fen, best, ci)=> resolve(ci || null)).then(ok=>{ if(!ok) resolve(false); });
+      });
+      job.wake = null; clearTimeout(dog); if(off) off();
+      if(OJ_JOB!==job) return;
+      if(info===false){
+        if(hve.state==='failed'){ if(hve.failWhy!=='slow') OJ_NOENG = true; break; }       // Stockfish can't run here (the hosted Artifact): not tried again this visit
+        job.i--; await new Promise(r=> setTimeout(r, 500)); continue;
+      }
+      if(info && info.score && hvFen4(info.fen)===hvFen4(t.fen)){
+        ojKeep(t.g, t.x, t.which, info.score, 'sf', info.depth);
+        job.done++;
+      } else OJ_FAIL.add(id);                                     // no score for it: left for another visit
+      OJ_VER++;
+      ojStatus();
+      ojSoonDraw();
+    }
+    if(OJ_JOB===job){ OJ_JOB = null; OJ_IDLE = job.empty ? ojIdleSig() : ''; ojStatus(); if(job.done) ojSoonDraw(true); }
+  }
+  // what an empty to-do list depended on: while it's the same, there's nothing to check (no job, no redraw)
+  function ojIdleSig(){ return OJ_VER+'|'+EG.size+'|'+OJ_FAIL.size+'|'+OJ_ON+'|'+OJ_DB.size; }
+  function ojStop(){
+    const j = OJ_JOB;
+    OJ_JOB = null;
+    if(j && j.wake) j.wake(false);
+    if(hve.kind==='ck') hve.stop();
+    ojStatus();
+  }
+  // leaving Game History: the checks stop, and the engine goes too unless a review is opening (it uses it)
+  function ojLeave(name){
+    ojStop();
+    OJ_NOENG = false; OJ_IDLE = '';                        // tried again next time
+    if(name!=='play-history' && hve.state!=='off') hve.quit();
+  }
+  document.addEventListener('visibilitychange', ()=>{
+    if(currentView!=='history') return;
+    if(document.hidden){ if(OJ_JOB) ojStop(); if(hve.state!=='off') hve.quit(); }      // a phone frees its memory; it loads again on return
+    else ojEnsure();
+  });
+  // new scores show at most every 30 s, and once the checks finish; only on the Openings tab (a filtered list keeps
+  // still while you read it) and never while you type a search
+  function ojSoonDraw(now){
+    if(currentView!=='history' || !ghoOn()) return;
+    const go = ()=>{
+      OJ_DRAWT = 0;
+      if(currentView!=='history' || !ghoOn()) return;
+      if(Date.now() - GHO_QAT < 900){ OJ_DRAWT = setTimeout(go, 900); return; }
+      OJ_DRAWN = Date.now();
+      ghRender();
+    };
+    const wait = now ? 0 : Math.max(0, 30000 - (Date.now() - OJ_DRAWN));
+    if(now){ clearTimeout(OJ_DRAWT); OJ_DRAWT = setTimeout(go, 400); return; }
+    if(!OJ_DRAWT) OJ_DRAWT = setTimeout(go, wait);
+  }
+  // ---- Settings: the switch, and how far the checks have got ----
+  function ojCounts(){
+    let all = 0, scored = 0;
+    rpGames().forEach(g=>{ const r = ojOf(g); if(!r) return; all++; if(r.k!=='wait') scored++; });
+    return { all, scored };
+  }
+  function ojStatus(){
+    const el = document.getElementById('oj-status');
+    if(!el) return;
+    const row = document.getElementById('oj-row');
+    row.querySelectorAll('.toggle').forEach(b=>{ const on = (b.dataset.val==='on')===OJ_ON; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    if(!document.getElementById('settings-overlay').classList.contains('active')) return;      // worked out when Settings is open
+    let t = '';
+    if(!egReady() || !OJ_LOADED) t = 'Open Game History\u2019s Openings tab to start.';
+    else {
+      const c = ojCounts(), n = (v)=> ghoN(v, 'game').replace(/ games?$/, '');
+      if(!c.all) t = 'No games to score yet.';
+      else if(OJ_NOENG) t = 'Stockfish can\u2019t run here: '+n(c.scored)+' of '+ghoN(c.all, 'game')+' scored, from your reviews and Lichess\u2019s analysis.';
+      else if(c.scored >= c.all) t = 'All '+ghoN(c.all, 'game')+' scored.';
+      else if(!OJ_ON) t = 'Off: '+n(c.scored)+' of '+ghoN(c.all, 'game')+' scored.';
+      else t = (OJ_JOB ? 'Checking: ' : '')+n(c.scored)+' of '+ghoN(c.all, 'game')+' scored'+(OJ_JOB ? '.' : '. Checks run while the Openings tab is open.');
+    }
+    if(el.textContent!==t) el.textContent = t;
+  }
+  (function(){
+    const row = document.getElementById('oj-row');
+    row.addEventListener('click', (e)=>{
+      const b = e.target.closest('.toggle');
+      if(!b) return;
+      OJ_ON = b.dataset.val==='on';
+      if(OJ_ON) OJ_NOENG = false;
+      try{ localStorage.setItem(OJ_KEY, OJ_ON ? 'on' : 'off'); }catch(e2){}
+      if(!OJ_ON) ojStop(); else ojEnsure();
+      ojStatus();
+    });
+    document.getElementById('settings-fab').addEventListener('click', ()=> setTimeout(ojStatus, 0));
+    ojStatus();
+  })();
+  // ---- each phase's accuracy from Lichess's evals (a game you had Lichess analyze and didn't review here) ----
+  // your moves with a score on both sides only; a phase whose moves aren't 90% covered is left blank
+  function ojGradeGaps(ev, b, d, mine){
+    const out = [0, 1, 2].map(()=> ({ n:0, all:0, loss:0, acc:null, marks:{ inaccuracy:0, mistake:0, blunder:0 } }));
+    for(let p=1; p<=d.N; p++){
+      const mover = p % 2 ? 'w' : 'b';
+      if(mover!==mine) continue;
+      const o = out[hpfPhaseOf(d, p-1)];
+      o.all++;
+      if(!ev[p-1] || !ev[p]) continue;
+      o.loss += Math.max(0, (hrMoverScore(ev[p-1], mover) - hrMoverScore(ev[p], mover)) - 15);
+      o.n++;
+      if(b && o.marks[b[p-1]]!=null) o.marks[b[p-1]]++;
+    }
+    out.forEach(o=>{ o.acc = o.n && o.n >= 0.9 * o.all ? hrAccuracy(o.loss, o.n) : null; o.gap = o.all > 0 && o.acc==null; });
+    return out;
+  }
+  // [opening, middlegame, endgame] from Lichess's evals of game g (its phases from the endgames pass), or null
+  function ojLiGrades(g){
+    const x = EG.get(String(g.id)), mine = ojMine(g);
+    if(!x || !x.all || !mine || !Array.isArray(g._ev) || g._ev.length!==x.n) return null;
+    const ev = [{ type:'cp', value:20 }].concat(g._ev);                   // the start position: no score from Lichess
+    return ojGradeGaps(ev, g._evj || null, { mid:x.m, end:x.s, N:x.n }, mine);
+  }
+  /* ---- Boards (2026-10-31, the user: "a tool that creates snapshots of the piece setup heading into the middle game /
+     endgame for those games so that I can compare/contrast/analyze"). The listed games (any filter: Opening's job, a line, a
+     result) as boards at one moment: out of the opening (the opening check's position) or into the endgame (the endgame's
+     first calm position), your side at the bottom, the score there from your side when it's known. Grouped by pawn
+     structure, one color at a time: a group is the commonest exact structure left and every game within 2 pawns of it (the
+     Positions count), so a group never drifts; structures seen once go last. Each group: its pawns, how you scored, "Make a
+     group from these". A board opens the review at that move. Boards fill in as they come on screen. ---- */
+  var GHB_OPEN = new Set(), GHB_ROWS = null, GHB_IO = null, GHB_SIG = '', GHB_PS = null;
+  const GHB_N = 6;
+  function ghbOn(){ return !!GH_UI.boards && GH_UI.view==='games'; }
+  function ghbPawns(fen){ const B = boardFromFENChecks(fen).board; return ghpPawns(i=>{ const p = B[i]; return p && p.type==='p' ? (p.color==='w' ? 1 : 7) : 0; }); }
+  // the FEN's pawns only (a group's picture)
+  function ghbPawnFen(fen){
+    return String(fen).split(' ')[0].split('/').map(r=>{
+      let out = '', gap = 0;
+      for(const ch of r){
+        if(ch >= '1' && ch <= '8') gap += Number(ch);
+        else if(ch==='p' || ch==='P'){ if(gap) out += gap; gap = 0; out += ch; }
+        else gap++;
+      }
+      return out + (gap ? gap : '');
+    }).join('/')+' w - - 0 1';
+  }
+  // a group: the commonest exact structure left (ties: the newest game's) and every game within 2 pawns of it
+  function ghbGroup(L){
+    let left = L.slice();
+    const out = [];
+    while(left.length){
+      const by = new Map();
+      left.forEach(e=>{ const k = e.pw.join(','); by.set(k, (by.get(k) || 0) + 1); });
+      let seedK = null, best = 0;
+      by.forEach((n, k)=>{ if(n > best){ best = n; seedK = k; } });
+      const sp = seedK.split(',').map(Number), grp = [], rest = [];
+      left.forEach(e=>{ const d = ghpApart(e.pw[0], e.pw[1], sp[0], sp[1]) + ghpApart(e.pw[2], e.pw[3], sp[2], sp[3]); (d <= 2 ? grp : rest).push(e); });
+      if(best < 2 || grp.length < 2) break;
+      out.push({ key:seedK, seedFen:grp.find(e=> e.pw.join(',')===seedK).fen, exact:best, list:grp });
+      left = rest;
+    }
+    // every structure left is a one-off: the game with the most others within 2 pawns of it seeds a group, then the next
+    if(left.length > 1){
+      const near = (a, b)=> ghpApart(a.pw[0], a.pw[1], b.pw[0], b.pw[1]) + ghpApart(a.pw[2], a.pw[3], b.pw[2], b.pw[3]) <= 2;
+      const nb = left.map((a, i)=> left.reduce((t, b, k)=> t + (k!==i && near(a, b) ? 1 : 0), 0));
+      const order = left.map((e, i)=> i).sort((a, b)=> nb[b] - nb[a] || a - b), used = new Set();
+      order.forEach(i=>{
+        if(used.has(i) || !nb[i]) return;
+        const grp = [left[i]].concat(left.filter((b, k)=> k!==i && !used.has(k) && near(left[i], b)));
+        if(grp.length < 2) return;
+        used.add(i); left.forEach((b, k)=>{ if(k!==i && !used.has(k) && near(left[i], b)) used.add(k); });
+        out.push({ key:left[i].pw.join(','), seedFen:left[i].fen, exact:1, list:grp });
+      });
+      left = left.filter((e, k)=> !used.has(k));
+    }
+    out.sort((a, b)=> b.list.length - a.list.length || b.exact - a.exact);
+    return { groups:out, rest:left };
+  }
+  // the score from your side: "+0.4", "-1.2", "M3" (you mate) / "-M3"
+  function ghbScoreText(sc, mine){
+    if(!sc) return '';
+    const sg = mine==='w' || mine==='white' ? 1 : -1;
+    if(sc.type==='mate') return '#'+(sc.value * sg);                       // as the review writes a mate: #3, #-3
+    const v = sc.value * sg / 100;
+    return (v > 0 ? '+' : v < 0 ? '\u2212' : '')+Math.abs(v).toFixed(2);  // two decimals, as the bars are written
+  }
+  const GHB_SRC = { review:'your review', lichess:'Lichess\u2019s analysis', sf:'Opening checks' };
+  function ghbCard(e, u){
+    const g = e.g, b = ghEl('button', 'ghb-card is-'+e.res);
+    b.type = 'button'; b.dataset.gid = String(g.id); b.dataset.ply = String(e.p);
+    const bd = ghEl('div', 'ghb-bd');
+    bd.dataset.fen = e.fen; if(e.color==='black') bd.dataset.flip = '1';
+    b.appendChild(bd);
+    const toks = String(g.moves || '').trim().split(/\s+/), mv = rpMoveText(e.p - 1, toks[e.p - 1] || '');
+    const sc = e.sc, st = e.st;
+    const cap = ghEl('div', 'ghb-cap');
+    cap.appendChild(ghEl('span', '', 'after '+mv));
+    cap.appendChild(ghEl('b', '', st || '\u2014'));
+    b.appendChild(cap);
+    const P = ghPlayers(g, u), opp = ghOppName(P.opp), rw = e.res==='win' ? 'Won' : e.res==='loss' ? 'Lost' : 'Drawn';
+    const ow = ghEl('div', 'ghb-opp');
+    ow.appendChild(ghEl('b', 'ghb-rw', rw));
+    ow.appendChild(ghEl('span', 'ghb-vs', ' vs '+opp));
+    b.appendChild(ow);
+    const d = g.createdAt ? new Date(Number(g.createdAt)).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) : '';
+    const lab = rw+' against '+opp+(d ? ', '+d : '')+'. After '+mv+(st ? ', '+st+' for you ('+(GHB_SRC[sc.src] || 'Opening checks')+')' : ', not scored')+'. Open the review at this move';
+    b.title = lab; b.setAttribute('aria-label', lab);
+    return b;
+  }
+  // boards drawn as they come near the screen (a board is ~230 elements)
+  function ghbFill(root){
+    const fill = (bd)=>{ if(bd.firstChild || !bd.dataset.fen) return; try{ bd.appendChild(nbMiniBoard({ fen:bd.dataset.fen, flip:!!bd.dataset.flip, arrows:[], squares:[], label:'', ply:null, line:null, extra:[] })); }catch(e){} };
+    const list = root.querySelectorAll('.ghb-bd');
+    if(!('IntersectionObserver' in window)){ list.forEach(fill); return; }
+    if(!GHB_IO){
+      const cb = (ents)=>{ ents.forEach(en=>{ if(en.isIntersecting){ GHB_IO.unobserve(en.target); fill(en.target); } }); };
+      try{ GHB_IO = new IntersectionObserver(cb, { root:document, rootMargin:'600px 0px' }); }catch(e){ GHB_IO = new IntersectionObserver(cb, { rootMargin:'600px 0px' }); }
+    }
+    list.forEach(bd=>{ if(!bd.firstChild) GHB_IO.observe(bd); });
+  }
+  function ghbRender(rows){
+    GHB_ROWS = rows;
+    const box = document.getElementById('ghb'), wrap = document.getElementById('ghb-groups'), sum = document.getElementById('ghb-sum');
+    const mom = GH_UI.bmom==='b' ? 'b' : 'a';
+    document.querySelectorAll('#ghb-mom .toggle').forEach(t=>{ const on = t.dataset.m===mom; t.classList.toggle('active', on); t.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    if(!egReady()){ sum.textContent = 'Reading your games\u2026'; wrap.textContent = ''; GHB_SIG = ''; return; }
+    const u = ghMe(), E = [];
+    let none = 0, scored = 0;
+    rows.forEach(g=>{
+      const x = EG.get(String(g.id)), mine = ojMine(g);
+      if(!x || !x.all || !mine || !ghIsStd(g) || g.initialFen){ none++; return; }
+      const p = mom==='a' ? x.qa : x.qb, fen = mom==='a' ? x.fa : x.fb;
+      if(p < 0 || !fen){ none++; return; }
+      const sc = ojEvalAt(g, x, p);
+      if(sc) scored++;
+      E.push({ g, x, p, fen, color: mine==='w' ? 'white' : 'black', pw:ghbPawns(fen), res:ghGameResult(g, u || ''), sc, st:ghbScoreText(sc && sc.s, mine) });
+    });
+    // what's shown (each board's score included, and the piece set): the same again touches nothing
+    const sig = mom+'|'+[...GHB_OPEN].join(',')+'|'+rows.length+'|'+E.map(e=> e.g.id+':'+e.st).join(',');
+    if(sig===GHB_SIG && GHB_PS===PIECE_SVG && wrap.childNodes.length) return;
+    GHB_SIG = sig; GHB_PS = PIECE_SVG;
+    const where = mom==='a' ? 'out of the opening' : 'going into the endgame';
+    sum.textContent = !rows.length ? '' : E.length
+      ? ghoN(E.length, 'game')+' '+where+(none ? ' ('+ghoN(none, 'other')+' never got there)' : '')+', your side at the bottom, grouped by pawn structure: the same pawns, or within 2 pawns of them. '
+        +'Scored on '+scored+' of '+E.length+' (\u2014 means not scored'+(mom==='b' ? '; an endgame is checked only for games where the opening did its job and you lost' : '')+'). Tap a board for the review at that move.'
+      : 'None of the '+ghoN(rows.length, 'game')+' listed got '+(mom==='a' ? 'out of the opening' : 'to an endgame')+'.';
+    sum.hidden = !sum.textContent;
+    const fa = document.activeElement, fk = fa && wrap.contains(fa) ? (fa.dataset.gid ? 'g|'+fa.dataset.gid : fa.dataset.grp ? 'x|'+fa.dataset.grp+'|'+fa.dataset.act : '') : '';
+    if(GHB_IO) GHB_IO.disconnect();
+    wrap.textContent = '';
+    const ENT = new Map(ghoEntries(E.map(e=> e.g), u, false).map(x=> [String(x.g.id), x]));       // the reviews read once
+    ['white', 'black'].forEach(color=>{
+      const L = E.filter(e=> e.color===color);
+      if(!L.length) return;
+      const side = ghEl('div', 'ghb-side');
+      side.appendChild(ghEl('h4', '', 'As '+(color==='white' ? 'White' : 'Black')+' \u00b7 '+ghoN(L.length, 'game')));
+      const G = ghbGroup(L);
+      const draw = (list, key, title, seedFen, exact)=>{
+        const sec = ghEl('section', 'ghb-grp'), gk = color+'|'+key, open = GHB_OPEN.has(gk);
+        const m = ghoMetrics(list.map(e=> ENT.get(String(e.g.id))).filter(Boolean));
+        const head = ghEl('div', 'ghb-gh');
+        if(seedFen){
+          const pb = ghEl('div', 'ghb-pawns'), bd = ghEl('div', 'ghb-bd');
+          bd.dataset.fen = ghbPawnFen(seedFen); if(color==='black') bd.dataset.flip = '1';
+          pb.appendChild(bd);
+          head.appendChild(pb);
+        }
+        const tx = ghEl('div', 'ghb-gt');
+        tx.appendChild(ghEl('div', 'ghb-gk', title));
+        tx.appendChild(ghEl('div', 'ghb-gm', 'You scored '+ghoPts(m)+' \u00b7 W '+m.W+' \u00b7 D '+m.D+' \u00b7 L '+m.L+(exact!=null && exact < list.length ? ' \u00b7 '+exact+' with exactly these pawns' : '')));
+        tx.appendChild(ghoBar(m));
+        const acts = ghEl('div', 'ghb-acts');
+        const mk = ghEl('button', 'btn-link', 'Make a group from these');
+        mk.type = 'button'; mk.dataset.grp = gk; mk.dataset.act = 'make';
+        mk.addEventListener('click', ()=> gpNewDialog({ suggest:(color==='white' ? 'White' : 'Black')+' structure, '+ghoN(list.length, 'game'), fen:seedFen || '', flip:color==='black', label:'', games:list.map(e=> String(e.g.id)) }));
+        acts.appendChild(mk);
+        tx.appendChild(acts);
+        head.appendChild(tx);
+        sec.appendChild(head);
+        const grid = ghEl('div', 'ghb-grid');
+        (open ? list : list.slice(0, GHB_N)).forEach(e=> grid.appendChild(ghbCard(e, u)));
+        sec.appendChild(grid);
+        if(list.length > GHB_N){
+          const more = ghEl('button', 'btn-link ghb-more', open ? 'Show fewer' : 'Show all '+list.length);
+          more.type = 'button'; more.dataset.grp = gk; more.dataset.act = 'more';
+          more.addEventListener('click', ()=>{ if(GHB_OPEN.has(gk)) GHB_OPEN.delete(gk); else GHB_OPEN.add(gk); ghbRender(GHB_ROWS || []); });
+          sec.appendChild(more);
+        }
+        side.appendChild(sec);
+      };
+      G.groups.forEach(gr=> draw(gr.list, gr.key, ghoN(gr.list.length, 'game')+' with these pawns or within 2 of them', gr.seedFen, gr.exact));
+      if(G.rest.length) draw(G.rest, 'rest', G.groups.length ? 'Other structures \u00b7 '+ghoN(G.rest.length, 'game') : ghoN(G.rest.length, 'game')+', no two with the same pawns', null, null);
+      wrap.appendChild(side);
+    });
+    ghbFill(wrap);
+    if(fk){
+      const el = fk.charAt(0)==='g' ? wrap.querySelector('.ghb-card[data-gid="'+CSS.escape(fk.slice(2))+'"]') : Array.from(wrap.querySelectorAll('[data-grp]')).find(x=> 'x|'+x.dataset.grp+'|'+x.dataset.act===fk);
+      if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+    }
+  }
+  (function ghbWire(){
+    document.getElementById('gh-bv').addEventListener('click', (e)=>{
+      const b = e.target.closest('.toggle');
+      if(!b) return;
+      GH_UI.boards = b.dataset.v==='boards';
+      ghSaveFilters();
+      ghRender();
+    });
+    document.getElementById('ghb-mom').addEventListener('click', (e)=>{
+      const b = e.target.closest('.toggle');
+      if(!b) return;
+      GH_UI.bmom = b.dataset.m==='b' ? 'b' : 'a';
+      ghSaveFilters();
+      ghbRender(GHB_ROWS || []);
+    });
+    document.getElementById('ghb-groups').addEventListener('click', (e)=>{
+      const c = e.target.closest('.ghb-card');
+      if(!c) return;
+      const g = (GHB_ROWS || []).find(x=> String(x.id)===c.dataset.gid);
+      if(g) ghOpenGame(g, { at:{ ply:Number(c.dataset.ply) } });
+    });
+  })();
+  function ghbSyncToggle(){
+    document.querySelectorAll('#gh-bv .toggle').forEach(t=>{ const on = (t.dataset.v==='boards')===!!GH_UI.boards; t.classList.toggle('active', on); t.setAttribute('aria-pressed', on ? 'true' : 'false'); });
   }
   // { reach: entries that reached an endgame, kinds: [[kind, entries], ...] most first } over entries L
   function egGroups(L){
     const reach = [], by = new Map();
     L.forEach(e=>{ const x = EG.get(e.g.id); if(!x || x.s < 0) return; reach.push(e); x.t.forEach(k=>{ if(!by.has(k)) by.set(k, []); by.get(k).push(e); }); });
     return { reach, kinds:Array.from(by.entries()).sort((a, b)=> b[1].length - a[1].length || EG_ORD[a[0]] - EG_ORD[b[0]]) };
+  }
+  function ghoDrawOj(model){
+    const box = document.getElementById('gho-oj');
+    box.hidden = true;
+    if(!model || !ojReady()) return;
+    let any = false;
+    ['white', 'black'].forEach(color=>{
+      const col = document.getElementById('gho-oj-'+color), sd = model.sides[color];
+      col.textContent = '';
+      const L = sd && !sd.hidden && sd.list ? sd.list.filter(e=> e.j) : [];
+      col.hidden = !L.length;
+      if(col.hidden) return;
+      any = true;
+      const side = color==='white' ? 'White' : 'Black', S = L.filter(e=> e.j.k!=='wait');
+      const done = S.filter(e=> e.j.k==='done'), not = S.filter(e=> e.j.k==='not'), lost = S.filter(e=> e.j.lost), open = S.filter(e=> e.j.open);
+      col.appendChild(ghEl('h4', '', 'As '+side));
+      const md = ghoMetrics(done), wait = L.length - S.length;
+      col.appendChild(ghEl('p', 'gho-ends-sum', S.length
+        ? 'Did its job in '+done.length+' of '+ghoN(S.length, 'scored game')+' ('+Math.round(100*done.length/S.length)+'%)'+(done.length ? '. You score '+ghoPct(md.score)+' in them.' : '.')
+          +(wait > 0 ? ' '+ghoN(wait, 'game')+' not scored yet.' : '')
+        : 'None of your '+ghoN(L.length, 'game')+' as '+side+' scored yet.'));
+      if(!S.length){ col.appendChild(ghEl('p', 'gho-oj-note', ojHint())); return; }
+      const ul = ghEl('ul', 'gho-ends-list');
+      const row = (name, oj, list, sub)=>{
+        if(!list.length && oj!=='lost') return;
+        const m = ghoMetrics(list), li = ghEl('li', ''), b = ghEl('button', 'gho-end-b gho-oj-b'+(m.n < GHO_MIN ? ' is-thin' : ''));
+        b.type = 'button'; b.dataset.oj = oj; b.dataset.ojc = color; b.dataset.fid = 'oj|'+color+'|'+oj;
+        b.appendChild(ghEl('span', 'gho-end-k', name));
+        b.appendChild(ghoBar(m));
+        b.appendChild(ghEl('span', 'gho-end-v', oj==='lost' ? String(m.n) : m.n+' \u00b7 '+ghoPct(m.score)));
+        if(sub) b.appendChild(ghEl('span', 'gho-oj-sub', sub));
+        const lab = name+' as '+side+': '+ghoN(m.n, 'game')+(oj==='lost' ? '' : ', score '+ghoPct(m.score))+(sub ? ' ('+sub+')' : '')+'. Show them';
+        b.title = lab; b.setAttribute('aria-label', lab);
+        li.appendChild(b); ul.appendChild(li);
+      };
+      row('Did its job', 'done', done);
+      row('Didn\u2019t', 'not', not);
+      // where the games that did their job were lost: the bigger drop in your winning chances
+      const jm = lost.filter(e=> e.j.slip==='mid').length, je = lost.filter(e=> e.j.slip==='end').length, jw = lost.length - jm - je;
+      row('Did its job, then lost', 'lost', lost, lost.length ? [jm ? 'went wrong before the endgame: '+jm : '', je ? 'still fine into the endgame: '+je : '', jw ? 'endgame not scored yet: '+jw : ''].filter(Boolean).join(' \u00b7 ') : '');
+      row('Over before a middlegame', 'open', open, open.length ? 'by the result' : '');
+      col.appendChild(ul);
+    });
+    box.hidden = !any;
+  }
+  // how the scores come (the section's line when nothing is scored yet)
+  function ojHint(){
+    if(OJ_NOENG) return 'Stockfish can\u2019t run here: only games you reviewed or had Lichess analyze can be scored.';
+    if(!OJ_ON) return 'Turn on Opening checks in Settings to score your games, or review them on the analysis board.';
+    return 'Stockfish is scoring where your games leave the opening, newest first.';
   }
   function ghoDrawEnds(model){
     const box = document.getElementById('gho-ends');
@@ -32451,6 +33114,30 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       this.send('go movetime '+o.ms);
       return true;
     },
+    // Opening checks (oj*): one position's score, full strength, one line, a fixed number of nodes from a fresh
+    // hash (the same answer on every device), handed to cb(fen, bestmove, info). Its lines go to no listener.
+    async check(fen, nodes, cb){
+      const w = this.worker, my = ++this._thinkSeq;
+      if(!w) return false;
+      await this.ready;
+      if(this.worker!==w || this.state!=='ready' || my!==this._thinkSeq) return false;
+      this.pendingFen = null;
+      for(let k = 0; k < 5 && this.searching && this.worker===w && my===this._thinkSeq; k++){
+        hveSendStop();
+        await new Promise(res=>{ const t = setTimeout(res, 1000); this._bestWait.push(()=>{ clearTimeout(t); res(); }); });
+      }
+      if(this.worker!==w || this.searching || this.state!=='ready' || my!==this._thinkSeq) return false;
+      this.pendingFen = null;
+      this.send('setoption name UCI_LimitStrength value false');
+      this.send('setoption name MultiPV value 1');
+      this.limited = true;                 // the next analysis puts its three lines back
+      this.send('ucinewgame');
+      this.kind = 'ck'; this._pxCb = cb; this._ck = null;
+      this.currentFen = fen; this.searching = true; this._stopSent = false;
+      this.send('position fen '+fen);
+      this.send('go nodes '+nodes);
+      return true;
+    },
     // A fresh hash, like Repertoire Lab's new Engine for a review.
     async reset(){
       const w = this.worker;
@@ -32494,7 +33181,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hveDrop(state){
     clearTimeout(hve._t1); clearTimeout(hve._t2); clearTimeout(hve._stopT);
     hve.worker = null; hve.searching = false; hve.pendingFen = null; hve.pendingDepth = null; hve.currentFen = null;
-    hve.kind = ''; hve._pxCb = null; hve.limited = false;          // a new worker starts at full strength
+    hve.kind = ''; hve._pxCb = null; hve._ck = null; hve.limited = false;          // a new worker starts at full strength
     const rr = hve._readyRes; hve._readyRes = null; if(rr) rr(false);
     hve._readyWait.splice(0).forEach(f=> f(false));
     hve._bestWait.splice(0).forEach(f=> f());
@@ -32553,17 +33240,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       return;
     }
     if(line.indexOf('bestmove')===0){
-      const fen = hve.currentFen, natural = !hve._stopSent, px = hve.kind==='px' ? hve._pxCb : null;
-      hve.searching = false; hve.kind = ''; hve._pxCb = null;
+      const fen = hve.currentFen, natural = !hve._stopSent, px = hve.kind==='px' || hve.kind==='ck' ? hve._pxCb : null, ck = hve.kind==='ck' ? hve._ck : null;
+      hve.searching = false; hve.kind = ''; hve._pxCb = null; hve._ck = null;
       clearTimeout(hve._stopT);
       hve._bestWait.splice(0).forEach(f=> f());
-      if(px){ if(natural) try{ px(fen, line.split(/\s+/)[1] || ''); }catch(e){} }
+      if(px){ if(natural) try{ px(fen, line.split(/\s+/)[1] || '', ck); }catch(e){} }
       else if(natural && fen) hve._done.forEach(cb=>{ try{ cb(fen); }catch(e){} });
       hveStartNext();
       return;
     }
     if(line.indexOf('info ')===0 && line.indexOf(' pv ')>=0){
       if(hve.kind==='px') return;          // a move being played out isn't analysis
+      if(hve.kind==='ck'){ const ci = hveParse(line); if(ci && ci.multipv===1) hve._ck = ci; return; }      // an opening check: its last score
       const info = hveParse(line);
       if(info) hve._ls.forEach(cb=>{ try{ cb(info); }catch(e){} });
     }
@@ -32658,7 +33346,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   });
   document.addEventListener('visibilitychange', ()=>{
     if(!HV_STATE || !hvViewActive()) return;
-    if(document.hidden){ if(hve.owner==='live' && hve.state==='ready' && hve.kind!=='px') hve.stop(); }      // a move being played out still comes
+    if(document.hidden){ if(hve.owner==='live' && hve.state==='ready' && hve.kind!=='px' && hve.kind!=='ck') hve.stop(); }      // a move being played out still comes
     else hvLiveAnalyze();
   });
   // RL formatScore: +0.35, -1.20, #3, #-2
@@ -33397,7 +34085,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!hrValidEntry(gid, entry)) return false;
     const st = hrReadStore();
     st.g[gid] = entry;
-    return hrWriteStore(st);
+    const ok = hrWriteStore(st);
+    if(ok && typeof OJ_VER==='number'){ OJ_RS = null; OJ_VER++; }      // the opening's job reads reviews (oj*)
+    return ok;
   }
   // A finished review of this exact game (same moves), or null.
   function hrLoad(S){
@@ -33625,6 +34315,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     card: document.getElementById('hpf'), now: document.getElementById('hpf-now'), field: document.getElementById('hpf-field'),
     svg: document.getElementById('hpf-svg'), marks: document.getElementById('hpf-marks'), queens: document.getElementById('hpf-queens'),
     phases: document.getElementById('hpf-phases'), go: document.getElementById('hpf-go'), season: document.getElementById('hpf-season'), cells: [],
+    src: document.getElementById('hpf-src'),
     info: document.getElementById('hpf-info'), how: document.getElementById('hpf-how'),
     bar: document.getElementById('hpf-bar'), mini: document.getElementById('hpf-mini'), more: document.getElementById('hpf-more')
   };
@@ -33777,8 +34468,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hpfDrawStatic();
     if(!S._hpf) S._hpf = hpfDivide(S.plyStates);
     const d = S._hpf, R = S.review, job = hrJob && hrJob.S===S ? hrJob : null, graded = hpfGraded(S), mine = hpfMine(S);
-    const G = graded ? hpfGrade(R.ev, R.b, d, mine) : null;
+    // no review here: the phases from Lichess's analysis, when you had Lichess analyze the game (oj*)
+    const LG = !graded && !job && S.game && Array.isArray(S.game._ev) && S.game._ev.length===S.main.length
+      ? ojGradeGaps([{ type:'cp', value:20 }].concat(S.game._ev), S.game._evj || null, d, mine) : null;
+    const G = graded ? hpfGrade(R.ev, R.b, d, mine) : LG;
     S._hpfG = G;
+    E.src.hidden = !LG;
+    if(LG && E.src.textContent!=='From Lichess\u2019s analysis of this game') E.src.textContent = 'From Lichess\u2019s analysis of this game';
     hpfSetOpen(hvPrefs.phaseOpen, true);
     hpfDrawQueens(d);
     // your other reviewed games (this one left out), a phase's average from 2 or more of them
@@ -33786,7 +34482,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     E.cells.forEach((b, k)=>{
       const reached = hpfReached(d, k), o = G ? G[k] : null;
       const num = !reached || (G && o.acc==null) ? '\u2013' : G ? Math.round(o.acc)+'%' : (job ? '\u2026' : '\u2013');
-      const word = !reached ? 'Not reached' : G ? (o.acc==null ? 'No moves of yours' : hpfWord(o.acc)) : (job ? 'Grading\u2026' : 'Not graded');
+      const word = !reached ? 'Not reached' : G ? (o.acc==null ? (o.gap ? 'Not enough of Lichess\u2019s analysis' : 'No moves of yours') : hpfWord(o.acc)) : (job ? 'Grading\u2026' : 'Not graded');
       const marks = G && reached && o.acc!=null ? hpfMarksText(o.marks) : '', av = avg(k), sub = [marks, av].filter(Boolean).join(' \u00b7 ');
       b.querySelector('.hpf-ph-num').textContent = num;
       b.querySelector('.hpf-ph-word').textContent = word;
@@ -33794,7 +34490,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       b.querySelector('.hpf-ph-avg').textContent = av;
       b.title = sub;
       b.disabled = !reached;
-      b.setAttribute('aria-label', HPF_NAMES[k]+': '+(num!=='\u2013' && num!=='\u2026' ? 'your accuracy '+num+', ' : '')+word+(sub ? ', '+sub.replace('avg ', 'your average over your other reviewed games ') : '')+(reached ? '. Go to where it begins' : ''));
+      b.setAttribute('aria-label', HPF_NAMES[k]+': '+(num!=='\u2013' && num!=='\u2026' ? 'your accuracy '+num+', ' : '')+word+(sub ? ', '+sub.replace('avg ', 'your average over your other analyzed games ') : '')+(reached ? '. Go to where it begins' : ''));
     });
     hpfRenderMarks(S, d, R, graded, mine);
     // the queen trade, when it brought the endgame sooner
@@ -33809,7 +34505,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     E.queens.hidden = !qt;
     // Analyze game (the review pane's own button, here too); when the engine can't run, why
     const goHad = document.activeElement===E.go;
-    E.go.hidden = !!(graded || job || !S.std);
+    E.go.hidden = !!(graded || job || !S.std || (LG && LG.some((o, k)=> o.acc!=null && hpfReached(d, k))));
     const noEng = !graded && !job && (hve.state==='failed' || hrNotice==='engine');
     const goTxt = noEng ? (hve.state==='failed' && hve.failWhy==='slow' ? 'The engine didn\u2019t finish downloading, so the phases aren\u2019t graded. Try again'
       : 'Grading the phases needs the engine, which isn\u2019t available here. Try again') : 'Analyze game to grade each phase';
@@ -33907,7 +34603,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const st = hrReadStore().g, games = new Map();
     try{ ghBaseList('all').forEach(g=>{ if(g && g.id!=null) games.set(String(g.id), g); }); }catch(e){}
     const todo = Object.keys(st).filter(id=> games.has(id));
-    const key = todo.map(id=> id+':'+st[id].at).sort().join(',');
+    // and the games you had Lichess analyze (no review here), from its evals (oj*)
+    games.forEach((g, id)=>{ if(!st[id] && Array.isArray(g._ev) && EG.has(id)) todo.push(id); });
+    const key = todo.map(id=> id+':'+(st[id] ? st[id].at : 'li')).sort().join(',');
     if(key===hpfSeasonKey) return hpfSeasonRes;
     hpfSeasonKey = key;
     hpfSeasonRes = null;
@@ -33921,8 +34619,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       while(i < todo.length && performance.now() - t0 < 10){
         const id = todo[i++];
         let r = null;
-        try{ r = hpfGameGrades(games.get(id), st[id]); }catch(e){ r = null; }
-        if(r) per.set(id, r.map(o=> o.acc));
+        try{ r = st[id] ? hpfGameGrades(games.get(id), st[id]) : ojLiGrades(games.get(id)); }catch(e){ r = null; }
+        if(r && r.some(o=> o.acc!=null)) per.set(id, r.map(o=> o.acc));
       }
       if(i < todo.length){ hpfSeasonT = setTimeout(step, 16); return; }
       hpfSeasonRes = { per };
