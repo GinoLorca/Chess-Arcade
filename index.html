@@ -3295,43 +3295,68 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .plaque-board .piece-wrap{ filter:none; }
   /* the Chess Arcade logo (the user's, 2026-10-31) sits where the theme swatch was; the swatch stays built, unseen */
   #page-header .plaque-board{ display:none; }
-  /* ... and it glows like an arcade sign (the user, 2026-10-31): a halo in the logo's two colours for the theme that
-     breathes, now and then flickers, and a shine that sweeps the badge every few seconds. Only opacity, transform and
-     a small highlight move, so it stays cheap; still for reduced motion. --lg-a/--lg-b/--lg-o/--lg-mask come from
-     paintThemeLogo. */
-  .plaque-logo-wrap{ position:relative; flex:0 0 auto; display:block; width:108px; height:108px; margin:-4px -2px -4px 0; isolation:isolate; }   /* 25% smaller (the user, 2026-10-31) */
-  .plaque-logo{ display:block; width:100%; height:100%; filter:drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
+  /* ... and it glows like a TV screen in a dark room (the user, 2026-10-31: "like a glowing tv screen in a dark room glow",
+     not a shine): its light spills well past the badge onto the card, in the logo's two colours for the theme, and wavers
+     the way a screen's light does as the picture changes: two soft pools of light, each on its own uneven beat (slow drifts,
+     now and then a quick change like a cut), never in step, so the light's colour shifts; the badge brightens and dims a
+     touch with it. Only opacity, transform and the badge's filter move; still for reduced motion. --lg-a/--lg-b/--lg-o come
+     from paintThemeLogo. */
+  .plaque-logo-wrap{ position:relative; flex:0 0 auto; display:block; width:108px; height:108px; margin:-4px -2px -4px 0; isolation:isolate;   /* 25% smaller (the user, 2026-10-31) */
+    --lg-sh:drop-shadow(0 0 7px color-mix(in srgb, var(--lg-a, #29d3ff) 45%, transparent)) drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
+  .plaque-logo{ display:block; width:100%; height:100%; filter:var(--lg-sh); animation:plaqueTvScreen 6.7s linear infinite; }
+  .plaque-logo-wrap::before, .plaque-logo-wrap::after{
+    content:""; position:absolute; inset:-95%; border-radius:50%; z-index:-1; pointer-events:none; filter:blur(16px); will-change:opacity, transform;
+  }
   .plaque-logo-wrap::before{
-    content:""; position:absolute; inset:9%; border-radius:28%; z-index:-1; pointer-events:none;
-    background:linear-gradient(135deg, var(--lg-a, #29d3ff), var(--lg-b, #ff3fd2));
-    filter:blur(11px); opacity:calc(var(--lg-o, 1) * .5); will-change:opacity, transform;
-    animation:plaqueGlow 4.2s ease-in-out infinite;
+    /* full strength out to the badge's edge (the light comes off the screen), then fading over the card */
+    background:radial-gradient(closest-side, var(--lg-a, #29d3ff) 26%, color-mix(in srgb, var(--lg-a, #29d3ff) 62%, transparent) 40%,
+      color-mix(in srgb, var(--lg-a, #29d3ff) 26%, transparent) 64%, color-mix(in srgb, var(--lg-a, #29d3ff) 8%, transparent) 84%, transparent 100%);
+    opacity:calc(var(--lg-o, 1) * .55); animation:plaqueTvA 6.7s linear infinite;
   }
   .plaque-logo-wrap::after{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(105deg, transparent 42%, rgba(255,255,255,.38) 50%, transparent 58%) no-repeat;
-    background-size:300% 100%; background-position:150% 0;
-    -webkit-mask:var(--lg-mask) center / contain no-repeat; mask:var(--lg-mask) center / contain no-repeat;
-    animation:plaqueShine 7s ease-in-out infinite 1.2s;
+    background:radial-gradient(closest-side, var(--lg-b, #ff3fd2) 24%, color-mix(in srgb, var(--lg-b, #ff3fd2) 50%, transparent) 40%,
+      color-mix(in srgb, var(--lg-b, #ff3fd2) 18%, transparent) 66%, transparent 92%);
+    opacity:calc(var(--lg-o, 1) * .32); transform:translate(7%, 5%); animation:plaqueTvB 9.3s linear infinite;
   }
-  @keyframes plaqueGlow{
-    0%, 100%{ opacity:calc(var(--lg-o, 1) * .42); transform:scale(.97); }
-    45%{ opacity:calc(var(--lg-o, 1) * .9); transform:scale(1.05); }
-    86%{ opacity:calc(var(--lg-o, 1) * .66); transform:scale(1); }
-    88%{ opacity:calc(var(--lg-o, 1) * .18); }
-    90%{ opacity:calc(var(--lg-o, 1) * .72); }
-    92%{ opacity:calc(var(--lg-o, 1) * .3); }
-    94%{ opacity:calc(var(--lg-o, 1) * .66); }
+  @keyframes plaqueTvA{
+    0%, 100%{ opacity:calc(var(--lg-o, 1) * 0.65); transform:scale(1); }
+    9%{ opacity:calc(var(--lg-o, 1) * 0.81); }
+    14%{ opacity:calc(var(--lg-o, 1) * 0.60); transform:scale(.97); }
+    27%{ opacity:calc(var(--lg-o, 1) * 0.96); transform:scale(1.04); }
+    31%{ opacity:calc(var(--lg-o, 1) * 0.74); }
+    46%{ opacity:calc(var(--lg-o, 1) * 0.86); transform:scale(1.01); }
+    51%{ opacity:calc(var(--lg-o, 1) * 0.52); }
+    54%{ opacity:calc(var(--lg-o, 1) * 0.92); transform:scale(1.03); }
+    71%{ opacity:calc(var(--lg-o, 1) * 0.72); transform:scale(.99); }
+    83%{ opacity:calc(var(--lg-o, 1) * 1.00); transform:scale(1.05); }
+    90%{ opacity:calc(var(--lg-o, 1) * 0.68); }
   }
-  @keyframes plaqueShine{
-    0%{ background-position:150% 0; }
-    16%, 100%{ background-position:-50% 0; }
+  @keyframes plaqueTvB{
+    0%, 100%{ opacity:calc(var(--lg-o, 1) * 0.39); transform:translate(7%, 5%) scale(1); }
+    18%{ opacity:calc(var(--lg-o, 1) * 0.60); transform:translate(-4%, 6%) scale(1.06); }
+    24%{ opacity:calc(var(--lg-o, 1) * 0.34); }
+    41%{ opacity:calc(var(--lg-o, 1) * 0.52); transform:translate(-6%, -3%) scale(.98); }
+    63%{ opacity:calc(var(--lg-o, 1) * 0.29); transform:translate(3%, -6%) scale(1.02); }
+    66%{ opacity:calc(var(--lg-o, 1) * 0.57); }
+    84%{ opacity:calc(var(--lg-o, 1) * 0.44); transform:translate(8%, 2%) scale(1.04); }
+  }
+  /* the screen itself, with its light (plaqueTvA's beat) */
+  @keyframes plaqueTvScreen{
+    0%, 100%{ filter:brightness(1) var(--lg-sh); }
+    9%{ filter:brightness(1.03) var(--lg-sh); }
+    14%{ filter:brightness(.97) var(--lg-sh); }
+    27%{ filter:brightness(1.06) var(--lg-sh); }
+    31%{ filter:brightness(1.01) var(--lg-sh); }
+    51%{ filter:brightness(.95) var(--lg-sh); }
+    54%{ filter:brightness(1.04) var(--lg-sh); }
+    71%{ filter:brightness(.99) var(--lg-sh); }
+    83%{ filter:brightness(1.07) var(--lg-sh); }
+    90%{ filter:brightness(1) var(--lg-sh); }
   }
   @media (prefers-reduced-motion:reduce){
-    .plaque-logo-wrap::before{ animation:none; opacity:calc(var(--lg-o, 1) * .6); }
-    .plaque-logo-wrap::after{ animation:none; display:none; }
+    .plaque-logo, .plaque-logo-wrap::before, .plaque-logo-wrap::after{ animation:none; }
   }
-  @media (max-width:480px){ .plaque-logo-wrap{ width:78px; height:78px; } .plaque-logo-wrap::before{ filter:blur(8px); } }
+  @media (max-width:480px){ .plaque-logo-wrap{ width:78px; height:78px; } .plaque-logo-wrap::before, .plaque-logo-wrap::after{ inset:-80%; filter:blur(12px); } }
   @media (max-width:480px){ .plaque-board{ --tsq:11px; } }
 
   /* ---- Game History ---- */
@@ -12775,7 +12800,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // the glow: the logo's two colours for this skin (paper skins glow softly)
     const wrap = img.parentNode && img.parentNode.classList.contains('plaque-logo-wrap') ? img.parentNode : null;
     const lg = (a, b, o)=>{ if(!wrap) return; wrap.style.setProperty('--lg-a', a); wrap.style.setProperty('--lg-b', b); wrap.style.setProperty('--lg-o', String(o)); };
-    const shine = (src)=>{ if(wrap) wrap.style.setProperty('--lg-mask', 'url("'+src+'")'); };
     if(pal.glow) lg(pal.glow[0], pal.glow[1], .9);
     else if(pal.steps) lg(pal.steps[3], pal.steps[2], .9);
     else if(pal.paper) lg(pal.warm, pal.cool, .35);
@@ -12821,8 +12845,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       cx.putImageData(im, 0, 0);
       img.src = cv.toDataURL('image/png');
-      shine(img.src);
-    }catch(e){ img.src = img.dataset.src; shine(img.src); } };
+    }catch(e){ img.src = img.dataset.src; } };
     if(!LOGO_IMG){ LOGO_IMG = new Image(); LOGO_IMG.src = img.dataset.src; }
     if(LOGO_IMG.complete && LOGO_IMG.naturalWidth) draw(); else LOGO_IMG.onload = draw;
   }
