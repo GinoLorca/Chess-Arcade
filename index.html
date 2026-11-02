@@ -4885,6 +4885,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      moves (a side line) dotted */
   ::highlight(hv-mv){ color:var(--brass-text); text-decoration:underline; text-decoration-thickness:1.5px; }
   ::highlight(hv-mv-alt){ color:var(--brass-text); text-decoration:underline dotted; text-decoration-thickness:1.5px; }
+  /* in a color of your own (a note's text color): only the underline, in that color */
+  ::highlight(hv-mv-own){ text-decoration:underline; text-decoration-thickness:1.5px; }
+  ::highlight(hv-mv-alt-own){ text-decoration:underline dotted; text-decoration-thickness:1.5px; }
   /* your comments on moves (hvCom*): a row under the move pair (the game's moves), inline in a
      side line; the comment box; another device's version (hvAnnConflictRow) */
   .hv-movelist .hv-com{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; padding:1px 4px 5px 12px; font-size:12.5px; line-height:1.5; }
@@ -5175,7 +5178,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     /* and, as in the short pinned Notes, a diagram sits beside its caption, small enough to
        see whole (the card is about 45% of a column that follows the screen's height) */
     #hv-notes-card #hv-note .nb-dg{ flex-direction:row; align-items:flex-end; gap:12px; width:auto; max-width:100%; }
-    #hv-notes-card #hv-note .nb-board-wrap{ flex:0 0 auto; width:clamp(104px, calc(45vh - 220px), 200px); width:clamp(104px, calc(45dvh - 220px), 200px); }
+    #hv-notes-card #hv-note .nb-board-wrap{ flex:0 0 auto; width:clamp(104px, calc(45vh - 251px), 200px); width:clamp(104px, calc(45dvh - 251px), 200px); }     /* 251: the toolbar's second row (2026-11-02) */
     #hv-notes-card #hv-note .nb-dg-foot{ flex-direction:column; align-items:flex-start; gap:6px; }
     #hv-notes-card #hv-note .nb-dg-x{ margin-left:0; }
     /* Folding (hvApplyFold): an arrow on each of this column's cards folds it to its first lines
@@ -5188,11 +5191,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .hv-sidecol-review .hv-fold:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
     .hv-fold-chev{ width:8px; height:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:translateY(2px) rotate(-135deg); }
     .hv-fold[aria-expanded="false"] .hv-fold-chev{ transform:translateY(-2px) rotate(45deg); }     /* folded: points down, to open */
-    /* Notes' arrow at the right end of its title line. The formatting bar shares that line only in
-       a wide card (otherwise it has its own line under it): there the line keeps the arrow's room. */
-    .hv-sidecol-review #hv-pane-notes{ container:hvnotes / inline-size; }
+    /* Notes' arrow at the right end of its title line. The formatting bar has a line of its own under
+       it, from the left (2026-11-02: with Text style, Text color and Divider line it's about 340px,
+       more than this card ever has beside "Notes" and the arrow; at 360px and up it takes one row). */
     .hv-sidecol-review .hv-notes-head{ position:relative; }
-    @container hvnotes (min-width:300px){ .hv-notes-head{ padding-right:30px; } }
+    #view-play-history .hv-sidecol-review .hv-notes-head > .nb-bar{ flex:1 1 100%; margin-left:-6px; }
     /* (25px tall: it ends where the bar's own line starts, when the bar wraps under the title) */
     .hv-sidecol-review .hv-notes-head > .hv-fold{ position:absolute; top:-7px; right:-6px; height:25px; margin:0; }
     #hv-fold-head{ margin:-9px -6px -9px auto; }       /* a 10px margin box: the eyebrow still sets its row's height */
@@ -5458,7 +5461,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      its toolbar, and board diagrams. Text sits on the field's own
      surface-2 (as .text-input), icons in --ink; pressed buttons invert. ===== */
   .nb-wrap{ display:flex; flex-direction:column; min-width:0; min-height:0; }
-  .nb-bar{ display:flex; align-items:center; flex-wrap:wrap; gap:1px; }
+  .nb-bar{ display:flex; align-items:center; flex-wrap:wrap; gap:0; }
   .nb-wrap > .nb-bar{ padding:3px 4px; background:var(--surface-2); border:1px solid var(--line); border-bottom:0; border-radius:8px 8px 0 0; }
   .nb-wrap > .nb-bar + .nb-doc{ border-top-left-radius:0; border-top-right-radius:0; }
   .nb-btn{
@@ -5470,8 +5473,54 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-notes-head .nb-btn:hover{ background:var(--surface-2); }
   .nb-btn[aria-pressed="true"], .nb-btn[aria-pressed="true"]:hover{ background:var(--ink); color:var(--surface); }
   .nb-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; }
-  .nb-sep{ flex:0 0 auto; width:1px; height:18px; margin:0 3px; background:var(--line); }
-  @media (pointer:coarse){ .nb-btn{ width:36px; height:36px; } }
+  .nb-sep{ flex:0 0 auto; width:1px; height:18px; margin:0 1px; background:var(--line); }
+  /* the two menu buttons (Text style, Text color): the icon and a small caret */
+  .nb-btn.nb-btn-menu{ width:auto; min-width:32px; padding:0 1px 0 4px; gap:0; }
+  .nb-btn-menu .nb-caret{ width:8px; height:18px; flex:0 0 auto; }
+  .nb-btn-menu[aria-expanded="true"]:not(.is-on){ background:var(--surface); }
+  .hv-notes-head .nb-btn-menu[aria-expanded="true"]:not(.is-on){ background:var(--surface-2); }
+  .nb-btn-hs .nb-hd{ display:none; }
+  .nb-btn-hs[data-lv="1"] .nb-hd-1, .nb-btn-hs[data-lv="2"] .nb-hd-2, .nb-btn-hs[data-lv="3"] .nb-hd-3, .nb-btn-hs[data-lv="4"] .nb-hd-4{ display:inline; }
+  .nb-btn-hs:not(.is-on) svg:first-child{ transform:translateX(2px); }        /* no number: the H alone, centred */
+  .nb-btn-hs.is-on, .nb-btn-hs.is-on:hover{ background:var(--ink); color:var(--surface); }
+  .nb-tc-bar{ fill:var(--nb-cur, currentColor); }
+  .nb-btn-tc[data-c="G"]{ --nb-cur:var(--nb-c-G); } .nb-btn-tc[data-c="R"]{ --nb-cur:var(--nb-c-R); } .nb-btn-tc[data-c="B"]{ --nb-cur:var(--nb-c-B); }
+  .nb-btn-tc[data-c="Y"]{ --nb-cur:var(--nb-c-Y); } .nb-btn-tc[data-c="O"]{ --nb-cur:var(--nb-c-O); } .nb-btn-tc[data-c="P"]{ --nb-cur:var(--nb-c-P); }
+  .nb-btn-tc[data-c="K"]{ --nb-cur:var(--nb-c-K); } .nb-btn-tc[data-c="L"]{ --nb-cur:var(--nb-c-L); } .nb-btn-tc[data-c="N"]{ --nb-cur:var(--nb-c-N); }
+  @media (pointer:coarse){ .nb-btn{ width:36px; height:36px; } .nb-btn.nb-btn-menu{ width:auto; min-width:36px; } .nb-sep{ margin:0; } }     /* one row in a 375px phone's pop-up */
+  /* the menus (nbMenuOpen): a list of text styles, each in its own look; Default and nine swatches */
+  .nb-menu{
+    position:fixed; z-index:75; display:flex; flex-direction:column; gap:1px; padding:4px; min-width:168px; box-sizing:border-box;
+    background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 28px rgba(0,0,0,.3);
+  }
+  .modal-overlay > .nb-menu{ z-index:3; }
+  .nb-mi{
+    position:relative; display:flex; align-items:center; gap:8px; min-height:32px; margin:0; padding:4px 12px 4px 28px; box-sizing:border-box;
+    background:none; border:0; border-radius:5px; font:inherit; font-size:14px; line-height:1.25; color:var(--ink); text-align:left; cursor:pointer;
+  }
+  .nb-mi:hover{ background:var(--surface-2); }
+  .nb-mi:focus-visible{ background:var(--surface-2); outline:2px solid var(--focus); outline-offset:-2px; }
+  .nb-mi[role="menuitemradio"][aria-checked="true"]::before{
+    content:''; position:absolute; left:11px; top:50%; width:5px; height:9px; margin-top:-7px;
+    border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(40deg);
+  }
+  .nb-mi-h1{ font-size:18px; font-weight:700; }     /* the notes' steps on the menu's 14px: 1.3, 1.17, 1.05, .86 */
+  .nb-mi-h2{ font-size:16.5px; font-weight:700; }
+  .nb-mi-h3{ font-size:14.75px; font-weight:700; }
+  .nb-mi-h4{ font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  .nb-sw-dot{ flex:0 0 auto; width:14px; height:14px; border-radius:50%; background:var(--ink); }
+  .nb-sws{ display:grid; grid-template-columns:repeat(3, 32px); gap:6px; padding:6px 10px 6px 28px; }
+  .nb-mi.nb-sw{ width:32px; height:32px; min-height:0; padding:0; border-radius:50%; justify-content:center; }
+  .nb-mi.nb-sw::after{ content:''; width:22px; height:22px; border-radius:50%; background:var(--nb-sw); box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); }
+  .nb-mi.nb-sw[aria-checked="true"]::before{ display:none; }
+  .nb-mi.nb-sw[aria-checked="true"]::after{ box-shadow:0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
+  .nb-sw-G{ --nb-sw:var(--nb-c-G); } .nb-sw-R{ --nb-sw:var(--nb-c-R); } .nb-sw-B{ --nb-sw:var(--nb-c-B); } .nb-sw-Y{ --nb-sw:var(--nb-c-Y); } .nb-sw-O{ --nb-sw:var(--nb-c-O); }
+  .nb-sw-P{ --nb-sw:var(--nb-c-P); } .nb-sw-K{ --nb-sw:var(--nb-c-K); } .nb-sw-L{ --nb-sw:var(--nb-c-L); } .nb-sw-N{ --nb-sw:var(--nb-c-N); }
+  @media (pointer:coarse){
+    .nb-mi{ min-height:44px; }
+    .nb-sws{ grid-template-columns:repeat(3, 44px); gap:4px; }
+    .nb-mi.nb-sw{ width:44px; height:44px; }
+  }
   .nb-doc{ position:relative; white-space:pre-wrap; overflow-wrap:anywhere; word-break:normal; cursor:text; overflow:auto; }
   .nb-doc:focus{ outline:none; border-color:var(--brass-soft); }
   .nb-doc.nb-empty::before{
@@ -5479,7 +5528,34 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     color:var(--ink-soft); pointer-events:none; white-space:normal;
   }
   .nb-doc > div, .nb-ro > div{ min-height:1.5em; }
-  .nb-doc > [data-b="h"], .nb-ro > [data-b="h"]{ font-size:17px; font-weight:700; line-height:1.35; padding:5px 0 2px; }
+  /* Headings 1-4 (data-lv 2-4) in the note's own text size (15px in the review and the pop-up,
+     15.5px in a group's note, 16px on a touch screen), so each level stays apart from the text and
+     from bold in every place: 1.3, 1.17, 1.05 times it, bold; Heading 4 a smaller bold capital
+     label (the one level under the text's size: its capitals and weight set it apart) */
+  .nb-doc > [data-b="h"], .nb-ro > [data-b="h"]{ font-size:1.3em; font-weight:700; line-height:1.3; padding:5px 0 2px; }
+  .nb-doc > [data-b="h"][data-lv="2"], .nb-ro > [data-b="h"][data-lv="2"]{ font-size:1.17em; line-height:1.35; padding:4px 0 1px; }
+  .nb-doc > [data-b="h"][data-lv="3"], .nb-ro > [data-b="h"][data-lv="3"]{ font-size:1.05em; line-height:1.4; padding:4px 0 1px; }
+  .nb-doc > [data-b="h"][data-lv="4"], .nb-ro > [data-b="h"][data-lv="4"]{ font-size:.86em; font-weight:800; line-height:1.6; letter-spacing:.06em; text-transform:uppercase; padding:5px 0 1px; }
+  /* a divider line: an island (nbHrEl), a thin line with a little room; the soft ink at 45% (--line,
+     the field's own border, all but vanished on the dark skins: 1.2:1 on Uptown's) */
+  .nb-doc > .nb-hr, .nb-ro > .nb-hr{ min-height:0; height:21px; display:flex; align-items:center; cursor:default; user-select:none; -webkit-user-select:none; }
+  .nb-hr > hr{ flex:1 1 auto; height:0; margin:0; border:0; border-top:2px solid var(--ink-soft); opacity:.45; }
+  /* text colors: the arrow colors (NB_CODES) made readable on the note's background (nbParseInline {R} ...):
+     each at least 4.5:1 on --surface-2 of every skin (measured; t_nbfmt checks it on all ten, light and
+     dark). Darker on the light skins, darker still on Hustler's and Game Boy's grey light ones, lighter on
+     the dark skins and Outer Space (dark in its light mode too). Picked to stay apart from each other
+     (brown from orange and yellow, light blue from blue). */
+  :root{ --nb-c-G:#176e3c; --nb-c-R:#c0182e; --nb-c-B:#1658c4; --nb-c-Y:#725c00; --nb-c-O:#a24a00; --nb-c-P:#7b33c9; --nb-c-K:#b5146f; --nb-c-L:#006a80; --nb-c-N:#634232; }
+  /* Felt's (and Custom's) links are brass, a dark gold the yellow above all but matches: an olive yellow
+     there, so a yellow move link stays told apart from an uncolored one */
+  :root:is(:not([data-skin]), [data-skin="custom"]){ --nb-c-Y:#666000; }
+  :root:is([data-skin="hustler"], [data-skin="gameboy"]){ --nb-c-G:#145831; --nb-c-R:#98131f; --nb-c-B:#0b46a0; --nb-c-Y:#574600; --nb-c-O:#7f3a00; --nb-c-P:#5a1fa0; --nb-c-K:#8c0c52; --nb-c-L:#00525f; --nb-c-N:#4e3428; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --nb-c-G:#2ecc71; --nb-c-R:#f47c84; --nb-c-B:#5aaaff; --nb-c-Y:#f7f06e; --nb-c-O:#fb8b3a; --nb-c-P:#b892f8; --nb-c-K:#f472c8; --nb-c-L:#7dd3fc; --nb-c-N:#c8a589; }
+  }
+  :root[data-theme="dark"], :root[data-skin="outerspace"]{ --nb-c-G:#2ecc71; --nb-c-R:#f47c84; --nb-c-B:#5aaaff; --nb-c-Y:#f7f06e; --nb-c-O:#fb8b3a; --nb-c-P:#b892f8; --nb-c-K:#f472c8; --nb-c-L:#7dd3fc; --nb-c-N:#c8a589; }
+  .nb-c-G{ color:var(--nb-c-G); } .nb-c-R{ color:var(--nb-c-R); } .nb-c-B{ color:var(--nb-c-B); } .nb-c-Y{ color:var(--nb-c-Y); } .nb-c-O{ color:var(--nb-c-O); }
+  .nb-c-P{ color:var(--nb-c-P); } .nb-c-K{ color:var(--nb-c-K); } .nb-c-L{ color:var(--nb-c-L); } .nb-c-N{ color:var(--nb-c-N); }
   .nb-doc > [data-b="li"], .nb-doc > [data-b="ol"], .nb-ro > [data-b="li"], .nb-ro > [data-b="ol"]{ position:relative; padding-left:1.75em; }
   /* a drawn disc, not the font's bullet (some skins' fonts draw it as a faint dot) */
   .nb-doc > [data-b="li"]::before, .nb-ro > [data-b="li"]::before{ content:""; position:absolute; left:.68em; top:.57em; width:.36em; height:.36em; border-radius:50%; background:currentColor; }
@@ -5529,9 +5605,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   #hv-tabs{ position:relative; }
   .nb-toast.nb-toast-in{ position:absolute; bottom:14px; z-index:8; }
   @media (prefers-reduced-motion:reduce){ .nb-toast{ transition:none; } }
-  /* the review's Notes pane: the toolbar shares the label's row */
+  /* the review's Notes pane: the toolbar shares the label's row at its right end when it fits;
+     else it has its own row under the label, from the left (space-between puts a row's one item
+     at its start), its first icon in line with "Notes" */
   #view-play-history .hv-notes-head{ display:flex; align-items:center; justify-content:space-between; gap:4px 8px; flex-wrap:wrap; }
-  #view-play-history .hv-notes-head .nb-bar{ margin-left:auto; }
+  #view-play-history .hv-notes-head .nb-bar{ margin-left:-6px; }
   #view-play-history .hv-pane-notes .nb-wrap{ flex:1 1 auto; }
   #view-play-history .hv-pane-notes .hv-note{ flex:1 1 0; min-height:160px; overflow:auto; resize:none; }
   @media (min-width:1180px) and (max-width:1439.98px) and (min-height:950px){
@@ -5544,7 +5622,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   @media (max-width:899.98px){
     #view-play-history .hv-pane-notes .hv-note{ flex:0 0 auto; min-height:160px; overflow:visible; }
-    #view-play-history .hv-notes-head .nb-bar{ margin-left:-6px; }     /* its own row under the label, from the left */
   }
   /* the pop-up: the toolbar stays in view while a long note scrolls */
   /* it grows with the note and the card scrolls (never shrunk under its text) */
@@ -5555,7 +5632,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      scrolling box (the 3-line clamp only suits plain text), diagrams small */
   .gn-conflict-text.nb-ro{ display:block; -webkit-line-clamp:unset; max-height:180px; overflow:auto; white-space:pre-wrap; }
   .gn-conflict-text .nb-dg{ width:110px; margin:4px 0; }
-  :root[data-skin="bauhaus"] :is(.nb-btn, .nb-wrap > .nb-bar, .nb-dg-x, .nb-toast){ border-radius:0; }
+  :root[data-skin="bauhaus"] :is(.nb-btn, .nb-wrap > .nb-bar, .nb-dg-x, .nb-toast, .nb-menu, .nb-mi:not(.nb-sw)){ border-radius:0; }
   /* ===== end of rich notes ===== */
   .hotkey-grid{ display:flex; flex-direction:column; gap:10px; }
   .hotkey-item{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; }
@@ -38556,22 +38633,49 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* ---- Rich notes ----
      A game note stays ONE string in GN.notes[id].text (at most 10,000
      characters), so the store, the Lichess sync and its data-safety rules
-     (seen lists, conflicts, tombstones, base) work on it unchanged. Two
-     kinds, told apart by the first character:
+     (seen lists, conflicts, tombstones, base) work on it unchanged. Three
+     kinds, told apart by the first characters:
        plain: anything not starting with U+2063 (every note written before
-         this). Each line is a paragraph, verbatim; no markup is read.
-       rich: U+2063, then one block per line: '# ' heading, '- ' bullet,
-         'N. ' numbered, a whole-line '[diagram ...]' board diagram, else a
-         paragraph. Inline: ** bold, * italic, __ underline (toggles, reset
-         at the end of each line); a backslash makes the next character
-         literal. Old builds show the markup as text (the marker is
-         invisible), which reads fine on lichess.org too.
+         rich notes). Each line is a paragraph, verbatim; no markup is read.
+       rich (v1): one U+2063, then one block per line: '# ' heading, '- '
+         bullet, 'N. ' numbered, a whole-line '[diagram ...]' board
+         diagram, else a paragraph. Inline: ** bold, * italic, __ underline
+         (toggles, reset at the end of each line); a backslash makes the
+         next character literal. Every rich note before 2026-11-02, read
+         and written exactly as then.
+       rich (v2, 2026-11-02): two U+2063, then v1 and: '## ' to '#### '
+         Heading 2 to 4, '---' a divider line, {G} {R} {B} {Y} {O} {P} {K}
+         {L} {N} a text color (the arrow colors' letters) and {/} back to
+         the note's own (inside a line). Written only when a note uses one
+         of these; a first line that's a diagram is written '\[diagram'.
+     Old builds read v2 as v1 with the second U+2063 starting its first
+     line: they show the new markup as text and write it back unchanged
+     ('{' is no escape of theirs; the doubled marker keeps it rich), so an
+     edit on a device still on an old build keeps the formatting. Typing
+     before that U+2063 there (Cmd+Up, Home, a new line above the first)
+     leaves it inside the text, and the old build writes the note as v1,
+     or as plain text when it sees no formatting of its own. No build
+     types or pastes a U+2063, and this one escapes one in the text
+     wherever it could read as a marker, so a bare one after the markers
+     is that marker moved: when
+     the note then reads something of v2's it reads as v2 again, the
+     U+2063 gone (2026-11-02; else as before). From plain text (the old
+     build's lines, its escapes gone) only what it can't read is taken as
+     markup: '---', '## ' to '#### ', the colors, and on the marker's own
+     line any v2 line. Backspace at the very start, or the first line
+     deleted whole, takes the marker away: then the note is what the old
+     build saved, so every device should be on this build before notes
+     use the new formatting. A line
+     of text the new markup would read ('\---', '\## x', '\{R}') comes back
+     from an old build without its backslash. Old builds show the markup
+     as text (the markers are invisible), which reads fine on lichess.org.
      The editor writes plain whenever nothing is formatted, so typing with
      no formatting stores exactly what the old textarea did.
      Note text never goes into innerHTML, an attribute, CSS or a URL: the
-     DOM is built from text nodes and b/i/u elements; a diagram is drawn
-     only from values that passed their regexes, colors only from the code
-     map below. Both note fields (#hv-note in the review, #gn-text in the
+     DOM is built from text nodes, b/i/u elements and color spans (a class
+     per letter, nb-c-R); a diagram is drawn only from values that passed
+     their regexes, colors only from the code map below and the CSS. Both
+     note fields (#hv-note in the review, #gn-text in the
      pop-up) are contenteditable divs with a textarea-like shim (value,
      select, setSelectionRange), so the GN code below drives them as it
      drove the textareas. Everything here is a var or a function: the GN
@@ -38586,19 +38690,42 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var NB_UCI_RE = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
   var NB_EXTRA_RE = /^[a-z][a-z0-9-]{0,19}( [A-Za-z0-9 .,:;+#=\/-]{1,200})?$/;   // fields a later version may add: kept verbatim
   var NB_KNOWN = ['fen', 'arrows', 'squares', 'ply', 'line', 'flip'];
+  // text colors: the arrow colors but black (X), in the menu's order; drawn from CSS custom properties per skin
+  // (--nb-c-R ...), each at least 4.5:1 on the note's background
+  var NB_TCODES = ['G', 'R', 'B', 'Y', 'O', 'P', 'K', 'L', 'N'];
+  var NB_TNAMES = { G:'Green', R:'Red', B:'Blue', Y:'Yellow', O:'Orange', P:'Purple', K:'Pink', L:'Light blue', N:'Brown' };
+  var NB_TC_RE = /^[GRBYOPKLN]$/;
+  var NB_ESC1 = /[\\*_\[\u2063]/g, NB_ESC2 = /[\\*_\[\u2063]|\{(?=[GRBYOPKLN\/]\})/g;     // v1's escapes (as before 2026-11-02, and a U+2063: never a marker); v2's add a '{' that would read as a color
   var nbDgData = new WeakMap();      // diagram island element -> its diagram
+  var nbHrEls = new WeakSet();       // divider line islands
   var NB_EDS = [];
   var NB_MAC = /Mac|iPhone|iPad|iPod/.test((navigator.platform || '') + ' ' + (navigator.userAgent || ''));
 
-  // ---- the model: { rich, blocks:[ {t:'p'|'h'|'li'|'ol', runs:[{text,b,i,u}]} | {t:'dg', dg} ] } ----
-  function nbRun(text, b, i, u){ return { text:String(text), b:!!b, i:!!i, u:!!u }; }
+  // ---- the model: { rich, blocks:[ {t:'p'|'h'|'li'|'ol', lv?, runs:[{text,b,i,u,c?}]} | {t:'dg', dg} | {t:'hr'} ] } ----
+  // lv: a heading's level 2-4 (none: Heading 1, as every heading before 2026-11-02); c: a text color's letter
+  // (none: the note's own color). The two islands (a diagram, a divider line) hold no text and count as one unit.
+  function nbRun(text, b, i, u, c){
+    const r = { text:String(text), b:!!b, i:!!i, u:!!u };
+    if(c && NB_TC_RE.test(c)) r.c = c;
+    return r;
+  }
   function nbPush(runs, r){
     if(!r || !r.text) return runs;
     const l = runs[runs.length-1];
-    if(l && l.b===!!r.b && l.i===!!r.i && l.u===!!r.u) l.text += r.text;
-    else runs.push(nbRun(r.text, r.b, r.i, r.u));
+    if(l && l.b===!!r.b && l.i===!!r.i && l.u===!!r.u && (l.c || '')===(r.c || '')) l.text += r.text;
+    else runs.push(nbRun(r.text, r.b, r.i, r.u, r.c));
     return runs;
   }
+  function nbIsl(b){ return !!b && (b.t==='dg' || b.t==='hr'); }
+  function nbIslEl(el){ return !!el && (nbDgData.has(el) || nbHrEls.has(el)); }
+  function nbLv(b){ return b && b.t==='h' ? Math.max(1, Math.min(4, b.lv || 1)) : 0; }
+  // a block's type (and a heading's level), as the model writes it: {t:'h', lv:2, runs} with lv only from 2
+  function nbSetT(b, t, lv){
+    b.t = t;
+    if(t==='h' && lv > 1) b.lv = lv; else delete b.lv;
+    return b;
+  }
+  function nbWithRuns(b, runs){ return b.t==='h' && b.lv > 1 ? { t:'h', lv:b.lv, runs } : { t:b.t, runs }; }
   function nbRunsText(runs){ let s = ''; for(const r of runs) s += r.text; return s; }
   function nbRunsLen(runs){ let n = 0; for(const r of runs) n += r.text.length; return n; }
   function nbSlice(runs, a, b){
@@ -38606,14 +38733,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let p = 0;
     for(const r of runs){
       const L = r.text.length, s = Math.max(a, p), e = Math.min(b, p+L);
-      if(e > s) nbPush(out, nbRun(r.text.slice(s-p, e-p), r.b, r.i, r.u));
+      if(e > s) nbPush(out, nbRun(r.text.slice(s-p, e-p), r.b, r.i, r.u, r.c));
       p += L;
     }
     return out;
   }
   function nbConcat(a, b){ const out = []; a.forEach(r=> nbPush(out, r)); b.forEach(r=> nbPush(out, r)); return out; }
-  function nbCopyBlock(b){ return b.t==='dg' ? { t:'dg', dg:b.dg } : { t:b.t, runs:b.runs.map(r=> nbRun(r.text, r.b, r.i, r.u)) }; }
-  function nbBlockLen(b){ return b.t==='dg' ? 1 : nbRunsLen(b.runs); }
+  function nbCopyBlock(b){
+    if(b.t==='dg') return { t:'dg', dg:b.dg };
+    if(b.t==='hr') return { t:'hr' };
+    return nbWithRuns(b, b.runs.map(r=> nbRun(r.text, r.b, r.i, r.u, r.c)));
+  }
+  function nbBlockLen(b){ return nbIsl(b) ? 1 : nbRunsLen(b.runs); }
   function nbCmp(p, q){ return (p.k - q.k) || (p.o - q.o); }
   function nbClampPos(B, p){
     if(!B.length) return { k:0, o:0 };
@@ -38698,102 +38829,163 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     dg.extra.forEach(x=>{ s += ' | '+x; });
     return s + ']';
   }
-  function nbParseInline(s){
+  // v2: a color token, {R} from here on, {/} back to the note's own (any other '{' is text);
+  // lit: only those (an old build's plain lines: no escapes, no marks)
+  function nbParseInline(s, v2, lit){
     const runs = [];
-    let b = false, i = false, u = false, buf = '';
-    const flush = ()=>{ if(buf){ nbPush(runs, nbRun(buf, b, i, u)); buf = ''; } };
+    let b = false, i = false, u = false, col = null, buf = '';
+    const flush = ()=>{ if(buf){ nbPush(runs, nbRun(buf, b, i, u, col)); buf = ''; } };
     for(let k=0; k<s.length; k++){
       const c = s.charAt(k);
-      if(c==='\\' && k+1 < s.length){ buf += s.charAt(++k); continue; }
-      if(c==='*' && s.charAt(k+1)==='*'){ flush(); b = !b; k++; continue; }
-      if(c==='_' && s.charAt(k+1)==='_'){ flush(); u = !u; k++; continue; }
-      if(c==='*'){ flush(); i = !i; continue; }
+      if(!lit){
+        if(c==='\\' && k+1 < s.length){ buf += s.charAt(++k); continue; }
+        if(c==='*' && s.charAt(k+1)==='*'){ flush(); b = !b; k++; continue; }
+        if(c==='_' && s.charAt(k+1)==='_'){ flush(); u = !u; k++; continue; }
+        if(c==='*'){ flush(); i = !i; continue; }
+      }
+      if(v2 && c==='{' && s.charAt(k+2)==='}' && (s.charAt(k+1)==='/' || NB_TC_RE.test(s.charAt(k+1)))){
+        flush(); col = s.charAt(k+1)==='/' ? null : s.charAt(k+1); k += 2; continue;
+      }
       buf += c;
     }
     flush();
     return runs;
   }
-  function nbEsc(t){ return t.replace(/[\\*_\[]/g, '\\$&'); }
+  function nbEsc(t, v2){ return t.replace(v2 ? NB_ESC2 : NB_ESC1, '\\$&'); }
   // Between two runs only the marks that change are toggled: those that end
   // (italic, bold, underline), then those that start (underline, bold,
   // italic), so marks nest as they read (__***x***__) and a run of * is at
   // most 3 long, never misread. (Opening and closing every run in full
   // would be: *a* then ***b*** reads back as *a****b***, bold lost.)
-  function nbSerInline(runs){
-    let out = '', b = false, i = false, u = false;
-    const to = (nb, ni, nu)=>{
+  // v2: a color token goes between the marks that end and those that start,
+  // only where the color changes ({R}**red bold**{/} plain); none at the end,
+  // as the line's end resets it. Its runs are merged first, so a '{' ending
+  // one run's text is always followed by a mark or a token, never read as one.
+  function nbSerInline(runs, v2){
+    let out = '', b = false, i = false, u = false, col = '';
+    const to = (nb, ni, nu, nc)=>{
       let g = '';
       if(i && !ni) g += '*';
       if(b && !nb) g += '**';
       if(u && !nu) g += '__';
+      if(v2 && nc!==col && nc!=null) g += '{'+(nc || '/')+'}';
       if(nu && !u) g += '__';
       if(nb && !b) g += '**';
       if(ni && !i) g += '*';
-      b = nb; i = ni; u = nu;
+      b = nb; i = ni; u = nu; if(nc!=null) col = nc;
       return g;
     };
-    for(const r of runs) if(r.text) out += to(!!r.b, !!r.i, !!r.u) + nbEsc(r.text);
-    return out + to(false, false, false);
+    const R = v2 ? nbConcat(runs, []) : runs;
+    for(const r of R) if(r.text) out += to(!!r.b, !!r.i, !!r.u, r.c || '') + nbEsc(r.text, v2);
+    return out + to(false, false, false, null);
+  }
+  // A note's version: v2 when it uses Heading 2-4, a divider line or a color, else v1.
+  function nbIsV2(B){ return B.some(b=> b.t==='hr' || nbLv(b) > 1 || (!nbIsl(b) && b.runs.some(r=> r.c))); }
+  // A bare U+2063 in a line: one not escaped (n, the markers: 1 or 2), or any (plain text, n 0).
+  function nbBareMark(l, n){
+    for(let k=0; k<l.length; k++){
+      const c = l.charAt(k);
+      if(c==='\\' && n){ k++; continue; }
+      if(c===NB_MARK) return true;
+    }
+    return false;
   }
   function nbParse(text){
     const s = String(text==null ? '' : text);
-    if(s.charAt(0)!==NB_MARK){
-      return { rich:false, blocks: s ? s.split('\n').map(l=> ({ t:'p', runs: l ? [nbRun(l)] : [] })) : [] };
+    const plain = ()=> ({ rich:false, blocks: s ? s.split('\n').map(l=> ({ t:'p', runs: l ? [nbRun(l)] : [] })) : [] });
+    if(s.indexOf(NB_MARK) < 0) return plain();
+    const n = s.charAt(0)!==NB_MARK ? 0 : s.charAt(1)===NB_MARK ? 2 : 1, ls = s.slice(n).split('\n');
+    // a v2 marker an old build moved into the text (see above): v2 again, the bare U+2063s gone, when
+    // that reads something of v2's (else the text as before: a U+2063 pasted into an old textarea)
+    if(n < 2 && ls.some(l=> nbBareMark(l, n))){
+      const B = nbParseLines(ls, n, true);
+      if(nbIsV2(B)) return { rich:true, blocks:B };
     }
+    return n ? { rich:true, blocks:nbParseLines(ls, n, false) } : plain();
+  }
+  // The lines after the markers (n): v1, v2 (two markers, or a moved one), or (moved, n 0) plain text.
+  function nbParseLines(ls, n, moved){
+    const v2 = n===2 || moved;
     let dgs = 0, m;
-    const blocks = s.slice(1).split('\n').map(l=>{
+    const dgOf = (l)=>{ const dg = dgs < NB_MAX_DG ? nbParseDiagram(l) : null; if(dg) dgs++; return dg; };
+    return ls.map((L, k)=>{
+      const own = moved && L.charAt(0)===NB_MARK;          // the line the moved marker starts: the first line once
+      let l = L;
+      if(moved && !n){          // from plain text: the old build's lines as they showed, no escapes
+        l = L.replace(/\u2063/g, '');
+        if(own && l.slice(0, 8)==='[diagram'){ const dg = dgOf(l); if(dg) return { t:'dg', dg }; }
+        if(l==='---') return { t:'hr' };
+        if((m = /^(#{1,4}) /.exec(l)) && (own || m[1].length > 1)) return nbWithRuns({ t:'h', lv:m[1].length }, nbParseInline(l.slice(m[0].length), true, true));
+        if(own && l.slice(0, 2)==='- ') return { t:'li', runs:nbParseInline(l.slice(2), true, true) };
+        if(own && (m = /^\d{1,3}\. /.exec(l))) return { t:'ol', runs:nbParseInline(l.slice(m[0].length), true, true) };
+        return { t:'p', runs:nbParseInline(l, true, true) };
+      }
+      if(moved) l = L.replace(/\\[\s\S]|\u2063/g, x=> x===NB_MARK ? '' : x);
+      // v2's first line: a diagram is written '\[diagram ...]' (what an old build writes back there)
+      if(v2 && (n===2 ? !k : own) && l.slice(0, 9)==='\\[diagram'){
+        const dg = dgOf(l.slice(1));
+        if(dg) return { t:'dg', dg };
+      }
       if(l.slice(0, 8)==='[diagram'){
-        const dg = dgs < NB_MAX_DG ? nbParseDiagram(l) : null;
-        if(dg){ dgs++; return { t:'dg', dg }; }
+        const dg = dgOf(l);
+        if(dg) return { t:'dg', dg };
         return { t:'p', runs: [nbRun(l)] };          // not a valid diagram: the line as it is
       }
-      if(l.slice(0, 2)==='# ') return { t:'h', runs:nbParseInline(l.slice(2)) };
-      if(l.slice(0, 2)==='- ') return { t:'li', runs:nbParseInline(l.slice(2)) };
-      if((m = /^\d{1,3}\. /.exec(l))) return { t:'ol', runs:nbParseInline(l.slice(m[0].length)) };
-      return { t:'p', runs:nbParseInline(l) };
+      if(v2 && l==='---') return { t:'hr' };
+      if(v2 && (m = /^(#{1,4}) /.exec(l))) return nbWithRuns({ t:'h', lv:m[1].length }, nbParseInline(l.slice(m[0].length), true));
+      if(!v2 && l.slice(0, 2)==='# ') return { t:'h', runs:nbParseInline(l.slice(2)) };
+      if(l.slice(0, 2)==='- ') return { t:'li', runs:nbParseInline(l.slice(2), v2) };
+      if((m = /^\d{1,3}\. /.exec(l))) return { t:'ol', runs:nbParseInline(l.slice(m[0].length), v2) };
+      return { t:'p', runs:nbParseInline(l, v2) };
     });
-    return { rich:true, blocks };
   }
   function nbSerialize(doc){
     const B = (doc && doc.blocks) || [];
-    if(B.every(b=> b.t==='p' && b.runs.every(r=> !r.b && !r.i && !r.u))){
+    if(B.every(b=> b.t==='p' && b.runs.every(r=> !r.b && !r.i && !r.u && !r.c))){
       const s = B.map(b=> nbRunsText(b.runs)).join('\n');
-      if(s.charAt(0)!==NB_MARK) return s;          // plain: the lines verbatim, as a textarea would
+      if(s.indexOf(NB_MARK) < 0 || !nbParse(s).rich) return s;          // plain: the lines verbatim, as a textarea would (rich, escaped, when a U+2063 in them would read as a moved marker)
     }
+    const v2 = nbIsV2(B);
     let n = 0;
-    const lines = B.map(b=>{
-      if(b.t==='dg'){ n = 0; return nbSerDiagram(b.dg); }
-      const inl = nbSerInline(b.runs);
+    const lines = B.map((b, k)=>{
+      if(b.t==='dg'){ n = 0; return (v2 && !k ? '\\' : '')+nbSerDiagram(b.dg); }
+      if(b.t==='hr'){ n = 0; return '---'; }
+      const inl = nbSerInline(b.runs, v2);
       if(b.t==='ol'){ n++; return Math.min(n, 999)+'. '+inl; }
       n = 0;
-      if(b.t==='h') return '# '+inl;
+      if(b.t==='h') return '#'.repeat(nbLv(b))+' '+inl;
       if(b.t==='li') return '- '+inl;
-      if(/^[#-] /.test(inl)) return '\\'+inl;
+      // a line of text that reads as markup stays text
+      if(v2 ? /^(#{1,4}|-) /.test(inl) || inl==='---' : /^[#-] /.test(inl)) return '\\'+inl;
       const m = /^(\d{1,3})\. /.exec(inl);
-      return m ? m[1]+'\\'+inl.slice(m[1].length) : inl;
+      if(m) return m[1]+'\\'+inl.slice(m[1].length);
+      if(v2 && !k && inl.slice(0, 9)==='\\[diagram') return '\\[\\'+inl.slice(2);     // text, not v2's first-line diagram
+      return inl;
     });
     // only empty lines (a heading or bullet with nothing in it, as select-all
     // and Delete leaves): no note, the '' a textarea would give
-    if(B.every(b=> b.t!=='dg' && !nbRunsLen(b.runs))) return '';
-    return NB_MARK + lines.join('\n');
+    if(B.every(b=> !nbIsl(b) && !nbRunsLen(b.runs))) return '';
+    return NB_MARK + (v2 ? NB_MARK : '') + lines.join('\n');
   }
-  // Nothing to read: blank text, or only blank lines of any kind. Saved as
-  // '' (a deleted note), like the plain trim() it extends.
+  // Nothing to read: blank text, or only blank lines of any kind (divider
+  // lines too: a line under nothing isn't a note). Saved as '' (a deleted
+  // note), like the plain trim() it extends.
   function nbBlank(text){
     const s = String(text==null ? '' : text);
-    if(s.charAt(0)!==NB_MARK) return !s.trim();
-    return nbParse(s).blocks.every(b=> b.t!=='dg' && !nbRunsText(b.runs).trim());
+    if(s.indexOf(NB_MARK) < 0) return !s.trim();
+    return nbParse(s).blocks.every(b=> b.t==='hr' || (b.t!=='dg' && !nbRunsText(b.runs).trim()));
   }
   function nbDgTitle(dg){ const l = dg.label.trim(); return l==='Start' ? 'Diagram of the starting position' : (l ? 'Diagram after '+l : 'Diagram'); }
   function nbDgCaption(dg){ const l = dg.label.trim(); return l==='Start' ? 'Starting position' : (l ? 'After '+l : 'Board diagram'); }
   // The readable plain text (the Lichess study copy, copy and paste).
   function nbPlain(text){
     const s = String(text==null ? '' : text);
-    if(s.charAt(0)!==NB_MARK) return s;
+    if(s.indexOf(NB_MARK) < 0) return s;
     let n = 0;
     return nbParse(s).blocks.map(b=>{
       if(b.t==='dg'){ n = 0; return '['+nbDgTitle(b.dg)+': '+b.dg.fen+']'; }
-      const t = nbRunsText(b.runs);
+      if(b.t==='hr'){ n = 0; return '---'; }
+      const t = nbRunsText(b.runs);          // headings of every level as their text, colors gone
       if(b.t==='ol'){ n++; return n+'. '+t; }
       n = 0;
       return b.t==='li' ? '- '+t : t;
@@ -38802,9 +38994,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // The Game History row's one plain line.
   function nbFirstLine(text){
     const s = String(text==null ? '' : text);
-    if(s.charAt(0)!==NB_MARK){ const l = s.split('\n').find(x=> x.trim()); return l ? l.trim() : ''; }
+    if(s.indexOf(NB_MARK) < 0){ const l = s.split('\n').find(x=> x.trim()); return l ? l.trim() : ''; }
     let dg = false;
     for(const b of nbParse(s).blocks){
+      if(b.t==='hr') continue;
       if(b.t==='dg'){ dg = true; continue; }
       const t = nbRunsText(b.runs).trim();
       if(t) return t;
@@ -38877,17 +39070,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     el.appendChild(foot);
     return el;
   }
+  // a divider line: an island like a diagram (the caret goes around it, Backspace or Delete next to it removes it).
+  // The line is a real <hr> in it: an empty island gave the caret two invisible stops beside it.
+  function nbHrEl(){
+    const el = nbEl('div', 'nb-hr');
+    el.setAttribute('data-b', 'hr');
+    el.setAttribute('contenteditable', 'false');
+    el.setAttribute('role', 'separator');
+    el.appendChild(document.createElement('hr')).setAttribute('aria-hidden', 'true');
+    nbHrEls.add(el);
+    return el;
+  }
   function nbRunNode(r){
     let n = document.createTextNode(r.text);
     if(r.i){ const e = document.createElement('i'); e.appendChild(n); n = e; }
     if(r.b){ const e = document.createElement('b'); e.appendChild(n); n = e; }
     if(r.u){ const e = document.createElement('u'); e.appendChild(n); n = e; }
+    if(r.c && NB_TC_RE.test(r.c)){ const e = document.createElement('span'); e.className = 'nb-c-'+r.c; e.appendChild(n); n = e; }     // outermost: its underline takes the color
     return n;
   }
   function nbBlockEl(b, ctx, num){
     if(b.t==='dg') return nbIsland(b.dg, ctx);
+    if(b.t==='hr') return nbHrEl();
     const d = document.createElement('div');
     d.setAttribute('data-b', b.t);
+    if(nbLv(b) > 1) d.setAttribute('data-lv', String(nbLv(b)));
     if(b.t==='ol') d.setAttribute('data-n', String(num));
     if(b.runs.length) b.runs.forEach(r=> d.appendChild(nbRunNode(r)));
     else d.appendChild(document.createElement('br'));          // keeps an empty line's height (and a place for the caret)
@@ -38903,17 +39110,46 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // before (its text), a rich one through the same renderer.
   function nbShowText(el, text){
     const s = String(text==null ? '' : text);
-    if(s.charAt(0)!==NB_MARK){ el.classList.remove('nb-ro'); el.textContent = s; return; }
+    const P = nbParse(s);
+    if(!P.rich){ el.classList.remove('nb-ro'); el.textContent = s; return; }
     el.classList.add('nb-ro');
-    nbRenderBlocks(el, nbParse(s).blocks, 'ro');
+    nbRenderBlocks(el, P.blocks, 'ro');
   }
 
   // ---- reading the DOM back (the editor's own, or pasted HTML) ----
-  var NB_SKIP = /^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT|HEAD|TITLE|META|LINK|BASE|IFRAME|FRAME|FRAMESET|OBJECT|EMBED|APPLET|SVG|MATH|CANVAS|VIDEO|AUDIO|SOURCE|TRACK|IMG|PICTURE|MAP|AREA|SELECT|TEXTAREA|INPUT|BUTTON|OPTION|DATALIST|PARAM|WBR|HR)$/;
+  var NB_SKIP = /^(SCRIPT|STYLE|TEMPLATE|NOSCRIPT|HEAD|TITLE|META|LINK|BASE|IFRAME|FRAME|FRAMESET|OBJECT|EMBED|APPLET|SVG|MATH|CANVAS|VIDEO|AUDIO|SOURCE|TRACK|IMG|PICTURE|MAP|AREA|SELECT|TEXTAREA|INPUT|BUTTON|OPTION|DATALIST|PARAM|WBR)$/;
   var NB_BLOCK = /^(P|DIV|BLOCKQUOTE|PRE|SECTION|ARTICLE|HEADER|FOOTER|ASIDE|NAV|MAIN|FIGURE|FIGCAPTION|ADDRESS|DL|DT|DD|UL|OL|MENU|TABLE|THEAD|TBODY|TFOOT|TR|CAPTION|DETAILS|SUMMARY|FORM|FIELDSET|LEGEND|CENTER)$/;
-  function nbMarksOf(el, m){
+  // The letter whose color (this skin's --nb-c-X) a CSS color is, or null. Chrome types on in
+  // a deleted word's color as <font color> or a style color (its typing style), not our span.
+  function nbTcOfColor(css){
+    const probe = nbEl('span');
+    probe.style.display = 'none';
+    document.documentElement.appendChild(probe);
+    try{
+      const rgb = (v)=>{ probe.style.color = ''; probe.style.color = v; return probe.style.color ? getComputedStyle(probe).color : ''; };
+      const want = rgb(css);
+      if(!want) return null;
+      const root = getComputedStyle(document.documentElement);
+      return NB_TCODES.find(c=> rgb(root.getPropertyValue('--nb-c-'+c).trim())===want) || null;
+    } finally { probe.remove(); }
+  }
+  // A text color only from our own markup: the editor's color spans, or (pasted) the
+  // data-nb-c our copy writes, one of the nine letters; any other page's colors (style,
+  // <font>) are dropped. In the editor's own DOM, Chrome's typing style in one of our
+  // colors is that color again (a red word deleted and typed over stays red, as bold does).
+  function nbMarksOf(el, m, paste){
     const tag = el.tagName.toUpperCase();
-    let b = m.b, i = m.i, u = m.u;
+    let b = m.b, i = m.i, u = m.u, c = m.c || null;
+    if(paste){ const x = el.getAttribute('data-nb-c'); if(x && NB_TC_RE.test(x)) c = x; }
+    else {
+      const x = tag==='SPAN' ? /^nb-c-([GRBYOPKLN])$/.exec(el.getAttribute('class') || '') : null;
+      if(x) c = x[1];
+      else {
+        const fc = (el.style && el.style.color) || (tag==='FONT' ? el.getAttribute('color') : '');
+        const y = fc ? nbTcOfColor(fc) : null;
+        if(y) c = y;
+      }
+    }
     if(tag==='B' || tag==='STRONG') b = true;
     else if(tag==='I' || tag==='EM' || tag==='CITE' || tag==='DFN' || tag==='VAR') i = true;
     else if(tag==='U' || tag==='INS') u = true;
@@ -38926,11 +39162,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const td = st.textDecorationLine || st.textDecoration;
       if(td) u = td.indexOf('underline') >= 0;
     }
-    return { b, i, u };
+    return { b, i, u, c };
   }
+  // A block's type: 'p', 'li', 'ol', or 'h' / 'h2' / 'h3' / 'h4' (a heading and its level; nbFromDom's start() makes the block).
+  // Pasted, <h1> to <h4> keep their level (our own copy writes them so), <h5> and <h6> are a Heading 4.
   function nbBlockType(el, tag, t, paste){
-    if(!paste && tag==='DIV'){ const x = el.getAttribute('data-b'); if(x==='p' || x==='h' || x==='li' || x==='ol') return x; }
-    if(/^H[1-6]$/.test(tag)) return 'h';
+    if(!paste && tag==='DIV'){
+      const x = el.getAttribute('data-b');
+      if(x==='h'){ const lv = el.getAttribute('data-lv') || ''; return /^[234]$/.test(lv) ? 'h'+lv : 'h'; }
+      if(x==='p' || x==='li' || x==='ol') return x;
+    }
+    const hm = /^H([1-6])$/.exec(tag);
+    if(hm) return hm[1]==='1' ? 'h' : 'h'+Math.min(4, Number(hm[1]));
     if(tag==='LI'){ const p = el.parentElement; return p && p.tagName.toUpperCase()==='OL' ? 'ol' : 'li'; }
     if(NB_BLOCK.test(tag)) return (t==='li' || t==='ol' || (!paste && t)) ? t : 'p';
     return null;
@@ -38945,7 +39188,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const blocks = [], hit = pts.map(()=> null);
     let cur = null, pend = [];
     const start = (t, br)=>{
-      cur = { t, runs:[] };
+      const hm = /^h([234])$/.exec(t);
+      cur = hm ? { t:'h', lv:Number(hm[1]), runs:[] } : { t, runs:[] };
       if(br) cur.br = true;
       blocks.push(cur);
       if(pend.length){ pend.forEach(j=>{ hit[j] = { k:blocks.length-1, o:0 }; }); pend = []; }
@@ -38969,7 +39213,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(pre && s.indexOf('\n') >= 0){
           s.split('\n').forEach((part, i)=>{
             if(i){ if(!cur) start(t || 'p', true); cur = null; }
-            if(part){ if(!cur) start(t || 'p'); nbPush(cur.runs, nbRun(part, m.b, m.i, m.u)); }
+            if(part){ if(!cur) start(t || 'p'); nbPush(cur.runs, nbRun(part, m.b, m.i, m.u, m.c)); }
           });
           return;
         }
@@ -38982,7 +39226,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       if(!s) return;
       if(!cur) start(t || 'p');
-      nbPush(cur.runs, nbRun(s, m.b, m.i, m.u));
+      nbPush(cur.runs, nbRun(s, m.b, m.i, m.u, m.c));
     };
     const walk = (node, m, t, pre)=>{
       let idx = 0;
@@ -38990,9 +39234,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(pts.length) point(node, idx);
         if(c.nodeType===3){ text(c, m, t, pre); continue; }
         if(c.nodeType!==1) continue;
-        if(!paste && nbDgData.has(c)){
+        // an island (ours: a diagram, a divider line), or a pasted <hr>: a divider line
+        if((!paste && nbIslEl(c)) || c.tagName.toUpperCase()==='HR'){
           cur = null;
-          blocks.push({ t:'dg', dg:nbDgData.get(c) });
+          blocks.push(!paste && nbDgData.has(c) ? { t:'dg', dg:nbDgData.get(c) } : { t:'hr' });
           const k = blocks.length-1;
           pend.forEach(j=>{ hit[j] = { k, o:0 }; }); pend = [];
           pts.forEach((p, j)=>{ if(hit[j]==null && c.contains(p.node)) hit[j] = { k, o:0 }; });
@@ -39010,12 +39255,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           cur = null;
           continue;
         }
-        if(paste && (tag==='TD' || tag==='TH') && cur && nbRunsLen(cur.runs)) nbPush(cur.runs, nbRun(' ', m.b, m.i, m.u));
-        walk(c, nbMarksOf(c, m), t, pre);
+        if(paste && (tag==='TD' || tag==='TH') && cur && nbRunsLen(cur.runs)) nbPush(cur.runs, nbRun(' ', m.b, m.i, m.u, m.c));
+        walk(c, nbMarksOf(c, m, paste), t, pre);
       }
       if(pts.length) point(node, idx);
     };
-    walk(root, { b:false, i:false, u:false }, null, false);
+    walk(root, { b:false, i:false, u:false, c:null }, null, false);
     if(pend.length){
       if(!blocks.length) start('p');
       const e = nbEndPos(blocks);
@@ -39027,16 +39272,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function nbCleanPaste(blocks){
     const out = [];
     blocks.forEach(b=>{
-      if(b.t==='dg'){ out.push(b); return; }
+      if(nbIsl(b)){ out.push(b); return; }
       let runs = b.runs.slice();
-      if(runs.length){ runs[0] = nbRun(runs[0].text.replace(/^ +/, ''), runs[0].b, runs[0].i, runs[0].u); const L = runs.length-1; runs[L] = nbRun(runs[L].text.replace(/ +$/, ''), runs[L].b, runs[L].i, runs[L].u); runs = runs.filter(r=> r.text); }
+      if(runs.length){ runs[0] = nbRun(runs[0].text.replace(/^ +/, ''), runs[0].b, runs[0].i, runs[0].u, runs[0].c); const L = runs.length-1; runs[L] = nbRun(runs[L].text.replace(/ +$/, ''), runs[L].b, runs[L].i, runs[L].u, runs[L].c); runs = runs.filter(r=> r.text); }
       if(!runs.length && !b.br) return;          // an empty HTML block isn't a line
       const txt = nbRunsText(runs);
-      if(b.t==='p' && txt.slice(0, 8)==='[diagram' && runs.every(r=> !r.b && !r.i && !r.u)){
+      if(b.t==='p' && txt.slice(0, 8)==='[diagram' && runs.every(r=> !r.b && !r.i && !r.u && !r.c)){
         const dg = nbParseDiagram(txt);
         if(dg){ out.push({ t:'dg', dg }); return; }
       }
-      out.push({ t:b.t, runs });
+      out.push(nbWithRuns(b, runs));
     });
     return out;
   }
@@ -39050,17 +39295,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const m = marks || {};
     return String(txt).replace(/\r\n?/g, '\n').replace(/\u2063/g, '').split('\n').map(l=>{
       const dg = paste && l.slice(0, 8)==='[diagram' ? nbParseDiagram(l) : null;
-      return dg ? { t:'dg', dg } : { t:'p', runs: l ? [nbRun(l, m.b, m.i, m.u)] : [] };
+      return dg ? { t:'dg', dg } : { t:'p', runs: l ? [nbRun(l, m.b, m.i, m.u, m.c)] : [] };
     });
   }
-  // Is the editor's DOM what nbRenderBlocks would draw (blocks of text and
-  // b/i/u, our islands)? Only a non-canonical DOM is redrawn.
+  // Is the editor's DOM what nbRenderBlocks would draw (blocks of text,
+  // b/i/u and one color span deep, our islands)? Only a non-canonical DOM
+  // is redrawn.
   function nbInlineOk(n, tags){
     for(let c = n.firstChild; c; c = c.nextSibling){
       if(c.nodeType===3) continue;
       if(c.nodeType!==1) return false;
       const tg = c.tagName;
-      if((tg!=='B' && tg!=='I' && tg!=='U') || c.attributes.length || tags.indexOf(tg) >= 0 || !c.firstChild) return false;
+      if(tg==='SPAN'){ if(c.attributes.length!==1 || !/^nb-c-[GRBYOPKLN]$/.test(c.getAttribute('class') || '')) return false; }
+      else if((tg!=='B' && tg!=='I' && tg!=='U') || c.attributes.length) return false;
+      if(tags.indexOf(tg) >= 0 || !c.firstChild) return false;
       if(!nbInlineOk(c, tags.concat(tg))) return false;
     }
     return true;
@@ -39072,8 +39320,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(c.nodeType!==1 || c.tagName!=='DIV') return false;
       const t = c.getAttribute('data-b');
       if(t==='dg'){ if(!nbDgData.has(c)) return false; n = 0; continue; }
+      if(t==='hr'){ if(!nbHrEls.has(c)) return false; n = 0; continue; }
       if(t!=='p' && t!=='h' && t!=='li' && t!=='ol') return false;
-      if(c.attributes.length!==(t==='ol' ? 2 : 1)) return false;
+      const lv = c.getAttribute('data-lv');
+      if(lv!=null && (t!=='h' || !/^[234]$/.test(lv))) return false;
+      if(c.attributes.length!==1 + (t==='ol' ? 1 : 0) + (lv!=null ? 1 : 0)) return false;
       if(t==='ol'){ n++; if(c.getAttribute('data-n')!==String(n)) return false; } else n = 0;
       const f = c.firstChild;
       if(!f) return false;
@@ -39089,17 +39340,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(nbCmp(s, e) >= 0) return s;
     const a = B[s.k], z = B[e.k];
     if(s.k===e.k){
-      if(a.t==='dg'){ B.splice(s.k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k:s.k, o:0 }); }
+      if(nbIsl(a)){ B.splice(s.k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k:s.k, o:0 }); }
       a.runs = nbConcat(nbSlice(a.runs, 0, s.o), nbSlice(a.runs, e.o, Infinity));
       return s;
     }
-    const L = a.t==='dg' ? (s.o > 0 ? a : null) : { t:a.t, runs:nbSlice(a.runs, 0, s.o) };
-    const R = z.t==='dg' ? (e.o > 0 ? null : z) : { t:z.t, runs:nbSlice(z.runs, e.o, Infinity) };
+    const L = nbIsl(a) ? (s.o > 0 ? a : null) : nbWithRuns(a, nbSlice(a.runs, 0, s.o));
+    const R = nbIsl(z) ? (e.o > 0 ? null : z) : nbWithRuns(z, nbSlice(z.runs, e.o, Infinity));
     let mid, pos;
-    if(L && R && L.t!=='dg' && R.t!=='dg'){ mid = [{ t:L.t, runs:nbConcat(L.runs, R.runs) }]; pos = { k:s.k, o:s.o }; }
+    if(L && R && !nbIsl(L) && !nbIsl(R)){ mid = [nbWithRuns(L, nbConcat(L.runs, R.runs))]; pos = { k:s.k, o:s.o }; }
     else {
       mid = [L, R].filter(Boolean);
-      pos = !L ? { k:s.k, o:0 } : (L.t==='dg' ? (R ? { k:s.k+1, o:0 } : { k:s.k, o:1 }) : { k:s.k, o:s.o });
+      pos = !L ? { k:s.k, o:0 } : (nbIsl(L) ? (R ? { k:s.k+1, o:0 } : { k:s.k, o:1 }) : { k:s.k, o:s.o });
     }
     B.splice(s.k, e.k - s.k + 1, ...mid);
     if(!B.length){ B.push({ t:'p', runs:[] }); pos = { k:0, o:0 }; }
@@ -39112,23 +39363,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!frag.length) return p;
     frag = frag.map(nbCopyBlock);
     const cur = B[p.k];
-    if(cur.t==='dg'){
+    if(nbIsl(cur)){
       const at = p.o > 0 ? p.k+1 : p.k;
       B.splice(at, 0, ...frag);
       return { k:at+frag.length-1, o:nbBlockLen(frag[frag.length-1]) };
     }
     const L = nbSlice(cur.runs, 0, p.o), R = nbSlice(cur.runs, p.o, Infinity);
     const out = [], f0 = frag[0];
-    if(f0.t!=='dg') out.push({ t: (L.length || frag.length===1) ? cur.t : f0.t, runs:nbConcat(L, f0.runs) });
-    else { if(L.length) out.push({ t:cur.t, runs:L }); out.push(f0); }
+    if(!nbIsl(f0)) out.push(nbWithRuns((L.length || frag.length===1) ? cur : f0, nbConcat(L, f0.runs)));
+    else { if(L.length) out.push(nbWithRuns(cur, L)); out.push(f0); }
     for(let i=1; i<frag.length; i++) out.push(frag[i]);
     const last = out[out.length-1];
     let pos;
-    if(last.t!=='dg'){
+    if(!nbIsl(last)){
       pos = { k:p.k+out.length-1, o:nbRunsLen(last.runs) };
       last.runs = nbConcat(last.runs, R);
     } else {
-      out.push({ t: R.length ? cur.t : 'p', runs:R });
+      out.push(R.length ? nbWithRuns(cur, R) : { t:'p', runs:R });
       pos = { k:p.k+out.length-1, o:0 };
     }
     B.splice(p.k, 1, ...out);
@@ -39138,7 +39389,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // empty list item leaves the list.
   function nbSplit(B, p){
     const b = B[p.k];
-    if(b.t==='dg'){
+    if(nbIsl(b)){
       const at = p.o > 0 ? p.k+1 : p.k;
       B.splice(at, 0, { t:'p', runs:[] });
       return p.o > 0 ? { k:at, o:0 } : { k:at+1, o:0 };
@@ -39154,13 +39405,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function nbJoin(B, p, dir){
     const b = B[p.k];
     if(dir < 0){
-      if(b.t==='dg' && p.o > 0){ B.splice(p.k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k:p.k, o:0 }); }
-      if(b.t!=='dg' && p.o > 0) return false;
-      if(b.t==='h' || b.t==='li' || b.t==='ol'){ b.t = 'p'; return p; }      // the start of a list item or heading: back to a paragraph
+      if(nbIsl(b) && p.o > 0){ B.splice(p.k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k:p.k, o:0 }); }
+      if(!nbIsl(b) && p.o > 0) return false;
+      if(b.t==='h' || b.t==='li' || b.t==='ol'){ nbSetT(b, 'p'); return p; }      // the start of a list item or heading: back to a paragraph
       if(p.k===0) return false;
       const pv = B[p.k-1];
-      if(pv.t==='dg'){ B.splice(p.k-1, 1); return { k:p.k-1, o:0 }; }       // the diagram before it goes
-      if(b.t==='dg'){
+      if(nbIsl(pv)){ B.splice(p.k-1, 1); return { k:p.k-1, o:0 }; }       // the diagram (or divider line) before it goes
+      if(nbIsl(b)){
         if(!nbRunsLen(pv.runs)){ B.splice(p.k-1, 1); return { k:p.k-1, o:0 }; }
         return { k:p.k-1, o:nbRunsLen(pv.runs) };
       }
@@ -39169,58 +39420,88 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       B.splice(p.k, 1);
       return pos;
     }
-    if(b.t==='dg' && p.o===0){ B.splice(p.k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k:p.k, o:0 }); }
-    if(b.t!=='dg' && p.o < nbRunsLen(b.runs)) return false;
+    if(nbIsl(b) && p.o===0){ B.splice(p.k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k:p.k, o:0 }); }
+    if(!nbIsl(b) && p.o < nbRunsLen(b.runs)) return false;
     const nx = B[p.k+1];
     if(!nx) return false;
-    if(nx.t==='dg'){ B.splice(p.k+1, 1); return p; }
-    if(b.t==='dg') return { k:p.k+1, o:0 };
+    if(nbIsl(nx)){ B.splice(p.k+1, 1); return p; }
+    if(nbIsl(b)) return { k:p.k+1, o:0 };
     b.runs = nbConcat(b.runs, nx.runs);
     B.splice(p.k+1, 1);
     return p;
   }
   function nbToggleBlock(B, s, e, T){
     const ks = [];
-    for(let k=s.k; k<=e.k; k++) if(B[k] && B[k].t!=='dg') ks.push(k);
+    for(let k=s.k; k<=e.k; k++) if(B[k] && !nbIsl(B[k])) ks.push(k);
     if(!ks.length) return;
     const all = ks.every(k=> B[k].t===T);
-    ks.forEach(k=>{ B[k].t = all ? 'p' : T; });
+    ks.forEach(k=> nbSetT(B[k], all ? 'p' : T));
+  }
+  // Text style: Heading lv (1-4) on the lines of the selection, or (all of them that heading
+  // already) back to normal text, as the one heading button toggled; lv 0, normal text:
+  // headings become paragraphs (lists stay lists).
+  function nbSetHeads(B, s, e, lv){
+    const ks = [];
+    for(let k=s.k; k<=e.k; k++) if(B[k] && !nbIsl(B[k])) ks.push(k);
+    if(!ks.length) return;
+    const all = lv > 0 && ks.every(k=> nbLv(B[k])===lv);
+    ks.forEach(k=>{ if(lv && !all) nbSetT(B[k], 'h', lv); else if(B[k].t==='h') nbSetT(B[k], 'p'); });
   }
   function nbRangeIn(B, k, s, e){ return [k===s.k ? s.o : 0, k===e.k ? e.o : nbRunsLen(B[k].runs)]; }
   function nbAllMarked(B, s, e, mk){
     let any = false;
     for(let k=s.k; k<=e.k; k++){
-      if(!B[k] || B[k].t==='dg') continue;
+      if(!B[k] || nbIsl(B[k])) continue;
       const [a, z] = nbRangeIn(B, k, s, e);
       for(const r of nbSlice(B[k].runs, a, z)){ any = true; if(!r[mk]) return false; }
     }
     return any;
   }
+  // The selection's one text color: a letter, null (the note's own), or undefined when it mixes them.
+  function nbColorIn(B, s, e){
+    let c;
+    for(let k=s.k; k<=e.k; k++){
+      if(!B[k] || nbIsl(B[k])) continue;
+      const [a, z] = nbRangeIn(B, k, s, e);
+      for(const r of nbSlice(B[k].runs, a, z)){ const x = r.c || null; if(c===undefined) c = x; else if(c!==x) return undefined; }
+    }
+    return c===undefined ? null : c;
+  }
+  function nbColorRange(B, s, e, c){
+    for(let k=s.k; k<=e.k; k++){
+      const b = B[k];
+      if(!b || nbIsl(b)) continue;
+      const [a, z] = nbRangeIn(B, k, s, e);
+      if(z <= a) continue;
+      const mid = nbSlice(b.runs, a, z).map(r=> nbRun(r.text, r.b, r.i, r.u, c));
+      b.runs = nbConcat(nbConcat(nbSlice(b.runs, 0, a), mid), nbSlice(b.runs, z, Infinity));
+    }
+  }
   function nbMarkRange(B, s, e, mk, on){
     if(on==null) on = !nbAllMarked(B, s, e, mk);
     for(let k=s.k; k<=e.k; k++){
       const b = B[k];
-      if(!b || b.t==='dg') continue;
+      if(!b || nbIsl(b)) continue;
       const [a, z] = nbRangeIn(B, k, s, e);
       if(z <= a) continue;
-      const mid = nbSlice(b.runs, a, z).map(r=>{ const x = nbRun(r.text, r.b, r.i, r.u); x[mk] = on; return x; });
+      const mid = nbSlice(b.runs, a, z).map(r=>{ const x = nbRun(r.text, r.b, r.i, r.u, r.c); x[mk] = on; return x; });
       b.runs = nbConcat(nbConcat(nbSlice(b.runs, 0, a), mid), nbSlice(b.runs, z, Infinity));
     }
   }
   function nbMarksAt(B, p){
     const b = B[p.k];
-    if(!b || b.t==='dg') return { b:false, i:false, u:false };
+    if(!b || nbIsl(b)) return { b:false, i:false, u:false, c:null };
     const r = p.o > 0 ? nbSlice(b.runs, p.o-1, p.o)[0] : nbSlice(b.runs, 0, 1)[0];
-    return r ? { b:r.b, i:r.i, u:r.u } : { b:false, i:false, u:false };
+    return r ? { b:r.b, i:r.i, u:r.u, c:r.c || null } : { b:false, i:false, u:false, c:null };
   }
   function nbSliceBlocks(B, s, e){
     const out = [];
     for(let k=s.k; k<=e.k; k++){
       const b = B[k];
       if(!b) continue;
-      if(b.t==='dg'){ const a = k===s.k ? s.o : 0, z = k===e.k ? e.o : 1; if(z > a) out.push({ t:'dg', dg:b.dg }); continue; }
+      if(nbIsl(b)){ const a = k===s.k ? s.o : 0, z = k===e.k ? e.o : 1; if(z > a) out.push(nbCopyBlock(b)); continue; }
       const [a, z] = nbRangeIn(B, k, s, e);
-      out.push({ t:b.t, runs:nbSlice(b.runs, a, z) });
+      out.push(nbWithRuns(b, nbSlice(b.runs, a, z)));
     }
     return out;
   }
@@ -39230,12 +39511,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const out = [];
     for(const b of frag){
       if(n <= 0 && out.length) break;
-      if(b.t==='dg'){ if(n >= 1) out.push(b); n -= 2; continue; }
+      if(nbIsl(b)){ if(n >= 1) out.push(b); n -= 2; continue; }
       const L = nbRunsLen(b.runs), take = Math.max(0, Math.min(L, n));
       let runs = nbSlice(b.runs, 0, take);
       const t = nbRunsText(runs);
       if(take < L && /[\ud800-\udbff]$/.test(t)) runs = nbSlice(b.runs, 0, take-1);      // never half an emoji
-      out.push({ t:b.t, runs });
+      out.push(nbWithRuns(b, runs));
       n -= L + 1;
     }
     return out;
@@ -39278,7 +39559,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const kids = root.childNodes;
     if(!kids.length) return { node:root, off:0 };
     const k = Math.max(0, Math.min(P.k, kids.length-1)), blk = kids[k];
-    if(nbDgData.has(blk)) return { node:root, off: k + (P.o > 0 ? 1 : 0) };
+    if(nbIslEl(blk)) return { node:root, off: k + (P.o > 0 ? 1 : 0) };
     let acc = 0, last = null, t;
     const w = document.createTreeWalker(blk, NodeFilter.SHOW_TEXT);
     while((t = w.nextNode())){
@@ -39334,6 +39615,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
   }
   function nbLoad(ed, v){
+    if(nbMenu && nbMenu.ed===ed) nbMenuClose(false);
     nbRenderBlocks(ed.el, nbParse(v).blocks, ed.ctx);
     ed.pending = null;
     ed.lastSel = null;
@@ -39400,7 +39682,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function nbInsertFrag(ed, frag, plainLines, o){
     let ok = true, trimmed = false;
     const done = nbApply(ed, (B, s, e)=>{
-      if(e.k > s.k && e.o===0 && B[e.k-1].t!=='dg') e = { k:e.k-1, o:nbBlockLen(B[e.k-1]) };     // a triple-click's selection: the next line stays
+      e = nbLineEnd(B, s, e);     // a triple-click's selection: the next line stays
       const cur = B[s.k];
       if(plainLines && cur && (cur.t==='li' || cur.t==='ol')) frag.forEach(b=>{ if(b.t==='p') b.t = cur.t; });
       let have = B.filter(b=> b.t==='dg').length;
@@ -39423,11 +39705,41 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ed.pending = null;
     return nbInsertFrag(ed, nbFromPlain(data, false, marks), true);
   }
-  function nbEnter(ed){ return nbApply(ed, (B, s, e)=> nbSplit(B, nbDelete(B, s, e))); }
+  // Enter; on a line of its own '---' (typed, at its end) makes a divider line and a new line under it (Cmd+Z: the text again)
+  function nbEnter(ed){
+    return nbApply(ed, (B, s, e)=>{
+      const b = B[s.k];
+      if(!nbCmp(s, e) && b && b.t==='p' && s.o===3 && nbRunsText(b.runs)==='---'){ B.splice(s.k, 1, { t:'hr' }, { t:'p', runs:[] }); return { k:s.k+1, o:0 }; }
+      return nbSplit(B, nbDelete(B, s, e));
+    });
+  }
+  // dir: -1 Backspace, 1 Delete, 0 a cut. A selection goes; one that's empty in the model (the
+  // DOM's selection over an island's edge), or holds only the line break beside an island, is
+  // the key alone (at the end it faces), so the key never does nothing.
   function nbDel(ed, dir){
     return nbApply(ed, (B, s, e)=>{
-      if(nbCmp(s, e) < 0) return nbDelete(B, s, e);
-      return nbJoin(B, s, dir);
+      if(nbCmp(s, e) < 0){
+        const t0 = dir ? nbSerialize({ blocks:B }) : '', p = nbDelete(B, s, e);
+        if(!dir || nbSerialize({ blocks:B })!==t0) return p;
+        return nbJoin(B, dir < 0 ? e : s, dir);
+      }
+      return dir ? nbJoin(B, s, dir) : false;
+    });
+  }
+  // Left or Up at the start of the note's first line of text when only diagrams or divider lines
+  // are above it (Right or Down at the end of its last, only islands under it): an empty line
+  // there for the caret, as the keys have no other way past an island at the note's edge (2026-11-02)
+  function nbEdgeLine(ed, dir){
+    const q = nbQuick(ed);
+    if(!q || !q.collapsed || q.cross || !(dir < 0 ? q.atStart : q.atEnd)) return false;
+    const r = nbRead(ed);
+    if(!r.a) return false;
+    const k = r.a.k, out = dir < 0 ? r.blocks.slice(0, k) : r.blocks.slice(k+1);
+    if(!out.length || !out.every(nbIsl)) return false;
+    return nbApply(ed, (B)=>{
+      const at = dir < 0 ? 0 : B.length;
+      B.splice(at, 0, { t:'p', runs:[] });
+      return { k:at, o:0 };
     });
   }
   function nbMark(ed, mk){
@@ -39438,22 +39750,58 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!a || nbCmp(a, f)===0){
       // no selection: the next characters typed get the mark
       const cur = ed.pending || nbMarksAt(B, a || nbEndPos(B));
-      ed.pending = { b:cur.b, i:cur.i, u:cur.u, at:a || nbEndPos(B) };
+      ed.pending = { b:cur.b, i:cur.i, u:cur.u, c:cur.c || null, at:a || nbEndPos(B) };
       ed.pending[mk] = !cur[mk];
       nbBarState(ed);
       return true;
     }
     return nbApply(ed, (B2, s, e)=>{ nbMarkRange(B2, s, e, mk, null); return { s, e }; });
   }
-  function nbBlockCmd(ed, T){ nbFocus(ed); return nbApply(ed, (B, s, e)=>{ nbToggleBlock(B, s, e, T); return { s, e }; }); }
+  // A selection that ends at the start of the next line (a triple-click's: 'line\n') ends with its
+  // own line for the line commands: the next line isn't in it.
+  function nbLineEnd(B, s, e){ return e.k > s.k && e.o===0 && !nbIsl(B[e.k-1]) ? { k:e.k-1, o:nbBlockLen(B[e.k-1]) } : e; }
+  function nbBlockCmd(ed, T){ nbFocus(ed); return nbApply(ed, (B, s, e)=>{ nbToggleBlock(B, s, nbLineEnd(B, s, e), T); return { s, e }; }); }
+  // sel: the selection when a menu opened (the menu had the focus since), else the note's own
+  function nbHeadCmd(ed, lv, sel){ nbFocus(ed); return nbApply(ed, (B, s, e)=>{ nbSetHeads(B, s, nbLineEnd(B, s, e), lv); return { s, e }; }, sel ? { sel } : undefined); }
+  // A text color (c: a letter, or null for the note's own) on the selection, or at a caret
+  // for what's typed next (as Cmd+B there).
+  function nbColorCmd(ed, c, sel){
+    nbFocus(ed);
+    const r = nbRead(ed);
+    const B = r.blocks.length ? r.blocks : [{ t:'p', runs:[] }];
+    const L = sel || (r.a ? { a:r.a, f:r.f } : ed.lastSel);
+    const a = L ? nbClampPos(B, L.a) : nbEndPos(B), f = L ? nbClampPos(B, L.f) : a;
+    if(!nbCmp(a, f)){
+      if(sel) nbSetSel(ed, a, a);
+      const cur = ed.pending || nbMarksAt(B, a);
+      ed.pending = { b:cur.b, i:cur.i, u:cur.u, c:c || null, at:a };
+      nbBarState(ed);
+      return true;
+    }
+    return nbApply(ed, (B2, s, e)=>{ nbColorRange(B2, s, e, c || null); return { s, e }; }, { sel:{ a, f } });
+  }
+  // The Divider line button: a divider after the caret's line (in place of an empty line),
+  // with a line after it for the caret when it ends the note; the caret goes under it.
+  function nbHrCmd(ed){
+    nbFocus(ed);
+    return nbApply(ed, (B, s, e)=>{
+      let k = nbLineEnd(B, s, e).k;
+      const b = B[k];
+      if(b && b.t==='p' && !b.runs.length) B.splice(k, 1, { t:'hr' });
+      else B.splice(++k, 0, { t:'hr' });
+      if(k===B.length-1) B.push({ t:'p', runs:[] });
+      return { k:k+1, o:0 };
+    });
+  }
   function nbClearFmt(ed){
     nbFocus(ed);
     ed.pending = null;
     return nbApply(ed, (B, s, e)=>{
       let S = s, E = e;
-      if(nbCmp(s, e)===0 && B[s.k] && B[s.k].t!=='dg'){ S = { k:s.k, o:0 }; E = { k:s.k, o:nbRunsLen(B[s.k].runs) }; }
+      if(nbCmp(s, e)===0 && B[s.k] && !nbIsl(B[s.k])){ S = { k:s.k, o:0 }; E = { k:s.k, o:nbRunsLen(B[s.k].runs) }; }
       ['b', 'i', 'u'].forEach(m=> nbMarkRange(B, S, E, m, false));
-      for(let k=s.k; k<=e.k; k++) if(B[k] && B[k].t!=='dg') B[k].t = 'p';
+      nbColorRange(B, S, E, null);
+      for(let k=s.k, z=nbLineEnd(B, s, e).k; k<=z; k++) if(B[k] && !nbIsl(B[k])) nbSetT(B[k], 'p');
       return { s, e };
     });
   }
@@ -39472,7 +39820,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!s) return null;
     const blk = (n)=>{ while(n && n.parentNode!==ed.el) n = n.parentNode; return n; };
     const A = s.anchorNode===ed.el ? null : blk(s.anchorNode), F = s.focusNode===ed.el ? null : blk(s.focusNode);
-    const out = { collapsed:s.isCollapsed, cross: !A || !F || A!==F || nbDgData.has(A) || !nbCanonical(ed.el), atStart:false, atEnd:false };
+    const out = { collapsed:s.isCollapsed, cross: !A || !F || A!==F || nbIslEl(A) || !nbCanonical(ed.el), atStart:false, atEnd:false };
     if(out.collapsed && !out.cross){
       try{
         const rg = document.createRange();
@@ -39484,50 +39832,86 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     return out;
   }
+  // Markdown at the start of a paragraph: '# ' to '#### ' (a space typed after one to four #)
+  // makes it Heading 1 to 4. The space goes in first, so Cmd+Z gives the typed '## ' back.
+  function nbQuickHead(ed){
+    const q = nbQuick(ed);
+    if(!q || !q.collapsed || q.cross || ed.pending) return false;
+    const r = nbRead(ed);
+    const b = r.a ? r.blocks[r.a.k] : null;
+    if(!b || b.t!=='p') return false;
+    const hs = nbRunsText(nbSlice(b.runs, 0, r.a.o));
+    if(!/^#{1,4}$/.test(hs)) return false;
+    nbTypeText(ed, ' ');
+    return nbApply(ed, (B, s)=>{
+      const x = B[s.k];
+      if(!x || x.t!=='p' || nbRunsText(nbSlice(x.runs, 0, hs.length+1))!==hs+' ') return false;
+      x.runs = nbSlice(x.runs, hs.length+1, Infinity);
+      nbSetT(x, 'h', hs.length);
+      return { k:s.k, o:Math.max(0, s.o - hs.length - 1) };
+    });
+  }
   function nbIslandIndex(ed, isl){ return Array.prototype.indexOf.call(ed.el.childNodes, isl); }
   function nbRemoveIsland(ed, isl){
     nbNormalize(ed);
     const k = nbIslandIndex(ed, isl);
     if(k < 0) return false;
-    return nbApply(ed, (B)=>{ if(!B[k] || B[k].t!=='dg') return false; B.splice(k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k, o:0 }); }, { sel:{ a:{ k, o:0 }, f:{ k, o:0 } } });
+    return nbApply(ed, (B)=>{ if(!nbIsl(B[k])) return false; B.splice(k, 1); if(!B.length) B.push({ t:'p', runs:[] }); return nbClampPos(B, { k, o:0 }); }, { sel:{ a:{ k, o:0 }, f:{ k, o:0 } } });
+  }
+  // What the toolbar shows for a selection (r: nbRead, else read now; sel, a remembered one,
+  // in place of r's): its marks (m), its color (c: a letter, null for the note's own,
+  // undefined for a mix), its first line's type (bt) and heading level (lv, 0 for none).
+  function nbSelState(ed, r, sel){
+    r = r || nbRead(ed);
+    const B = r.blocks.length ? r.blocks : [{ t:'p', runs:[] }];
+    const L = sel || (r.a ? { a:r.a, f:r.f } : null);
+    const out = { m:{ b:false, i:false, u:false }, c:null, bt:null, lv:0 };
+    if(!L) return out;
+    const a = nbClampPos(B, L.a), f = nbClampPos(B, L.f), fwd = nbCmp(a, f) <= 0, s = fwd ? a : f, e = fwd ? f : a;
+    if(nbCmp(s, e)===0){ const x = ed.pending || nbMarksAt(B, s); out.m = x; out.c = x.c || null; }
+    else { out.m = { b:nbAllMarked(B, s, e, 'b'), i:nbAllMarked(B, s, e, 'i'), u:nbAllMarked(B, s, e, 'u') }; out.c = nbColorIn(B, s, e); }
+    out.bt = B[s.k] ? B[s.k].t : null;
+    out.lv = nbLv(B[s.k]);
+    return out;
   }
   function nbBarState(ed, r){
     if(!ed.bar) return;
-    let st = { b:false, i:false, u:false }, bt = null;
-    r = r || nbRead(ed);
-    const B = r.blocks.length ? r.blocks : [{ t:'p', runs:[] }];
-    const L = r.a ? { a:r.a, f:r.f } : null;
-    if(L){
-      const a = nbClampPos(B, L.a), f = nbClampPos(B, L.f), fwd = nbCmp(a, f) <= 0, s = fwd ? a : f, e = fwd ? f : a;
-      if(nbCmp(s, e)===0) st = ed.pending || nbMarksAt(B, s);
-      else st = { b:nbAllMarked(B, s, e, 'b'), i:nbAllMarked(B, s, e, 'i'), u:nbAllMarked(B, s, e, 'u') };
-      bt = B[s.k] ? B[s.k].t : null;
-    }
+    const st = nbSelState(ed, r);
     ed.bar.querySelectorAll('.nb-btn[aria-pressed]').forEach(btn=>{
       const c = btn.dataset.cmd;
-      const on = c==='b' || c==='i' || c==='u' ? !!st[c] : bt===c;
+      const on = c==='b' || c==='i' || c==='u' ? !!st.m[c] : st.bt===c;
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
+    // Text style: the level's number beside its H (and inverted, as the old Heading button was); Text color: the bar under its A.
+    // Their names say the current value too (a screen reader hears "Text style: Heading 2").
+    const hs = ed.bar.querySelector('.nb-btn-hs'), tc = ed.bar.querySelector('.nb-btn-tc');
+    const name = (b, v)=>{ if(b.getAttribute('aria-label')!==v) b.setAttribute('aria-label', v); };
+    if(hs){ hs.setAttribute('data-lv', String(st.lv)); hs.classList.toggle('is-on', st.lv > 0); name(hs, 'Text style: '+(st.lv ? 'Heading '+st.lv : 'Normal text')); }
+    if(tc){ tc.setAttribute('data-c', st.c || ''); name(tc, 'Text color: '+(st.c===undefined ? 'Mixed' : (st.c ? NB_TNAMES[st.c] : 'Default'))); }
   }
   var NB_ICONS = {
     b:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5h5.6a3.7 3.7 0 0 1 0 7.4H7zM7 11.9h6.6a3.8 3.8 0 0 1 0 7.6H7z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>',
     i:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 4.5h7M6.5 19.5h7M14.5 4.5l-5 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
     u:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v7a5 5 0 0 0 10 0V4M5 20.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
-    h:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 5v14M15.5 5v14M5.5 12h10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M19 12.5l2-1.2V19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    hs:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5v14M14.5 5v14M4.5 12h10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path class="nb-hd nb-hd-1" d="M18.4 12.6l2-1.2V19"/><path class="nb-hd nb-hd-2" d="M17.6 12.9a1.9 1.9 0 0 1 3.7.5c0 1.6-3.7 3.3-3.7 5.6h3.9"/><path class="nb-hd nb-hd-3" d="M17.7 11.4h3.5l-2 2.6a2.3 2.3 0 1 1-1.6 4.3"/><path class="nb-hd nb-hd-4" d="M20.4 19v-7.6l-3.1 5.1h4.4"/></g></svg>',
     li:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="7" r="1.7" fill="currentColor"/><circle cx="5" cy="12" r="1.7" fill="currentColor"/><circle cx="5" cy="17" r="1.7" fill="currentColor"/><path d="M9.5 7H20M9.5 12H20M9.5 17H20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     ol:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.6l1.6-1.1v4.8M3.6 12.2a1.5 1.5 0 1 1 2.5 1.2L3.6 16h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 18.7h1.8a1 1 0 0 1 0 2H4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M10 7H20M10 12H20M10 18H20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    tc:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 16L12 4l5.5 12M8.5 11.7h7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><rect class="nb-tc-bar" x="4" y="18.3" width="16" height="3.6" rx="1"/></svg>',
+    hr:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14M5 18.5h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".45"/><path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
     dg:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 3.5h4.25v4.25H3.5zM12 3.5h4.25v4.25H12zM7.75 7.75H12V12H7.75zM16.25 7.75h4.25V12h-4.25zM3.5 12h4.25v4.25H3.5zM12 12h4.25v4.25H12zM7.75 16.25H12v4.25H7.75zM16.25 16.25h4.25v4.25h-4.25z" fill="currentColor"/></svg>',
-    x:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5h11M10 5.5v13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M15 14.5l5 5M20 14.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+    x:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5h11M10 5.5v13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M15 14.5l5 5M20 14.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    caret:'<svg class="nb-caret" viewBox="0 0 8 24" aria-hidden="true"><path d="M1.2 10.6l2.8 2.8 2.8-2.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
   function nbBuildBar(ed, review){
-    const mod = NB_MAC ? 'Cmd' : 'Ctrl';
+    const mod = NB_MAC ? 'Cmd' : 'Ctrl', alt = NB_MAC ? 'Option' : 'Alt';
     const bar = nbEl('div', 'nb-bar');
     bar.setAttribute('role', 'toolbar');
     bar.setAttribute('aria-label', 'Formatting');
     if(ed.el.id) bar.setAttribute('aria-controls', ed.el.id);
     const tools = [['b', 'Bold', mod+'+B', 1], ['i', 'Italic', mod+'+I', 1], ['u', 'Underline', mod+'+U', 1], '|',
-      ['h', 'Heading', '', 1], ['li', 'Bulleted list', mod+'+Shift+8', 1], ['ol', 'Numbered list', mod+'+Shift+7', 1], '|'];
-    if(review) tools.push(['dg', 'Add this position as a diagram', '', 0]);
+      ['hs', 'Text style', mod+'+'+alt+'+1 to 4, normal text '+mod+'+'+alt+'+0', 'menu'], ['li', 'Bulleted list', mod+'+Shift+8', 1], ['ol', 'Numbered list', mod+'+Shift+7', 1], '|',
+      ['tc', 'Text color', '', 'menu'], ['hr', 'Divider line', '', 0], '|'];
+    if(review) tools.push(['dg', 'Add this position as a diagram', '', 0], '|');
     tools.push(['x', 'Clear formatting', '', 0]);
     tools.forEach(t=>{
       if(t==='|'){ const s = nbEl('span', 'nb-sep'); s.setAttribute('aria-hidden', 'true'); bar.appendChild(s); return; }
@@ -39536,9 +39920,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       b.dataset.cmd = t[0];
       b.setAttribute('aria-label', t[1]);
       b.title = t[1] + (t[2] ? ' ('+t[2]+')' : '');
-      if(t[3]) b.setAttribute('aria-pressed', 'false');
+      if(t[3]==='menu'){ b.classList.add('nb-btn-menu'); b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', 'false'); }
+      else if(t[3]) b.setAttribute('aria-pressed', 'false');
       b.tabIndex = bar.querySelector('.nb-btn') ? -1 : 0;
-      b.innerHTML = NB_ICONS[t[0]];         // app constants
+      b.innerHTML = NB_ICONS[t[0]] + (t[3]==='menu' ? NB_ICONS.caret : '');         // app constants
       bar.appendChild(b);
     });
     const keep = (e)=>{ if(e.target.closest && e.target.closest('.nb-btn')) e.preventDefault(); };   // the caret stays in the note
@@ -39549,11 +39934,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!b) return;
       const c = b.dataset.cmd;
       if(c==='b' || c==='i' || c==='u') nbMark(ed, c);
-      else if(c==='h' || c==='li' || c==='ol') nbBlockCmd(ed, c);
+      else if(c==='li' || c==='ol') nbBlockCmd(ed, c);
+      else if(c==='hs' || c==='tc') nbMenuToggle(ed, b, c, e.detail===0 ? 'checked' : null);      // detail 0: Enter or Space on it
+      else if(c==='hr') nbHrCmd(ed);
       else if(c==='x') nbClearFmt(ed);
       else if(c==='dg') nbInsertDiagram(typeof hvNode==='function' ? hvNode() : null);
     });
     bar.addEventListener('keydown', (e)=>{
+      const a = document.activeElement;
+      if((e.key==='ArrowDown' || e.key==='ArrowUp') && a && bar.contains(a) && a.classList.contains('nb-btn-menu')){
+        e.preventDefault(); e.stopPropagation();
+        nbMenuOpen(ed, a, a.dataset.cmd, e.key==='ArrowUp' ? 'last' : 'checked');
+        return;
+      }
       if(e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Home' && e.key!=='End') return;
       const items = [...bar.querySelectorAll('.nb-btn')];
       let i = items.indexOf(document.activeElement);
@@ -39563,7 +39956,167 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       items.forEach((x, j)=>{ x.tabIndex = j===i ? 0 : -1; });
       items[i].focus();
     });
+    if(typeof ResizeObserver==='function') new ResizeObserver(()=> nbSepTidy(bar)).observe(bar);
     return bar;
+  }
+  // A wrapped bar: a separator that starts or ends a row is hidden (its room kept, so the rows stay as they are).
+  function nbSepTidy(bar){
+    const kids = [...bar.children], mid = (r)=> r.top + r.height/2;
+    kids.forEach((s, i)=>{
+      if(!s.classList.contains('nb-sep')) return;
+      const r = s.getBoundingClientRect();
+      if(!r.height) return;
+      const row = (x)=>{ if(!x) return false; const q = x.getBoundingClientRect(); return q.height > 0 && Math.abs(mid(q) - mid(r)) < q.height/2; };
+      const edge = !row(kids[i-1]) || !row(kids[i+1]);
+      s.style.visibility = edge ? 'hidden' : '';
+    });
+  }
+
+  // ---- the toolbar's two menus: Text style (normal text, Heading 1-4) and Text color ----
+  // One open at a time (nbMenu). It floats over the page (fixed; in the pop-up inside its
+  // overlay, which keeps the keys to itself), under its button or above it when there's no
+  // room, and applies to the selection the note had when it opened. Opened with the mouse or a
+  // tap, the caret stays in the note (a tablet's keyboard stays up): the arrows then go into the
+  // menu, any other key closes it and does what it does. From the keyboard (Enter, Space or
+  // Arrow Down on its button) the focus goes into it. Escape closes it and gives the focus back,
+  // Tab or a click elsewhere closes it.
+  var nbMenu = null;     // { ed, btn, el, kind:'hs'|'tc', sel, byKey }
+  function nbMenuItems(m){ return [...m.el.querySelectorAll('.nb-mi')]; }
+  function nbMenuFocus(m, i){
+    const it = nbMenuItems(m);
+    if(!it.length) return;
+    try{ it[(i + it.length) % it.length].focus({ preventScroll:true }); }catch(e){}
+  }
+  function nbMenuClose(refocus){
+    const m = nbMenu;
+    if(!m) return;
+    nbMenu = null;
+    m.el.remove();
+    m.btn.setAttribute('aria-expanded', 'false');
+    m.btn.removeAttribute('aria-controls');
+    if(!refocus) return;
+    if(m.byKey && m.btn.isConnected){ try{ m.btn.focus({ preventScroll:true }); }catch(e){} }
+    else if(m.ed.el.isConnected && document.activeElement!==m.ed.el){ nbFocus(m.ed); if(m.sel) nbSetSel(m.ed, m.sel.a, m.sel.f); }
+  }
+  function nbMenuPlace(m){
+    const el = m.el, r = m.btn.getBoundingClientRect();
+    if(!r.width || r.bottom < 0 || r.top > innerHeight){ nbMenuClose(false); return; }      // its button went out of sight
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const below = innerHeight - 8 - (r.bottom + 4), above = r.top - 4 - 8;
+    const up = h > below && above > below;
+    const left = Math.max(8, Math.min(r.left, innerWidth - w - 8));
+    const top = up ? Math.max(8, r.top - 4 - h) : Math.max(8, Math.min(r.bottom + 4, innerHeight - 8 - h));
+    el.style.left = left+'px';
+    el.style.top = top+'px';
+    el.classList.toggle('nb-menu-up', up);
+    // an ancestor with a transform would carry a fixed box along: measured, and put back
+    const g = el.getBoundingClientRect();
+    if(Math.abs(g.left - left) > 0.5 || Math.abs(g.top - top) > 0.5){ el.style.left = (2*left - g.left)+'px'; el.style.top = (2*top - g.top)+'px'; }
+  }
+  // focus: null (the mouse or a tap), 'checked' (the current item) or 'last'
+  function nbMenuOpen(ed, btn, kind, focus){
+    nbMenuClose(false);
+    const r = nbRead(ed);
+    const sel = r.a ? { a:r.a, f:r.f } : ed.lastSel;
+    const st = nbSelState(ed, r, sel);
+    const mod = NB_MAC ? 'Cmd' : 'Ctrl', alt = NB_MAC ? 'Option' : 'Alt';
+    const el = nbEl('div', 'nb-menu nb-menu-'+kind);
+    el.id = 'nb-menu';
+    el.setAttribute('role', 'menu');
+    el.setAttribute('aria-label', kind==='hs' ? 'Text style' : 'Text color');
+    const item = (host, cls, text, v, on)=>{
+      const b = nbEl('button', 'nb-mi '+cls, text);
+      b.type = 'button';
+      b.tabIndex = -1;
+      if(text) b.setAttribute('aria-label', text);         // its name as written (Heading 4 is shown in capitals)
+      b.setAttribute('role', 'menuitemradio');
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      b.dataset.v = v;
+      host.appendChild(b);
+      return b;
+    };
+    if(kind==='hs'){
+      item(el, 'nb-mi-h0', 'Normal text', '0', st.lv===0).title = 'Normal text ('+mod+'+'+alt+'+0)';
+      for(let lv=1; lv<=4; lv++) item(el, 'nb-mi-h'+lv, 'Heading '+lv, String(lv), st.lv===lv).title = 'Heading '+lv+' ('+mod+'+'+alt+'+'+lv+')';
+    } else {
+      const d = item(el, 'nb-mi-c0', 'Default', '', st.c===null);
+      const dot = nbEl('span', 'nb-sw-dot');
+      dot.setAttribute('aria-hidden', 'true');
+      d.insertBefore(dot, d.firstChild);
+      const grid = nbEl('div', 'nb-sws');
+      grid.setAttribute('role', 'none');
+      el.appendChild(grid);
+      NB_TCODES.forEach(c=>{ const b = item(grid, 'nb-sw nb-sw-'+c, null, c, st.c===c); b.setAttribute('aria-label', NB_TNAMES[c]); b.title = NB_TNAMES[c]; });
+    }
+    (btn.closest('.modal-overlay') || document.body).appendChild(el);
+    btn.setAttribute('aria-expanded', 'true');
+    btn.setAttribute('aria-controls', el.id);
+    const m = nbMenu = { ed, btn, el, kind, sel, byKey:!!focus };
+    nbMenuPlace(m);
+    const keep = (e)=> e.preventDefault();     // the caret stays in the note (a click between its items too)
+    el.addEventListener('pointerdown', keep);
+    el.addEventListener('mousedown', keep);
+    el.addEventListener('click', (e)=>{ const it = e.target.closest && e.target.closest('.nb-mi'); if(it) nbMenuPick(it); });
+    if(focus && nbMenu===m){
+      const it = nbMenuItems(m);
+      nbMenuFocus(m, focus==='last' ? it.length-1 : Math.max(0, it.findIndex(x=> x.getAttribute('aria-checked')==='true')));
+    }
+  }
+  function nbMenuToggle(ed, btn, kind, focus){
+    if(nbMenu && nbMenu.btn===btn){ nbMenuClose(!!focus); return; }
+    nbMenuOpen(ed, btn, kind, focus);
+  }
+  function nbMenuPick(it){
+    const m = nbMenu;
+    if(!m || !m.el.contains(it)) return;
+    nbMenuClose(false);
+    if(!m.ed.el.isConnected) return;
+    if(m.kind==='hs') nbHeadCmd(m.ed, Number(it.dataset.v), m.sel);
+    else nbColorCmd(m.ed, it.dataset.v || null, m.sel);
+  }
+  // the menu's keys, before anything else hears them (the pop-up's Escape, the board's arrows)
+  document.addEventListener('keydown', (e)=>{
+    const m = nbMenu;
+    if(!m) return;
+    if(!m.el.isConnected || !m.btn.getClientRects().length){ nbMenuClose(false); return; }       // its note closed under it
+    const k = e.key, inMenu = m.el.contains(document.activeElement);
+    if(k==='Escape'){ e.preventDefault(); e.stopImmediatePropagation(); nbMenuClose(true); return; }
+    if(k==='Tab'){ nbMenuClose(inMenu); return; }       // from its button, Tab goes on as usual
+    if(e.isComposing || /^(Shift|Control|Alt|AltGraph|Meta|CapsLock|Fn)$/.test(k || '')) return;
+    const it = nbMenuItems(m), i = it.indexOf(document.activeElement), on = Math.max(0, it.findIndex(x=> x.getAttribute('aria-checked')==='true'));
+    if(!inMenu){
+      if(k==='ArrowDown' || k==='ArrowUp'){ e.preventDefault(); e.stopImmediatePropagation(); nbMenuFocus(m, k==='ArrowUp' ? it.length-1 : on); }
+      else nbMenuClose(false);
+      return;
+    }
+    e.stopImmediatePropagation();
+    if(k==='Enter' || k===' ' || k==='Spacebar'){ e.preventDefault(); if(i >= 0) nbMenuPick(it[i]); return; }
+    // Text style: a list; Text color: Default, then the swatches three to a row
+    const grid = m.kind==='tc', n = it.length;
+    let j = null;
+    if(k==='Home') j = 0;
+    else if(k==='End') j = n-1;
+    else if(k==='ArrowDown') j = !grid ? i+1 : (i===0 ? 1 : (i+3 <= n-1 ? i+3 : 0));
+    else if(k==='ArrowUp') j = !grid ? i-1 : (i===0 ? n-1 : (i-3 >= 1 ? i-3 : 0));
+    else if(grid && k==='ArrowRight') j = i+1;
+    else if(grid && k==='ArrowLeft') j = i-1;
+    if(/^Arrow|^Home$|^End$/.test(k)) e.preventDefault();
+    if(j!=null) nbMenuFocus(m, j);
+  }, true);
+  document.addEventListener('pointerdown', (e)=>{ const m = nbMenu; if(m && !m.el.contains(e.target) && !m.btn.contains(e.target)) nbMenuClose(false); }, true);
+  // it follows its button (a scroll, a turn of the device), and goes when the button does
+  document.addEventListener('scroll', ()=>{ if(nbMenu) nbMenuPlace(nbMenu); }, { capture:true, passive:true });
+  window.addEventListener('resize', ()=>{ if(nbMenu) nbMenuPlace(nbMenu); });
+  // Mod+Alt+1 to 4: Heading 1 to 4, Mod+Alt+0: normal text (as in Google Docs), or null. Read
+  // by the key's place (e.code): Option+1 types a character on a Mac. On Windows Ctrl+Alt is
+  // also AltGr: a key that types a character with it ('\u00b2' for AltGr+2 on a German
+  // keyboard) is left to type it.
+  function nbHeadKey(e){
+    if(!e.altKey || e.shiftKey || !(NB_MAC ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey)) return null;
+    const m = /^(?:Digit|Numpad)([0-4])$/.exec(e.code || '');
+    if(!m) return null;
+    if(!NB_MAC && e.key && e.key.length===1 && !/[0-9]/.test(e.key)) return null;
+    return Number(m[1]);
   }
   // el: the note field (a contenteditable div with its id). opts.context
   // 'review' | 'popup'; opts.barHost: where the toolbar goes (else just
@@ -39609,6 +40162,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         let data = e.data;
         if(data==null && e.dataTransfer){ try{ data = e.dataTransfer.getData('text/plain'); }catch(x){} }
         if(data==null) return;
+        if(data===' ' && nbQuickHead(ed)){ e.preventDefault(); return; }
         const q = nbQuick(ed);
         if(/[\n\r\u2063]/.test(data) || ed.pending || !q || q.cross || ed.len + 2*data.length + 4 > NB_MAX){ e.preventDefault(); nbTypeText(ed, data); }
         return;
@@ -39617,13 +40171,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const q = nbQuick(ed);
         if(!q) return;
         const back = /Backward/.test(it);
-        if(!q.collapsed && q.cross){ e.preventDefault(); nbDel(ed, 0); return; }
+        if(!q.collapsed && q.cross){ e.preventDefault(); nbDel(ed, back ? -1 : 1); return; }
         if(q.collapsed && (q.cross || (back && q.atStart) || (!back && q.atEnd))){ e.preventDefault(); nbDel(ed, back ? -1 : 1); }
       }
     });
     el.addEventListener('keydown', (e)=>{
       if(e.isComposing || e.keyCode===229) return;
       const k = e.key, mod = NB_MAC ? e.metaKey : e.ctrlKey;
+      const hk = nbHeadKey(e);
+      if(hk!=null){ e.preventDefault(); nbHeadCmd(ed, hk); return; }
       if(mod && !e.altKey){
         const lk = k && k.length===1 ? k.toLowerCase() : k;
         if(!e.shiftKey && (lk==='b' || lk==='i' || lk==='u')){ e.preventDefault(); nbMark(ed, lk); return; }
@@ -39637,10 +40193,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const q = nbQuick(ed);
         if(!q) return;
         const back = k==='Backspace';
-        if(!q.collapsed && q.cross){ e.preventDefault(); nbDel(ed, 0); return; }
+        if(!q.collapsed && q.cross){ e.preventDefault(); nbDel(ed, back ? -1 : 1); return; }
         if(q.collapsed && (q.cross || (back && q.atStart) || (!back && q.atEnd))){ e.preventDefault(); nbDel(ed, back ? -1 : 1); }
         return;
       }
+      if(/^Arrow(Left|Up|Right|Down)$/.test(k) && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey
+        && nbEdgeLine(ed, k==='ArrowLeft' || k==='ArrowUp' ? -1 : 1)){ e.preventDefault(); return; }
       if(k==='Escape' && ed.ctx==='review'){ e.preventDefault(); e.stopPropagation(); ed.el.blur(); }     // back to the board's keys
     });
     el.addEventListener('input', (e)=>{
@@ -39686,8 +40244,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     el.addEventListener('copy', (e)=> copy(e, false));
     el.addEventListener('cut', (e)=> copy(e, true));
-    // the diagram islands' buttons
-    el.addEventListener('mousedown', (e)=>{ if(e.target.closest && e.target.closest('.nb-dg button')) e.preventDefault(); });
+    // the diagram islands' buttons; a click on a divider line puts the caret just after it (the
+    // start of the next line, or past it when it ends the note), where Backspace removes it
+    el.addEventListener('mousedown', (e)=>{
+      if(e.target.closest && e.target.closest('.nb-dg button')){ e.preventDefault(); return; }
+      const hr = e.target.closest && e.target.closest('.nb-hr');
+      if(!hr || hr.parentNode!==el || e.button!==0) return;
+      e.preventDefault();
+      if(document.activeElement!==el){ try{ el.focus({ preventScroll:true }); }catch(x){ el.focus(); } }
+      nbNormalize(ed);
+      const k = nbIslandIndex(ed, hr);
+      if(k < 0) return;
+      const p = k+1 < el.childNodes.length ? { k:k+1, o:0 } : { k, o:1 };
+      ed.pending = null;
+      nbSetSel(ed, p, p);
+    });
     el.addEventListener('click', (e)=>{
       const t = e.target, isl = t.closest && t.closest('.nb-dg');
       if(!isl || isl.parentNode!==el) return;
@@ -39720,15 +40291,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let n = 0;
     return frag.map(b=>{
       if(b.t==='dg'){ n = 0; return nbSerDiagram(b.dg); }
+      if(b.t==='hr'){ n = 0; return '---'; }
       const t = nbRunsText(b.runs);
       if(b.t==='ol'){ n++; return n+'. '+t; }
       n = 0;
       return b.t==='li' ? '- '+t : t;
     }).join('\n');
   }
+  // A heading as <h1>-<h4> by its level, a divider as <hr>, a color as data-nb-c (what our paste
+  // reads back; other apps get the text without it)
   function nbFragHtml(frag){
     const esc = (s)=> String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const inl = (runs)=> runs.map(r=>{ let h = esc(r.text); if(r.i) h = '<i>'+h+'</i>'; if(r.b) h = '<b>'+h+'</b>'; if(r.u) h = '<u>'+h+'</u>'; return h; }).join('');
+    const inl = (runs)=> runs.map(r=>{
+      let h = esc(r.text);
+      if(r.i) h = '<i>'+h+'</i>';
+      if(r.b) h = '<b>'+h+'</b>';
+      if(r.u) h = '<u>'+h+'</u>';
+      if(r.c && NB_TC_RE.test(r.c)) h = '<span data-nb-c="'+r.c+'">'+h+'</span>';
+      return h;
+    }).join('');
     let out = '', list = null;
     const close = ()=>{ if(list){ out += '</'+list+'>'; list = null; } };
     frag.forEach(b=>{
@@ -39740,7 +40321,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       close();
       if(b.t==='dg') out += '<p>'+esc(nbSerDiagram(b.dg))+'</p>';
-      else if(b.t==='h') out += '<h3>'+inl(b.runs)+'</h3>';
+      else if(b.t==='hr') out += '<hr>';
+      else if(b.t==='h') out += '<h'+nbLv(b)+'>'+inl(b.runs)+'</h'+nbLv(b)+'>';
       else out += '<p>'+(b.runs.length ? inl(b.runs) : '<br>')+'</p>';
     });
     close();
@@ -40400,7 +40982,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      its sound show it): the game's own move, or a side line for one it didn't play. The
      note's text never changes: the links are CSS highlights over it (::highlight(hv-mv)
      for the game's moves, hv-mv-alt for the others), found again whenever the text
-     changes (typed, loaded, synced, a line added from the menu). ---- */
+     changes (typed, loaded, synced, a line added from the menu). Text you colored keeps
+     its color as a link (an alternative you made yellow stays yellow): those pieces are
+     in hv-mv-own / hv-mv-alt-own, only underlined. ---- */
   var HV_MV_EDS = ['hv-note', 'hv-opx-fam', 'hv-opx-var'];
   var hvMvLinks = [], hvMvTimer = 0;
   var HV_MV_SAN = /^(?:O-O-O|O-O|0-0-0|0-0|[KQRBN][a-h]?[1-8]?x?[a-h][1-8](?:=?[QRBN])?|[a-h](?:x[a-h])?[1-8](?:=?[QRBN])?)[+#]?[!?]{0,2}/;
@@ -40479,6 +41063,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     walk(block);
     return { text, parts };
   }
+  // Is a text node in a color of the note's own (a color span inside the editor)?
+  function hvMvOwn(node, ed){
+    for(let n = node.parentNode; n && n!==ed; n = n.parentNode) if(n.nodeType===1 && /(^| )nb-c-[GRBYOPKLN]( |$)/.test(n.getAttribute('class') || '')) return true;
+    return false;
+  }
   function hvMvPoint(map, off){
     for(let i = map.parts.length-1; i >= 0; i--){
       const pt = map.parts[i];
@@ -40489,7 +41078,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvMvRefresh(){
     clearTimeout(hvMvTimer);
     hvMvLinks = [];
-    const S = HV_STATE, play = [], alt = [];
+    const S = HV_STATE, play = [], alt = [], playOwn = [], altOwn = [];
     if(S && S.std && !S.game._puzzle && !S.game._practice && hvViewActive()){
       HV_MV_EDS.forEach(id=>{
         const ed = document.getElementById(id);
@@ -40506,8 +41095,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
               const r = document.createRange();
               try{ r.setStart(a[0], a[1]); r.setEnd(z[0], z[1]); }catch(e){ return; }
               const played = path.slice(0, i+1).every(y=> y.main);
-              hvMvLinks.push({ ed, range:r, path, i, played });
-              (played ? play : alt).push(r);
+              hvMvLinks.push({ ed, range:r, path, i, played });       // the whole link: what a click hits
+              // drawn a text node at a time: a piece in your own color keeps it
+              map.parts.forEach(pt=>{
+                const a0 = Math.max(x.tk.ns, pt.at), z0 = Math.min(x.tk.e, pt.at + pt.node.nodeValue.length);
+                if(z0 <= a0) return;
+                const q = document.createRange();
+                try{ q.setStart(pt.node, a0 - pt.at); q.setEnd(pt.node, z0 - pt.at); }catch(e){ return; }
+                (hvMvOwn(pt.node, ed) ? (played ? playOwn : altOwn) : (played ? play : alt)).push(q);
+              });
             });
           });
         });
@@ -40516,6 +41112,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(window.CSS && CSS.highlights && typeof Highlight==='function'){
       CSS.highlights.set('hv-mv', new Highlight(...play));
       CSS.highlights.set('hv-mv-alt', new Highlight(...alt));
+      CSS.highlights.set('hv-mv-own', new Highlight(...playOwn));
+      CSS.highlights.set('hv-mv-alt-own', new Highlight(...altOwn));
     }
   }
   function hvMvSoon(){ clearTimeout(hvMvTimer); hvMvTimer = setTimeout(hvMvRefresh, 150); }
