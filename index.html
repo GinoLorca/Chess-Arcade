@@ -2013,6 +2013,71 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ol-movelist .mv-san:empty{ cursor:default; }
   .ol-movelist .mv-san:not(:empty):hover{ background:var(--surface-2); }
   .ol-movelist .mv-san.mv-viewed{ background:var(--brass-soft); }
+  /* Play Online: the opponent's row, the board and your row on one screen,
+     as Puzzles, Rush and the review do: the squares answer to the height as
+     well as the width. Each allowance is what stacks in the board's column
+     down to the bottom of your row: the page's 6px top, the back link (15-19)
+     and HUD (41-45) where they stay on top, both player rows (49, the top one
+     with its 8px margin), the view's 6px gaps, the frame's own 34px (8px
+     padding each way, 14px file labels, the board's 2px border each way) and
+     about 10px of air. --ol-frame-extra is what a skin's frame adds to those
+     34px (Uptown's tablet border, board-column padding and line signs: 67px
+     in all), as --hv-frame-extra is for the review. The tips row goes under
+     your row (as Puzzles moves its own under the board): during a game it
+     only repeats "Your move", so it shouldn't push the board down. */
+  #view-play-online{
+    --ol-frame-extra:0px;
+    --sq: clamp(30px, min(calc((100vh - 240px - var(--ol-frame-extra)) / 8), calc((100vw - 100px) / 8)), 85px);
+    --sq: clamp(30px, min(calc((100dvh - 240px - var(--ol-frame-extra)) / 8), calc((100vw - 100px) / 8)), 85px);
+  }
+  :root[data-skin="uptown"] #view-play-online{ --ol-frame-extra:33px; }
+  #view-play-online > .anno-hint{ order:1; }
+  /* One column: the side panel follows your row, and the Friends pill in the
+     bottom-right corner would sit on your clock, so your row ends 50px higher.
+     (Phones are narrow enough that the width rule decides anyway.) */
+  @media (max-width:1179.98px){
+    #view-play-online{
+      --sq: clamp(30px, min(calc((100vh - 290px - var(--ol-frame-extra)) / 8), calc((100vw - 100px) / 8)), 85px);
+      --sq: clamp(30px, min(calc((100dvh - 290px - var(--ol-frame-extra)) / 8), calc((100vw - 100px) / 8)), 85px);
+    }
+  }
+  /* A phone on its side (or any window under 1180 wide and at most 540 tall)
+     is too short for a row above the board and one below it, so during a
+     game the rows stand beside it, as Puzzles' glance card does: the
+     opponent's at the top (clear of the home button), yours at the bottom,
+     as the two sides sit on the board, and the board takes the screen's
+     height. While seeking there are no rows: the one-column layout above
+     keeps the HUD and Leave on top. */
+  @media (max-width:1179.98px) and (orientation:landscape) and (max-height:540px){
+    #view-play-online.active.ol-in-game{ display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); column-gap:16px; }
+    #view-play-online.ol-in-game > *{ grid-column:1 / -1; }
+    #view-play-online.ol-in-game > .board-frame{ grid-column:2; grid-row:1 / span 2; }
+    #view-play-online.ol-in-game > .ol-player-row{ grid-column:1; justify-self:end; width:min(100%, 240px); box-sizing:border-box;
+      flex-direction:column; align-items:flex-start; gap:4px; }
+    #view-play-online.ol-in-game > #ol-opp-row{ grid-row:1; align-self:start; margin-top:clamp(0px, calc((44px - var(--fab-gutter)) * 100), 50px); }
+    #view-play-online.ol-in-game > #ol-me-row{ grid-row:2; align-self:end; margin-bottom:0; }
+    #view-play-online.ol-in-game .ol-player-info{ flex-wrap:wrap; row-gap:2px; max-width:100%; }
+    #view-play-online.ol-in-game{
+      --sq: clamp(30px, min(calc((100vh - 46px - var(--ol-frame-extra)) / 8), calc((100vw - 330px) / 8)), 85px);
+      --sq: clamp(30px, min(calc((100dvh - 46px - var(--ol-frame-extra)) / 8), calc((100vw - 330px) / 8)), 85px);
+    }
+  }
+  /* From 1180px (the side panel beside the board) the HUD and the back link
+     go under your row too during a game (HUD, tips, then Leave), so the
+     opponent's row heads the column and the board gives up almost nothing;
+     that row's name clears the home button where the page's gutter doesn't
+     (1180-1330px), as the review's top strip does. Down there they don't need
+     the room the home button takes at the top. While seeking there are no
+     rows, so they stay on top, over the board. (.ol-in-game: olSetPhaseLive) */
+  @media (min-width:1180px){
+    #view-play-online.ol-in-game > .hud{ order:1; padding-left:12px; }
+    #view-play-online.ol-in-game > .back-link{ order:2; padding-left:0; }
+    #ol-opp-row{ padding-left:max(12px, calc(56px - var(--fab-gutter))); }
+    #view-play-online{
+      --sq: clamp(30px, min(calc((100vh - 170px - var(--ol-frame-extra)) / 8), calc((100vw - 100px) / 8)), 85px);
+      --sq: clamp(30px, min(calc((100dvh - 170px - var(--ol-frame-extra)) / 8), calc((100vw - 100px) / 8)), 85px);
+    }
+  }
   @media (min-width:1180px){
     .wrap.play-mode{ max-width:1240px; }
     .wrap.play-mode .view.active.has-side{
@@ -23607,8 +23672,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const meCaptured = myWhite ? capturedByWhite : capturedByBlack;
     const oppCaptured = myWhite ? capturedByBlack : capturedByWhite;
     const myDiff = myWhite ? diff : -diff;
-    meEl.innerHTML = olMaterialHtml(meCaptured, myWhite?'b':'w', myDiff, myDiff>0);
-    oppEl.innerHTML = olMaterialHtml(oppCaptured, myWhite?'w':'b', -myDiff, myDiff<0);
+    // every board render comes through here: a row whose pieces haven't changed isn't rewritten
+    // (a rewrite cost a second style and layout pass before the board could paint)
+    const meHtml = olMaterialHtml(meCaptured, myWhite?'b':'w', myDiff, myDiff>0), oppHtml = olMaterialHtml(oppCaptured, myWhite?'w':'b', -myDiff, myDiff<0);
+    if(meEl._olHtml!==meHtml){ meEl.innerHTML = meHtml; meEl._olHtml = meHtml; }
+    if(oppEl._olHtml!==oppHtml){ oppEl.innerHTML = oppHtml; oppEl._olHtml = oppHtml; }
   }
 
   function renderBoardOl(){
@@ -23649,11 +23717,37 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     renderMarks(olBoardEl, arrowSvgOl, marksOl, viewState.board);
     olRenderMaterial(viewState.board);
   }
+  // Picking a piece up or putting it down changes three classes, not the board: the same marks
+  // renderBoardOl gives, on the squares already there (rebuilding all 64 squares and their pieces
+  // on every press is what made a press lag behind the finger)
+  function olPaintSelection(){
+    if(!roundOl || !roundOl.state) return;
+    const live = olIsLiveView(), from = live ? olSelected : null;
+    const targets = (live && from!=null && roundOl.phase==='live' && roundOl.myTurn)
+      ? new Set(pzLegalMovesFrom(roundOl.state, from).map(m=>m.to))
+      : null;
+    olBoardEl.querySelectorAll('.sq').forEach(sq=>{
+      const i = Number(sq.dataset.idx), t = !!(targets && targets.has(i));
+      sq.classList.toggle('picked', i===from);
+      sq.classList.toggle('move-dot', t);
+      sq.classList.toggle('movable', t);
+    });
+  }
 
   wireAnnotations(
     olBoardEl,
     ()=>marksOl,
-    ()=>renderMarks(olBoardEl, arrowSvgOl, marksOl, roundOl && roundOl.state ? roundOl.state.board : []),
+    ()=>{
+      // a finger held to draw an arrow didn't mean to pick its piece up (the press picked it
+      // before it was a hold, and the lift's click is swallowed): put back what was picked before
+      // (only where a press can pick: on a finished game or an older move olPreClickSelected is stale)
+      const back = olPreClickSelected, bp = back!=null && roundOl && roundOl.state ? roundOl.state.board[back] : null;
+      if(roundOl && roundOl.phase==='live' && olIsLiveView() && performance.now() - annoHoldEndedAt < 50 && olSelected!==back
+        && (back==null || (bp && bp.color===(roundOl.color==='white'?'w':'b')))){      // (their move may have taken it meanwhile)
+        olSelected = olPreClickSelected; olPaintSelection();
+      }
+      renderMarks(olBoardEl, arrowSvgOl, marksOl, roundOl && roundOl.state ? roundOl.state.board : []);
+    },
     null, null
   );
 
@@ -23704,41 +23798,53 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   // Same press-time selection as Puzzles (see its own comment): dots have
   // to show on touch, not wait for a completed click or a drag past slop.
-  let olPreClickSelected = null;
+  // During the opponent's turn too (as on Lichess): your piece is picked up
+  // at once and its dots show the moment their move lands, so a press made
+  // just before it arrives isn't lost. Moving still waits for your turn.
+  // olPressMoves: how many moves the game had at the press. A click only moves a piece in the
+  // position it was pressed in: their move landing under a held finger (a tap's click fires at the
+  // lift on a touch screen) must not turn that tap into a move with the piece picked before it.
+  // olPressIdx: the square pressed. A click elsewhere is the tail of a drag (the board isn't
+  // rebuilt on a press any more, so the browser still sends it): an illegal drop of one piece must
+  // not play the picked piece's move to that square.
+  let olPreClickSelected = null, olPressMoves = -1, olPressIdx = -1;
   olBoardEl.addEventListener('pointerdown', (e)=>{
-    if(!roundOl || roundOl.phase!=='live' || !roundOl.myTurn || !olIsLiveView() || e.button!==0) return;
+    if(!roundOl || roundOl.phase!=='live' || !olIsLiveView() || e.button!==0) return;
     const sqEl = e.target.closest('.sq');
     if(!sqEl || !olBoardEl.contains(sqEl)) return;
     const idx = Number(sqEl.dataset.idx);
     const myColorCode = roundOl.color==='white'?'w':'b';
     olPreClickSelected = olSelected;
+    olPressMoves = roundOl.lastMoveCount;
+    olPressIdx = idx;
     const piece = roundOl.state.board[idx];
     if(piece && piece.color===myColorCode && olSelected!==idx){
       olSelected = idx;
-      renderBoardOl();
+      olPaintSelection();
     }
   });
 
   olBoardEl.addEventListener('click', (e)=>{
-    if(!roundOl || roundOl.phase!=='live' || !roundOl.myTurn || !olIsLiveView()) return;
+    if(!roundOl || roundOl.phase!=='live' || !olIsLiveView()) return;
     const under = document.elementFromPoint(e.clientX, e.clientY);
     const sqEl = under && under.closest ? under.closest('.sq') : null;
     if(!sqEl || !olBoardEl.contains(sqEl)) return;
     const idx = Number(sqEl.dataset.idx);
+    if(idx!==olPressIdx) return;          // a drag's tail, not a click (see olPressIdx)
     const myColorCode = roundOl.color==='white'?'w':'b';
-    if(olPreClickSelected!=null){
+    if(roundOl.myTurn && olPressMoves===roundOl.lastMoveCount && olPreClickSelected!=null){
       const targets = pzLegalMovesFrom(roundOl.state, olPreClickSelected).map(m=>m.to);
       if(targets.includes(idx) && idx!==olPreClickSelected){ olResolveDrop(olPreClickSelected, idx); return; }
     }
     if(olPreClickSelected===idx){
       olSelected = null;
-      renderBoardOl();
+      olPaintSelection();
       return;
     }
     const piece = roundOl.state.board[idx];
     if(!(piece && piece.color===myColorCode)){
       olSelected = null;
-      renderBoardOl();
+      olPaintSelection();
     }
   });
 
@@ -23746,9 +23852,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const uci = olMoveToApiUCI(move);
     const prevState = roundOl.state;
     const wasCapture = !!move.captured || !!move.isEP;
+    const sentN = roundOl.lastMoveCount;
+    // your clock stops where it stands until the echo brings Lichess's own times (the ticker counts
+    // from the last sync for the side to move: without this, the moment the turn passed, your
+    // clock jumped back to its start-of-turn time and your thinking time showed on theirs)
+    const spent = roundOl.lastMoveCount >= 2 ? Date.now() - roundOl.serverSyncedAt : 0;     // (no clock on the first moves)
+    if(roundOl.color==='white') roundOl.wtime = Math.max(0, roundOl.wtime - spent);
+    else roundOl.btime = Math.max(0, roundOl.btime - spent);
+    roundOl.serverSyncedAt = Date.now();
     roundOl.state = pzApplyMoveRaw(roundOl.state, move);
     roundOl.myTurn = false;
+    // Your move shows at once, not when Lichess echoes it back a round trip later (till then the
+    // board drew the position before it: a dropped piece jumped back to its square, and the slide
+    // had nothing to slide). The echo rebuilds the game from the server's moves as before; a
+    // rejected move comes back off (the .catch below).
+    const prevPly = roundOl.plyStates, prevSan = roundOl.sanMoves;
+    let mine = null;
+    if(prevPly && olIsLiveView()){
+      roundOl.plyStates = mine = prevPly.concat([roundOl.state]);
+      roundOl.sanMoves = (prevSan || []).concat([pzMoveToSAN(prevState, move, roundOl.state)]);
+    }
     animatePieceMove(olBoardEl, move.from, move.to, renderBoardOl);
+    if(mine) olRenderMoveList();
     playSoundSequence(pzMoveSoundKeys(roundOl.state, move, wasCapture));
 
     const token = getLichessToken();
@@ -23758,9 +23883,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!res.ok) return res.json().catch(()=>({})).then(body=>{ throw new Error(body.error||('HTTP '+res.status)); });
     }).catch(err=>{
       if(!roundOl || roundOl.phase!=='live') return;
+      if(roundOl.lastMoveCount!==sentN) return;     // Lichess has played it (its echo came): only the answer was lost
       roundOl.state = prevState;
       roundOl.myTurn = true;
+      if(mine && roundOl.plyStates===mine){ roundOl.plyStates = prevPly; roundOl.sanMoves = prevSan; }
+      // pressing Left while it was in flight left you one move back, which is now the live position
+      if(roundOl.viewPly!=null && roundOl.viewPly >= roundOl.plyStates.length-1) roundOl.viewPly = null;
+      // nothing stays picked on a square that isn't yours in the position you're back to
+      if(olSelected!=null){ const p = prevState.board[olSelected]; if(!(p && p.color===(roundOl.color==='white'?'w':'b'))) olSelected = null; }
       renderBoardOl();
+      olRenderMoveList();
       olStatusEl.textContent = 'Move rejected \u2014 try again.';
     });
   }
@@ -23795,6 +23927,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ol-abort-controls').style.display='none';
     document.getElementById('ol-opp-row').style.display='none';
     document.getElementById('ol-me-row').style.display='none';
+    document.getElementById('view-play-online').classList.remove('ol-in-game');
     document.getElementById('ol-movelist-wrap').style.display='none';
     document.getElementById('ol-result-banner').style.display='none';
     document.getElementById('ol-error-banner').style.display='none';
@@ -23814,6 +23947,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ol-abort-controls').style.display='none';
     document.getElementById('ol-opp-row').style.display='flex';
     document.getElementById('ol-me-row').style.display='flex';
+    document.getElementById('view-play-online').classList.add('ol-in-game');      // the rows head the column (CSS)
     document.getElementById('ol-movelist-wrap').style.display='flex';
     document.getElementById('ol-hud-mode-text').textContent = roundOl.color==='white' ? 'PLAYING WHITE' : 'PLAYING BLACK';
     document.getElementById('ol-side-dot').className = 'side-dot ' + (roundOl.color==='white'?'w':'b');
@@ -23848,7 +23982,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   function olRenderClocksNow(){
     if(!roundOl || !roundOl.state) return;
-    const elapsed = roundOl.phase==='live' ? (Date.now() - roundOl.serverSyncedAt) : 0;
+    // Lichess runs no clock until both sides have made their first move (it has its own first-move
+    // timer): counting before that showed time going that the echo then put back
+    const elapsed = roundOl.phase==='live' && roundOl.lastMoveCount >= 2 ? (Date.now() - roundOl.serverSyncedAt) : 0;
     const turn = roundOl.state.turn;
     const w = turn==='w' ? Math.max(0, roundOl.wtime - elapsed) : roundOl.wtime;
     const b = turn==='b' ? Math.max(0, roundOl.btime - elapsed) : roundOl.btime;
@@ -23857,8 +23993,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const oppTurn = myWhite ? turn==='b' : turn==='w';
     const meTurn = !oppTurn;
     const oppEl = document.getElementById('ol-opp-clock'), meEl = document.getElementById('ol-me-clock');
-    oppEl.textContent = fmtClockOl(oppMs);
-    meEl.textContent = fmtClockOl(meMs);
+    // four ticks a second, but a clock shows whole seconds (and the waiting one doesn't move):
+    // an unchanged clock isn't rewritten, as each write cost the page a style, layout and paint
+    const oppText = fmtClockOl(oppMs), meText = fmtClockOl(meMs);
+    if(oppEl.textContent!==oppText) oppEl.textContent = oppText;
+    if(meEl.textContent!==meText) meEl.textContent = meText;
     oppEl.classList.toggle('low', oppMs<10000);
     meEl.classList.toggle('low', meMs<10000);
     oppEl.classList.toggle('active', roundOl.phase==='live' && oppTurn);
@@ -23986,6 +24125,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function olFinishGame(){
     roundOl.phase='ended';
     clearInterval(roundOl.clockTimer);
+    removePromoPickerOl();             // a promotion still being chosen can't be sent now
     if(roundOl.eventStreamHandle) roundOl.eventStreamHandle.abort();
     if(roundOl.gameStreamHandle) roundOl.gameStreamHandle.abort();
     document.getElementById('ol-live-controls').style.display='none';
@@ -23998,7 +24138,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ol-result-line').textContent = line;
     document.getElementById('ol-result-sub').textContent = OL_STATUS_LABELS[roundOl.status] || roundOl.status || '';
     document.getElementById('ol-result-banner').style.display='flex';
-    renderBoardOl();
+    // olApplyState has just drawn this final position: what made it a live board comes off without
+    // a rebuild (a rebuild cut short the slide of your move that ended the game)
+    olBoardEl.querySelectorAll('.sq.draggable').forEach(sq=> sq.classList.remove('draggable'));
+    olPaintSelection();
     if(roundOl.winner){
       olShowKingDeath(roundOl.winner==='w' ? 'b' : 'w');
       if(roundOl.winner===myColor){
@@ -24180,6 +24323,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   function olApplyState(st){
     if(!roundOl) return;
+    // what the board shows now, live (see the end: an unchanged board isn't rebuilt)
+    const shown = roundOl.plyStates && roundOl.viewPly==null ? roundOl.plyStates[roundOl.plyStates.length-1] : null, wasMyTurn = roundOl.myTurn;
     const tokens = (st.moves||'').trim().length ? st.moves.trim().split(/\s+/) : [];
     let state = pzStartPosition();
     const sanMoves = [];
@@ -24212,14 +24357,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     roundOl.wdraw = !!st.wdraw; roundOl.bdraw = !!st.bdraw;
     roundOl.serverSyncedAt = Date.now();
     roundOl.myTurn = state.turn === (roundOl.color==='white'?'w':'b');
+    const isOver = st.status && st.status!=='created' && st.status!=='started';
+    // a piece picked up during their turn stays picked if it's still yours on that square
+    // (their move may have taken it), and nothing stays picked once the game is over
+    if(olSelected!=null){
+      const p = state.board[olSelected];
+      if(isOver || !(p && p.color===(roundOl.color==='white'?'w':'b'))) olSelected = null;
+    }
 
-    renderBoardOl();
+    // The echo of your own move (already on the board, olSendMove) or a draw offer leaves the
+    // board as it is shown: it isn't rebuilt (a rebuild cut your move's slide short), only the
+    // selection is repainted. Anything else draws the new position.
+    const sig = (b)=> b.map(p=> p ? p.color+p.type : '.').join('');
+    if(shown && olIsLiveView() && wasMyTurn===roundOl.myTurn && sig(shown.board)===sig(state.board)) olPaintSelection();
+    else renderBoardOl();
     olRenderClocksNow();
     olUpdateStatusText();
     olRenderMoveList();
     olOpeningSoon();
 
-    const isOver = st.status && st.status!=='created' && st.status!=='started';
     if(isOver) olFinishGame();
     else olStartClockTicker();
   }
@@ -24237,7 +24393,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         + '<div class="mv-san'+(whitePly===viewedPly?' mv-viewed':'')+'" data-ply="'+whitePly+'">'+moves[i]+'</div>'
         + '<div class="mv-san'+(blackPly===viewedPly?' mv-viewed':'')+'" data-ply="'+blackPly+'">'+(moves[i+1]||'')+'</div>';
     }
-    el.innerHTML = html;
+    if(el._olHtml===html) return;                // the same moves and the same one viewed (your move's echo)
+    el.innerHTML = html; el._olHtml = html;
     if(olIsLiveView()) el.scrollTop = el.scrollHeight;
     else {
       const viewedEl = el.querySelector('.mv-viewed');
