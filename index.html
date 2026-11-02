@@ -3711,6 +3711,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ghb-cap{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:0 6px; font-size:12px; line-height:1.3; }
   .ghb-cap > span{ white-space:nowrap; }      /* "21.Qd8+ &middot; +5.03 ->" stays together; the score drops below when the card is narrow */
   .ghb-cap b{ margin-left:auto; font-family:"JetBrains Mono",monospace; font-weight:600; white-space:nowrap; }
+  .ghb-cell{ position:relative; display:flex; min-width:0; }
+  .ghb-cell > .ghb-card{ flex:1 1 auto; }
+  .ghb-cell .ghb-opp{ padding-right:24px; }
+  .ghb-share{ position:absolute; right:5px; bottom:5px; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; border-radius:5px; background:none; color:var(--ink-soft); cursor:pointer; }
+  .ghb-share:hover{ color:var(--ink); background:var(--surface-2); }
+  .ghb-share:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  @media (pointer:coarse){ .ghb-share{ width:44px; height:44px; right:0; bottom:0; } .ghb-cell .ghb-opp{ padding-right:38px; } }
+  .ghb-cell .share-note{ position:absolute; left:4px; right:4px; bottom:4px; z-index:3; margin:0; padding:3px 6px; background:var(--surface); border:1px solid var(--line); border-radius:6px; }
+  .ghb-cell .share-note:not(.has-link){ pointer-events:none; }      /* over the card's own caption: never over the next card */
+  #hv-controls > .share-note{ position:absolute; top:100%; left:0; right:0; z-index:5; margin:4px 0 0; padding:4px 8px; text-align:center; background:var(--surface); border:1px solid var(--line); border-radius:6px; }
+  .saved-actions .share-note.has-link{ flex-basis:100%; margin-left:0; }
+  .share-url{ display:block; width:100%; max-width:360px; margin:4px auto 0; padding:4px 6px; font:inherit; font-size:12px; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:5px; }
+  @media (pointer:coarse){ .saved-actions .btn-link{ min-height:44px; display:inline-flex; align-items:center; } .hv-share-pop .hv-pop-item{ min-height:44px; } }
+  .share-note{ margin-left:8px; font-size:12px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
+  #hv-controls{ position:relative; contain:inline-size; }      /* the board sets the column's width, not this row: on a short window it wraps */
   .ghb-x{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:0 6px; font-size:11.5px; line-height:1.3; color:var(--ink-soft); }
   .ghb-x .ghb-sep{ display:none; }      /* the material (or the tag) left, the clocks right, as the line above */
   .ghb-x .ghb-clk{ margin-left:auto; }
@@ -7283,6 +7298,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="btn btn-ghost" id="hv-next" type="button" title="Next move (&rarr;)" aria-label="Next move">&#8594;</button>
         <button class="btn btn-ghost" id="hv-end" type="button" title="End of the line (End)" aria-label="End of the line">&#8677;</button>
         <button class="btn btn-ghost hv-px-here" id="hv-px-here" type="button" title="Play this position out against Stockfish, on this device">Play it out</button>
+        <button class="btn btn-ghost hv-share" id="hv-share" type="button" aria-haspopup="menu" aria-expanded="false" title="Share the game at this move, or this position">Share</button>
       </div>
       <!-- Only shown while an arrow color profile is on, so the profile label
            has a home under this board too; in Default the view is unchanged. -->
@@ -30613,7 +30629,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         +(km.tag ? ': '+(km.tag==='inaccuracy' ? 'an ' : 'a ')+km.tag+', '+Math.round(km.drop)+' points of winning chances' : '')+' ('+(GHB_SRC[km.src] || 'Opening checks')+').'+clk+' Open the review before that move'
       : rw+' against '+opp+(d ? ', '+d : '')+'. After '+mv+(st ? ', '+st+' for you ('+(GHB_SRC[sc.src] || 'Opening checks')+')' : ', not scored')+(mat ? ', '+mat : '')+'.'+clk+' Open the review at this move';
     b.title = lab; b.setAttribute('aria-label', lab);
-    return b;
+    const cell = ghEl('div', 'ghb-cell'), sh = ghEl('button', 'ghb-share');
+    sh.type = 'button';
+    sh.innerHTML = SHARE_SVG;
+    sh.title = 'Share this position';
+    sh.dataset.share = String(g.id);
+    sh.setAttribute('aria-label', 'Share this position, '+(km ? 'before ' : 'after ')+mv);
+    sh.addEventListener('click', (ev)=>{
+      ev.stopPropagation();
+      shareOut(sh, { title:(km ? 'Before ' : 'After ')+mv, url:shareLiPos(e.fen, e.color),
+        text:(km ? 'Before '+mv+', the move that took me out of the opening\u2019s zone for good' : 'After '+mv)+' \u00b7 my game vs '+opp+(d ? ', '+d : '') });
+    });
+    cell.appendChild(b); cell.appendChild(sh);
+    return cell;
   }
   // boards drawn as they come near the screen (a board is ~230 elements)
   function ghbFill(root){
@@ -30681,7 +30709,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         +'Scored on '+scored+' of '+E.length+' (\u2014 means not scored'+(mom==='b' ? '; an endgame is checked only for games where the opening did its job and you lost' : '')+'). Tap a board for the review at that move.'
       : 'None of the '+ghoN(rows.length, 'game')+' listed got '+(mom==='a' ? 'out of the opening' : 'to an endgame')+'.';
     sum.hidden = !sum.textContent;
-    const fa = document.activeElement, fk = fa && wrap.contains(fa) ? (fa.dataset.gid ? 'g|'+fa.dataset.gid : fa.dataset.grp ? 'x|'+fa.dataset.grp+'|'+fa.dataset.act : '') : '';
+    const fa = document.activeElement, fk = fa && wrap.contains(fa) ? (fa.dataset.gid ? 'g|'+fa.dataset.gid : fa.dataset.share ? 's|'+fa.dataset.share : fa.dataset.grp ? 'x|'+fa.dataset.grp+'|'+fa.dataset.act : '') : '';
     if(GHB_IO) GHB_IO.disconnect();
     wrap.textContent = '';
     const ENT = new Map(ghoEntries(E.map(e=> e.g), u, false).map(x=> [String(x.g.id), x]));       // the reviews read once
@@ -30730,7 +30758,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     ghbFill(wrap);
     if(fk){
-      const el = fk.charAt(0)==='g' ? wrap.querySelector('.ghb-card[data-gid="'+CSS.escape(fk.slice(2))+'"]') : Array.from(wrap.querySelectorAll('[data-grp]')).find(x=> 'x|'+x.dataset.grp+'|'+x.dataset.act===fk);
+      const el = fk.charAt(0)==='g' ? wrap.querySelector('.ghb-card[data-gid="'+CSS.escape(fk.slice(2))+'"]') : fk.charAt(0)==='s' ? wrap.querySelector('.ghb-share[data-share="'+CSS.escape(fk.slice(2))+'"]') : Array.from(wrap.querySelectorAll('[data-grp]')).find(x=> 'x|'+x.dataset.grp+'|'+x.dataset.act===fk);
       if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
     }
   }
@@ -36882,6 +36910,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     link.href = 'https://lichess.org/training/'+p.id;
     link.target = '_blank'; link.rel = 'noopener';
     acts.appendChild(link);
+    const sh = spMake('button', 'btn-link sp-share', 'Share');
+    sh.type = 'button';
+    sh.setAttribute('aria-label', 'Share puzzle '+p.id);
+    sh.addEventListener('click', ()=> sharePuzzle(sh, p));
+    acts.appendChild(sh);
     const rm = spMake('button', 'btn-link danger', spArmedPid===p.id ? 'Remove it?' : 'Remove');
     rm.addEventListener('click', ()=>{
       if(spArmedPid===p.id){ clearTimeout(spArmTimer); spArmedPid = null; spRemovePuzzle(p.id); return; }
@@ -41715,6 +41748,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.getElementById('hv-px-again').addEventListener('click', pxAgain);
   document.getElementById('hv-px-stop').addEventListener('click', pxAnalyze);
   document.getElementById('hv-px-here').addEventListener('click', ()=>{ if(HV_STATE) pxFromBoard(HV_STATE.cur); });
+  document.getElementById('hv-share').addEventListener('click', (e)=>{ e.stopPropagation(); hvShareMenu(e.currentTarget); });
   // the board's back link goes back the same way while a position is played out (as the puzzle one does)
   (function(){
     const back = document.querySelector('#view-play-history .back-link');
@@ -41729,6 +41763,118 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // ---- where Play it out starts ----
   const PX_NO_REPLAY = 'The moves to this position don\u2019t replay here, so it can\u2019t be played out.';
   // why it couldn't start, beside the button pressed (the next redraw of that list takes it away)
+  /* ---- Share (2026-11-01): a puzzle, a game at a move or a position, to a friend or a coach. The links are Lichess's
+     own public pages, which open for anyone, no account and no Chess Arcade needed: a puzzle's training page, a game at
+     the move (chess.com's game page for a chess.com game), a position on Lichess's analysis board. The device's share
+     sheet when there is one (a phone, Safari), else the message copied; what happened is said beside the button. ---- */
+  const SHARE_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    + '<path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+  // a position on Lichess's analysis board, from the given side
+  function shareLiPos(fen, color){ return 'https://lichess.org/analysis/'+String(fen || '').trim().replace(/\s+/g, '_')+(color==='black' ? '?color=black' : ''); }
+  // what happened, beside the button (a status, read out); with a url: the link in a box to copy by hand, kept until the
+  // next share there
+  function shareSay(btn, msg, url){
+    const box = btn && btn.parentNode;
+    if(!box) return;
+    let n = box.querySelector('.share-note');
+    if(!msg){ if(n) n.remove(); return; }
+    if(!n){ n = document.createElement('span'); n.className = 'share-note'; n.setAttribute('role', 'status'); box.appendChild(n); }
+    clearTimeout(n._t); clearTimeout(n._f);
+    n.textContent = '';
+    n.classList.toggle('has-link', !!url);
+    // its words a moment after it's on the page: a region that appears already filled isn't always read out (as hvSay)
+    n._f = setTimeout(()=>{
+      if(!n.isConnected) return;
+      n.textContent = msg;
+      if(!url){ n._t = setTimeout(()=>{ if(n.isConnected) n.remove(); }, 5000); return; }
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.readOnly = true; inp.value = url; inp.className = 'share-url';
+      inp.setAttribute('aria-label', 'The link, to copy');
+      inp.addEventListener('focus', ()=> inp.select());
+      n.appendChild(inp);
+      try{ inp.focus({ preventScroll:true }); inp.select(); }catch(e){}
+    }, 60);
+  }
+  // the old way to copy, for a browser (or a frame) with no clipboard API: the keyboard goes back to the button
+  function shareCopyOld(t, btn){
+    let ok = false;
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = t; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      ok = document.execCommand('copy');
+      ta.remove();
+    }catch(e){ ok = false; }
+    if(btn && btn.isConnected) try{ btn.focus({ preventScroll:true }); }catch(e){}
+    return ok;
+  }
+  // o: { title, text, url }
+  async function shareOut(btn, o){
+    const data = { title:o.title, text:o.text, url:o.url };
+    if(navigator.share){
+      try{
+        if(!navigator.canShare || navigator.canShare(data)){ await navigator.share(data); shareSay(btn, ''); return; }
+      }catch(e){ if(e && e.name==='AbortError') return; }                 // the sheet was closed: nothing to say
+    }
+    const t = o.text+'\n'+o.url;
+    let ok = false;
+    try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(t); ok = true; } }catch(e){ ok = false; }
+    if(!ok) ok = shareCopyOld(t, btn);
+    if(ok) shareSay(btn, 'Link copied'); else shareSay(btn, 'Copy this link:', o.url);
+  }
+  // a saved puzzle: its Lichess page, with its rating, who's to move and its themes
+  function sharePuzzle(btn, p){
+    const shown = (p.themes || []).filter(t=> !['short', 'long', 'veryLong', 'oneMove', 'master', 'masterVsMaster', 'superGM'].includes(t)).slice(0, 4).map(pzThemeLabel);
+    shareOut(btn, { title:'Lichess puzzle #'+p.id, url:'https://lichess.org/training/'+p.id,
+      text:'Lichess puzzle #'+p.id+' \u00b7 '+p.rating+' \u00b7 '+(p.solver==='b' ? 'Black' : 'White')+' to move'+(shown.length ? ' \u00b7 '+shown.join(', ') : '') });
+  }
+  // the review's Share: the game at the move you're on, or this position
+  function hvShareMenu(btn){
+    const S = HV_STATE;
+    if(!S) return;
+    if(hvMenu && hvMenu.opener===btn){ hvMenuClose(true); return; }
+    hvMenuClose();
+    const g = S.game, node = S.cur, base = hvBranchBase(node) || node;
+    const d = g.createdAt ? new Date(Number(g.createdAt)).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) : '';
+    const bare = !!g._summary && !String(g.moves || '').trim();          // a game that didn't load here: its link only
+    const who = bare ? 'A game on Lichess' : S.whiteName+' vs '+S.blackName+(d ? ', '+d : ''), color = S.flipped ? 'black' : 'white';
+    const at = base && base.parent ? hvNodeLabel(base) : '', here = node && node.parent ? hvNodeLabel(node) : '';
+    const items = [];
+    if(g._puzzle) items.push(['The puzzle on Lichess', { title:'Lichess puzzle #'+g._puzzle.id, url:'https://lichess.org/training/'+g._puzzle.id, text:'Lichess puzzle #'+g._puzzle.id }]);
+    else if(!g._practice && ccIsId(String(g.id)) && g.url) items.push(['The game on chess.com', { title:who, url:String(g.url), text:who+(at ? ' \u00b7 look at '+at : '') }]);
+    else if(!g._practice && /^[A-Za-z0-9]{8}$/.test(String(g.id))) items.push(['The game, at this move', { title:who, url:'https://lichess.org/'+g.id+'/'+color+(base && base.parent ? '#'+((g.initialFen ? rpPlyOffset(g.initialFen) : 0) + base.ply) : ''), text:who+(at ? ' \u00b7 at '+at : '') }]);
+    if(S.std && !bare && node && node.fen) items.push(['This position', { title:here ? 'After '+here : 'A position', url:shareLiPos(node.fen, color),
+      text:(here ? 'After '+here : 'The starting position')+(g._puzzle ? ' \u00b7 Lichess puzzle #'+g._puzzle.id : g._practice ? '' : ' \u00b7 '+who) }]);
+    if(!items.length) return;
+    const el = hvEl('div', 'hv-pop hv-share-pop');
+    el.setAttribute('role', 'menu');
+    el.setAttribute('aria-label', 'Share');
+    items.forEach(([label, o])=>{
+      const b = hvEl('button', 'hv-pop-item', label);
+      b.type = 'button';
+      b.setAttribute('role', 'menuitem');
+      b.addEventListener('click', (e)=>{ e.stopPropagation(); hvMenuClose(true); shareOut(btn, o); });
+      el.appendChild(b);
+    });
+    const box = btn.parentNode;
+    box.appendChild(el);
+    el.style.left = Math.max(0, Math.min(btn.offsetLeft, box.clientWidth - el.offsetWidth))+'px';
+    const fits = btn.getBoundingClientRect().bottom + 4 + el.offsetHeight <= (window.innerHeight || 800) - 8;      // else above the button
+    el.style.top = (fits ? btn.offsetTop + btn.offsetHeight + 4 : btn.offsetTop - el.offsetHeight - 4)+'px';
+    const outside = (e)=>{ if(!el.contains(e.target) && e.target!==btn) hvMenuClose(); };
+    btn.setAttribute('aria-expanded', 'true');
+    hvMenu = { el, node, opener:btn, outside, onClose:()=> btn.setAttribute('aria-expanded', 'false') };
+    setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
+    el.addEventListener('keydown', (e)=>{
+      const its = [...el.querySelectorAll('.hv-pop-item')], i = its.indexOf(document.activeElement);
+      if(e.key==='ArrowDown'){ e.preventDefault(); e.stopPropagation(); its[(i + 1) % its.length].focus(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); e.stopPropagation(); its[(i - 1 + its.length) % its.length].focus(); }
+      else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); hvMenuClose(true); }
+      else if(e.key==='Tab') hvMenuClose();
+    });
+    const first = el.querySelector('.hv-pop-item');
+    if(first) try{ first.focus({ preventScroll:true }); }catch(e){}
+  }
   function pxNote(btn, text){
     const box = btn && btn.parentNode;
     if(!box || !text) return;
