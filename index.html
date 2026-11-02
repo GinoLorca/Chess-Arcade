@@ -3708,8 +3708,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (hover:hover){ .ghb-card:hover{ border-color:var(--ink-soft); } .ghb-card.is-win:hover{ border-left-color:var(--good); } .ghb-card.is-loss:hover{ border-left-color:var(--bad); } }
   .ghb-bd{ width:100%; }
   .ghb-bd:empty::before{ content:''; display:block; padding-top:100%; background:var(--surface-2); border-radius:2px; }
-  .ghb-cap{ display:flex; justify-content:space-between; align-items:baseline; gap:6px; font-size:12px; line-height:1.3; }
-  .ghb-cap b{ font-family:"JetBrains Mono",monospace; font-weight:600; white-space:nowrap; }
+  .ghb-cap{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:0 6px; font-size:12px; line-height:1.3; }
+  .ghb-cap > span{ white-space:nowrap; }      /* "21.Qd8+ &middot; +5.03 ->" stays together; the score drops below when the card is narrow */
+  .ghb-cap b{ margin-left:auto; font-family:"JetBrains Mono",monospace; font-weight:600; white-space:nowrap; }
+  .ghb-x{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:0 6px; font-size:11.5px; line-height:1.3; color:var(--ink-soft); }
+  .ghb-x .ghb-sep{ display:none; }      /* the material (or the tag) left, the clocks right, as the line above */
+  .ghb-x .ghb-clk{ margin-left:auto; }
+  .ghb-tag{ color:var(--ink); font-weight:600; }
+  .ghb-tag.is-blunder{ color:var(--bad); }
+  .ghb-clk{ font-family:"JetBrains Mono",monospace; font-size:11px; white-space:nowrap; }
+  .ghb-clk .is-low{ color:var(--bad); font-weight:700; text-decoration:underline dotted; text-underline-offset:2px; }      /* time trouble: not by colour alone */
   .ghb-opp{ font-size:11.5px; line-height:1.3; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   :root[data-skin="bauhaus"] .ghb-card{ border-radius:0; }
   .ghb-rw{ font-weight:700; color:var(--ink); }
@@ -3942,7 +3950,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-oj-note{ margin:6px 0 0; font-size:12px; line-height:1.4; color:var(--ink-soft); }
   .gho-c-job .gho-share{ display:block; }
   /* Openings -> Variations (ghv*): one card, the controls on top, then the ranked list; a row opens its games under it */
-  .gho.is-var > :not(.gho-note):not(.gho-status):not(.ghv):not(.gho-foot){ display:none !important; }
+  .gho.is-var > :not(.gho-note):not(.gho-status):not(.gho-speed):not(.ghv):not(.gho-foot){ display:none !important; }
+  .gho-speed{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 12px; }
+  .gho-speed[hidden]{ display:none; }
   .ghv{ display:flex; flex-direction:column; gap:12px; padding:14px 16px 10px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
   .ghv[hidden]{ display:none; }
   :root[data-skin="bauhaus"] .ghv{ border-radius:0; border-width:2px; }
@@ -6912,6 +6922,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
               <option value="done">Opening did its job</option>
               <option value="not">Opening didn&#8217;t do its job</option>
               <option value="lost">Did its job, then lost</option>
+              <option value="away">Did its job, didn&#8217;t win</option>
               <option value="open">Over before a middlegame</option>
             </select>
             <select class="select-input" id="gh-eg" aria-label="Endgame">
@@ -6983,6 +6994,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <h3 class="gho-gap-h" id="ghb-h">Boards</h3>
         <div class="toggle-row gh-seg ghb-mom" id="ghb-mom" role="group" aria-label="Which moment">
           <button type="button" class="toggle" data-m="a" aria-pressed="true">Out of the opening</button>
+          <button type="button" class="toggle" data-m="k" aria-pressed="false">Key moment</button>
           <button type="button" class="toggle" data-m="b" aria-pressed="false">Into the endgame</button>
         </div>
       </div>
@@ -7087,12 +7099,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" class="btn btn-ghost" id="gho-connect-btn">Connect Repertoire Lab</button>
       </div>
       <div class="gho-status" id="gho-status" role="status" aria-live="polite" tabindex="-1" hidden></div>
+      <!-- one Speed row for the whole tab (Overview and Variations): the Filters' own Speed, with each speed's games -->
+      <div class="gho-speed" id="gho-speed" hidden><span class="ghv-k" id="ghv-sp-k">Speed</span><div class="toggle-row ghv-chips" id="ghv-speed" role="group" aria-labelledby="ghv-sp-k"></div></div>
       <!-- Variations (ghv*): your chapters (or lines) ranked by games, score or the opening's job, for a speed and color; a row opens its games -->
       <section class="ghv" id="ghv" aria-labelledby="ghv-h" hidden>
         <h3 class="ph-sr" id="ghv-h">Your variations, ranked</h3>
         <div class="ghv-ctl">
           <div class="ghv-g"><span class="ghv-k" id="ghv-rank-k">Rank by</span><div class="toggle-row gh-seg ghv-seg" id="ghv-rank" role="group" aria-labelledby="ghv-rank-k"><button type="button" class="toggle" data-val="played" aria-pressed="false">Most played</button><button type="button" class="toggle" data-val="best" aria-pressed="false">Best</button><button type="button" class="toggle" data-val="worst" aria-pressed="false">Struggling</button><button type="button" class="toggle" data-val="job" aria-pressed="false">Job done</button></div></div>
-          <div class="ghv-g"><span class="ghv-k" id="ghv-sp-k">Speed</span><div class="toggle-row ghv-chips" id="ghv-speed" role="group" aria-labelledby="ghv-sp-k"></div></div>
           <div class="ghv-g"><span class="ghv-k" id="ghv-col-k">Color</span><div class="toggle-row gh-seg ghv-seg" id="ghv-color" role="group" aria-labelledby="ghv-col-k"><button type="button" class="toggle" data-val="" aria-pressed="false">Both</button><button type="button" class="toggle" data-val="white" aria-pressed="false">White</button><button type="button" class="toggle" data-val="black" aria-pressed="false">Black</button></div></div>
           <div class="ghv-g"><span class="ghv-k" id="ghv-lvl-k">Show</span><div class="toggle-row gh-seg ghv-seg" id="ghv-lvl" role="group" aria-labelledby="ghv-lvl-k"><button type="button" class="toggle" data-val="c" aria-pressed="false">Chapters</button><button type="button" class="toggle" data-val="l" aria-pressed="false">Lines</button></div></div>
         </div>
@@ -24861,7 +24874,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', eg:'', oj:'', len:'', date:'', variant:'', notes:false, rep:'' };
   const GH_F_SETS = { speed:['ultraBullet','bullet','blitz','rapid','classical','correspondence'], result:['win','loss','draw'],
     color:['white','black'], rated:['rated','casual'], gap:['higher','even','lower'], end:['mate','resign','time','draw','other'],
-    len:['short','medium','long'], date:['7','30','90','year'], oj:['done','not','lost','open'], eg:['yes','no','pawn','rook','queen','bishopOpp','bishopSame','knight','bishopKnight','minor','rookMinor','queenMix','uneven'] };
+    len:['short','medium','long'], date:['7','30','90','year'], oj:['done','not','lost','away','open'], eg:['yes','no','pawn','rook','queen','bishopOpp','bishopSame','knight','bishopKnight','minor','rookMinor','queenMix','uneven'] };
   const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','oj','len','date','variant','notes','rep'];
   var EG = new Map(), EG_JOB = null, EG_SIG = '', EG_DONE = false;       // each game's endgame (where it begins, the kinds it went through): egEnsure
   // the repertoire filter (gho*, SPEC B.7): opening / trunk / course / chapter / line, outside, or a spot
@@ -24892,7 +24905,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         GH_UI.view = d.ui && (d.ui.view==='openings' || d.ui.view==='groups' || d.ui.view==='positions') ? d.ui.view : 'games';
         if(d.ui && typeof d.ui.osort==='string' && /^[a-z]{1,8}$/.test(d.ui.osort)) GH_UI.osort = d.ui.osort;
         if(d.ui && /^(all|lichess|chesscom)$/.test(String(d.ui.site))) GH_UI.site = d.ui.site;
-        GH_UI.boards = !!(d.ui && d.ui.boards); GH_UI.bmom = d.ui && d.ui.bmom==='b' ? 'b' : 'a';
+        GH_UI.boards = !!(d.ui && d.ui.boards); GH_UI.bmom = d.ui && (d.ui.bmom==='b' || d.ui.bmom==='k') ? d.ui.bmom : 'a';
         GH_UI.osub = d.ui && d.ui.osub==='variations' ? 'variations' : 'overview';     // Openings: Overview | Variations
         if(d.ui && /^(played|best|worst|job)$/.test(String(d.ui.vrank))) GH_UI.vrank = d.ui.vrank;
         GH_UI.vlvl = d.ui && d.ui.vlvl==='l' ? 'l' : 'c';
@@ -24900,7 +24913,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }catch(e){}
   })();
   function ghSaveFilters(){
-    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more, view:GH_UI.view, osort:GH_UI.osort, site:GH_UI.site, boards:!!GH_UI.boards, bmom:GH_UI.bmom==='b' ? 'b' : 'a', osub:GH_UI.osub==='variations' ? 'variations' : 'overview', vrank:GH_UI.vrank, vlvl:GH_UI.vlvl==='l' ? 'l' : 'c' } })); }catch(e){}
+    try{ localStorage.setItem(GH_FILTERS_KEY, JSON.stringify({ v:1, f:GH_FILTERS, ui:{ more:!!GH_UI.more, view:GH_UI.view, osort:GH_UI.osort, site:GH_UI.site, boards:!!GH_UI.boards, bmom:GH_UI.bmom==='b' || GH_UI.bmom==='k' ? GH_UI.bmom : 'a', osub:GH_UI.osub==='variations' ? 'variations' : 'overview', vrank:GH_UI.vrank, vlvl:GH_UI.vlvl==='l' ? 'l' : 'c' } })); }catch(e){}
   }
   function ghIsOn(k){ return k==='oq' ? (!GH_FILTERS.opening && !!GH_FILTERS.oq) : !!GH_FILTERS[k]; }
   function ghActiveCount(){ return GH_PARAM_KEYS.filter(ghIsOn).length; }
@@ -27415,6 +27428,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(GH_UI.view===v) return;
     if(GH_UI.view==='groups') ghgLeave();
     if(v==='games') GHO_Y = window.scrollY;
+    if(v==='openings' && GHB_DRILL){ GH_UI.boards = GHB_DRILL.boards; GH_UI.bmom = GHB_DRILL.bmom; GHB_DRILL = null; }
     if(v==='openings' && GHO_DRILL){
       // back from a drill-down: its extra filters as they were (unless you changed them since)
       const back = {};
@@ -27582,12 +27596,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     seg('ghv-rank', k); seg('ghv-color', f.color || ''); seg('ghv-lvl', lvl);
     const lw = model.rep ? ['Chapters', 'Lines'] : ['Openings', 'Variations'];
     document.querySelectorAll('#ghv-lvl .toggle').forEach((b, i)=>{ if(b.textContent!==lw[i]) b.textContent = lw[i]; });
-    if(loading){
-      const sp = document.getElementById('ghv-speed');
-      list.textContent = ''; list.dataset.sig = ''; sum.textContent = ''; note.hidden = true; sp.textContent = ''; sp.dataset.sig = '';
-      return;
-    }
-    ghvChips(model);
+    if(loading){ list.textContent = ''; list.dataset.sig = ''; sum.textContent = ''; note.hidden = true; return; }
     const R = ghvRows(model), u = ghMe(), all = R.ranked.concat(R.small);
     if(!all.some(r=> r.n.key===GHV_OPEN)) GHV_OPEN = '';
     const word = model.rep ? (lvl==='l' ? 'line' : 'chapter') : (lvl==='l' ? 'variation' : 'opening');
@@ -27644,6 +27653,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   (function ghvWire(){
     document.getElementById('gho-sub').addEventListener('click', e=>{ const b = e.target.closest('.gh-sub-b'); if(b) ghvSetSub(b.dataset.val); });
+    document.getElementById('ghv-speed').addEventListener('click', e=>{ const t = e.target.closest('.toggle'); if(t && (GH_FILTERS.speed || '')!==(t.dataset.val || '')) ghSetFilters({ speed:t.dataset.val || '' }); });
     const sec = document.getElementById('ghv');
     sec.addEventListener('click', e=>{
       const t = e.target.closest('button');
@@ -27654,7 +27664,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(grp.id==='ghv-rank'){ if(ghvRank()!==v){ GH_UI.vrank = v; ghSaveFilters(); ghoRedraw(); } }
         else if(grp.id==='ghv-lvl'){ if(ghvLvl()!==v){ GH_UI.vlvl = v; ghSaveFilters(); ghoRedraw(); } }
         else if(grp.id==='ghv-color'){ if((GH_FILTERS.color || '')!==v) ghSetFilters({ color:v }); }
-        else if(grp.id==='ghv-speed'){ if((GH_FILTERS.speed || '')!==v) ghSetFilters({ speed:v }); }
         return;
       }
       const key = t.dataset.key;
@@ -27669,7 +27678,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       const n = ghoFind(key), fl = n && ghoNodeFilter(n);
       if(!fl || (t.dataset.act!=='list' && t.dataset.act!=='boards')) return;
-      GH_UI.boards = t.dataset.act==='boards';
+      ghbDrill(t.dataset.act==='boards', t.dataset.act==='boards' ? 'a' : null);
       ghoApply(fl);
     });
   })();
@@ -28816,7 +28825,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       { name:'Stronger (100+)', gap:'higher', list:L.filter(e=>{ const x = d(e); return x!=null && x >= 100; }) },
       { name:'About even', gap:'even', list:L.filter(e=>{ const x = d(e); return x!=null && Math.abs(x) < 100; }) },
       { name:'Weaker (100+)', gap:'lower', list:L.filter(e=>{ const x = d(e); return x!=null && x <= -100; }) }]);
-    group('Speed', GHO_SPEEDS.map(([k, w])=> ({ name:w, speed:k, list:L.filter(e=> e.g.speed===k) })));
+    if(!GH_FILTERS.speed) group('Speed', GHO_SPEEDS.map(([k, w])=> ({ name:w, speed:k, list:L.filter(e=> e.g.speed===k) })));      // one speed picked: nothing to split
     // where this opening's games end up: the endgames reached, most first (step 2, 2026-10-31)
     if(egReady()){
       const G = egGroups(L);
@@ -29237,6 +29246,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghoStatus(model);
     const ccN = ghCcUp() ? ccGames().length : 0;
     const loading = site==='chesscom' ? !ccN && ghCcBusy() : !GH_STATE.games.length && !(mix && ccN);
+    // the Speed row (both views): each speed's games; none while loading (no counts from another tab)
+    const spr = document.getElementById('gho-speed');
+    if(loading){ const sp = document.getElementById('ghv-speed'); sp.textContent = ''; sp.dataset.sig = ''; spr.hidden = true; }
+    else { ghvChips(model); spr.hidden = false; }
     if(vOn){ ghoBriefTimer(false); ghvRender(model, loading); }
     else {
       ghoDrawBrief(loading ? null : model);
@@ -29348,7 +29361,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const sec = document.getElementById('gho');
     sec.addEventListener('click', e=>{
       const wk = e.target.closest('.gho-work-go');
-      if(wk){ const w = GHO_BRIEF.work && GHO_BRIEF.work[Number(wk.dataset.wi)]; if(w){ GH_UI.boards = wk.dataset.act==='boards'; ghoApply({ rep:w.rep }); } return; }
+      if(wk){ const w = GHO_BRIEF.work && GHO_BRIEF.work[Number(wk.dataset.wi)]; if(w){ ghbDrill(wk.dataset.act==='boards', wk.dataset.act==='boards' ? 'a' : null); ghoApply({ rep:w.rep }); } return; }
       const card = e.target.closest('.gho-card');
       if(card){ const c = GHO_LAST && GHO_LAST.ins[Number(card.dataset.ins)]; if(c) ghoApply(c.f); return; }
       const dot = e.target.closest('.gho-brief-dot');
@@ -29390,7 +29403,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const sp = e.target.closest('.gho-sp[data-key]');
       if(sp){ const n = ghoFind(sp.dataset.key), f = n && ghoNodeFilter(n); if(f) ghoApply(Object.assign({}, f, sp.dataset.gap ? { gap:sp.dataset.gap } : sp.dataset.eg ? { eg:sp.dataset.eg } : { speed:sp.dataset.speed })); return; }
       const ob = e.target.closest('.gho-oj-b');
-      if(ob){ ghoApply({ color:ob.dataset.ojc, oj:ob.dataset.oj }); return; }
+      if(ob){ if(ob.dataset.oj==='away') ghbDrill(true, 'k'); ghoApply({ color:ob.dataset.ojc, oj:ob.dataset.oj }); return; }     // where it got away: their key moments
       const eb = e.target.closest('.gho-end-b');
       if(eb){ ghoApply({ color:eb.dataset.egc, eg:eb.dataset.eg }); return; }
       const more = e.target.closest('#gho-more');
@@ -30066,7 +30079,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ojMatch(g, v){
     const r = ojOf(g);
     if(!r || r.k==='wait') return false;                       // not checked yet (or never graded): matches no setting
-    return v==='done' ? r.k==='done' : v==='not' ? r.k==='not' : v==='lost' ? !!r.lost : v==='open' ? !!r.open : false;
+    return v==='done' ? r.k==='done' : v==='not' ? r.k==='not' : v==='lost' ? !!r.lost : v==='away' ? r.k==='done' && !r.open && r.res!=='win' : v==='open' ? !!r.open : false;
   }
   // ---- the store: one record a game, { id, h, v, a:{ p, s, src, d }, b } ----
   function ojIdb(){
@@ -30120,7 +30133,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return out.sort((a, b)=> (Number(b.g.createdAt) || 0) - (Number(a.g.createdAt) || 0) || (a.which < b.which ? -1 : 1));
   }
   function ojEnsure(){
-    ojLoad();
+    ojLoad(); kmLoad();
     if(OJ_JOB || !ojWanted() || OJ_IDLE===ojIdleSig()) return;
     clearTimeout(ojEnsure.t);
     ojEnsure.t = setTimeout(()=>{ if(!OJ_JOB && ojWanted()) ojRun(); }, 1500);          // after the lists have drawn
@@ -30128,21 +30141,48 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   async function ojRun(){
     const job = OJ_JOB = { wake:null, todo:ojTodo(), i:0, done:0 };
     ojStatus();
-    while(OJ_JOB===job && ojWanted()){
-      // the list done: what's left now (an endgame to score for a game that just turned out to be "did its job, then lost")
-      if(job.i >= job.todo.length){ job.todo = ojTodo(); job.i = 0; if(!job.todo.length){ job.empty = true; break; } }
-      const t = job.todo[job.i++], id = String(t.g.id);
-      const r = ojOf(t.g);
-      if(!r || (t.which==='a' && r.k!=='wait') || (t.which==='b' && (!r.lost || r.slip))) continue;      // scored meanwhile
+    // one position to Stockfish: its info, false (it couldn't start, or the engine failed), null (no answer)
+    const ask = async (fen, nodes)=>{
       hveBoot();
       let off = null, dog = 0;
       const info = await new Promise(resolve=>{
         job.wake = resolve;
         off = hve.onState((st)=>{ if(st==='failed' || st==='off') resolve(st==='failed' ? false : null); });
         dog = setTimeout(()=>{ if(hve.kind==='ck') hve.stop(); resolve(null); }, 60000);
-        hve.check(t.fen, OJ_NODES, (fen, best, ci)=> resolve(ci || null)).then(ok=>{ if(!ok) resolve(false); });
+        hve.check(fen, nodes, (f, best, ci)=> resolve(ci || null)).then(ok=>{ if(!ok) resolve(false); });
       });
       job.wake = null; clearTimeout(dog); if(off) off();
+      return info;
+    };
+    while(OJ_JOB===job && ojWanted()){
+      // the list done: what's left now (an endgame to score for a game that just turned out to be "did its job, then
+      // lost"); with every checkpoint scored, the key moments, a position at a time (kmNext)
+      if(job.i >= job.todo.length){
+        job.todo = ojTodo(); job.i = 0;
+        if(!job.todo.length){ const k = kmNext(); if(k) job.todo = [k]; else { job.empty = true; break; } }
+      }
+      const t = job.todo[job.i++], id = String(t.g.id);
+      let info = null;
+      if(t.which==='k'){
+        let sc = null;
+        try{ sc = kmTerminal(t.st); }catch(e){ sc = null; }
+        if(!sc){
+          info = await ask(t.fen, KM_NODES);
+          if(OJ_JOB!==job) return;
+          if(info===false){
+            if(hve.state==='failed'){ if(hve.failWhy!=='slow') OJ_NOENG = true; break; }
+            job.i--; await new Promise(r=> setTimeout(r, 500)); continue;
+          }
+          sc = info && info.score && hvFen4(info.fen)===hvFen4(t.fen) ? info.score : null;
+        }
+        if(!sc) KM_FAIL.add(id);                                  // no score for it: left for another visit
+        else if(kmKeep(t, sc)){ job.done++; ojSoonDraw(); }       // a game's key moment found (or not there)
+        ojStatus();
+        continue;
+      }
+      const r = ojOf(t.g);
+      if(!r || (t.which==='a' && r.k!=='wait') || (t.which==='b' && (!r.lost || r.slip))) continue;      // scored meanwhile
+      info = await ask(t.fen, OJ_NODES);
       if(OJ_JOB!==job) return;
       if(info===false){
         if(hve.state==='failed'){ if(hve.failWhy!=='slow') OJ_NOENG = true; break; }       // Stockfish can't run here (the hosted Artifact): not tried again this visit
@@ -30156,10 +30196,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       ojStatus();
       ojSoonDraw();
     }
-    if(OJ_JOB===job){ OJ_JOB = null; OJ_IDLE = job.empty ? ojIdleSig() : ''; ojStatus(); if(job.done) ojSoonDraw(true); }
+    if(OJ_JOB===job){ OJ_JOB = null; OJ_IDLE = job.empty ? ojIdleSig() : ''; ojStatus(); if(job.done || OJ_NOENG) ojSoonDraw(true); }      // Stockfish can't run: once, so the lines say why
   }
   // what an empty to-do list depended on: while it's the same, there's nothing to check (no job, no redraw)
-  function ojIdleSig(){ return OJ_VER+'|'+EG.size+'|'+OJ_FAIL.size+'|'+OJ_ON+'|'+OJ_DB.size; }
+  function ojIdleSig(){ return OJ_VER+'|'+EG.size+'|'+OJ_FAIL.size+'|'+OJ_ON+'|'+OJ_DB.size+'|'+KM_VER+'|'+KM_FAIL.size+'|'+KM_LOADED; }
   function ojStop(){
     const j = OJ_JOB;
     OJ_JOB = null;
@@ -30181,10 +30221,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // new scores show at most every 30 s, and once the checks finish; only on the Openings tab (a filtered list keeps
   // still while you read it) and never while you type a search
   function ojSoonDraw(now){
-    if(currentView!=='history' || !ghoOn()) return;
+    const on = ()=> ghoOn() || (ghbOn() && GH_UI.bmom==='k');           // Boards at its Key moment shows them as they come
+    if(currentView!=='history' || !on()) return;
     const go = ()=>{
       OJ_DRAWT = 0;
-      if(currentView!=='history' || !ghoOn()) return;
+      if(currentView!=='history' || !on()) return;
       if(Date.now() - GHO_QAT < 900){ OJ_DRAWT = setTimeout(go, 900); return; }
       OJ_DRAWN = Date.now();
       ghRender();
@@ -30214,9 +30255,216 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(c.scored >= c.all) t = 'All '+ghoN(c.all, 'game')+' scored.';
       else if(!OJ_ON) t = 'Off: '+n(c.scored)+' of '+ghoN(c.all, 'game')+' scored.';
       else t = (OJ_JOB ? 'Checking: ' : '')+n(c.scored)+' of '+ghoN(c.all, 'game')+' scored'+(OJ_JOB ? '.' : '. Checks run while the Openings tab is open.');
+      const k = c.all ? kmCounts() : { all:0 };
+      if(k.all) t += ' Key moments: '+n(k.done)+' of '+ghoN(k.all, 'game')+' looked at.';
     }
     if(el.textContent!==t) el.textContent = t;
   }
+  /* ---- Key moments (km*, 2026-11-01). In a game where the opening did its job and you then lost or drew: the move of
+     yours that took your score out of the opening's zone (White +0.50, Black -0.30, OJ_BAR) for good, the last time it
+     left and never came back. The user's definition: not the biggest drop (that's blunder spotting, another part of
+     chess), but where the advantage the opening gave you started leaking away for good. The move gets Lichess's own word
+     for what it cost in winning chances (0-100: inaccuracy 5+, mistake 10+, blunder 15+), none when the advantage went a
+     little at a time. A score that only hovered under the line (never KM_CLEAR points of winning chances below it) is
+     no key moment, and neither is a game that never left the zone (lost on time, resigned or drew while still fine).
+     Scores, one source a game: your review, else Lichess's analysis, else Stockfish at KM_NODES, in the opening checks'
+     background job once the checkpoints are all scored (ojRun), scanning your moves back from the end and stopping at
+     the last one still in the zone. At the key move: your clock before it, what it took, your opponent's clock; time
+     trouble is under 10% of your starting clock. Kept in IndexedDB wavyChessPrepKeyMoments: { id, h, v, s:{ ply:score } }. ---- */
+  const KM_V = 1, KM_DBN = 'wavyChessPrepKeyMoments', KM_CLEAR = 5;
+  var KM_NODES = 60000;                           // about depth 13-14 in a middlegame: a third of a second or so on a laptop
+  var KM_DB = new Map(), KM_LOADED = false, KM_LOADING = false, KM_VER = 0, KM_IDBP = null;
+  var KM_FAIL = new Set(), KM_C = new Map(), KM_RUN = new Map();      // games Stockfish couldn't score; results; scores of games in progress
+  function kmIdb(){
+    return KM_IDBP || (KM_IDBP = new Promise((res)=>{
+      try{
+        const q = indexedDB.open(KM_DBN, 1);
+        q.onupgradeneeded = ()=>{ try{ q.result.createObjectStore('k', { keyPath:'id' }); }catch(e){} };
+        q.onsuccess = ()=> res(q.result); q.onerror = ()=> res(null); q.onblocked = ()=> res(null);
+      }catch(e){ res(null); }
+    }));
+  }
+  function kmLoad(){
+    if(KM_LOADED || KM_LOADING) return;
+    KM_LOADING = true;
+    kmIdb().then(db=> new Promise(res=>{
+      if(!db) return res();
+      try{ const q = db.transaction('k').objectStore('k').getAll(); q.onsuccess = ()=>{ (q.result || []).forEach(r=>{ if(r && r.id && r.s && typeof r.s==='object') KM_DB.set(String(r.id), r); }); res(); }; q.onerror = ()=> res(); }catch(e){ res(); }
+    })).then(()=>{ KM_LOADED = true; KM_VER++; if(currentView==='history' && KM_DB.size && (ghoOn() || (ghbOn() && GH_UI.bmom==='k'))) ghRender(); });
+  }
+  function kmPut(rec){ kmIdb().then(db=>{ if(!db) return; try{ db.transaction('k', 'readwrite').objectStore('k').put(rec); }catch(e){} }); }
+  // the games a key moment is looked for in: the opening did its job (scored where it ended) and you didn't win
+  function kmIn(g){ const j = ojOf(g); return !!j && j.k==='done' && !j.open && j.res!=='win'; }
+  // the position after ply p, as a FEN with the real halfmove clock, the state, and the move into it ({ from, to })
+  function kmAt(g, p){
+    const toks = String(g.moves || '').trim().split(/\s+/);
+    let st = pzStartPosition(), half = 0, mv = null;
+    for(let i = 0; i < p; i++){
+      mv = rpSanToMove(st, toks[i]);
+      if(!mv) return null;
+      half = (mv.piece==='p' || mv.captured || mv.isEP) ? 0 : half + 1;
+      st = pzApplyMoveRaw(st, mv);
+    }
+    const f = pzStateToFEN(st, p).split(' ');
+    f[4] = String(half);
+    return { fen:f.join(' '), st, mv };
+  }
+  // a finished position scored off the board (the engine prints no move there): mate, stalemate, bare kings
+  function kmTerminal(st){
+    if(pzAllLegalMoves(st).length) return hvInsufficient(st.board) ? { type:'cp', value:0 } : null;
+    return pzIsInCheck(st, st.turn) ? { type:'mate', value: st.turn==='w' ? -1 : 1 } : { type:'cp', value:0 };
+  }
+  // the clocks at your move at ply p (centiseconds): yours before it, what it took, your opponent's; null when not kept
+  // a side's starting clock and increment (centiseconds): a Lichess berserk halves the clock and drops the increment
+  function kmStart(g, c){
+    const ini = g.clock ? Number(g.clock.initial) || 0 : 0, inc = g.clock ? Number(g.clock.increment) || 0 : 0;
+    const pl = g.players && g.players[c==='w' ? 'white' : 'black'];
+    return pl && pl.berserk ? { ini:ini*50, inc:0 } : { ini:ini*100, inc:inc*100 };
+  }
+  function kmClock(g, p){
+    const C = g.clocks;
+    if(!Array.isArray(C) || !C.length || !(g.clock && Number(g.clock.initial) > 0) || p < 1) return null;
+    const M = kmStart(g, p % 2 ? 'w' : 'b'), O = kmStart(g, p % 2 ? 'b' : 'w');
+    const rd = (q, s)=> q < 1 ? s.ini : (q - 1 < C.length && typeof C[q - 1]==='number' ? C[q - 1] : null);     // the mover's own clock after ply q
+    const me = rd(p - 2, M), after = rd(p, M), opp = rd(p - 1, O);
+    if(me==null || after==null || opp==null) return null;
+    return { me, opp, spent:Math.max(0, me - after + M.inc), trouble: me < M.ini/10 };
+  }
+  // the scan, given the scores (get(p): a score, null for a gap, undefined for not scored yet)
+  function kmScan(g, x, mine, get, src){
+    const bar = OJ_BAR[mine], P = [];
+    for(let p = x.n; p > x.qa; p--) if((p % 2 ? 'w' : 'b')===mine) P.push(p);       // your moves after the opening, last first
+    if(!P.length) return { k:'kept', src };
+    let last = -1;
+    for(let i = 0; i < P.length; i++){
+      const s = get(P[i]);
+      if(s===undefined) return { k:'wait', need:P[i], src };
+      if(!s) return { k:'gap', src };
+      if(hrMoverScore(s, mine) >= bar){ last = i; break; }
+    }
+    if(last===0) return { k:'kept', src };                                           // still in the zone after your last move
+    const ki = last < 0 ? P.length - 1 : last - 1, p = P[ki];                         // the first of your moves out, for good
+    const prev = get(p - 1), after = get(p);
+    if(prev===undefined) return { k:'wait', need:p - 1, src };
+    if(!prev) return { k:'gap', src };
+    // the score it left from: just before your move, or (your opponent's reply had already dipped under the line) your
+    // last position in the zone, the opening's end when there's none after it
+    let before = prev, from = p - 1;
+    if(hrMoverScore(prev, mine) < bar){
+      from = last >= 0 ? P[last] : x.qa;
+      const b = get(from);
+      if(b===undefined) return { k:'wait', need:from, src };
+      if(!b) return { k:'gap', src };
+      before = b;
+    }
+    const line = hpfWinPct({ type:'cp', value: mine==='w' ? bar : -bar }, mine);
+    let low = 101;
+    for(let i = 0; i <= ki; i++) low = Math.min(low, hpfWinPct(get(P[i]), mine));
+    if(line - low < KM_CLEAR) return { k:'near', p, src };                            // only ever just under the line
+    const drop = hpfWinPct(prev, mine) - hpfWinPct(after, mine);             // what your move itself cost: Lichess's words are for one move
+    return { k:'away', p, before, from, after, drop, tag: drop >= 15 ? 'blunder' : drop >= 10 ? 'mistake' : drop >= 5 ? 'inaccuracy' : '', src, clk:kmClock(g, p) };
+  }
+  function kmWork(g, x, mine){
+    const id = String(g.id), R = ojRevs()[id];
+    if(R && R.h===x.h && R.n===x.n && typeof R.e==='string'){
+      const E = R.e.split(',');
+      return kmScan(g, x, mine, (p)=> E[p]!=null && E[p]!=='' ? hrDecScore(E[p]) : null, 'review');
+    }
+    if(Array.isArray(g._ev) && g._ev.length===x.n){
+      const r = kmScan(g, x, mine, (p)=> p >= 1 ? g._ev[p - 1] || null : null, 'lichess');
+      if(r.k!=='gap') return r;                                                       // a gap in Lichess's analysis: Stockfish for the whole game
+    }
+    const rec = KM_DB.get(id), run = KM_RUN.get(id);
+    const kept = rec && rec.h===x.h && rec.v===KM_V ? rec.s : null, now = run && run.h===x.h ? run.s : null;
+    return kmScan(g, x, mine, (p)=> kept && kept[p]!=null ? hrDecScore(kept[p]) : now && now[p]!=null ? hrDecScore(now[p]) : undefined, 'sf');
+  }
+  // a game's key moment: { k:'away'|'kept'|'near'|'wait'|'gap', p, before, after, drop, tag, src, clk } or null (not looked for)
+  function kmOf(g){
+    if(!KM_LOADED || !kmIn(g)) return null;
+    const id = String(g.id), x = EG.get(id), mine = ojMine(g);
+    if(!x || !x.all || x.qa < 0 || !mine) return null;
+    const c = KM_C.get(id);
+    if(c && c.ver===KM_VER && c.ov===OJ_VER) return c.r;
+    const r = kmWork(g, x, mine);
+    if(r.k==='wait' && KM_FAIL.has(id)) r.failed = true;
+    KM_C.set(id, { ver:KM_VER, ov:OJ_VER, r });
+    return r;
+  }
+  // the next position Stockfish scores (the newest game first), or null
+  function kmNext(){
+    if(!KM_LOADED) return null;
+    let best = null;
+    rpGames().forEach(g=>{
+      const id = String(g.id);
+      if(KM_FAIL.has(id)) return;
+      const r = kmOf(g);
+      if(!r || r.k!=='wait' || r.src!=='sf') return;
+      if(!best || (Number(g.createdAt) || 0) > (Number(best.g.createdAt) || 0)) best = { g, p:r.need };
+    });
+    if(!best) return null;
+    const A = kmAt(best.g, best.p);
+    if(!A){ KM_FAIL.add(String(best.g.id)); return kmNext(); }
+    return { g:best.g, x:EG.get(String(best.g.id)), which:'k', p:best.p, fen:A.fen, st:A.st };
+  }
+  // a score in: kept with the game's others; the game's done when its scan has what it needs
+  function kmKeep(t, score){
+    const id = String(t.g.id), h = t.x.h;
+    let run = KM_RUN.get(id);
+    if(!run || run.h!==h) KM_RUN.set(id, run = { h, s:{} });
+    run.s[t.p] = hrEncScore(score);
+    KM_C.delete(id);
+    const r = kmWork(t.g, t.x, ojMine(t.g));
+    if(r.k==='wait') return false;
+    KM_RUN.delete(id);
+    if(r.src==='sf'){
+      const old = KM_DB.get(id), base = old && old.h===h && old.v===KM_V ? old.s : {};
+      const rec = { id, h, v:KM_V, s:Object.assign({}, base, run.s), d:KM_NODES };
+      KM_DB.set(id, rec); kmPut(rec);
+    }
+    KM_VER++;
+    return true;
+  }
+  function kmCounts(){
+    let all = 0, done = 0;
+    if(KM_LOADED) rpGames().forEach(g=>{ const r = kmOf(g); if(!r) return; all++; if(r.k!=='wait') done++; });
+    return { all, done };
+  }
+  // ---- Boards cards: how the game ended, the material, the clocks (2026-11-01) ----
+  // "Lost on time", "Won by checkmate", "Resigned": the result in words with how it ended
+  function ghbEnd(g, res){
+    const s = String(g.status || '');
+    if(res==='win') return s==='mate' ? 'Won by checkmate' : s==='resign' ? 'Won by resignation' : s==='outoftime' ? 'Won on time' : s==='timeout' || s==='abandoned' ? 'Won, they left' : 'Won';
+    if(res==='loss') return s==='mate' ? 'Checkmated' : s==='resign' ? 'Resigned' : s==='outoftime' ? 'Lost on time' : s==='timeout' || s==='abandoned' ? 'Lost, left the game' : 'Lost';
+    return s==='stalemate' ? 'Drawn by stalemate' : s==='repetition' ? 'Drawn by repetition' : s==='fiftyMove' ? 'Drawn, 50-move rule' : s==='insufficientMaterialClaim' ? 'Drawn, no mating material'
+      : s==='outoftime' || s==='timeVsInsufficient' ? 'Drawn on time' : 'Drawn';
+  }
+  // the material at a position from your side, in words: "up a rook", "down 2 pawns", "up the exchange", "material +3"
+  function ghbMaterial(fen, mine){
+    let B;
+    try{ B = boardFromFENChecks(fen).board; }catch(e){ return ''; }
+    const n = { w:{ q:0, r:0, m:0, p:0 }, b:{ q:0, r:0, m:0, p:0 } };
+    B.forEach(p=>{ if(!p || p.type==='k') return; const t = p.type==='b' || p.type==='n' ? 'm' : p.type; n[p.color][t]++; });
+    const op = mine==='w' ? 'b' : 'w', d = { q:n[mine].q - n[op].q, r:n[mine].r - n[op].r, m:n[mine].m - n[op].m, p:n[mine].p - n[op].p };
+    const pts = d.q*9 + d.r*5 + d.m*3 + d.p;
+    if(!pts) return 'even material';
+    const ud = pts > 0 ? 'up ' : 'down ';
+    if(!d.q && !d.p && d.r===-d.m && Math.abs(d.r)===1) return ud+'the exchange';
+    const one = ['q', 'r', 'm', 'p'].filter(t=> d[t]);
+    if(one.length===1){
+      const k = Math.abs(d[one[0]]), w = { q:'queen', r:'rook', m:'piece', p:'pawn' }[one[0]];
+      return ud+(k===1 ? 'a '+w : k+' '+w+'s');
+    }
+    return 'material '+(pts > 0 ? '+' : '\u2212')+Math.abs(pts);
+  }
+  // both clocks at a position: yours and your opponent's, each after their last move (centiseconds), or null
+  function ghbClocks(g, p, mine){
+    const C = g.clocks;
+    if(!Array.isArray(C) || !C.length || !(g.clock && Number(g.clock.initial) > 0)) return null;
+    const at = (c)=>{ const q = (p % 2 ? 'w' : 'b')===c ? p : p - 1; return q < 1 ? kmStart(g, c).ini : (q - 1 < C.length && typeof C[q - 1]==='number' ? C[q - 1] : null); };
+    const me = at(mine), opp = at(mine==='w' ? 'b' : 'w');
+    return me==null || opp==null ? null : { me, opp, trouble: me < kmStart(g, mine).ini/10 };
+  }
+
   (function(){
     const row = document.getElementById('oj-row');
     row.addEventListener('click', (e)=>{
@@ -30227,6 +30475,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       try{ localStorage.setItem(OJ_KEY, OJ_ON ? 'on' : 'off'); }catch(e2){}
       if(!OJ_ON) ojStop(); else ojEnsure();
       ojStatus();
+      if(currentView==='history' && ghbOn() && GH_UI.bmom==='k') ghRender();          // Boards at Key moment says why some aren't looked at
     });
     document.getElementById('settings-fab').addEventListener('click', ()=> setTimeout(ojStatus, 0));
     ojStatus();
@@ -30265,6 +30514,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var GHB_OPEN = new Set(), GHB_ROWS = null, GHB_IO = null, GHB_SIG = '', GHB_PS = null;
   const GHB_N = 6;
   function ghbOn(){ return !!GH_UI.boards && GH_UI.view==='games'; }
+  // a drill-down that shows its games as boards (or as the list) for itself only: back in Openings, the switch and the
+  // moment are yours again (unless you changed them meanwhile)
+  var GHB_DRILL = null;
+  function ghbDrill(boards, mom){
+    if(!GHB_DRILL) GHB_DRILL = { boards:!!GH_UI.boards, bmom:GH_UI.bmom };
+    GH_UI.boards = !!boards;
+    if(mom) GH_UI.bmom = mom;
+  }
   function ghbPawns(fen){ const B = boardFromFENChecks(fen).board; return ghpPawns(i=>{ const p = B[i]; return p && p.type==='p' ? (p.color==='w' ? 1 : 7) : 0; }); }
   // the FEN's pawns only (a group's picture)
   function ghbPawnFen(fen){
@@ -30320,30 +30577,47 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   const GHB_SRC = { review:'your review', lichess:'Lichess\u2019s analysis', sf:'Opening checks' };
   function ghbCard(e, u){
-    const g = e.g, b = ghEl('button', 'ghb-card is-'+e.res);
+    const g = e.g, b = ghEl('button', 'ghb-card is-'+e.res), mine = e.color==='white' ? 'w' : 'b', km = e.km;
     b.type = 'button'; b.dataset.gid = String(g.id); b.dataset.ply = String(e.p);
     const bd = ghEl('div', 'ghb-bd');
     bd.dataset.fen = e.fen; if(e.color==='black') bd.dataset.flip = '1';
+    if(e.arrow) bd.dataset.arrow = e.arrow;
     b.appendChild(bd);
-    const toks = String(g.moves || '').trim().split(/\s+/), mv = rpMoveText(e.p - 1, toks[e.p - 1] || '');
-    const sc = e.sc, st = e.st;
+    const toks = String(g.moves || '').trim().split(/\s+/), q = km ? km.p : e.p, mv = rpMoveText(q - 1, toks[q - 1] || '');
+    const sc = e.sc, st = e.st, was = km ? ghbScoreText(km.before, mine) : '';
     const cap = ghEl('div', 'ghb-cap');
-    cap.appendChild(ghEl('span', '', 'after '+mv));
+    cap.appendChild(ghEl('span', '', km ? mv+' \u00b7 '+was+' \u2192' : 'after '+mv));
     cap.appendChild(ghEl('b', '', st || '\u2014'));
     b.appendChild(cap);
-    const P = ghPlayers(g, u), opp = ghOppName(P.opp), rw = e.res==='win' ? 'Won' : e.res==='loss' ? 'Lost' : 'Drawn';
+    // the line under it: at a key moment, what the move was and the clocks then; otherwise the material and the clocks
+    const ck = km ? km.clk : ghbClocks(g, e.p, mine), mat = km ? '' : ghbMaterial(e.fen, mine), first = km ? (km.tag || 'left the zone') : mat;
+    const xl = ghEl('div', 'ghb-x');
+    if(first) xl.appendChild(ghEl('span', km && km.tag ? 'ghb-tag is-'+km.tag : '', first));
+    if(ck){
+      if(first) xl.appendChild(ghEl('span', 'ghb-sep', ' \u00b7 '));
+      const cs = ghEl('span', 'ghb-clk');
+      cs.appendChild(ghEl('span', ck.trouble ? 'is-low' : '', hvFmtClock(ck.me)));             // yours: time trouble marks only it
+      cs.appendChild(document.createTextNode(' v '+hvFmtClock(ck.opp)));
+      xl.appendChild(cs);
+    }
+    if(xl.childNodes.length) b.appendChild(xl);
+    const P = ghPlayers(g, u), opp = ghOppName(P.opp), rw = ghbEnd(g, e.res);
     const ow = ghEl('div', 'ghb-opp');
     ow.appendChild(ghEl('b', 'ghb-rw', rw));
     ow.appendChild(ghEl('span', 'ghb-vs', ' vs '+opp));
     b.appendChild(ow);
     const d = g.createdAt ? new Date(Number(g.createdAt)).toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' }) : '';
-    const lab = rw+' against '+opp+(d ? ', '+d : '')+'. After '+mv+(st ? ', '+st+' for you ('+(GHB_SRC[sc.src] || 'Opening checks')+')' : ', not scored')+'. Open the review at this move';
+    const clk = ck ? (km ? ' You had '+hvFmtClock(ck.me)+(ck.spent!=null ? ' and it took '+hvFmtClock(ck.spent) : '')+'; your opponent had '+hvFmtClock(ck.opp)+(ck.trouble ? ': time trouble' : '')+'.'
+      : ' Clocks: yours '+hvFmtClock(ck.me)+', your opponent\u2019s '+hvFmtClock(ck.opp)+(ck.trouble ? ' (time trouble)' : '')+'.') : '';
+    const lab = km ? rw+' against '+opp+(d ? ', '+d : '')+'. '+(km.from===km.p - 1 ? 'Your move '+mv+' took your score from '+was+' to '+st : 'Your score was '+was+' after an earlier move of yours; after '+mv+' it was '+st)+', out of the opening\u2019s zone for good'
+        +(km.tag ? ': '+(km.tag==='inaccuracy' ? 'an ' : 'a ')+km.tag+', '+Math.round(km.drop)+' points of winning chances' : '')+' ('+(GHB_SRC[km.src] || 'Opening checks')+').'+clk+' Open the review before that move'
+      : rw+' against '+opp+(d ? ', '+d : '')+'. After '+mv+(st ? ', '+st+' for you ('+(GHB_SRC[sc.src] || 'Opening checks')+')' : ', not scored')+(mat ? ', '+mat : '')+'.'+clk+' Open the review at this move';
     b.title = lab; b.setAttribute('aria-label', lab);
     return b;
   }
   // boards drawn as they come near the screen (a board is ~230 elements)
   function ghbFill(root){
-    const fill = (bd)=>{ if(bd.firstChild || !bd.dataset.fen) return; try{ bd.appendChild(nbMiniBoard({ fen:bd.dataset.fen, flip:!!bd.dataset.flip, arrows:[], squares:[], label:'', ply:null, line:null, extra:[] })); }catch(e){} };
+    const fill = (bd)=>{ if(bd.firstChild || !bd.dataset.fen) return; const ar = bd.dataset.arrow; try{ bd.appendChild(nbMiniBoard({ fen:bd.dataset.fen, flip:!!bd.dataset.flip, arrows: ar ? [{ f:ar.slice(0, 2), t:ar.slice(2, 4), c:'R' }] : [], squares:[], label:'', ply:null, line:null, extra:[] })); }catch(e){} };
     const list = root.querySelectorAll('.ghb-bd');
     if(!('IntersectionObserver' in window)){ list.forEach(fill); return; }
     if(!GHB_IO){
@@ -30355,14 +30629,33 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghbRender(rows){
     GHB_ROWS = rows;
     const box = document.getElementById('ghb'), wrap = document.getElementById('ghb-groups'), sum = document.getElementById('ghb-sum');
-    const mom = GH_UI.bmom==='b' ? 'b' : 'a';
+    const mom = GH_UI.bmom==='b' || GH_UI.bmom==='k' ? GH_UI.bmom : 'a';
     document.querySelectorAll('#ghb-mom .toggle').forEach(t=>{ const on = t.dataset.m===mom; t.classList.toggle('active', on); t.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     if(!egReady()){ sum.textContent = 'Reading your games\u2026'; wrap.textContent = ''; GHB_SIG = ''; return; }
     const u = ghMe(), E = [];
     let none = 0, scored = 0;
+    const K = { won:0, notjob:0, open:0, unscored:0, other:0, kept:0, wait:0, trouble:0 };       // Key moment: the games without one, and why
+    const sq = (i)=> 'abcdefgh'[i % 8] + (Math.floor(i / 8) + 1);
     rows.forEach(g=>{
       const x = EG.get(String(g.id)), mine = ojMine(g);
-      if(!x || !x.all || !mine || !ghIsStd(g) || g.initialFen){ none++; return; }
+      if(!x || !x.all || !mine || !ghIsStd(g) || g.initialFen){ if(mom==='k') K.other++; else none++; return; }
+      if(mom==='k'){
+        // the position before your key move, the move as an arrow, the score after it
+        const r = kmOf(g);
+        if(!r){
+          const jo = ojOf(g);
+          if(!jo) K.other++; else if(jo.k==='wait') K.unscored++; else if(jo.open) K.open++; else if(jo.res==='win') K.won++; else if(jo.k==='not') K.notjob++; else K.wait++;
+          return;
+        }
+        if(r.k==='wait' || r.k==='gap'){ K.wait++; return; }
+        if(r.k!=='away'){ K.kept++; return; }
+        const A = kmAt(g, r.p - 1), mv = A && rpSanToMove(A.st, String(g.moves || '').trim().split(/\s+/)[r.p - 1]);
+        if(!A || !mv){ K.wait++; return; }
+        if(r.clk && r.clk.trouble) K.trouble++;
+        scored++;
+        E.push({ g, x, p:r.p - 1, fen:A.fen, color: mine==='w' ? 'white' : 'black', pw:ghbPawns(A.fen), res:ghGameResult(g, u || ''), sc:{ s:r.after, src:r.src }, st:ghbScoreText(r.after, mine), km:r, arrow:sq(mv.from)+sq(mv.to) });
+        return;
+      }
       const p = mom==='a' ? x.qa : x.qb, fen = mom==='a' ? x.fa : x.fb;
       if(p < 0 || !fen){ none++; return; }
       const sc = ojEvalAt(g, x, p);
@@ -30370,11 +30663,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       E.push({ g, x, p, fen, color: mine==='w' ? 'white' : 'black', pw:ghbPawns(fen), res:ghGameResult(g, u || ''), sc, st:ghbScoreText(sc && sc.s, mine) });
     });
     // what's shown (each board's score included, and the piece set): the same again touches nothing
-    const sig = mom+'|'+[...GHB_OPEN].join(',')+'|'+rows.length+'|'+E.map(e=> e.g.id+':'+e.st).join(',');
+    const sig = mom+'|'+[...GHB_OPEN].join(',')+'|'+rows.length+'|'+(mom==='k' ? JSON.stringify(K)+(OJ_NOENG ? 1 : 0)+(OJ_ON ? 1 : 0) : '')+'|'+E.map(e=> e.g.id+':'+e.st+(e.km ? ':'+e.km.p+e.km.tag : '')).join(',');
     if(sig===GHB_SIG && GHB_PS===PIECE_SVG && wrap.childNodes.length) return;
     GHB_SIG = sig; GHB_PS = PIECE_SVG;
     const where = mom==='a' ? 'out of the opening' : 'going into the endgame';
-    sum.textContent = !rows.length ? '' : E.length
+    const hint = OJ_NOENG ? ' (Stockfish can\u2019t run here)' : !OJ_ON ? ' (turn on Opening checks in Settings)' : '';
+    const kmWhy = [K.kept ? ghoN(K.kept, 'game')+' never clearly left the zone (lost on time, resigned or drew while still fine)' : '',
+      K.wait ? K.wait+' not looked at yet'+hint : '', K.unscored ? ghoN(K.unscored, 'game')+' with the opening not scored yet'+hint : '',
+      K.won ? K.won+' won' : '', K.notjob ? K.notjob+' where the opening didn\u2019t do its job' : '', K.open ? K.open+' over before a middlegame' : '',
+      K.other ? K.other+' not graded (Chess960, set positions, bots, unfinished)' : ''].filter(Boolean).join(' \u00b7 ');
+    if(mom==='k') sum.textContent = !rows.length ? '' : (E.length
+      ? ghoN(E.length, 'key moment')+': in games where the opening did its job and you lost or drew, your move that took your score out of the opening\u2019s zone for good (White +0.50, Black \u22120.30). '
+        +'The position before it, your move as the arrow, your score after it'+(K.trouble ? '; '+K.trouble+' in time trouble (under 10% of your clock)' : '')+'. '
+      : 'No key moments in these games. ')+(kmWhy ? kmWhy+'. ' : '')+(E.length ? 'Tap a board for the review at that move.' : '');
+    else sum.textContent = !rows.length ? '' : E.length
       ? ghoN(E.length, 'game')+' '+where+(none ? ' ('+ghoN(none, 'other')+' never got there)' : '')+', your side at the bottom, grouped by pawn structure: the same pawns, or within 2 pawns of them. '
         +'Scored on '+scored+' of '+E.length+' (\u2014 means not scored'+(mom==='b' ? '; an endgame is checked only for games where the opening did its job and you lost' : '')+'). Tap a board for the review at that move.'
       : 'None of the '+ghoN(rows.length, 'game')+' listed got '+(mom==='a' ? 'out of the opening' : 'to an endgame')+'.';
@@ -30437,13 +30739,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const b = e.target.closest('.toggle');
       if(!b) return;
       GH_UI.boards = b.dataset.v==='boards';
+      GHB_DRILL = null;                // your own choice: kept
       ghSaveFilters();
       ghRender();
     });
     document.getElementById('ghb-mom').addEventListener('click', (e)=>{
       const b = e.target.closest('.toggle');
       if(!b) return;
-      GH_UI.bmom = b.dataset.m==='b' ? 'b' : 'a';
+      GH_UI.bmom = b.dataset.m==='b' || b.dataset.m==='k' ? b.dataset.m : 'a';
+      GHB_DRILL = null;
       ghSaveFilters();
       ghbRender(GHB_ROWS || []);
     });
@@ -30487,13 +30791,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const ul = ghEl('ul', 'gho-ends-list');
       const row = (name, oj, list, sub)=>{
         if(!list.length && oj!=='lost') return;
+        const cnt = oj==='lost' || oj==='away';          // a count: the score of those is plain (lost, or not won)
         const m = ghoMetrics(list), li = ghEl('li', ''), b = ghEl('button', 'gho-end-b gho-oj-b'+(m.n < GHO_MIN ? ' is-thin' : ''));
         b.type = 'button'; b.dataset.oj = oj; b.dataset.ojc = color; b.dataset.fid = 'oj|'+color+'|'+oj;
         b.appendChild(ghEl('span', 'gho-end-k', name));
         b.appendChild(ghoBar(m));
-        b.appendChild(ghEl('span', 'gho-end-v', oj==='lost' ? String(m.n) : m.n+' \u00b7 '+ghoPct(m.score)));
+        b.appendChild(ghEl('span', 'gho-end-v', cnt ? String(m.n) : m.n+' \u00b7 '+ghoPct(m.score)));
         if(sub) b.appendChild(ghEl('span', 'gho-oj-sub', sub));
-        const lab = name+' as '+side+': '+ghoN(m.n, 'game')+(oj==='lost' ? '' : ', score '+ghoPct(m.score))+(sub ? ' ('+sub+')' : '')+'. Show them';
+        const lab = name+' as '+side+': '+ghoN(m.n, 'game')+(cnt ? '' : ', score '+ghoPct(m.score))+(sub ? ' ('+sub+')' : '')+(oj==='away' ? '. Show their key moments as boards' : '. Show them');
         b.title = lab; b.setAttribute('aria-label', lab);
         li.appendChild(b); ul.appendChild(li);
       };
@@ -30502,6 +30807,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // where the games that did their job were lost: the bigger drop in your winning chances
       const jm = lost.filter(e=> e.j.slip==='mid').length, je = lost.filter(e=> e.j.slip==='end').length, jw = lost.length - jm - je;
       row('Did its job, then lost', 'lost', lost, lost.length ? [jm ? 'went wrong before the endgame: '+jm : '', je ? 'still fine into the endgame: '+je : '', jw ? 'endgame not scored yet: '+jw : ''].filter(Boolean).join(' \u00b7 ') : '');
+      // where it got away (lost or drawn after the opening did its job): each game's key moment, in time trouble or not
+      const away = S.filter(e=> e.j.k==='done' && !e.j.open && e.j.res!=='win');
+      if(away.length){
+        const K = { tt:0, wt:0, nc:0, kept:0, wait:0 };
+        away.forEach(e=>{ const r = kmOf(e.g); if(!r || r.k==='wait' || r.k==='gap') K.wait++; else if(r.k!=='away') K.kept++; else if(!r.clk) K.nc++; else if(r.clk.trouble) K.tt++; else K.wt++; });
+        row('Where it got away', 'away', away, [K.tt ? 'key move in time trouble: '+K.tt : '', K.wt ? 'with time on the clock: '+K.wt : '', K.nc ? 'no clock kept: '+K.nc : '',
+          K.kept ? 'never clearly left the zone: '+K.kept : '', K.wait ? 'not looked at yet: '+K.wait : ''].filter(Boolean).join(' \u00b7 '));
+      }
       row('Over before a middlegame', 'open', open, open.length ? 'by the result' : '');
       col.appendChild(ul);
     });
