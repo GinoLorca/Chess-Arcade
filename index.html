@@ -3868,6 +3868,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (pointer:coarse){ .saved-actions .btn-link{ min-height:44px; display:inline-flex; align-items:center; } .hv-share-pop .hv-pop-item{ min-height:44px; } }
   .share-note{ margin-left:8px; font-size:12px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
   #hv-controls{ position:relative; contain:inline-size; }      /* the board sets the column's width, not this row: on a short window it wraps */
+  /* With Copy PGN (2026-11-02) the row is 654px at full padding: narrower, the buttons slim down before it wraps
+     (a 1024x768 window keeps it on one line, in view under the board) */
+  #hv-controls{ container-type:inline-size; }
+  @container (max-width:659px){ #hv-controls > .btn{ padding-left:14px; padding-right:14px; } }
   .ghb-x{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:0 6px; font-size:11.5px; line-height:1.3; color:var(--ink-soft); }
   .ghb-x .ghb-sep{ display:none; }      /* the material (or the tag) left, the clocks right, as the line above */
   .ghb-x .ghb-clk{ margin-left:auto; }
@@ -7638,6 +7642,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="btn btn-ghost" id="hv-end" type="button" title="End of the line (End)" aria-label="End of the line">&#8677;</button>
         <button class="btn btn-ghost hv-px-here" id="hv-px-here" type="button" title="Play this position out against Stockfish, on this device">Play it out</button>
         <button class="btn btn-ghost hv-share" id="hv-share" type="button" aria-haspopup="menu" aria-expanded="false" title="Share the game at this move, or this position">Share</button>
+        <button class="btn btn-ghost hv-copy-pgn" id="hv-copy-pgn" type="button" title="Copy the game&rsquo;s PGN as text">Copy PGN</button>
       </div>
       <!-- Only shown while an arrow color profile is on, so the profile label
            has a home under this board too; in Default the view is unchanged. -->
@@ -7701,7 +7706,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="hv-prep-key" id="hv-prep-key"></div>
         </div>
         <div class="hv-actions">
-          <button class="btn btn-ghost hv-act" id="hv-copy-pgn" type="button">Copy PGN</button>
           <a class="btn btn-ghost hv-act" id="hv-lichess" target="_blank" rel="noopener noreferrer">Open on Lichess</a>
           <button class="btn btn-ghost hv-act" id="hv-groups" type="button" aria-haspopup="menu" aria-expanded="false">Groups</button>
         </div>
@@ -35814,16 +35818,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!HV_STATE.me) hpfRender();      // whose side unknown: the phase card grades the side at the bottom
   }
   document.getElementById('hv-flip').addEventListener('click', hvFlip);
-  document.getElementById('hv-copy-pgn').addEventListener('click', async ()=>{
+  // Copy PGN, beside Share (2026-11-02): the game's PGN as plain text, to paste anywhere. On a phone or an
+  // iPad (a touch screen with a share sheet) it opens the share sheet with the text instead, so it goes
+  // straight to Messages, Mail or another app; closing the sheet says nothing. A Mac copies.
+  function hvPgnShares(){ return !!navigator.share && typeof matchMedia==='function' && matchMedia('(pointer:coarse)').matches; }
+  function hvPgnLabel(){ return hvPgnShares() ? 'Share PGN' : 'Copy PGN'; }
+  (function(){
     const btn = document.getElementById('hv-copy-pgn');
-    const text = document.getElementById('hv-pgn').value;
-    let ok = false;
-    try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); ok = true; } }catch(e){ ok = false; }
-    if(!ok) ok = phExecCopy(text);
-    clearTimeout(btn._t);
-    btn.textContent = ok ? 'Copied' : 'Couldn\u2019t copy';
-    btn._t = setTimeout(()=>{ btn.textContent = 'Copy PGN'; }, 1600);
-  });
+    btn.textContent = hvPgnLabel();
+    if(hvPgnShares()) btn.title = 'Share the game\u2019s PGN as text';
+    btn.addEventListener('click', async ()=>{
+      const S = HV_STATE, text = document.getElementById('hv-pgn').value;
+      if(!S || !text || text.charAt(0)==='(') return;          // "(PGN not available for this game)"
+      if(hvPgnShares()){
+        const title = S.game && S.game._practice ? 'Play it out' : S.whiteName+' vs '+S.blackName;
+        try{ await navigator.share({ title, text }); return; }
+        catch(e){ if(e && e.name==='AbortError') return; }      // any other failure: copy it instead
+      }
+      let ok = false;
+      try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); ok = true; } }catch(e){ ok = false; }
+      if(!ok) ok = phExecCopy(text);
+      clearTimeout(btn._t);
+      btn.textContent = ok ? 'Copied' : 'Couldn\u2019t copy';
+      btn._t = setTimeout(()=>{ btn.textContent = hvPgnLabel(); }, 1600);
+    });
+  })();
   // 1, 2 or 3 (0 for any other key): by the digit typed, or by the key's
   // place on the top row or the keypad, so AZERTY (whose top row types
   // symbols and accents unshifted) works too. Keypad keys with Num Lock off
