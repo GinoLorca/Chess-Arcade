@@ -3712,6 +3712,83 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   .gh-open-eco{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--ink-soft); }
   .gh-open.is-unknown .gh-open-name{ color:var(--ink-soft); font-weight:600; }
+  /* CLAMP (2026-11-02): the five letters under the opening (ghClampLine), filled in a letter's color once a move
+     of the game is marked with it, faint (an outline) until then. An 18px disc in a 24px target (32px on touch);
+     each opens its box (ghClampOpen). The discs stay round on every skin. */
+  .gh-clamp{ display:flex; align-self:flex-start; margin:1px -3px -3px; }
+  .gh-clamp-l{
+    width:24px; height:24px; padding:0; flex:0 0 auto; cursor:pointer; border:0; border-radius:50%; background:none;
+    display:inline-flex; align-items:center; justify-content:center;
+  }
+  .clamp-d{
+    box-sizing:border-box; width:18px; height:18px; flex:0 0 auto; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center; font:800 9px/1 "JetBrains Mono",monospace;
+    color:color-mix(in srgb, var(--ink-soft) 85%, transparent); background:transparent;
+    border:1.5px solid color-mix(in srgb, var(--ink-soft) 45%, transparent);
+  }
+  .clamp-d.is-on{ border-color:transparent; color:#fff; }
+  .gh-clamp-l:hover .clamp-d:not(.is-on){ border-color:var(--ink-soft); color:var(--ink); }
+  .gh-clamp-l:focus{ outline:none; }
+  .gh-clamp-l:focus-visible .clamp-d{ outline:2px solid var(--focus); outline-offset:2px; }
+  .gh-clamp-l.is-open .clamp-d{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
+  .clamp-d.is-wait{ outline:1.5px dashed var(--cw, currentColor); outline-offset:1.5px; }      /* moves only in a waiting other version */
+  @media (pointer:coarse){ .gh-clamp{ margin:-6px -7px -4px; } .gh-clamp-l{ width:32px; height:32px; } }      /* the discs sit evenly between the ECO and the time line; the targets stop short of it */
+  /* a letter's box: the moves marked with it (Go to move, x), and Mark a move */
+  .gh-clamp-pop{
+    position:absolute; z-index:60; box-sizing:border-box; width:356px; max-width:calc(100vw - 32px); padding:12px 14px 14px;
+    background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:12px;
+    box-shadow:0 14px 36px rgba(0,0,0,.22); font-size:13px; text-align:left;
+  }
+  .gh-clamp-pop:focus{ outline:none; }
+  :root[data-skin="uptown"] .gh-clamp-pop{ border-radius:6px; }
+  :root[data-skin="bauhaus"] .gh-clamp-pop{ border-radius:0; border-width:2px; }
+  .gcp-head{ display:flex; align-items:center; gap:9px; }
+  .gcp-head .clamp-d{ width:22px; height:22px; font-size:11px; }
+  .gcp-title{ flex:1 1 auto; min-width:0; font-size:14px; font-weight:700; line-height:1.25; }
+  .gcp-x, .gcp-rm{
+    flex:0 0 auto; width:28px; height:28px; padding:0; border:0; border-radius:6px; background:none; cursor:pointer;
+    color:var(--ink-soft); font-size:19px; line-height:1;
+  }
+  .gcp-x{ margin:-4px -6px -4px 0; }
+  .gcp-rm{ font-size:17px; }
+  .gcp-x:hover, .gcp-rm:hover{ color:var(--ink); background:var(--surface-2); }
+  .gcp-x:focus-visible, .gcp-rm:focus-visible, .gcp-note:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .gcp-sub{ margin:3px 0 8px 31px; font-size:11.5px; color:var(--ink-soft); }
+  .gcp-wait{ margin:0 0 9px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); font-size:12px; line-height:1.4; }      /* as the review's other-version notice */
+  .gcp-wait .btn-link{ font-size:11.5px; }
+  .gcp-row{ display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:8px; padding:7px 0; border-top:1px solid var(--line); }
+  .gcp-mv{ font:600 12.5px/1.2 "JetBrains Mono",monospace; white-space:nowrap; }
+  .gcp-note{
+    min-width:0; margin:-3px -4px; padding:3px 4px; border:0; border-radius:4px; background:none; cursor:text;
+    font:inherit; font-size:12.5px; line-height:1.3; text-align:left; color:var(--ink-soft); overflow-wrap:anywhere;
+  }
+  .gcp-note.is-empty{ font-style:italic; }
+  .gcp-note:hover{ background:var(--surface-2); color:var(--ink); }
+  .gcp-noteed{ min-width:0; font-family:inherit; font-weight:400; font-size:12.5px; padding:5px 7px; }
+  .gh-clamp-pop .btn{ font-size:12.5px; padding:6px 14px; }
+  .gh-clamp-pop .btn.gcp-go{ font-size:12px; padding:5px 10px; white-space:nowrap; }
+  :root[data-skin="uptown"] .gh-clamp-pop .btn-primary{ padding-top:8px; padding-bottom:5px; background-position:0 2px; }
+  .gh-clamp-pop .btn:disabled{ opacity:.45; cursor:not-allowed; }
+  .gcp-add{ display:grid; gap:7px; margin-top:2px; padding-top:10px; border-top:1px solid var(--line); }
+  .gcp-lab{ font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft); }
+  .gcp-field{ display:flex; align-items:center; gap:8px; padding:0 11px; }
+  .gcp-field:focus-within{ border-color:var(--brass-soft); }
+  .gcp-field input{ flex:1 1 auto; min-width:0; padding:8px 0; border:0; background:none; color:var(--ink); font:inherit; outline:none; }
+  .gcp-field input:disabled{ cursor:not-allowed; }
+  .gcp-field input::placeholder, .gcp-noteed::placeholder, .gcp-notein::placeholder{ color:color-mix(in srgb, var(--ink-soft) 85%, transparent); }
+  .gcp-ok{ flex:0 0 auto; font-family:"JetBrains Mono",monospace; font-size:11.5px; font-weight:600; color:var(--good); white-space:nowrap; }
+  .gcp-notein{ font-family:inherit; font-weight:400; }
+  .gcp-msg:empty{ display:none; }
+  .gcp-why, .gcp-msg{ font-size:12px; line-height:1.35; color:var(--ink-soft); }
+  .gcp-why, .gcp-msg.is-bad{ color:var(--bad); }
+  .gcp-why{ min-height:15px; margin:-5px 0; line-height:15px; }      /* its line kept, so a reason coming or going moves nothing */
+  .gcp-btns{ display:flex; gap:8px; justify-content:flex-end; }
+  @media (pointer:coarse){
+    .gcp-field input, .gcp-notein, .gcp-noteed{ font-size:16px; }      /* iOS zooms into anything smaller */
+    .gcp-x, .gcp-rm{ width:44px; height:44px; }
+    .gh-clamp-pop .btn{ min-height:44px; }
+    .gcp-wait .btn-link{ min-height:44px; }
+  }
   .gh-note-btn{
     width:34px; height:34px; padding:0; flex:0 0 auto; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center;
@@ -3925,6 +4002,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .gh-open.is-rep{ flex-wrap:wrap; row-gap:2px; }
     .gh-open.is-rep .gh-open-name{ flex:1 1 100%; white-space:normal; display:-webkit-box; -webkit-line-clamp:2; }
     .gh-open.is-rep .gh-open-eco{ flex:1 1 100%; min-width:0; overflow-wrap:anywhere; }
+  }
+  /* Phone: the CLAMP letters get a line of their own under the opening name and ECO (2026-11-02). A grid keeps the
+     name and ECO side by side as the flex row did (the name cut short first); a path's rows wrap as before. */
+  @media (max-width:640px){
+    .gh-open:not(.is-rep){ display:grid; grid-template-columns:minmax(0, max-content) minmax(0, 1fr); column-gap:6px; row-gap:2px; align-items:baseline; }
+    .gh-open:not(.is-rep) > .gh-clamp{ grid-column:1 / -1; justify-self:start; }
+    .gh-open.is-rep > .gh-clamp{ flex:0 0 auto; }
   }
   .gho{ display:flex; flex-direction:column; gap:14px; }
   .gho-note, .gho-status, .gho-tools, .gho-foot{
@@ -5315,12 +5399,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-bdg-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
   .hv-bdg-name{ padding-right:10px; font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; }
   .hv-bdg-grid{ display:grid; grid-template-columns:repeat(5, 36px); justify-content:center; gap:2px; padding:2px 6px 4px; }
-  .hv-bdg-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
-  .hv-bdg-pick:hover{ background:var(--surface-2); }
-  .hv-bdg-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
+  .hv-bdg-pick, .hv-clamp-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
+  .hv-bdg-pick:hover, .hv-clamp-pick:hover{ background:var(--surface-2); }
+  .hv-bdg-pick:focus-visible, .hv-clamp-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
   .hv-bdg-pick .hv-badge{ width:28px; height:28px; margin:0; font-size:13px; vertical-align:0; }
   .hv-bdg-pick.is-on .hv-badge{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
-  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-pick{ width:44px; height:44px; } }
+  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-pick, .hv-clamp-pick{ width:44px; height:44px; } }
+  /* the CLAMP row under it on a move of yours (2026-11-02): five checkboxes, every disc in its color, the ones on
+     ringed like a picked badge; a refusal (the record full) under them, never widening the menu */
+  .hv-clamp-pick .clamp-d{ width:28px; height:28px; font-size:13px; }
+  .hv-clamp-pick.is-on .clamp-d{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
+  .hv-clamp-msg{ width:0; min-width:100%; box-sizing:border-box; padding:0 10px 4px; font-size:12px; line-height:1.35; color:var(--bad); }
+  .hv-clamp-svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4; overflow:visible; }
   .hr-vh{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
 
   .hr-wrap{ display:flex; flex-direction:column; gap:12px; }
@@ -11701,6 +11791,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   function showView(name){
     if(currentView==='history' && name!=='history' && typeof ojLeave==='function') ojLeave(name);
+    if(currentView==='history' && name!=='history' && typeof ghClampClose==='function') ghClampClose(false);    // a CLAMP letter's box stays with its list
     if(currentView !== name && currentView.indexOf('play')===0){
       leaveHooks.forEach(fn=>{ try{ fn(); }catch(e){} });
     }
@@ -25376,8 +25467,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       let added = false;
       Object.values(GN.notes).forEach(n=>{
         if(!(n.text || n.conflict) || !n.g || ccIsId(n.id) || gnIsMeta(n.id) || GH_STATE.ids.has(n.id)) return;
-        // your analysis on a game not loaded: that game (once, if it has a note too)
-        if(gnIsAn(n.id)){ const gid = n.id.slice(3); if((!n.conflict && !gnHasAnn(gid)) || ccIsId(gid) || GH_STATE.ids.has(gid) || GN.notes[gid] || out.some(x=> x.id===gid)) return; n = Object.assign({}, n, { id:gid }); }
+        // your analysis on a game not loaded (CLAMP marks too: its row's letters show them): that game (once, if it has a note too)
+        if(gnIsAn(n.id)){ const gid = n.id.slice(3); if((!n.conflict && !gnHasAnn(gid) && !gnClampOf(gid).length) || ccIsId(gid) || GH_STATE.ids.has(gid) || GN.notes[gid] || out.some(x=> x.id===gid)) return; n = Object.assign({}, n, { id:gid }); }
         else if(out.some(x=> x.id===n.id)) return;
         const g = GH_STATE.extras.get(n.id) || ghGameFromSummary(n);
         if(ghVsComputer(g)) return;
@@ -25497,6 +25588,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   const GH_NOTE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
     + '<path d="M14.5 3h-8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8z"/><path d="M14.5 3v5h5"/><path d="M8.5 13h7M8.5 17h4.5"/></svg>';
+  // CLAMP (2026-11-02): the blunder check of the user's Chessable course (Checks, Loose pieces, Alignments, Mobility,
+  // Passed pawns). You mark a move of yours with its letters, from the review's move menu (hvClampRow) or a Game
+  // History row's letter box (ghClampOpen); the game's analysis record keeps them as k. Nothing is marked for you.
+  // A white letter reads at 4.5:1 or more on each color; the hues stay apart on every skin, light and dark.
+  const CLAMP_K = [
+    { ch:'C', name:'Checks', short:'Checks', color:'#d73b33' },
+    { ch:'L', name:'Loose pieces & loose squares', short:'Loose pieces', color:'#be570d' },
+    { ch:'A', name:'Alignments', short:'Alignments', color:'#2675cd' },
+    { ch:'M', name:'Mobility restrictions', short:'Mobility', color:'#845cdc' },
+    { ch:'P', name:'Passed pawns', short:'Passed pawns', color:'#1b864a' },
+  ];
+  const CLAMP_BY = {};
+  CLAMP_K.forEach(K=>{ CLAMP_BY[K.ch] = K; });
+  const CLAMP_NOTE_MAX = 140;
+  var ghClampBox = null;          // the open letter box: { gid, ch, g, el, btn, ... }
   function ghThumb(g){
     if(ghThumbStyle!==PIECE_SVG){ GH_THUMBS.clear(); ghThumbStyle = PIECE_SVG; }   // a new piece set redraws them
     const key = g.id+'|'+(g.lastFen||'');
@@ -25620,6 +25726,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       op.classList.add('is-unknown');
       op.appendChild(ghEl('div', 'gh-open-name', 'Unknown'));
     }
+    if(gnIsAn('an-'+g.id)) op.appendChild(ghClampLine(g));       // CLAMP, under the opening (any game the review keeps analysis for)
     row.appendChild(op);
 
     const when = ghEl('div', 'gh-when');
@@ -25660,6 +25767,438 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     row.appendChild(acts);
     if(GH_MARKS) row.title = (row.title ? row.title+'\n' : '')+(ccIsId(g.id) ? 'Played on chess.com' : 'Played on Lichess');
     return row;
+  }
+  /* ---- CLAMP on a row (2026-11-02): a button per letter, filled once a move of the game is marked with it. A
+     click (or Enter) opens the letter's box and does nothing else: it never marks a move by itself and never
+     opens the game (the row's click and keys stop at the letter). ---- */
+  function ghClampLine(g){
+    const gid = String(g.id), line = ghEl('div', 'gh-clamp');
+    line.dataset.gid = gid;
+    line.setAttribute('role', 'group');
+    line.setAttribute('aria-label', 'CLAMP');
+    CLAMP_K.forEach((K, i)=>{
+      const b = ghEl('button', 'gh-clamp-l'), d = ghEl('span', 'clamp-d', K.ch);
+      b.type = 'button';
+      b.tabIndex = i ? -1 : 0;          // one Tab stop for the five (the last one focused): the arrow keys go along them
+      b.dataset.gid = gid;
+      b.dataset.ck = K.ch;
+      b.setAttribute('aria-haspopup', 'dialog');
+      d.setAttribute('aria-hidden', 'true');
+      b.appendChild(d);
+      line.appendChild(b);
+    });
+    ghClampShow(line, gnClampOf(gid));
+    line.addEventListener('click', e=>{
+      const b = e.target.closest('.gh-clamp-l');
+      if(!b) return;              // beside the letters: the row's click (the game opens)
+      e.stopPropagation();
+      ghClampOpen(b, g, b.dataset.ck);
+    });
+    line.addEventListener('keydown', e=>{
+      const b = e.target.closest('.gh-clamp-l');
+      if(!b) return;
+      e.stopPropagation();        // Enter on a letter isn't the row's Enter
+      const all = [...line.querySelectorAll('.gh-clamp-l')], i = all.indexOf(b), n = all.length;
+      const j = e.key==='ArrowRight' ? (i + 1) % n : e.key==='ArrowLeft' ? (i + n - 1) % n : e.key==='Home' ? 0 : e.key==='End' ? n - 1 : -1;
+      if(j < 0 || e.metaKey || e.ctrlKey || e.altKey) return;
+      e.preventDefault();
+      all[j].focus();
+    });
+    line.addEventListener('focusin', e=>{
+      const b = e.target.closest('.gh-clamp-l');
+      if(b) line.querySelectorAll('.gh-clamp-l').forEach(x=>{ x.tabIndex = x===b ? 0 : -1; });
+    });
+    return line;
+  }
+  // a line's letters as the record has them: filled and counted, ringed while its box is open; a dashed ring in
+  // its color on a letter with moves only in a waiting other version of the record (gnClampWait: open the game to choose)
+  function ghClampShow(line, k){
+    const B = ghClampBox, w = gnClampWait(line.dataset.gid) || [];
+    line.querySelectorAll('.gh-clamp-l').forEach(b=>{
+      const K = CLAMP_BY[b.dataset.ck], n = k.filter(x=> x[1]===K.ch).length, nw = w.filter(x=> x[1]===K.ch).length, d = b.firstChild;
+      const t = K.name+': '+(n ? n+' move'+(n===1 ? '' : 's')+' marked' : 'not marked')+(nw ? '; '+nw+' more in another version, waiting' : '');
+      if(b.title!==t){ b.title = t; b.setAttribute('aria-label', t); }
+      const open = !!B && B.gid===b.dataset.gid && B.ch===K.ch;
+      b.classList.toggle('is-open', open);
+      b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      d.classList.toggle('is-on', n > 0);
+      d.classList.toggle('is-wait', nw > 0);
+      if(!n && !nw){ if(d.hasAttribute('style')) d.removeAttribute('style'); return; }
+      d.style.background = n ? K.color : '';
+      if(nw) d.style.setProperty('--cw', K.color); else d.style.removeProperty('--cw');
+    });
+  }
+  // every row of this game on the page shows its marks again, in place (the next redraw builds those rows again)
+  function ghClampSync(gid){
+    const k = gnClampOf(gid);
+    document.querySelectorAll('.gh-clamp-l[data-ck="C"][data-gid="'+CSS.escape(gid)+'"]').forEach(b=>{
+      const row = b.closest('.history-row');
+      if(row) row._ghMark = '';
+      ghClampShow(b.parentNode, k);
+    });
+  }
+  // the letter a box hangs from (a redraw of its list may have built that row again since)
+  function ghClampLetter(B){
+    if(B.btn && B.btn.isConnected) return B.btn;
+    const all = [...document.querySelectorAll('.gh-clamp-l[data-ck="'+B.ch+'"][data-gid="'+CSS.escape(B.gid)+'"]')];
+    const b = all.find(x=> x.getClientRects().length) || all[0] || null;
+    if(b) B.btn = b;
+    return b;
+  }
+  // the button of a row that had the keyboard, found again after a rebuild ('' for the row itself)
+  function ghRowFocusSel(fa){
+    if(fa.classList.contains('gh-clamp-l')) return '.gh-clamp-l[data-ck="'+fa.dataset.ck+'"]';
+    return ['.gh-note-btn', '.gh-grp-btn', '.gh-note-line', '.ghg-out'].find(q=> fa.matches(q)) || '';
+  }
+  // a move as you'd write it ("12. Rf1", "12...Rf1"); off 1 in a game from a set position where Black moved first
+  function ghClampLabel(p, san, off){ const a = p + (off || 0), n = Math.ceil(a/2); return n+(a % 2 ? '. ' : '...')+(san || '\u2026'); }
+  // "12. Rf1", "12.Rf1" or "12...Rf1" (+ or # as you like) against the game's moves: { ok, ply, label } for a move
+  // of yours, else { ok:false, why }. Black's moves are written 12...; no other numbering is read (2026-11-02, the
+  // user's choice): a move of yours written as the other side's says how. Q: { toks, me, off (hvMkNode's: 1 when
+  // Black moved first), can (the plies the review can show: a Chess960 castle ends its replay) }. Until done (Enter,
+  // Save, leaving the field) a move still being typed has no reason: only text that can't become the move does.
+  function ghClampParse(text, Q, done){
+    const toks = Q.toks, me = Q.me, off = Q.off || 0, can = Q.can==null ? toks.length : Q.can;
+    const s = String(text || '').replace(/\u2026/g, '...').trim();       // a phone's ellipsis character
+    if(!s || !toks.length) return { ok:false, why:'' };
+    const how = 'Write it like '+(me==='white' ? '12. Rf1' : '12...Rf1')+'.';
+    if(/^\d{1,3}\s*\.{0,3}$/.test(s)) return { ok:false, why:done ? how : '' };
+    const m = /^(\d{1,3})\s*(\.\.\.|\.)\s*(\S+)$/.exec(s);
+    if(!m) return { ok:false, why:how };
+    const strip = (t)=> String(t || '').replace(/[+#]+$/, '');
+    const san = strip(m[3]).replace(/^[0O](-[0O]?)*$/, t=> t.replace(/0/g, 'O'));
+    const no = Number(m[1]), black = m[2]==='...', ply = 2*no - (black ? 0 : 1) - off, o = black ? ply - 1 : ply + 1;
+    const mine = (p)=> ((p + off) % 2===1 ? 'white' : 'black')===me;
+    const tok = (p)=> no >= 1 && p >= 1 && p <= toks.length ? strip(toks[p-1]) : '';
+    if(tok(ply)===san){
+      if(!mine(ply)) return { ok:false, why:'That was your opponent\u2019s move.' };
+      if(ply > can) return { ok:false, why:can ? 'The review can\u2019t show this game past '+ghClampLabel(can, toks[can-1], off)+'.' : 'The review can\u2019t show this game\u2019s moves.' };
+      return { ok:true, ply, why:'', label:ghClampLabel(ply, toks[ply-1], off) };
+    }
+    if(mine(o) && tok(o)===san) return { ok:false, why:'Your moves as '+(me==='white' ? 'White' : 'Black')+' are written '+ghClampLabel(o, toks[o-1], off)+'.' };
+    if(!done && san && [ply, o].some(p=> tok(p).startsWith(san))) return { ok:false, why:'' };       // still being typed
+    return { ok:false, why:'Not one of your moves in this game.' };
+  }
+  // Your marks changed from a row's box: the game's analysis record is written at once (and synced like any edit),
+  // its other fields as they were. The review open on this game: its tree and the record together. A tree kept
+  // from earlier in the session gets the same marks, so opening and leaving the game can't put the old ones back.
+  // mutate(k) gives the new list. Returns 'ok', 'same', or 'full' (past GN_MAX: nothing changes, nothing saved).
+  const GH_CLAMP_FULL = 'No room left to keep more analysis for this game.';
+  function ghClampWrite(g, mutate){
+    const gid = String(g.id), id = 'an-'+gid;
+    if(!gnIsAn(id)) return 'same';
+    if(HV_STATE && hvAnnId()===id){
+      const S = HV_STATE, old = hvClampListOf(S), before = hvAnnText(false).length;
+      hvClampOnto(S, gnClampList({ k:mutate(old.map(x=> x.slice())) }));
+      if(!hvAnnFits(before)){ hvClampOnto(S, old); return 'full'; }
+      hvAnnSave();
+      return 'ok';
+    }
+    const cur = gnNoteText(id);
+    let A = null;
+    try{ A = cur ? JSON.parse(cur) : null; }catch(e){ A = null; }
+    if(!A || typeof A!=='object' || Array.isArray(A)) A = { v:1, l:[], c:[], m:[] };
+    const k = gnClampList({ k:mutate(gnClampList(A)) });
+    const out = { v:1, l:'l' in A ? A.l : [], c:'c' in A ? A.c : [], m:'m' in A ? A.m : [] };
+    if('b' in A) out.b = A.b;
+    out.k = k;
+    const t = JSON.stringify(Object.assign(out, gnAnExtra(A)));
+    if(t===cur) return 'same';
+    if(t.length > GN_MAX) return 'full';
+    gnSetNote(id, t, g);
+    const tree = HV_TREES.get(gid);
+    if(tree) hvClampOnto(tree, k);
+    return 'ok';
+  }
+  // A letter's box: the moves of this game marked with it, in game order (the move as you'd write it, your note,
+  // Go to move, an x), and Mark a move (a move of yours, checked against the game as you type, and a note). One
+  // box at a time (it is the page's hvMenu); Escape, the x, Cancel or a click outside closes it.
+  function ghClampOpen(btn, g, ch){
+    const K = CLAMP_BY[ch];
+    if(!K) return;
+    const gid = String(g.id);
+    if(hvMenu && hvMenu.kind==='clamp' && ghClampBox && ghClampBox.gid===gid && ghClampBox.ch===ch){ ghClampClose(true); return; }    // its letter again: closed
+    hvMenuClose();
+    const el = ghEl('div', 'gh-clamp-pop');
+    el.id = 'gh-clamp-pop';
+    el.tabIndex = -1;
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-labelledby', 'gh-clamp-title');
+    el.setAttribute('aria-describedby', 'gh-clamp-sub');
+    // the game's moves as the review replays them (hvTreeFor): numbered from its start (off 1 when Black moved
+    // first) and only as far as the replay goes (can: a Chess960 castle ends it), so every move marked here is one
+    // the review's main line has. A set-up game kept only as its summary has no start (opened, it's fetched with
+    // one): open the game to mark a move.
+    const toks = String(g.moves || '').trim() ? String(g.moves).trim().split(/\s+/) : [];
+    const noStart = !!g._summary && !ghIsStd(g) && !(typeof g.initialFen==='string' && g.initialFen.trim());
+    const st = hvStartState(g), can = toks.length && !noStart ? hvBuildPlyStates(toks, st).moves.length : 0;
+    const B = { gid, ch, g, el, btn, toks, me:ghMyColor(g, ghMe()), off:st.turn==='b' ? 1 : 0, can, noStart, parsed:null, up:false, aTop:0, t:'', wt:'' };
+    ghClampBox = B;
+    const head = ghEl('div', 'gcp-head'), d = ghEl('span', 'clamp-d is-on', K.ch), title = ghEl('div', 'gcp-title', K.name), x = ghEl('button', 'gcp-x', '\u00d7');
+    d.setAttribute('aria-hidden', 'true');
+    d.style.background = K.color;
+    title.id = 'gh-clamp-title';
+    x.type = 'button';
+    x.setAttribute('aria-label', 'Close');
+    x.addEventListener('click', ()=> ghClampClose(true));
+    head.append(d, title, x);
+    B.sub = ghEl('div', 'gcp-sub');
+    B.sub.id = 'gh-clamp-sub';
+    B.wait = ghEl('div', 'gcp-wait');
+    B.list = ghEl('div', 'gcp-list');
+    B.msg = ghEl('div', 'gcp-msg');
+    B.msg.setAttribute('role', 'status');
+    el.append(head, B.sub, B.wait, B.list, ghClampForm(B), B.msg);
+    ghClampList(B);
+    document.body.appendChild(el);
+    ghClampPlace(B);
+    // placed above its letter, it grows upward: its foot stays by the letter
+    if(typeof ResizeObserver==='function'){ B.ro = new ResizeObserver(()=>{ if(B.up && el.isConnected) el.style.top = (B.aTop - 6 - el.offsetHeight)+'px'; }); B.ro.observe(el); }
+    // It follows its letter when that moves: the window resized or turned, or the list drawn again with rows above
+    // it (games arriving); never while a press in it is held. Its row gone, it closes. (ghClampFollow)
+    const follow = ()=>{ if(!B.raf) B.raf = requestAnimationFrame(()=>{ B.raf = 0; ghClampFollow(B); }); };
+    const up = ()=>{ if(!B.down) return; B.down = false; if(B.pend){ B.pend = false; follow(); } };
+    el.addEventListener('pointerdown', e=>{ B.pt = e.pointerType; B.down = true; }, true);
+    window.addEventListener('resize', follow);
+    window.addEventListener('pointerup', up, true);
+    window.addEventListener('pointercancel', up, true);
+    const host = (btn.closest && btn.closest('#view-history')) || document.body;
+    if(typeof MutationObserver==='function'){ B.mo = new MutationObserver(follow); B.mo.observe(host, { childList:true, subtree:true }); }
+    B.unhook = ()=>{
+      window.removeEventListener('resize', follow);
+      window.removeEventListener('pointerup', up, true);
+      window.removeEventListener('pointercancel', up, true);
+      if(B.mo) B.mo.disconnect();
+      if(B.raf) cancelAnimationFrame(B.raf);
+    };
+    el.addEventListener('keydown', e=>{
+      e.stopPropagation();
+      if(e.key==='Escape'){ e.preventDefault(); ghClampClose(true); return; }
+      if(e.key!=='Tab') return;
+      // Tab past its last control (Shift+Tab before its first) leaves it for its letter: the keyboard goes on from there
+      const f = [...el.querySelectorAll('button, input')].filter(x=> !x.disabled && x.getClientRects().length), a = document.activeElement;
+      if(!f.length || (e.shiftKey ? (a===el || a===f[0]) : a===f[f.length - 1])){ e.preventDefault(); ghClampClose(true); }
+    });
+    el.addEventListener('focusout', e=>{ const t = e.relatedTarget; if(t && !el.contains(t) && t!==ghClampLetter(B) && hvMenu && hvMenu.el===el) hvMenuClose(); });    // Tab out of it (its letter toggles it)
+    // a click or tap outside puts it away, and on a game row itself does nothing more (the row would open its game, and
+    // what was typed would go with the box); a row's own buttons (another letter, Groups, the note) do what they do
+    const outside = (e)=>{
+      const a = ghClampLetter(B), t = e.target && e.target.closest ? e.target : null;
+      if(el.contains(e.target) || (a && a.contains(e.target))) return;
+      hvMenuClose();
+      if(t && t.closest('.history-row') && !t.closest('button, a, input, select, textarea, label')) ghSwallowClick();
+    };
+    hvMenu = { el, node:null, opener:btn, outside, kind:'clamp', onClose:()=>{ if(B.ro) B.ro.disconnect(); B.unhook(); if(ghClampBox===B) ghClampBox = null; ghClampSync(gid); } };
+    setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
+    ghClampSync(gid);
+    try{ el.focus({ preventScroll:true }); }catch(e){}
+  }
+  function ghClampClose(refocus){
+    if(!hvMenu || hvMenu.kind!=='clamp') return;
+    const a = ghClampBox ? ghClampLetter(ghClampBox) : null;
+    if(a) hvMenu.opener = a;
+    hvMenuClose(refocus);
+  }
+  // Under its letter, or above it when it doesn't fit below; 16px inside the screen's sides. Placed as it opens and
+  // again only when its letter moves (ghClampFollow), so it never moves under the pointer; no room either way: the
+  // roomier side, scrolling inside.
+  function ghClampPlace(B){
+    const el = B.el, a = ghClampLetter(B) || B.btn, r = a.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth || innerWidth, vh = innerHeight;
+    el.style.maxHeight = el.style.overflowY = '';
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const below = vh - 8 - (r.bottom + 6), above = r.top - 6 - 8;
+    B.up = h > below && (h <= above || above > below);
+    B.aTop = r.top + scrollY;
+    B.at = [Math.round(r.left + scrollX), Math.round(B.aTop), vw];
+    const room = B.up ? above : below;
+    if(h > room){ el.style.maxHeight = Math.max(160, Math.floor(room))+'px'; el.style.overflowY = 'auto'; }
+    el.style.left = (Math.max(16, Math.min(r.left + r.width/2 - 25, vw - 16 - w)) + scrollX)+'px';
+    el.style.top = (B.up ? B.aTop - 6 - el.offsetHeight : r.bottom + 6 + scrollY)+'px';
+  }
+  // the box by its letter again when the letter has moved on the page (or the screen's width changed); closed when
+  // its row is gone; a press held in it first lets go
+  function ghClampFollow(B){
+    if(ghClampBox!==B || !hvMenu || hvMenu.el!==B.el) return;
+    const a = ghClampLetter(B);
+    if(!a || !a.getClientRects().length){ ghClampClose(false); return; }
+    const r = a.getBoundingClientRect(), vw = document.documentElement.clientWidth || innerWidth;
+    if(B.at && Math.round(r.left + scrollX)===B.at[0] && Math.round(r.top + scrollY)===B.at[1] && vw===B.at[2]) return;
+    if(B.down){ B.pend = true; return; }
+    ghClampPlace(B);
+  }
+  // the click that follows a press: dropped (that one only: the next press, or 800ms, ends it)
+  function ghSwallowClick(){
+    const stop = (e)=>{ e.preventDefault(); e.stopPropagation(); done(); };
+    const done = ()=>{ clearTimeout(t); document.removeEventListener('click', stop, true); document.removeEventListener('pointerdown', done, true); };
+    const t = setTimeout(done, 800);
+    document.addEventListener('click', stop, true);
+    document.addEventListener('pointerdown', done, true);
+  }
+  function ghClampSay(B, text, bad){
+    B.msg.classList.toggle('is-bad', !!bad);
+    B.msg.textContent = text;
+  }
+  // the box's moves for its letter (drawn again after each change; what's typed below stays)
+  function ghClampList(B){
+    const k = gnClampOf(B.gid).filter(x=> x[1]===B.ch), n = k.length, an = typeof GN==='object' && GN ? GN.notes['an-'+B.gid] : null;
+    B.t = gnNoteText('an-'+B.gid);
+    B.wt = an && an.conflict ? an.conflict.text : '';
+    B.sub.textContent = n ? n+' move'+(n===1 ? '' : 's')+' in this game' : 'No moves marked yet';
+    // another version of the record waiting with different marks (a sync): the review's notice chooses (hvAnnConflictRow)
+    const w = gnClampWait(B.gid);
+    B.wait.textContent = '';
+    B.wait.hidden = !w;
+    if(w){
+      const here = w.filter(x=> x[1]===B.ch).map(x=> ghClampLabel(x[0], B.toks[x[0]-1], B.off));
+      B.wait.appendChild(ghEl('span', '', 'Another version of this game\u2019s CLAMP marks is waiting'+(here.length ? ', with '+here.join(', ') : '')+'. '));
+      const ob = ghEl('button', 'btn-link gcp-waitgo', 'Open the game to choose');
+      ob.type = 'button';
+      ob.addEventListener('click', ()=>{ ghClampClose(false); ghOpenGame(B.g, ghoOpenOpts(B.g)); });
+      B.wait.appendChild(ob);
+    }
+    B.list.textContent = '';
+    k.forEach((x, i)=>{
+      const p = x[0], label = ghClampLabel(p, B.toks[p-1], B.off);
+      const row = ghEl('div', 'gcp-row'), go = ghEl('button', 'btn btn-ghost gcp-go', 'Go to move'), rm = ghEl('button', 'gcp-rm', '\u00d7');
+      row.dataset.ply = String(p);
+      go.type = rm.type = 'button';
+      go.setAttribute('aria-label', 'Go to move '+label);
+      // the game in the review, at the position before the move, the move drawn in the letter's color (hvClampGo);
+      // a mark past where the review's replay ends (another device's) can't be shown there
+      go.addEventListener('click', ()=>{ ghClampClose(false); ghOpenGame(B.g, { at:{ ply:p-1 }, clamp:{ ply:p, ch:B.ch } }); });
+      if(!B.noStart && B.toks.length && p > B.can){ go.disabled = true; go.title = 'The review can\u2019t show this move'; }
+      rm.title = 'Remove '+label;
+      rm.setAttribute('aria-label', rm.title);
+      rm.addEventListener('click', (e)=>{
+        // a double click is one x: the next mark's x slides up under the pointer and would take the second click
+        if(e.detail > 1 || Date.now() - (B.rmAt || 0) < 400) return;
+        if(ghClampWrite(B.g, (all)=> all.filter(y=> !(y[0]===p && y[1]===B.ch)))==='full') return;
+        B.rmAt = Date.now();
+        ghClampRefresh(B);
+        ghClampSay(B, label+' unmarked.');
+        const rms = B.list.querySelectorAll('.gcp-rm');
+        ghClampRefocus(B, e, rms[Math.min(i, rms.length - 1)] || B.mv);
+      });
+      row.append(ghEl('span', 'gcp-mv', label), ghClampNoteBtn(B, p, x[2] || '', label), go, rm);
+      B.list.appendChild(row);
+    });
+  }
+  function ghClampRefresh(B){
+    ghClampList(B);
+    ghClampSync(B.gid);
+    if(B.check) B.check();
+  }
+  // another device's (or tab's) marks arrived while a box is open: its list follows (what's being typed stays)
+  function ghClampBoxSync(){
+    const B = ghClampBox, an = B && typeof GN==='object' && GN ? GN.notes['an-'+B.gid] : null;
+    if(!B || !hvMenu || hvMenu.el!==B.el || B.list.querySelector('.gcp-noteed')) return;
+    if(B.t===gnNoteText('an-'+B.gid) && B.wt===(an && an.conflict ? an.conflict.text : '')) return;
+    ghClampRefresh(B);
+  }
+  // after a Save or an x: the keyboard on f (the move field, the next x), unless that came from a finger and f is the
+  // move field (a phone would raise its keyboard over the list): then the box itself
+  function ghClampRefocus(B, e, f){
+    const touch = !!e && e.detail > 0 && !!B.pt && B.pt!=='mouse';
+    try{ (touch && f===B.mv ? B.el : f).focus({ preventScroll:true }); }catch(x){}
+  }
+  // a mark's note: a click edits it in place (Enter or leaving the field keeps it, Escape leaves it as it was)
+  function ghClampNoteBtn(B, p, text, label){
+    const b = ghEl('button', 'gcp-note'+(text ? '' : ' is-empty'), text || 'Add a note');
+    b.type = 'button';
+    b.setAttribute('aria-label', text ? 'Edit the note on '+label+': '+text : 'Add a note to '+label);
+    b.addEventListener('click', ()=>{
+      const inp = ghEl('input', 'text-input gcp-noteed');
+      inp.type = 'text';
+      inp.maxLength = CLAMP_NOTE_MAX;
+      inp.value = text;
+      inp.placeholder = 'What you missed';
+      inp.setAttribute('aria-label', 'Note on '+label);
+      let done = false;
+      const end = (keep)=>{
+        if(done) return;
+        done = true;
+        const t = gnClampNote(inp.value);
+        const res = keep && t!==text ? ghClampWrite(B.g, (k)=> k.map(y=> y[0]===p && y[1]===B.ch ? (t ? [p, B.ch, t] : [p, B.ch]) : y)) : 'same';
+        if(res==='full') ghClampSay(B, GH_CLAMP_FULL, true);
+        if(res==='ok') B.t = gnNoteText('an-'+B.gid);
+        const nb = ghClampNoteBtn(B, p, res==='ok' ? t : text, label), had = document.activeElement===inp;
+        inp.replaceWith(nb);
+        if(had) try{ nb.focus({ preventScroll:true }); }catch(e){}
+      };
+      inp.addEventListener('keydown', e=>{
+        if(e.key==='Enter'){ e.preventDefault(); end(true); }
+        else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); end(false); }
+      });
+      inp.addEventListener('blur', ()=> end(true));
+      b.replaceWith(inp);
+      try{ inp.focus({ preventScroll:true }); inp.setSelectionRange(inp.value.length, inp.value.length); }catch(e){}
+    });
+    return b;
+  }
+  // Mark a move: the move (checked as you type: a tick, or a short reason), what you missed (optional), Cancel / Save.
+  // Saving a move that has this letter already changes its note.
+  function ghClampForm(B){
+    const add = ghEl('div', 'gcp-add'), lab = ghEl('label', 'gcp-lab', 'Mark a move'), field = ghEl('div', 'text-input gcp-field');
+    const mv = ghEl('input', 'gcp-mvin'), ok = ghEl('span', 'gcp-ok'), why = ghEl('div', 'gcp-why'), note = ghEl('input', 'text-input gcp-notein');
+    const btns = ghEl('div', 'gcp-btns'), cancel = ghEl('button', 'btn btn-ghost gcp-cancel', 'Cancel'), save = ghEl('button', 'btn btn-primary gcp-save', 'Save');
+    lab.htmlFor = mv.id = 'gh-clamp-mv';
+    mv.type = note.type = 'text';
+    mv.maxLength = 24;
+    mv.autocomplete = note.autocomplete = 'off';
+    mv.spellcheck = false;
+    mv.setAttribute('autocapitalize', 'off');
+    mv.setAttribute('autocorrect', 'off');
+    ok.id = 'gh-clamp-ok';
+    why.id = 'gh-clamp-why';
+    why.setAttribute('aria-live', 'polite');
+    mv.setAttribute('aria-describedby', 'gh-clamp-ok gh-clamp-why');
+    note.maxLength = CLAMP_NOTE_MAX;
+    note.placeholder = 'What you missed (optional)';
+    note.setAttribute('aria-label', note.placeholder);
+    cancel.type = save.type = 'button';
+    save.disabled = true;
+    field.append(mv, ok);
+    btns.append(cancel, save);
+    add.append(lab, field, why, note, btns);
+    if(!B.toks.length || B.noStart){
+      // a game kept only as its note's summary, without its moves (or a set-up game's start): the review has them
+      mv.disabled = note.disabled = true;
+      mv.placeholder = 'Open the game to mark a move';
+    } else mv.placeholder = B.me==='white' ? '12. Rf1' : '12...Rf1';
+    const check = (done)=>{
+      const r = ghClampParse(mv.value, B, done===true);
+      const had = r.ok && gnClampOf(B.gid).some(x=> x[0]===r.ply && x[1]===B.ch);
+      ok.textContent = r.ok ? (had ? '\u2713 marked already' : '\u2713 in this game') : '';
+      if(why.textContent!==r.why) why.textContent = r.why;
+      save.disabled = !r.ok;
+      B.parsed = r;
+    };
+    const go = (e)=>{
+      check(true);
+      const r = B.parsed;
+      if(!r || !r.ok) return;
+      const t = gnClampNote(note.value);
+      const res = ghClampWrite(B.g, (k)=>{
+        const i = k.findIndex(x=> x[0]===r.ply && x[1]===B.ch);
+        if(i < 0) k.push(t ? [r.ply, B.ch, t] : [r.ply, B.ch]);
+        else if(t) k[i] = [r.ply, B.ch, t];
+        return k;
+      });
+      if(res==='full'){ ghClampSay(B, GH_CLAMP_FULL, true); return; }
+      mv.value = note.value = '';
+      ghClampRefresh(B);
+      ghClampSay(B, 'Marked '+r.label+'.');
+      ghClampRefocus(B, e, mv);
+    };
+    mv.addEventListener('input', check);
+    mv.addEventListener('blur', ()=>{ if(mv.value.trim()) check(true); });      // left half typed: why it isn't a move
+    [mv, note].forEach(i=> i.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(null); } }));
+    save.addEventListener('click', go);
+    cancel.addEventListener('click', ()=> ghClampClose(true));
+    B.mv = mv;
+    B.check = check;
+    return add;
   }
   function ghSyncCombo(id, text, picked){
     const input = document.getElementById(id);
@@ -25818,7 +26357,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // The rows are rebuilt (a page loaded, a sync finished): the keyboard
     // stays on the same row, note line or note button instead of falling to <body>.
     const fa = document.activeElement, fRow = fa && fa!==listEl && listEl.contains(fa) ? fa.closest('.history-row') : null;
-    const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-grp-btn') ? '.gh-grp-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : '')));
+    const fSel = !fRow || fa===fRow ? '' : ghRowFocusSel(fa);
     if(bv){
       ghbRender(rows);
       ghRenderFooter(rows.length, active);
@@ -27924,7 +28463,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     note.hidden = !nt;
     const open = all.find(r=> r.n.key===GHV_OPEN);
     const GS = open ? ghGroupsNow() : [];
-    const gsig = open ? open.n.list.map(e=> e.g.id+':'+gnFirstLine(gnNoteText(e.g.id))+':'+(gnWaiting(e.g.id) ? 1 : 0)+':'+gnAnnSummary(e.g.id)+':'+GS.filter(G=> gpIn(G, e.g)).map(G=> G.name).join(';')).join(',') : '';
+    const gsig = open ? open.n.list.map(e=> e.g.id+':'+gnFirstLine(gnNoteText(e.g.id))+':'+(gnWaiting(e.g.id) ? 1 : 0)+':'+gnAnnSummary(e.g.id)+':'+gnClampSig(e.g.id)+':'+GS.filter(G=> gpIn(G, e.g)).map(G=> G.name).join(';')).join(',') : '';
     const rs = (r)=>{ const m = r.n.m; return r.n.key+':'+r.n.name+':'+r.ctx+':'+m.n+':'+m.W+':'+m.D+':'+m.jn+':'+m.jd+':'+(m.last ? ghoAgo(m.last) : ''); };
     const sig = [k, lvl, model.rep ? 1 : 0, GH_MARKS ? 1 : 0, GHV_OPEN, GHV_ALL===GHV_OPEN ? 1 : 0, R.ranked.map(rs).join(','), R.small.map(rs).join(','), gsig].join('|');
     if(list.dataset.sig===sig && GHV_PS===PIECE_SVG){ ghThumbsFill(list); return; }
@@ -27933,7 +28472,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const fRow = inL && fa.classList.contains('ghv-row') ? fa.dataset.key : '';
     const fAct = inL && fa.dataset.act ? fa.dataset.act : '';
     const fGame = inL && !fRow && !fAct ? fa.closest('.history-row') : null;
-    const fSel = !fGame || fa===fGame ? '' : ['.gh-note-btn', '.gh-grp-btn', '.gh-note-line'].find(q=> fa.matches(q)) || '';
+    const fSel = !fGame || fa===fGame ? '' : ghRowFocusSel(fa);
     list.dataset.sig = sig;
     GHV_PS = PIECE_SVG;
     list.textContent = '';
@@ -28174,12 +28713,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       : 'No games in this group yet. Open a game (a row in Games), then its Groups button adds it here.';
     // rebuilt when the games or what a row shows (its note, your analysis) change
     const list = document.getElementById('ghg-list');
-    const lsig = have.map(g=> g.id+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)).concat(miss).join('\u0001');
+    const lsig = have.map(g=> g.id+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)+':'+gnClampSig(g.id)).concat(miss).join('\u0001');
     if(list.dataset.sig===lsig && list.dataset.group===G.id){ ghThumbsFill(list); return; }
     list.dataset.sig = lsig; list.dataset.group = G.id;
     // the keyboard stays on the same row or button through a rebuild, as in the Games list
     const fa = document.activeElement, fRow = fa && fa!==list && list.contains(fa) ? fa.closest('.history-row') : null;
-    const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-grp-btn') ? '.gh-grp-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : (fa.classList.contains('ghg-out') ? '.ghg-out' : ''))));
+    const fSel = !fRow || fa===fRow ? '' : ghRowFocusSel(fa);
     list.textContent = '';
     const out = (row, id)=>{
       const x = ghEl('button', 'ghg-out', '\u00d7');
@@ -28678,12 +29217,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // rebuilt when the games or what a row shows (its note, your analysis) change
     const shown = R.list.slice(0, 200);
     const list = document.getElementById('ghp-list');
-    const sig = R.q.fen+'|'+R.q.mode+'|'+R.q.color+'|'+R.list.length+'|'+shown.map(({ g, m })=> g.id+':'+m.ply+':'+m.d+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)).join('\u0001');
+    const sig = R.q.fen+'|'+R.q.mode+'|'+R.q.color+'|'+R.list.length+'|'+shown.map(({ g, m })=> g.id+':'+m.ply+':'+m.d+':'+gnFirstLine(gnNoteText(g.id))+':'+(gnWaiting(g.id) ? 1 : 0)+':'+gnAnnSummary(g.id)+':'+gnClampSig(g.id)).join('\u0001');
     if(list.dataset.sig===sig){ ghThumbsFill(list); return; }      // the same rows: boards that came on screen meanwhile get filled
     list.dataset.sig = sig;
     // the keyboard stays on the same row or button through a rebuild, as in the Games list
     const fa = document.activeElement, fRow = fa && fa!==list && list.contains(fa) ? fa.closest('.history-row') : null;
-    const fSel = !fRow || fa===fRow ? '' : (fa.classList.contains('gh-note-btn') ? '.gh-note-btn' : (fa.classList.contains('gh-grp-btn') ? '.gh-grp-btn' : (fa.classList.contains('gh-note-line') ? '.gh-note-line' : '')));
+    const fSel = !fRow || fa===fRow ? '' : ghRowFocusSel(fa);
     list.textContent = '';
     const frag = document.createDocumentFragment();
     shown.forEach(({ g, m })=>{
@@ -33360,8 +33899,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       });
     });
     hvBoardEl.appendChild(hvEngSvg);
+    hvBoardEl.appendChild(hvClampSvg);
     hvBoardEl.appendChild(arrowSvgHv);
     hvDrawEngArrow();
+    hvDrawClampArrow();
     renderMarks(hvBoardEl, arrowSvgHv, marksHv, st.board);
     if(typeof hrDecorateBoard==='function'){ try{ hrDecorateBoard(hvBoardEl, n); }catch(e){} }
   }
@@ -33537,6 +34078,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     S.cur = node;
     hvSelected = null;
     if(hvPromoOpen) hvRemovePromo();
+    if(S.clampGo && node!==S.clampGo.at) S.clampGo = null;      // Go to move's arrow goes once the board moves
     marksHv = hvMarksOf(node);
     const step = !!(opts && opts.sound && prev && node.parent===prev && node.move);
     if(step){
@@ -33940,6 +34482,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       el.appendChild(b);
     };
     if(com) hvBadgeRow(el, node, opener);      // a game's move, main line or side line: your badge on it
+    if(com && hvClampMine(node)) hvClampRow(el, node);      // a move of yours in the game: its CLAMP letters
     if(!node.main) add('Go to this line', ()=>{ hvGoNode(node); hvRevealBoard(); }, 'hv-pop-go');
     if(com){
       add(node.comment ? 'Edit comment' : 'Add a comment', ()=> hvComEdit(node), 'hv-pop-com');
@@ -33990,13 +34533,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvMenu = { el, node, opener, outside };
     setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
     el.addEventListener('keydown', (e)=>{
-      const items = [...el.querySelectorAll('.hv-pop-item')], picks = [...el.querySelectorAll('.hv-bdg-pick')];
+      const items = [...el.querySelectorAll('.hv-pop-item')], picks = [...el.querySelectorAll('.hv-bdg-pick, .hv-clamp-pick')];
       const a = document.activeElement, i = items.indexOf(a), p = picks.indexOf(a);
-      // the badge grid (HV_BDG_COLS a row) comes before the items: Left/Right along it, Up/Down a row
-      // at a time and on into the items (in the same column coming back: the checked badge's, else the first)
+      // the badge grid (HV_BDG_COLS a row) and the CLAMP row come before the items: Left/Right along its own
+      // grid, Up/Down a row at a time and on into the items (in the same column coming back: the checked
+      // badge's, else the first)
       if(p >= 0 && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
         e.preventDefault(); e.stopPropagation();
-        picks[(p + (e.key==='ArrowRight' ? 1 : -1) + picks.length) % picks.length].focus();
+        const own = [...a.parentNode.children], q = own.indexOf(a);
+        own[(q + (e.key==='ArrowRight' ? 1 : -1) + own.length) % own.length].focus();
       } else if(e.key==='ArrowDown' || e.key==='ArrowUp'){
         e.preventDefault(); e.stopPropagation();
         const rows = Math.ceil(picks.length / HV_BDG_COLS), n = rows + items.length;
@@ -34071,6 +34616,130 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     hvSay(id ? hvNodeLabel(node)+': '+HR_BY_ID[id].label+' (your badge)' : hvNodeLabel(node)+': your badge taken off');
     hvAnnSave();                 // kept at once, like a comment
+  }
+  // ---- CLAMP on a move of yours (2026-11-02): the move menu's CLAMP row, under the badges, on a main-line move
+  // you made in a game (never a puzzle's, a played-out position's, a side line's or your opponent's). A move can
+  // have several letters: each disc is a checkbox, a click puts it on or takes it off and the menu stays open. ----
+  function hvClampMine(node){
+    const S = HV_STATE;
+    return !!(S && S.me && node && node.main && node.parent && S.nodes.has(node.id) && hvAnnId()
+      && ((node.ply + (node.off || 0)) % 2===1 ? 'white' : 'black')===S.me);
+  }
+  // A tree's marks as a record's k, and a record's k onto a tree's main line (exactly those). Marks past where the
+  // tree's replay ends (a Chess960 castle, a set-up game opened from its summary without its start) are kept with
+  // the tree as they came (clampPast), so opening the game never takes them out of the record.
+  function hvClampListOf(T){
+    const k = [];
+    T.main.forEach(n=>{ if(n.clamp) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp) k.push(n.clamp[K.ch] ? [n.ply, K.ch, n.clamp[K.ch]] : [n.ply, K.ch]); }); });
+    return k.concat((T.tree || T).clampPast || []);
+  }
+  function hvClampOnto(T, k){
+    T.main.forEach(n=>{ if(n.clamp) delete n.clamp; });
+    k.forEach(x=>{ const n = T.main[x[0]-1]; if(n) (n.clamp || (n.clamp = {}))[x[1]] = x[2] || ''; });
+    (T.tree || T).clampPast = k.filter(x=> x[0] > T.main.length).map(x=> x.slice());
+  }
+  // an edit fits the game's record when it doesn't push it past GN_MAX, nor push your arrows out of it to
+  // make room (before: the record's length with them, as it was)
+  function hvAnnFits(before){
+    if(hvAnnText(false).length <= GN_MAX) return true;
+    return before > GN_MAX && hvAnnText(true).length <= GN_MAX;
+  }
+  function hvClampRow(el, node){
+    const wrap = hvEl('div', 'hv-clamp'), head = hvEl('div', 'hv-bdg-head'), name = hvEl('span', 'hv-bdg-name');
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', 'CLAMP');
+    head.appendChild(hvEl('span', 'hv-pop-head', 'CLAMP'));
+    // the letter under the pointer or the keyboard's focus by name; else yours on this move (a disc a click
+    // left focused names nothing: the state shows once the pointer leaves it)
+    name.setAttribute('aria-hidden', 'true');
+    const rest = ()=>{
+      const on = CLAMP_K.filter(K=> node.clamp && K.ch in node.clamp);
+      return !on.length ? '' : 'Yours: '+(on.length > 2 ? on.map(K=> K.ch).join(' ') : on.map(K=> K.short).join(', '));
+    };
+    name.textContent = rest();
+    head.appendChild(name);
+    wrap.appendChild(head);
+    const grid = hvEl('div', 'hv-bdg-grid hv-clamp-grid'), msg = hvEl('div', 'hv-clamp-msg');
+    msg.setAttribute('role', 'alert');
+    msg.hidden = true;
+    CLAMP_K.forEach(K=>{
+      const btn = hvEl('button', 'hv-clamp-pick'), disc = hvEl('span', 'clamp-d is-on', K.ch);
+      btn.type = 'button';
+      btn.dataset.ck = K.ch;
+      btn.setAttribute('role', 'menuitemcheckbox');
+      btn.setAttribute('aria-label', K.name);
+      disc.setAttribute('aria-hidden', 'true');
+      disc.style.background = K.color;
+      btn.appendChild(disc);
+      const show = ()=>{ const on = !!node.clamp && K.ch in node.clamp; btn.classList.toggle('is-on', on); btn.setAttribute('aria-checked', on ? 'true' : 'false'); };
+      show();
+      let pt = '';
+      btn.addEventListener('pointerdown', (e)=>{ pt = e.pointerType; });
+      btn.addEventListener('pointerenter', ()=>{ name.textContent = K.short; });
+      btn.addEventListener('focus', ()=>{ if(btn.matches(':focus-visible')) name.textContent = K.short; });     // the keyboard's, not a tap's
+      btn.addEventListener('pointerleave', ()=>{ const f = document.activeElement; name.textContent = f && grid.contains(f) && f.matches(':focus-visible') && CLAMP_BY[f.dataset.ck] ? CLAMP_BY[f.dataset.ck].short : rest(); });
+      btn.addEventListener('blur', ()=>{ name.textContent = rest(); });
+      btn.addEventListener('click', (e)=>{       // (the lift of the menu's own press and hold never gets here: hvMenuOpen)
+        e.stopPropagation();
+        const ok = hvClampToggle(node, K.ch);
+        show();
+        if(e.detail > 0 && pt && pt!=='mouse') name.textContent = rest();      // a tap: the pointer's gone, the heading says what's on now
+        pt = '';
+        msg.textContent = ok ? '' : GH_CLAMP_FULL;
+        msg.hidden = ok;
+      });
+      grid.appendChild(btn);
+    });
+    wrap.appendChild(grid);
+    wrap.appendChild(msg);
+    el.appendChild(wrap);
+    el.appendChild(hvEl('div', 'hv-pop-sep'));
+  }
+  // a letter on or off a move of yours, kept at once; false when the record has no room for it (nothing changes)
+  function hvClampToggle(node, ch){
+    const K = CLAMP_BY[ch];
+    if(!K || !hvClampMine(node)) return false;
+    const c = node.clamp || {}, on = ch in c, before = hvAnnText(false).length;
+    const off = ()=>{ delete c[ch]; if(!Object.keys(c).length) delete node.clamp; };
+    if(on) off();
+    else { node.clamp = c; c[ch] = ''; }
+    if(!on && !hvAnnFits(before)){ off(); hvSay(GH_CLAMP_FULL); return false; }
+    hvSay(hvNodeLabel(node)+': '+K.name+(on ? ' taken off' : ' (CLAMP)'));
+    hvAnnSave();
+    return true;
+  }
+  // Go to move from a row's letter box: the review opens at the position before the marked move, the move
+  // drawn in the letter's color on its own layer (never one of your arrows, never saved); the board moving
+  // takes it away, and the next move (the right arrow) is the one marked.
+  const hvClampSvg = document.createElementNS(ARROW_SVG_NS, 'svg');
+  hvClampSvg.setAttribute('class', 'hv-clamp-svg');
+  hvClampSvg.setAttribute('viewBox', '0 0 8 8');
+  hvClampSvg.setAttribute('preserveAspectRatio', 'none');
+  hvClampSvg.setAttribute('aria-hidden', 'true');
+  function hvClampGo(at){
+    const S = HV_STATE, K = at && CLAMP_BY[at.ch], n = S && K ? S.main[at.ply-1] : null;
+    if(!n || !n.move) return;
+    if(S.cur!==n.parent) hvGoNode(n.parent);
+    S.clampGo = { at:n.parent, from:n.move.from, to:n.move.to, uci:n.uci, ch:K.ch, color:K.color };
+    hvDrawClampArrow();
+    clearTimeout(hvLiveT);          // the plain move hvGoNode was about to read out would take its place
+    hvSay('Before '+hvNodeLabel(n)+' ('+K.name+')');
+  }
+  function hvDrawClampArrow(){
+    while(hvClampSvg.firstChild) hvClampSvg.removeChild(hvClampSvg.firstChild);
+    const S = HV_STATE, G = S && S.clampGo;
+    if(!G || S.cur!==G.at) return;
+    const cx = (i)=>{ const c = i%8; return (S.flipped ? 7-c : c) + 0.5; };
+    const cy = (i)=>{ const r = Math.floor(i/8); return (S.flipped ? r : 7-r) + 0.5; };
+    const dr = Math.floor(G.to/8)-Math.floor(G.from/8), dc = G.to%8-G.from%8, shaft = 0.22;
+    const shp = annoArrowShape(cx(G.from), cy(G.from), cx(G.to), cy(G.to), dr, dc, 1);
+    const mk = (tag, attrs)=>{ const e = document.createElementNS(ARROW_SVG_NS, tag); Object.keys(attrs).forEach(k=> e.setAttribute(k, attrs[k])); return e; };
+    const g = mk('g', { 'class':'hv-clamp-arrow', 'data-uci':G.uci, 'data-ck':G.ch, opacity:'.9' });
+    g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:'rgba(255,255,255,.6)', 'stroke-width':shaft+0.08, 'stroke-linecap':'butt' }));
+    g.appendChild(mk('polygon', { points:shp.triPoints, fill:'none', stroke:'rgba(255,255,255,.6)', 'stroke-width':0.08, 'stroke-linejoin':'round' }));
+    g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:G.color, 'stroke-width':shaft, 'stroke-linecap':'butt' }));
+    g.appendChild(mk('polygon', { points:shp.triPoints, fill:G.color }));
+    hvClampSvg.appendChild(g);
   }
   // ---- a game's Groups (the header's Groups button): in or out of each of your groups, or a new
   // one from this game (gpNewDialog: its name, this game, the position on the board if you like) ----
@@ -34996,6 +35665,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvSetTab(hvTab, { silent:true });
     hvGoNode(tree.root);
     if(opts.at) hvGoRef(opts.at);
+    if(opts.clamp) hvClampGo(opts.clamp);       // Go to move from a CLAMP letter's box
     hvFire(hvPaneLs, hvTab);
     if(hvNotesPinned() && hvTab!=='notes' && !hvNotesOff()) hvFire(hvPaneLs, 'notes');
   }
@@ -38031,7 +38701,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // a record that isn't a game's (an opening's note, a group, a group's note): never listed as a game
   function gnIsMeta(id){ return /^(?:op|gp|gq)-[0-9a-f]{8}$/.test(String(id || '')); }
   function gnIsAn(id){ return /^an-(?:\w{8}|cc-d?\d{1,15})$/.test(String(id || '')); }
-  function gnHasAnn(gid){ return !!gnAnnSummary(gid); }      // (a record with only b:[] in it is none)
+  function gnHasAnn(gid){ return !!gnAnnSummary(gid); }      // (a record with only b:[] in it is none; nor one with only CLAMP marks: the row's letters show those)
   // "2 comments \u00b7 1 badge \u00b7 1 side line \u00b7 arrows" for a game's saved analysis ('' when none)
   function gnAnnSummary(gid){
     let A = null;
@@ -38045,18 +38715,80 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(m) bits.push('arrows');
     return bits.join(' \u00b7 ');
   }
+  // A record's fields in the order this build writes them: v, l, c, m, then b and k when it has them, then any
+  // field a newer build added (gnAnExtra), kept as it came: this build never drops what it doesn't know.
+  const GN_AN_KNOWN = ['v', 'l', 'c', 'm', 'b', 'k'];
+  function gnAnExtra(A){
+    const x = {};
+    if(A && typeof A==='object' && !Array.isArray(A)) Object.keys(A).forEach(f=>{ if(GN_AN_KNOWN.indexOf(f) < 0 && f!=='__proto__') x[f] = A[f]; });
+    return x;
+  }
+  function gnAnCanon(A){
+    const out = {};
+    GN_AN_KNOWN.forEach(f=>{ if(f in A) out[f] = A[f]; });
+    return Object.assign(out, gnAnExtra(A));
+  }
+  // A record's CLAMP marks (k, 2026-11-02): [[ply, letter, note?]], a main-line move of yours by its ply, one per
+  // move and letter, by ply and then C L A M P. Read past anything else.
+  function gnClampNote(t){ return typeof t==='string' ? t.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, CLAMP_NOTE_MAX) : ''; }
+  function gnClampList(A){
+    const out = [], seen = new Set();
+    (A && Array.isArray(A.k) ? A.k : []).forEach(x=>{
+      if(!Array.isArray(x) || !Number.isInteger(x[0]) || x[0] < 1 || x[0] > 3000 || typeof x[1]!=='string' || !CLAMP_BY[x[1]] || seen.has(x[0]+x[1])) return;
+      seen.add(x[0]+x[1]);
+      const note = gnClampNote(x[2]);
+      out.push(note ? [x[0], x[1], note] : [x[0], x[1]]);
+    });
+    return out.sort((a, b)=> a[0] - b[0] || 'CLAMP'.indexOf(a[1]) - 'CLAMP'.indexOf(b[1]));
+  }
+  // a game's marks, read once per text of its record (every row of a redraw asks)
+  const GN_CLAMP_MEMO = new Map();
+  function gnClampOf(gid){
+    const t = gnNoteText('an-'+gid);
+    if(!t) return [];
+    const was = GN_CLAMP_MEMO.get(gid);
+    if(was && was.t===t) return was.k;
+    let A = null;
+    try{ A = JSON.parse(t); }catch(e){ A = null; }
+    const k = gnClampList(A);
+    if(GN_CLAMP_MEMO.size > 600) GN_CLAMP_MEMO.clear();
+    GN_CLAMP_MEMO.set(gid, { t, k });
+    return k;
+  }
+  // A waiting other version of the game's record (gnReconcile's conflict: this device's unsent edit that lost, or
+  // another device's that didn't win) with different marks: those only it has ([] when it differs only in notes or
+  // has fewer); null when there's none. Its row and box say so; the review's notice chooses (hvAnnConflictRow).
+  function gnClampWait(gid){
+    const n = typeof GN==='object' && GN && gid ? GN.notes['an-'+gid] : null;
+    if(!n || !n.conflict) return null;
+    let A = null;
+    try{ A = JSON.parse(n.conflict.text); }catch(e){ return null; }
+    const w = gnClampList(A), cur = gnClampOf(gid);
+    if(JSON.stringify(w)===JSON.stringify(cur)) return null;
+    const have = new Set(cur.map(x=> x[0]+x[1]));
+    return w.filter(x=> !have.has(x[0]+x[1]));
+  }
+  // what a row's letters show ('C1L2', '~L' for a waiting version's L): part of the game lists' redraw signatures
+  function gnClampSig(gid){
+    const n = {}, w = gnClampWait(gid);
+    gnClampOf(gid).forEach(x=>{ n[x[1]] = (n[x[1]] || 0) + 1; });
+    return CLAMP_K.map(K=> n[K.ch] ? K.ch+n[K.ch] : '').join('')+(w ? '~'+w.map(x=> x[1]).join('') : '');
+  }
   // A build from before badges writes a game's analysis record again without its b just by opening
-  // the game (its hvAnnText has no b), and a badges-only one as deleted. A newer build keeps b in a
-  // record that has had it (b:[] once they're all off), so a newer copy without b, over badges of
-  // this device's, is an older build's: the text to keep in its place (that copy with this device's
-  // b, sent out again by the sync), or '' when it isn't one.
+  // the game (its hvAnnText has no b), and a badges-only one as deleted; a build from before CLAMP
+  // (a54537d and older) the same with k. A newer build keeps b and k in a record that has had them
+  // (b:[], k:[] once they're all off), so a newer copy without one, over badges or marks of this
+  // device's, is an older build's: the text to keep in its place (that copy with this device's b
+  // and k, sent out again by the sync), or '' when it isn't one.
   function gnAnKeepB(id, mine, inc){
     if(!gnIsAn(id) || !mine || mine===inc) return '';
     let M = null, I = null;
     try{ M = JSON.parse(mine); I = inc ? JSON.parse(inc) : { v:1, l:[], c:[], m:[] }; }catch(e){ return ''; }
-    if(!M || !Array.isArray(M.b) || !M.b.length || !I || typeof I!=='object' || Array.isArray(I) || 'b' in I) return '';
-    I.b = M.b;
-    const t = JSON.stringify(I);
+    if(!M || typeof M!=='object' || !I || typeof I!=='object' || Array.isArray(I)) return '';
+    let kept = false;
+    ['b', 'k'].forEach(f=>{ if(Array.isArray(M[f]) && M[f].length && !(f in I)){ I[f] = M[f]; kept = true; } });
+    if(!kept) return '';
+    const t = JSON.stringify(gnAnCanon(I));
     return t.length <= GN_MAX ? t : '';
   }
   function gnOpId(name){ return 'op-'+gnFnv(String(name || '').trim().toLowerCase()); }
@@ -38260,7 +38992,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         }
         // this tab's own text lost: kept, and labeled as this device's version
         on.conflict = lost ? { text:n.text, at:n.updatedAt, mine:true, lost:true } : on.conflict;
-        // an older build's copy of a game's analysis (in another tab): this tab's badges stay in it
+        // an older build's copy of a game's analysis (in another tab): this tab's badges and CLAMP marks stay in it
         const kb = gnAnKeepB(id, n.text, on.text);
         if(kb){ on.base = on.updatedAt; on.text = kb; on.updatedAt += 1; localNewer = true; if(on.conflict && on.conflict.text===kb) on.conflict = null; }
         if(!on.link && !switched) on.link = n.link;
@@ -38374,7 +39106,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // the game with your side lines and comments, as Lichess shows a study chapter
       let mt = moves;
       if(moves && n.text){ try{ mt = gnAnnMovetext(g.san, n.text) || moves; }catch(e){ mt = moves; } }
-      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? 'Your analysis from Chess Arcade: comments, badges and side lines.' : '(analysis deleted)')+' } '+(mt ? mt+' ' : '')+result;
+      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? 'Your analysis from Chess Arcade: comments, badges, CLAMP marks and side lines.' : '(analysis deleted)')+' } '+(mt ? mt+' ' : '')+result;
     }
     return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? gnReadable(n.text) : '(note deleted)')+' } '+(moves ? moves+' ' : '')+result;
   }
@@ -38382,6 +39114,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // '1. d4 d5 2. Nc3 $1 { Jobava } (2. c4 e6) 2... Nf6'. Every move is replayed and written by
   // the app's own SAN, so Lichess takes it; a line that doesn't replay is left out. A badge with a
   // PGN glyph (RL's nag numbers: !! $3, ! $1, ?! $6, ? $2, ?? $4) follows its move; the rest have none.
+  // CLAMP marks (k) follow theirs as a comment: '{ CLAMP L: left the knight on e5 loose }', several
+  // letters joined ('{ CLAMP C; L: ... }'), braces in a note turned to parentheses (the PGN stays valid).
   function gnAnnMovetext(san, text){
     const A = JSON.parse(text);
     const toks = String(san || '').trim() ? String(san).trim().split(/\s+/) : [];
@@ -38416,6 +39150,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     (Array.isArray(A.l) ? A.l : []).forEach(L=> walk(L, true));
     (Array.isArray(A.c) ? A.c : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null; if(n && typeof x[1]==='string') n.com = x[1]; });
     (Array.isArray(A.b) ? A.b : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null, B = n && n.parent && typeof x[1]==='string' && x[1].length===1 && HR_BY_CODE[x[1]]; if(B && B.nag) n.nag = B.nag; });
+    gnClampList(A).forEach(x=>{ const n = walk(x[0], false); if(n && n.parent) (n.clamp || (n.clamp = [])).push(x); });
     const com = (t)=> '{ '+String(t).replace(/[{}]/g, m=> m==='{' ? '(' : ')').replace(/\[%/g, '[ %').replace(/\s+/g, ' ').trim()+' }';
     const out = [];
     const line = (start)=>{
@@ -38427,6 +39162,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(n.nag) out.push('$'+n.nag);
         num = false;
         if(n.com){ out.push(com(n.com)); num = true; }
+        if(n.clamp){ out.push(com('CLAMP '+n.clamp.map(x=> x[1]+(x[2] ? ': '+x[2] : '')).join('; '))); num = true; }
         const p = n.parent;
         if(p.kids[0]===n && p.kids.length > 1){
           p.kids.slice(1).forEach(v=>{ out.push('('); line(v); out.push(')'); });
@@ -38570,7 +39306,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           } else {
             // this device's unsent edit lost to a newer one: kept, as its own
             if(unsent) n.conflict = { text:n.text, at:n.updatedAt, mine:true, lost:true };
-            // an older build's copy of a game's analysis: this device's badges stay in it (gnAnKeepB)
+            // an older build's copy of a game's analysis: this device's badges and CLAMP marks stay in it (gnAnKeepB)
             const kb = gnAnKeepB(gid, n.text, rt);
             n.base = n.updatedAt;
             n.text = kb || rt; n.updatedAt = kb ? Math.max(Date.now(), best.up + 1) : best.up; n.pushedAt = best.up;
@@ -38581,7 +39317,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         } else if(best.up < n.updatedAt){
           // this device's edit wins; a remote change made since this device
           // last wrote, that it never had, is kept
-          // (an older build's copy of this very text, only its badges gone, is nothing new: gnAnKeepB)
+          // (an older build's copy of this very text, only its badges or CLAMP marks gone, is nothing new: gnAnKeepB)
           const olderCopy = !!n.text && gnAnKeepB(gid, n.text, rt)===n.text;
           const news = !!rt && rt!==n.text && best.up > n.pushedAt && !gnSeen(n, rt) && !olderCopy;
           if(news && !n.text){
@@ -40738,6 +41474,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(ghgF){ gnFieldRefresh(ghgF); gnRenderField(ghgF); }
     if(GH_LC && GH_LC.F) gnFieldRefresh(GH_LC.F);      // the line card's idea (a field you're typing in is left alone)
     hvAnnRefresh();
+    ghClampBoxSync();             // an open CLAMP box's list
   }
   var gnOverlay = document.getElementById('gn-overlay');
   var gnTextEl = document.getElementById('gn-text');
@@ -41347,11 +42084,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // b:[[ref, 'x']] } ('' when there's nothing); arrows as shown (the profile's colors) in the diagram codes;
   // b, your badges by their one-letter codes (HR_BADGES): only in a record that has had some (a record
   // without stays as an older build wrote it), and then always, b:[] once they're all off (never ''):
-  // a newer copy without b over badges is an older build's (gnAnKeepB), not your edit
+  // a newer copy without b over badges is an older build's (gnAnKeepB), not your edit. k, your CLAMP
+  // marks (2026-11-02): [[ply, letter, note?]] on main-line moves of yours, kept the same way (k:[] once
+  // they're all off). A field this build doesn't know (a newer build's) is kept from the record as it came.
   function hvAnnText(noMarks){
-    const S = HV_STATE, lines = [], com = [], mk = [], bd = [];
-    let hadB = false;
-    try{ const P = S.annText ? JSON.parse(S.annText) : null; hadB = !!P && Array.isArray(P.b); }catch(e){ hadB = false; }
+    const S = HV_STATE, lines = [], com = [], mk = [], bd = [], kd = hvClampListOf(S);
+    let P = null;
+    try{ P = S.annText ? JSON.parse(S.annText) : null; }catch(e){ P = null; }
+    const hadB = !!P && Array.isArray(P.b), hadK = !!P && Array.isArray(P.k), extra = gnAnExtra(P);
     const prof = annoProfile();
     const marks = (n)=>{
       const m = n.marks;
@@ -41367,14 +42107,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       marks(n);
       n.children.forEach(c=>{ if(!c.main && !c.children.length) lines.push(hvNodeRef(c).line); walk(c); });
     })(S.root);
-    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB) return '';
+    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !Object.keys(extra).length) return '';
     const A = { v:1, l:lines, c:com, m:mk };
     if(bd.length || hadB) A.b = bd;
-    return JSON.stringify(A);
+    if(kd.length || hadK) A.k = kd;
+    return JSON.stringify(Object.assign(A, extra));
   }
-  // A record onto the tree: its side lines, comments, marks and badges. mine: this device's comments,
-  // marks and badges stay, and a different comment from the other version is added under it. lost: the
-  // record is this device's own edit that lost to a newer one (the tree is the other's): its badges win.
+  // A record onto the tree: its side lines, comments, marks, badges and CLAMP marks. mine: this device's
+  // comments, marks, badges and CLAMP notes stay, and a different comment from the other version is added
+  // under it. lost: the record is this device's own edit that lost to a newer one (the tree is the
+  // other's): its badges and CLAMP notes win. CLAMP marks join by move and letter, never taken off here.
   function hvAnnMerge(A, mine, lost){
     if(!A || typeof A!=='object') return;
     hvAnnBusy = true;
@@ -41399,17 +42141,34 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const n = Array.isArray(x) ? hvAnnNode(x[0]) : null, B = n && n.parent && typeof x[1]==='string' && x[1].length===1 ? HR_BY_CODE[x[1]] : null;
         if(B && (lost || !(mine && n.badge))) n.badge = B.id;
       });
+      const S = HV_STATE, past = (S.tree || S).clampPast || ((S.tree || S).clampPast = []);
+      gnClampList(A).forEach(x=>{
+        const n = hvAnnNode(x[0]), t = x[2] || '';
+        if(x[0] > S.main.length){
+          // past where the replay ends: kept as it came, by move and letter (hvClampListOf)
+          const i = past.findIndex(y=> y[0]===x[0] && y[1]===x[1]);
+          if(i < 0) past.push(x.slice());
+          else if(t && (lost || !mine || !past[i][2])) past[i] = x.slice();
+          past.sort((a, b)=> a[0] - b[0] || 'CLAMP'.indexOf(a[1]) - 'CLAMP'.indexOf(b[1]));
+          return;
+        }
+        if(!n || !n.main || !n.parent) return;
+        const c = n.clamp || (n.clamp = {});
+        if(!(x[1] in c)) c[x[1]] = t;
+        else if(t && (lost || !mine || !c[x[1]])) c[x[1]] = t;
+      });
     } finally { hvAnnBusy = false; }
   }
   // hvOpen: the game's saved analysis onto its tree (a tree kept from earlier in the session
-  // already has it: nothing is added twice)
+  // already has it: nothing is added twice). Its CLAMP marks are the record's own, on a kept tree too:
+  // marks changed since from Game History's letters (or another device) never come back from it.
   function hvAnnApply(){
     const S = HV_STATE, id = hvAnnId();
     S.annText = id ? gnNoteText(id) : '';
-    if(!S.annText) return;
     let A = null;
-    try{ A = JSON.parse(S.annText); }catch(e){ A = null; }
-    hvAnnMerge(A, false);
+    if(S.annText) try{ A = JSON.parse(S.annText); }catch(e){ A = null; }
+    if(id) hvClampOnto(S, gnClampList(A));
+    if(A) hvAnnMerge(A, false);
   }
   function hvAnnSoon(){ clearTimeout(hvAnnTimer); hvAnnTimer = setTimeout(hvAnnSave, 700); }
   function hvAnnSave(){
@@ -41446,7 +42205,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const id = hvAnnId(), n = id ? GN.notes[id] : null;
     if(!n || !n.conflict) return null;
     const row = hvEl('div', 'hv-ann-conflict');
-    row.appendChild(hvEl('span', '', 'Another device saved different comments, badges or lines for this game '+relTime(n.conflict.at)+'.'));
+    row.appendChild(hvEl('span', '', 'Another device saved different comments, badges, CLAMP marks or lines for this game '+relTime(n.conflict.at)+'.'));
     const b1 = hvEl('button', 'btn-link', 'Add them to these'); b1.type = 'button'; b1.dataset.ann = 'merge';
     const b2 = hvEl('button', 'btn-link', 'Keep only these'); b2.type = 'button'; b2.dataset.ann = 'keep';
     row.appendChild(b1); row.appendChild(b2);
