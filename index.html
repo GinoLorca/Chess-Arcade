@@ -4980,10 +4980,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-com-text{ flex:1 1 160px; min-width:0; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
   .hv-com-inline{ font-style:italic; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
   /* comments read in the skin's text face, not the move list's mono */
-  .hv-com-text, .hv-com-inline{ font-family:"Libre Franklin",system-ui,-apple-system,sans-serif; }
-  :root[data-skin="bauhaus"] :is(.hv-com-text, .hv-com-inline){ font-family:"Jost","Libre Franklin",system-ui,sans-serif; }
+  .hv-com-text, .hv-com-inline, .hv-cc-text{ font-family:"Libre Franklin",system-ui,-apple-system,sans-serif; }
+  :root[data-skin="bauhaus"] :is(.hv-com-text, .hv-com-inline, .hv-cc-text){ font-family:"Jost","Libre Franklin",system-ui,sans-serif; }
   :root[data-skin="chessbook"] :is(.hv-com-text, .hv-com-inline){ font-family:"EB Garamond","Libre Franklin",Georgia,serif; font-size:13.5px; }
-  :root[data-skin="uptown"] :is(.hv-com-text, .hv-com-inline){ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }
+  :root[data-skin="uptown"] :is(.hv-com-text, .hv-com-inline, .hv-cc-text){ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }
   .hv-com-mv{ background:none; border:0; padding:0; font:inherit; font-style:normal; color:var(--brass-text); text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:2px; cursor:pointer; }
   .hv-com-mv.alt{ text-decoration-style:dotted; }
   .hv-com-go:focus-visible, .hv-com-mv:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
@@ -4993,6 +4993,40 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-com-pop-acts{ display:flex; gap:8px; justify-content:flex-end; }
   .hv-movelist .hv-ann-conflict{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; margin:0 0 8px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); font-size:12.5px; color:var(--ink); }
   #hv-movelist .mv-san{ -webkit-touch-callout:none; }
+  /* The comment on the move on the board (hvComCard), over the engine card: Repertoire Lab's move
+     note in this skin's colors, a tint and a 3px edge of the link color. Its own height (the move list
+     takes what's left); a long comment scrolls inside. It floats in (a fade and a 4px slide) and then
+     bobs gently, transform only, so nothing around it moves. */
+  #hv-com-card{
+    display:flex; flex-direction:column; gap:4px; flex:0 0 auto; padding:9px 12px 10px 11px;
+    background:color-mix(in srgb, var(--brass-text) 7%, var(--surface));
+    border-color:color-mix(in srgb, var(--brass-text) 30%, var(--line)); border-left:3px solid var(--brass-text);
+    animation:hv-cc-arrive .3s ease-out, hv-cc-float 3.6s ease-in-out .35s infinite;
+  }
+  :root[data-skin="bauhaus"] #hv-com-card{ border-left-width:4px; }
+  #hv-com-card.is-again{ animation:none; }      /* for one style pass: another commented move floats in again */
+  @keyframes hv-cc-arrive{ from{ opacity:0; transform:translateY(-4px); } to{ opacity:1; transform:none; } }
+  @keyframes hv-cc-float{ 0%, 100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+  @media (prefers-reduced-motion:reduce){ #hv-com-card{ animation:none; } }
+  .hv-cc-head{ display:flex; align-items:center; gap:6px; min-width:0; font-family:"JetBrains Mono",monospace; font-size:12.5px; font-weight:700; line-height:1.4; color:var(--ink); }
+  .hv-cc-icon{ flex:0 0 auto; width:14px; height:14px; fill:none; stroke:var(--brass-text); stroke-width:2; stroke-linejoin:round; }
+  .hv-cc-head .hv-badge{ flex:0 0 auto; margin-left:0; }
+  .hv-cc-head .hv-clamp-m{ flex:0 0 auto; margin-left:0; }
+  /* (no overscroll-behavior: at its end a swipe or the wheel goes on to the page, which scrolls on a
+     phone; 4px of padding inside, taken back by the margin, so a focused link's ring isn't cut off) */
+  .hv-cc-body{
+    flex:0 1 auto; min-height:0; max-height:260px; overflow-y:auto; padding:4px; margin:-4px; scroll-padding:4px;
+    scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--brass-text) 45%, transparent) transparent;
+  }
+  .hv-cc-body::-webkit-scrollbar{ width:6px; }
+  .hv-cc-body::-webkit-scrollbar-track{ background:transparent; }
+  .hv-cc-body::-webkit-scrollbar-thumb{ background:color-mix(in srgb, var(--brass-text) 40%, transparent); border-radius:999px; }
+  .hv-cc-text{ margin:0; font-size:14px; line-height:1.5; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
+  :root[data-skin="chessbook"] .hv-cc-text{ font-family:"EB Garamond","Libre Franklin",Georgia,serif; font-size:15px; }
+  /* its moves in the text's ink, underlined in the link color (the link color itself is under 4.5:1 on
+     the tint in a few skins: Felt, Hustler and Game Boy light, Game Boy dark) */
+  #hv-com-card .hv-com-mv{ color:var(--ink); font-weight:600; text-decoration-color:var(--brass-text); }
+  #hv-com-card .hv-com-mv:hover{ text-decoration-thickness:2.5px; }
   .gh-ann-line{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .hv-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
   .hv-act{ padding:6px 12px; font-size:12.5px; text-decoration:none; display:inline-flex; align-items:center; }
@@ -5064,7 +5098,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (pointer:coarse){ .hv-px-acts .btn{ min-height:44px; } }
   /* until the game's over and Analyze is pressed: no engine card, arrows or eval, no Explorer (they'd give moves away);
      never the review, notes, prep or phase cards (a position played out here isn't one of your games) */
-  #view-play-history.is-px :is(#hv-opx, #hv-prep, #hpf, #hv-tab-review, #hv-tab-notes, #hv-notes-card){ display:none !important; }
+  #view-play-history.is-px :is(#hv-opx, #hv-prep, #hpf, #hv-tab-review, #hv-tab-notes, #hv-notes-card, #hv-com-card){ display:none !important; }
   #view-play-history.is-px-play :is(#hv-engine, #hv-tab-explorer){ display:none !important; }
   #view-play-history.is-px-play .hv-eval{ visibility:hidden; }          /* kept for its room: the board doesn't move when Analyze shows it */
   /* the row wraps where it can't hold the button too (a phone): it takes a line of its own under the arrows */
@@ -5144,6 +5178,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; margin-left:4px; vertical-align:-2px;
     border-radius:50%; font:800 8.5px/1 "Helvetica Neue",Helvetica,Arial,sans-serif; color:#10151d;
   }
+  /* your CLAMP letters on a move (hvAddClamp), after its badge: the row's discs, smaller */
+  .hv-clamp-m{
+    display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; margin-left:3px; vertical-align:-2px;
+    border-radius:50%; font:800 8px/1 "JetBrains Mono",monospace; color:#fff;
+  }
+  .hv-badge.hv-own + .hv-clamp-m{ margin-left:5px; }        /* clear of your badge's ring */
   .hv-pop{
     position:absolute; z-index:20; min-width:200px; display:flex; flex-direction:column; padding:4px;
     background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 28px rgba(0,0,0,.3);
@@ -5184,6 +5224,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .hv-side{ position:sticky; top:6px; max-height:calc(100vh - 70px); max-height:calc(100dvh - 70px); }
     .hv-tabs{ flex:1 1 auto; min-height:0; }
     .hv-pane.active{ flex:1 1 auto; overflow:auto; }
+    /* A long comment leaves the move list its room: the card stops where the side column would keep
+       under about 210px for the tabs (670 = 70 the column's margin + about 210 header + 150 Engine +
+       210 tabs + 30 gaps), never under its head and two lines; its words scroll inside. */
+    #hv-com-card{ max-height:max(84px, calc(100vh - 670px)); max-height:max(84px, calc(100dvh - 670px)); }
     /* clear of the home and settings buttons in the corners */
     .wrap.play-mode .hv-boardcol > .back-link{ margin-left:max(0px, calc(44px - var(--fab-gutter))); }
     #hv-row-top{ padding-left:max(12px, calc(56px - var(--fab-gutter))); }
@@ -5198,6 +5242,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hv-tab-notes{ display:none; }
     #hv-pane-notes{ display:flex; flex:0 0 auto; height:clamp(200px, calc(100vh - 750px), 300px); height:clamp(200px, calc(100dvh - 750px), 300px); border-top:1px solid var(--line); }
     #hv-pane-notes .hv-note{ resize:none; }
+    #hv-com-card{ max-height:max(84px, calc(100vh - 670px - clamp(200px, calc(100vh - 750px), 300px))); max-height:max(84px, calc(100dvh - 670px - clamp(200px, calc(100dvh - 750px), 300px))); }      /* and the pinned Notes */
+  }
+  /* Two columns on a short screen (a 1366x768 laptop, 1024x600): while the comment card is up, the
+     game's header gives way before the moves do, down to its first lines and scrolling inside, so
+     the tabs keep about 170px (the card alone took the move list down to one row). A cap, not a
+     shrink: the column keeps its height, so the board never moves. 504 = 70 the column's margin +
+     84 card + 150 Engine + 30 gaps + 170 tabs; from about 715px tall the header is whole. */
+  @media (min-width:900px) and (max-width:1439.98px) and (min-height:561px){
+    .hv-side:has(#hv-com-card:not([hidden], .hv-card-off)) #hv-head{ flex-shrink:0; max-height:max(96px, calc(100vh - 504px)); max-height:max(96px, calc(100dvh - 504px)); overflow:auto; }      /* (scrolling, it would shrink too) */
   }
   /* Wide screens: three columns. The game's header moves left of the board
      with Notes as its own card under it; the engine takes the header's
@@ -5251,6 +5304,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hpf{ flex:0 1 auto; min-height:0; overflow:auto; }
     #hpf > *{ flex-shrink:0; }       /* the card scrolls; the field keeps its shape */
     #view-play-history.is-px #hv-head{ flex:0 0 auto; }      /* played out: nothing under the header, so it keeps its own height */
+    #hv-com-card{ max-height:max(84px, calc(100% - 340px)); }       /* the column is the board's height: about 150 Engine, 170 tabs, 20 gaps stay */
     /* with the header turned off, Notes takes the room */
     .hv-sidecol-review:has(> #hv-head.hv-card-off) > .hv-notes-card{ flex:1 1 auto; }
     .hv-opx-toggle{ display:none; }
@@ -5308,7 +5362,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hv-row-bottom{ order:4; }
     #hv-controls{ order:5; }
     #hv-anno-hint{ order:5; }
-    #hv-px, #hv-engine{ order:6; }
+    #hv-px, #hv-com-card, #hv-engine{ order:6; }
     #hv-tabs{ order:7; overflow:visible; }
     #hpf{ order:8; }
     #hv-head{ order:9; }
@@ -5354,6 +5408,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       --sq:clamp(30px, min(calc((100dvh - 124px - var(--hv-frame-extra)) / 8), calc((min(100vw, 1240px) - 466px - var(--hv-frame-extra)) / 8)), 85px);
     }
     #view-play-history .hv-side{ position:static; max-height:none; }
+    #view-play-history #hv-com-card{ max-height:none; }       /* the page scrolls here: the comment's own 260px only */
     #view-play-history .hv-pane.active{ overflow:visible; }
   }
   @media (max-width:899.98px) and (orientation:landscape) and (max-height:560px){
@@ -6886,6 +6941,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" class="toggle active" data-card="head" aria-pressed="true">Game review</button>
         <button type="button" class="toggle" data-card="phase" aria-pressed="false">Phase of the game</button>
         <button type="button" class="toggle active" data-card="notes" aria-pressed="true">Notes</button>
+        <button type="button" class="toggle active" data-card="comment" aria-pressed="true">Comment</button>
         <button type="button" class="toggle active" data-card="engine" aria-pressed="true">Engine</button>
         <button type="button" class="toggle active" data-card="tabs" aria-pressed="true">Moves &#183; Review &#183; Explorer</button>
       </div>
@@ -7695,6 +7751,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <button type="button" class="btn btn-primary" id="hv-px-stop">Stop and analyze</button>
         </div>
       </div>
+      <!-- The comment on the move on the board (hvComCard), over the engine card: only while that
+           move has one. A region named by its move, never a live one (the move is announced already). -->
+      <div class="hv-card hv-com-card" id="hv-com-card" role="region" hidden></div>
       <div class="hv-card hv-engine" id="hv-engine">
         <div class="hv-eng-head">
           <button class="hv-switch" id="hv-eng-toggle" type="button" role="switch" aria-checked="true" aria-keyshortcuts="L" title="Engine on or off (L) &#183; E hides the suggested moves">
@@ -33631,11 +33690,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   //      hidden (E: the arrows and lines, never the eval), last tab, explorer database ----
   const HV_PREFS_KEY = 'wavyChessPrepReviewPrefs';
   const HV_TABS = ['moves', 'review', 'explorer', 'notes'];
-  const HV_CARDS = ['head', 'phase', 'notes', 'engine', 'tabs'];     // the cards around the board (Settings)
+  const HV_CARDS = ['head', 'phase', 'notes', 'comment', 'engine', 'tabs'];     // the cards around the board (Settings)
   const hvPrefs = (function(){
     // v2 (2026-11-02): the phase card is off unless turned on in Settings (it was on); fold: the
-    // left column's two cards folded to their first lines (three columns)
-    const p = { v:2, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters', cards:{ head:true, phase:false, notes:true, engine:true, tabs:true }, phaseOpen:false,
+    // left column's two cards folded to their first lines (three columns). cards.comment (2026-11-02,
+    // the comment card over the engine): on, and on for a save from before it (no key)
+    const p = { v:2, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters', cards:{ head:true, phase:false, notes:true, comment:true, engine:true, tabs:true }, phaseOpen:false,
       fold:{ head:false, notes:false } };
     try{
       const raw = JSON.parse(localStorage.getItem(HV_PREFS_KEY) || 'null');
@@ -34333,6 +34393,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const el = hvEl('div', 'mv-san'+(node===S.cur ? ' mv-viewed' : ''), node.san);
     el.dataset.node = node.id;
     hvAddBadge(el, node);
+    hvAddClamp(el, node);
     if(typeof hpMark==='function') hpMark(el, node);  // review prep: your prep, the move that left it
     return el;
   }
@@ -34350,6 +34411,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     s.title = tip;
     if(b.color && /^#[0-9a-f]{3,8}$/i.test(b.color)) s.style.background = b.color;
     el.appendChild(s);
+  }
+  // your CLAMP letters on the move, after its badge (2026-11-02): a small disc each in the letter's color, in
+  // C L A M P order, the name and your note in its tooltip. Only your own main-line moves carry them.
+  function hvAddClamp(el, node){
+    const c = node.clamp;
+    if(!c || typeof c!=='object' || Array.isArray(c)) return;
+    CLAMP_K.forEach(K=>{
+      if(!(K.ch in c)) return;
+      const s = hvEl('span', 'hv-clamp-m', K.ch);
+      s.style.background = K.color;
+      const tip = 'CLAMP: '+K.name+(c[K.ch] ? ' \u00b7 '+c[K.ch] : '');
+      s.setAttribute('aria-label', tip);
+      s.title = tip;
+      el.appendChild(s);
+    });
   }
   function hvInlineLine(host, start){
     const S = HV_STATE;
@@ -34431,6 +34507,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     frag.appendChild(hvEl('div', 'hv-result-row', bits.join(' \u00b7 ')));
     el.textContent = '';
     el.appendChild(frag);
+    hvComCard();          // before the scroll: the card's coming or going changes the pane's height
     hvKeepInView();
   }
   // The current move stays in view inside its pane; the page never scrolls.
@@ -34447,6 +34524,55 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(cr.top < pr.top + room) pane.scrollTop -= (pr.top + room - cr.top);
     else if(cr.bottom > pr.bottom - room) pane.scrollTop += (cr.bottom - pr.bottom + room);
   }
+  // ---- the comment card (hvComCard): the comment on the move on the board, over the engine card ----
+  // Repertoire Lab's floating note: only the comment of the exact move on the board (main line or
+  // side line, never an earlier one), there the moment the board reaches it and gone the moment it
+  // moves to a move without one. Another commented move floats in again; the same move drawn again
+  // (an edit, a badge, a sync) keeps its float, and a focused link its focus. Read-only: the move
+  // menu adds and edits. Its moves play like the move list's. Off with Settings' Analysis board
+  // cards (Comment), in Play it out, and with no game open. hvRenderMoveList draws it.
+  const HV_CC_ICON = '<svg class="hv-cc-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.5 15a2.5 2.5 0 0 1-2.5 2.5H8L4 21V5.5A2.5 2.5 0 0 1 6.5 3H18a2.5 2.5 0 0 1 2.5 2.5z"/></svg>';
+  function hvComCardOff(el){
+    if(el.hidden && !el._n) return;
+    el.hidden = true;
+    el.textContent = '';
+    el.removeAttribute('aria-label');
+    el.removeAttribute('data-node');
+    el._n = el._k = null;      // _at stays: the same move back in the same redraw (a sync opening the game again) doesn't float in again
+  }
+  function hvComCard(){
+    const el = document.getElementById('hv-com-card'), S = HV_STATE, n = S ? S.cur : null;
+    const text = n && n.parent && !S.game._practice && hvPrefs.cards.comment && typeof n.comment==='string' ? n.comment.trim() : '';
+    if(!text){ hvComCardOff(el); return; }
+    let own = null, eng = null;
+    try{ own = hvOwnBadge(n); eng = hvBadgeFor(n); }catch(e){ own = eng = null; }
+    const lab = hvNodeLabel(n), at = String(S.game.id || '')+' '+JSON.stringify(hvNodeRef(n));
+    const k = [lab, own ? own.id : '', eng ? eng.id : '', n.clamp ? JSON.stringify(n.clamp) : '', text].join('\n');
+    if(!el.hidden && el._n===n && el._k===k) return;       // nothing new
+    const again = el._at!==at;
+    el._n = n; el._k = k; el._at = at;
+    el.textContent = '';
+    const head = hvEl('div', 'hv-cc-head');
+    head.innerHTML = HV_CC_ICON;
+    head.appendChild(hvEl('span', 'hv-cc-move', lab));
+    hvAddBadge(head, n);          // yours over the engine's, as in the move list
+    hvAddClamp(head, n);
+    const body = hvEl('div', 'hv-cc-body'), p = hvEl('p', 'hv-cc-text');
+    hvComText(p, text);
+    body.appendChild(p);
+    el.appendChild(head);
+    el.appendChild(body);
+    el.dataset.node = n.id;
+    el.setAttribute('aria-label', 'Comment on '+lab);
+    el.hidden = false;
+    // a card already showing starts its arrival again (one shown after being hidden starts it by itself)
+    if(again){ el.classList.add('is-again'); void el.offsetWidth; el.classList.remove('is-again'); }
+  }
+  document.getElementById('hv-com-card').addEventListener('click', (e)=>{
+    const mv = HV_STATE && e.target.closest('.hv-com-mv');
+    if(mv && mv._mv) hvMvGo(mv._mv);
+  });
+  onLeavePlay(()=> hvComCardOff(document.getElementById('hv-com-card')));
   // ---- variation menu ----
   let hvMenu = null;   // { el, node, opener }
   function hvLineRoot(node){
@@ -34705,6 +34831,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else { node.clamp = c; c[ch] = ''; }
     if(!on && !hvAnnFits(before)){ off(); hvSay(GH_CLAMP_FULL); return false; }
     hvSay(hvNodeLabel(node)+': '+K.name+(on ? ' taken off' : ' (CLAMP)'));
+    // the move's cell in the list shows its letters: redrawn in place, so the menu open over it stays put
+    const cell = document.querySelector('#hv-movelist .mv-san[data-node="'+node.id+'"]');
+    if(cell){ cell.querySelectorAll('.hv-clamp-m').forEach(x=> x.remove()); hvAddClamp(cell, node); }
+    hvComCard();
     hvAnnSave();
     return true;
   }
@@ -36652,11 +36782,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // A card turned off is hidden and the others in its column take its room. Notes off goes the
   // way a puzzle's does (no card, no tab, no "Add this line to notes"); the engine keeps running
   // with its card off (L turns it on or off).
-  const HV_CARD_EL = { head:'hv-head', engine:'hv-engine', tabs:'hv-tabs' };
+  const HV_CARD_EL = { head:'hv-head', comment:'hv-com-card', engine:'hv-engine', tabs:'hv-tabs' };
   function hvApplyCards(){
     Object.keys(HV_CARD_EL).forEach(k=> document.getElementById(HV_CARD_EL[k]).classList.toggle('hv-card-off', !hvPrefs.cards[k]));
     if(HV_STATE){
       hvModeUi();
+      hvComCard();
       if(hvNotesOff() && hvTab==='notes') hvSetTab('moves', { silent:true });
       hvPlaceNotes();
       if(hvPaneShown(hvTab)) hvFire(hvPaneLs, hvTab);
@@ -42266,6 +42397,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvMenuClose();
     const S = HV_STATE;
     if(!S || !node || !hvAnnId()) return;
+    // the board goes to the move first (its position in view while writing; saved, its comment card
+    // shows at once), before the box is placed: the move list is drawn again
+    if(S.cur!==node) hvGoNode(node);
     const pane = document.getElementById('hv-pane-moves');
     const lab = hvNodeLabel(node);
     const el = hvEl('div', 'hv-pop hv-com-pop');
