@@ -41185,12 +41185,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return c.length===1 ? { move:c[0], next:pzApplyMoveRaw(st, c[0]) } : null;
   }
   // A sequence against this game: [{ tk, from, move, main }] up to its first move that isn't
-  // legal there (nodes that don't exist yet are stand-ins until a click makes them).
-  function hvMvResolve(seq){
+  // legal there (nodes that don't exist yet are stand-ins until a click makes them); path.end:
+  // the node after its last move. prev: the line written before it in the same text (hvMvPrev).
+  // A sequence on the move right after a line that left the game continues that line first,
+  // the way a book does ("13...a6 14. Nc7+. A check that ... after 14...Kd7"): its path then
+  // starts with that line's moves (path.skip of them, not its own) so a click plays them all.
+  // Not a move there: the game's position, as before.
+  function hvMvResolve(seq, prev){
     const S = HV_STATE;
+    if(prev && prev.ply===seq.toks[0].ply && prev.path.some(x=> !x.main)){
+      const more = hvMvWalk(seq, prev.path.end);
+      if(more.length){
+        const path = prev.path.concat(more);
+        path.skip = prev.path.length;
+        path.end = more.end;
+        return path;
+      }
+    }
     const base = seq.toks[0].ply - (S.root.off || 0);
     if(base < 0 || base > S.main.length) return [];
-    let node = base===0 ? S.root : S.main[base-1];
+    return hvMvWalk(seq, base===0 ? S.root : S.main[base-1]);
+  }
+  function hvMvWalk(seq, node){
     const path = [];
     for(const tk of seq.toks){
       const f = hvMvFind(node.state, tk.san);
@@ -41200,7 +41216,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       path.push({ tk, from:node, move:f.move, main:!!(child && child.main) });
       node = child || { state:f.next, children:[], stand:true };
     }
+    path.end = node;
     return path;
+  }
+  // what the next sequence in the same text may continue (hvMvResolve's prev)
+  function hvMvPrev(path, prev){
+    return path.length > (path.skip || 0) ? { path, ply:path[path.length-1].tk.ply + 1 } : prev;
   }
   // a block's text, and where each of its text nodes starts in it (a diagram is skipped)
   function hvMvText(block){
@@ -41236,12 +41257,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const ed = document.getElementById(id);
         if(!ed || !ed.isConnected) return;
         const blocks = ed.firstElementChild ? [...ed.children] : [ed];
+        let prev = null;            // the line written last in this text, for the next to continue
         blocks.forEach(b=>{
           const map = hvMvText(b);
           if(!/\d/.test(map.text)) return;
           hvMvScan(map.text).forEach(seq=>{
-            const path = hvMvResolve(seq);
+            const path = hvMvResolve(seq, prev);
+            prev = hvMvPrev(path, prev);
             path.forEach((x, i)=>{
+              if(i < (path.skip || 0)) return;         // the line it continues: linked where it's written
               const a = hvMvPoint(map, x.tk.ns), z = hvMvPoint(map, x.tk.e);
               if(!a || !z) return;
               const r = document.createRange();
@@ -41454,11 +41478,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // a comment's words, its moves ("14. Nf5") as links like the notes' (hvMv*)
   function hvComText(host, text){
     const S = HV_STATE;
-    let at = 0;
+    let at = 0, prev = null;
     (S && S.std ? hvMvScan(text) : []).forEach(seq=>{
-      const path = hvMvResolve(seq);
+      const path = hvMvResolve(seq, prev);
+      prev = hvMvPrev(path, prev);
       path.forEach((x, i)=>{
-        if(x.tk.ns < at) return;
+        if(i < (path.skip || 0) || x.tk.ns < at) return;
         if(x.tk.ns > at) host.appendChild(document.createTextNode(text.slice(at, x.tk.ns)));
         const b = hvEl('button', 'hv-com-mv'+(path.slice(0, i+1).every(y=> y.main) ? '' : ' alt'), text.slice(x.tk.ns, x.tk.e));
         b.type = 'button';
