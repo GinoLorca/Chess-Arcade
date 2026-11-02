@@ -5286,6 +5286,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      use the eval bar's fixed white and black. */
   #view-play-history{
     --hr-book:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2.5 5.6c3.1-1.3 6.2-1.2 8.8.5v13c-2.6-1.6-5.7-1.7-8.8-.4z M12.7 6.1c2.6-1.7 5.7-1.8 8.8-.5v13.1c-3.1-1.3-6.2-1.2-8.8.4z'/%3E%3C/svg%3E");
+    --hr-miss:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5.4 2.8 12 9.4l6.6-6.6 2.6 2.6-6.6 6.6 6.6 6.6-2.6 2.6-6.6-6.6-6.6 6.6-2.6-2.6 6.6-6.6-6.6-6.6z'/%3E%3C/svg%3E");
   }
   .hv-badge-book::before, .hv-sq-badge-book::before, .hr-sym-book::before{
     content:''; display:block; width:78%; height:78%; background:currentColor;
@@ -5300,6 +5301,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     box-shadow:0 0 0 1.5px rgba(255,255,255,.9), 0 1px 3px rgba(0,0,0,.4);
   }
   .hv-sq-badge-book::before{ width:72%; height:72%; }
+  /* Miss (only ever yours): an X, drawn like the book */
+  .hv-badge-miss::before, .hv-sq-badge-miss::before{
+    content:''; display:block; width:58%; height:58%; background:currentColor;
+    -webkit-mask:var(--hr-miss) center / contain no-repeat; mask:var(--hr-miss) center / contain no-repeat;
+  }
+  /* your badge (the move menu's Badge row): a thin ring in the ink color around the move list's
+     disc; a dark one outside the board disc's white */
+  .hv-badge.hv-own{ box-shadow:0 0 0 1.5px var(--ink); }
+  .hv-sq-badge.hv-own{ box-shadow:0 0 0 1.5px rgba(255,255,255,.9), 0 0 0 3px #10151d, 0 1px 3px rgba(0,0,0,.4); }
+  /* the Badge row on top of a game move's menu: chess.com's ten, five a row (HV_BDG_COLS), the
+     name of the one under the pointer or the focus at the right of its heading */
+  .hv-bdg-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .hv-bdg-name{ padding-right:10px; font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; }
+  .hv-bdg-grid{ display:grid; grid-template-columns:repeat(5, 36px); justify-content:center; gap:2px; padding:2px 6px 4px; }
+  .hv-bdg-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
+  .hv-bdg-pick:hover{ background:var(--surface-2); }
+  .hv-bdg-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
+  .hv-bdg-pick .hv-badge{ width:28px; height:28px; margin:0; font-size:13px; vertical-align:0; }
+  .hv-bdg-pick.is-on .hv-badge{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
+  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-pick{ width:44px; height:44px; } }
   .hr-vh{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
 
   .hr-wrap{ display:flex; flex-direction:column; gap:12px; }
@@ -25356,7 +25377,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       Object.values(GN.notes).forEach(n=>{
         if(!(n.text || n.conflict) || !n.g || ccIsId(n.id) || gnIsMeta(n.id) || GH_STATE.ids.has(n.id)) return;
         // your analysis on a game not loaded: that game (once, if it has a note too)
-        if(gnIsAn(n.id)){ const gid = n.id.slice(3); if(ccIsId(gid) || GH_STATE.ids.has(gid) || GN.notes[gid] || out.some(x=> x.id===gid)) return; n = Object.assign({}, n, { id:gid }); }
+        if(gnIsAn(n.id)){ const gid = n.id.slice(3); if((!n.conflict && !gnHasAnn(gid)) || ccIsId(gid) || GH_STATE.ids.has(gid) || GN.notes[gid] || out.some(x=> x.id===gid)) return; n = Object.assign({}, n, { id:gid }); }
         else if(out.some(x=> x.id===n.id)) return;
         const g = GH_STATE.extras.get(n.id) || ghGameFromSummary(n);
         if(ghVsComputer(g)) return;
@@ -33773,14 +33794,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(typeof hpMark==='function') hpMark(el, node);  // review prep: your prep, the move that left it
     return el;
   }
+  // the move's badge after its SAN: yours (a thin ring; the engine's verdict stays in its
+  // tooltip) or the engine review's
   function hvAddBadge(el, node){
     if(typeof hvBadgeFor!=='function') return;
-    let b = null;
-    try{ b = hvBadgeFor(node); }catch(e){ b = null; }
+    let eng = null, own = null;
+    try{ eng = hvBadgeFor(node); own = hvOwnBadge(node); }catch(e){ eng = own = null; }
+    const b = own || eng;
     if(!b || !b.id) return;
-    const s = hvEl('span', 'hv-badge hv-badge-'+String(b.id).replace(/[^a-z]/g, ''), b.symbol || '');
-    s.setAttribute('aria-label', String(b.label || b.id));
-    s.title = String(b.label || b.id);
+    const s = hvEl('span', 'hv-badge hv-badge-'+String(b.id).replace(/[^a-z]/g, '')+(own ? ' hv-own' : ''), b.symbol || '');
+    const tip = own ? own.label+' (your badge)'+(eng ? ' \u00b7 Engine: '+eng.short : '') : String(b.label || b.id);
+    s.setAttribute('aria-label', tip);
+    s.title = tip;
     if(b.color && /^#[0-9a-f]{3,8}$/i.test(b.color)) s.style.background = b.color;
     el.appendChild(s);
   }
@@ -33914,6 +33939,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       b.addEventListener('click', (e)=>{ e.stopPropagation(); hvMenuClose(); fn(); });
       el.appendChild(b);
     };
+    if(com) hvBadgeRow(el, node, opener);      // a game's move, main line or side line: your badge on it
     if(!node.main) add('Go to this line', ()=>{ hvGoNode(node); hvRevealBoard(); }, 'hv-pop-go');
     if(com){
       add(node.comment ? 'Edit comment' : 'Add a comment', ()=> hvComEdit(node), 'hv-pop-com');
@@ -33935,22 +33961,116 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     pane.appendChild(el);
     const pr = pane.getBoundingClientRect();
-    let left = x - pr.left + pane.scrollLeft, top = y - pr.top + pane.scrollTop + 4;
+    let left = x - pr.left + pane.scrollLeft;
     left = Math.max(4, Math.min(left, pane.clientWidth - el.offsetWidth - 4));
+    // below the press; where it doesn't fit on screen, above its move (the move stays in sight). Nothing
+    // scrolls: a list moved under a still pointer, or under the finger of the press and hold that opened
+    // the menu, puts an item there for its next click or its lift. Room on neither side: the roomier
+    // one, the menu scrolling inside.
+    const vt = Math.max(pr.top, 0) + 4, vb = Math.min(pr.bottom, innerHeight) - 4;
+    const ar = anchor && anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : null;
+    const up = (ar && ar.top <= y && y - ar.top < 48 ? ar.top : y) - 4;
+    const h = el.offsetHeight, below = vb - (y + 4), above = up - vt;
+    let top = y + 4;
+    if(h > below){
+      if(above > below) top = up - Math.min(h, above);
+      if(h > Math.max(above, below)){ el.style.maxHeight = Math.floor(Math.max(above, below))+'px'; el.style.overflowY = 'auto'; }
+    }
     el.style.left = left+'px';
-    el.style.top = top+'px';
+    el.style.top = (top - pr.top + pane.scrollTop)+'px';
+    // a click counts from a press that began in the menu, or from a key (Enter, Space) or a screen
+    // reader (no pointer): never the lift of the press and hold that opened it
+    let down = false;
+    el.addEventListener('pointerdown', ()=>{ down = true; }, true);
+    el.addEventListener('click', (e)=>{
+      if(down || !(e.pointerType!==undefined ? e.pointerType : e.detail)) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+    }, true);
     const outside = (e)=>{ if(!el.contains(e.target)) hvMenuClose(); };
     hvMenu = { el, node, opener, outside };
     setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
     el.addEventListener('keydown', (e)=>{
-      const items = [...el.querySelectorAll('.hv-pop-item')];
-      const i = items.indexOf(document.activeElement);
-      if(e.key==='ArrowDown'){ e.preventDefault(); e.stopPropagation(); items[(i+1) % items.length].focus(); }
-      else if(e.key==='ArrowUp'){ e.preventDefault(); e.stopPropagation(); items[(i-1+items.length) % items.length].focus(); }
+      const items = [...el.querySelectorAll('.hv-pop-item')], picks = [...el.querySelectorAll('.hv-bdg-pick')];
+      const a = document.activeElement, i = items.indexOf(a), p = picks.indexOf(a);
+      // the badge grid (HV_BDG_COLS a row) comes before the items: Left/Right along it, Up/Down a row
+      // at a time and on into the items (in the same column coming back: the checked badge's, else the first)
+      if(p >= 0 && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
+        e.preventDefault(); e.stopPropagation();
+        picks[(p + (e.key==='ArrowRight' ? 1 : -1) + picks.length) % picks.length].focus();
+      } else if(e.key==='ArrowDown' || e.key==='ArrowUp'){
+        e.preventDefault(); e.stopPropagation();
+        const rows = Math.ceil(picks.length / HV_BDG_COLS), n = rows + items.length;
+        const on = picks.findIndex(b=> b.getAttribute('aria-checked')==='true');
+        const col = p >= 0 ? p % HV_BDG_COLS : Math.max(0, on) % HV_BDG_COLS;
+        const at = p >= 0 ? Math.floor(p / HV_BDG_COLS) : (i >= 0 ? rows + i : (e.key==='ArrowDown' ? n - 1 : rows));
+        const to = (at + (e.key==='ArrowDown' ? 1 : -1) + n) % n;
+        (to < rows ? picks[Math.min(to * HV_BDG_COLS + col, picks.length - 1)] : items[to - rows]).focus();
+      }
       else if(e.key==='Tab'){ hvMenuClose(); }
     });
-    const first = el.querySelector('.hv-pop-item');
+    const first = el.querySelector('.hv-pop-item') || el.querySelector('.hv-bdg-pick');
     if(first) try{ first.focus({ preventScroll:true }); }catch(e){}
+  }
+  // ---- your badge on a move: the move menu's Badge row (chess.com's ten) ----
+  const HV_BDG_COLS = 5;
+  function hvBadgeRow(el, node, opener){
+    const own = hvOwnBadge(node), eng = hvBadgeFor(node);
+    const wrap = hvEl('div', 'hv-bdg');
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', 'Badge');
+    const head = hvEl('div', 'hv-bdg-head');
+    head.appendChild(hvEl('span', 'hv-pop-head', 'Badge'));
+    // the badge under the pointer or the keyboard's focus by name; else yours, else the engine's
+    const name = hvEl('span', 'hv-bdg-name');
+    name.setAttribute('aria-hidden', 'true');
+    const rest = own ? 'Yours: '+own.short : (eng ? 'Engine: '+eng.short : '');
+    name.textContent = rest;
+    head.appendChild(name);
+    wrap.appendChild(head);
+    const grid = hvEl('div', 'hv-bdg-grid');
+    HR_BADGES.forEach(b=>{
+      const on = !!own && own.id===b.id;
+      const btn = hvEl('button', 'hv-bdg-pick'+(on ? ' is-on' : ''));
+      btn.type = 'button';
+      btn.dataset.bdg = b.id;
+      btn.setAttribute('role', 'menuitemradio');
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+      btn.setAttribute('aria-label', b.label);
+      const disc = hvEl('span', 'hv-badge hv-badge-'+b.id, b.symbol);
+      disc.setAttribute('aria-hidden', 'true');
+      disc.style.background = b.color;
+      btn.appendChild(disc);
+      const say = ()=>{ name.textContent = b.label; };
+      btn.addEventListener('pointerenter', say);
+      btn.addEventListener('focus', say);
+      btn.addEventListener('pointerleave', ()=>{ const f = document.activeElement; name.textContent = f && wrap.contains(f) && HR_BY_ID[f.dataset.bdg] ? HR_BY_ID[f.dataset.bdg].label : rest; });
+      btn.addEventListener('blur', ()=>{ name.textContent = rest; });
+      btn.addEventListener('click', (e)=>{       // (the lift of the menu's own press and hold never gets here: hvMenuOpen)
+        e.stopPropagation();
+        hvMenuClose();
+        hvBadgeSet(node, on ? '' : b.id, opener);
+      });
+      grid.appendChild(btn);
+    });
+    wrap.appendChild(grid);
+    el.appendChild(wrap);
+    el.appendChild(hvEl('div', 'hv-pop-sep'));
+  }
+  // Your badge on a move ('' takes it off): the move list, the board and the record follow at once.
+  function hvBadgeSet(node, id, opener){
+    const S = HV_STATE;
+    if(!S || !node || !node.parent || !S.nodes.has(node.id) || !hvAnnId() || (id && !HR_BY_ID[id])) return;
+    if((node.badge || '')===(id || '')) return;
+    if(id) node.badge = id; else delete node.badge;
+    if(node===S.cur) hvRenderBoard();
+    hvRenderMoveList();
+    // a line's menu button gets the keyboard back (the list was drawn again)
+    if(opener && opener.classList && opener.classList.contains('hv-var-menu')){
+      const nb = document.querySelector('#hv-movelist .hv-var-menu[data-node="'+opener.dataset.node+'"]');
+      if(nb) try{ nb.focus({ preventScroll:true }); }catch(e){}
+    }
+    hvSay(id ? hvNodeLabel(node)+': '+HR_BY_ID[id].label+' (your badge)' : hvNodeLabel(node)+': your badge taken off');
+    hvAnnSave();                 // kept at once, like a comment
   }
   // ---- a game's Groups (the header's Groups button): in or out of each of your groups, or a new
   // one from this game (gpNewDialog: its name, this game, the position on the board if you like) ----
@@ -34974,18 +35094,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      or Lichess players) about the shown position, only while its pane is
      on screen, debounced, cached, one request at a time. */
 
-  // ---- badges: Repertoire Lab's lib/badges.js (ids, symbols, colors) ----
-  // code: the one-letter form the device cache stores.
+  // ---- badges: Repertoire Lab's lib/badges.js (ids, symbols, colors, nag numbers) ----
+  // code: the one-letter form the device cache and the an- record store. chess.com's ten, in
+  // its order: the engine review gives nine; Miss (own) is only ever yours (the move menu's
+  // Badge row), so the review's count table leaves it out.
   const HR_BADGES = [
-    { id:'brilliant', symbol:'!!', label:'Brilliant', short:'Brilliant', color:'#1aada6', code:'r' },
-    { id:'great', symbol:'!', label:'Great move', short:'Great', color:'#5b8bd6', code:'t' },
+    { id:'brilliant', symbol:'!!', label:'Brilliant', short:'Brilliant', color:'#1aada6', code:'r', nag:3 },
+    { id:'great', symbol:'!', label:'Great move', short:'Great', color:'#5b8bd6', code:'t', nag:1 },
     { id:'best', symbol:'\u2605', label:'Best move', short:'Best', color:'#7bab5a', code:'s' },
     { id:'excellent', symbol:'\u2713', label:'Excellent', short:'Excellent', color:'#8fbc6a', code:'e' },
     { id:'good', symbol:'\u2713', label:'Good', short:'Good', color:'#9db77f', code:'g' },
     { id:'book', symbol:'', label:'Book move', short:'Book', color:'#a88a6a', code:'k' },   // a small book icon (CSS), no emoji
-    { id:'inaccuracy', symbol:'?!', label:'Inaccuracy', short:'Inaccuracy', color:'#e6a23c', code:'i' },
-    { id:'mistake', symbol:'?', label:'Mistake', short:'Mistake', color:'#e08331', code:'m' },
-    { id:'blunder', symbol:'??', label:'Blunder', short:'Blunder', color:'#d4504a', code:'x' },
+    { id:'inaccuracy', symbol:'?!', label:'Inaccuracy', short:'Inaccuracy', color:'#e6a23c', code:'i', nag:6 },
+    { id:'mistake', symbol:'?', label:'Mistake', short:'Mistake', color:'#e08331', code:'m', nag:2 },
+    { id:'miss', symbol:'', label:'Miss', short:'Miss', color:'#f07f86', code:'w', own:true },   // an X (CSS), like the book
+    { id:'blunder', symbol:'??', label:'Blunder', short:'Blunder', color:'#d4504a', code:'x', nag:4 },
   ];
   const HR_BY_ID = {}, HR_BY_CODE = {};
   HR_BADGES.forEach(b=>{ HR_BY_ID[b.id] = b; HR_BY_CODE[b.code] = b; });
@@ -34996,13 +35119,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!R || !node || !node.main || !(node.ply > 0) || !Array.isArray(R.b)) return null;
     return HR_BY_ID[R.b[node.ply-1]] || null;
   }
-  // chess.com's corner disc on the square the move landed on.
+  // Your own badge on a move, main line or side line (node.badge, from the move menu), or null.
+  // It shows in place of the engine's; the review's numbers never read it.
+  function hvOwnBadge(node){ return node && node.badge ? HR_BY_ID[node.badge] || null : null; }
+  // chess.com's corner disc on the square the move landed on (yours with a dark ring outside the white).
   function hrDecorateBoard(boardEl, node){
-    const b = hvBadgeFor(node);
+    const own = hvOwnBadge(node), b = own || hvBadgeFor(node);
     if(!b || !node.move) return;
     const sqEl = boardEl.querySelector('.sq[data-idx="'+node.move.to+'"]');
     if(!sqEl) return;
-    const d = hvEl('span', 'hv-sq-badge hv-sq-badge-'+b.id, b.symbol);
+    const d = hvEl('span', 'hv-sq-badge hv-sq-badge-'+b.id+(own ? ' hv-own' : ''), b.symbol);
     d.setAttribute('aria-hidden', 'true');
     d.style.backgroundColor = b.color;
     sqEl.appendChild(d);
@@ -35982,6 +36108,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     thead.appendChild(hr);
     const tbody = hvEl('tbody');
     HR_BADGES.forEach(b=>{
+      if(b.own) return;          // Miss: yours only, never the engine's
       const tr = hvEl('tr');
       const th = hvEl('th', 'hr-cls'); th.scope = 'row';
       th.appendChild(hrSym(b));
@@ -37904,18 +38031,33 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // a record that isn't a game's (an opening's note, a group, a group's note): never listed as a game
   function gnIsMeta(id){ return /^(?:op|gp|gq)-[0-9a-f]{8}$/.test(String(id || '')); }
   function gnIsAn(id){ return /^an-(?:\w{8}|cc-d?\d{1,15})$/.test(String(id || '')); }
-  function gnHasAnn(gid){ return !!gnNoteText('an-'+gid); }
-  // "2 comments \u00b7 1 side line \u00b7 arrows" for a game's saved analysis ('' when none)
+  function gnHasAnn(gid){ return !!gnAnnSummary(gid); }      // (a record with only b:[] in it is none)
+  // "2 comments \u00b7 1 badge \u00b7 1 side line \u00b7 arrows" for a game's saved analysis ('' when none)
   function gnAnnSummary(gid){
     let A = null;
     try{ A = JSON.parse(gnNoteText('an-'+gid) || 'null'); }catch(e){ A = null; }
     if(!A) return '';
-    const c = Array.isArray(A.c) ? A.c.length : 0, l = Array.isArray(A.l) ? A.l.length : 0, m = Array.isArray(A.m) ? A.m.length : 0;
+    const c = Array.isArray(A.c) ? A.c.length : 0, l = Array.isArray(A.l) ? A.l.length : 0, m = Array.isArray(A.m) ? A.m.length : 0, b = Array.isArray(A.b) ? A.b.length : 0;
     const bits = [];
     if(c) bits.push(c+' comment'+(c===1 ? '' : 's'));
+    if(b) bits.push(b+' badge'+(b===1 ? '' : 's'));
     if(l) bits.push(l+' side line'+(l===1 ? '' : 's'));
     if(m) bits.push('arrows');
     return bits.join(' \u00b7 ');
+  }
+  // A build from before badges writes a game's analysis record again without its b just by opening
+  // the game (its hvAnnText has no b), and a badges-only one as deleted. A newer build keeps b in a
+  // record that has had it (b:[] once they're all off), so a newer copy without b, over badges of
+  // this device's, is an older build's: the text to keep in its place (that copy with this device's
+  // b, sent out again by the sync), or '' when it isn't one.
+  function gnAnKeepB(id, mine, inc){
+    if(!gnIsAn(id) || !mine || mine===inc) return '';
+    let M = null, I = null;
+    try{ M = JSON.parse(mine); I = inc ? JSON.parse(inc) : { v:1, l:[], c:[], m:[] }; }catch(e){ return ''; }
+    if(!M || !Array.isArray(M.b) || !M.b.length || !I || typeof I!=='object' || Array.isArray(I) || 'b' in I) return '';
+    I.b = M.b;
+    const t = JSON.stringify(I);
+    return t.length <= GN_MAX ? t : '';
   }
   function gnOpId(name){ return 'op-'+gnFnv(String(name || '').trim().toLowerCase()); }
   function gnCleanNote(n, id){
@@ -38118,6 +38260,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         }
         // this tab's own text lost: kept, and labeled as this device's version
         on.conflict = lost ? { text:n.text, at:n.updatedAt, mine:true, lost:true } : on.conflict;
+        // an older build's copy of a game's analysis (in another tab): this tab's badges stay in it
+        const kb = gnAnKeepB(id, n.text, on.text);
+        if(kb){ on.base = on.updatedAt; on.text = kb; on.updatedAt += 1; localNewer = true; if(on.conflict && on.conflict.text===kb) on.conflict = null; }
         if(!on.link && !switched) on.link = n.link;
         if(!switched) on.pushedAt = Math.max(on.pushedAt, n.pushedAt);
         on.g = on.g || n.g;
@@ -38229,13 +38374,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // the game with your side lines and comments, as Lichess shows a study chapter
       let mt = moves;
       if(moves && n.text){ try{ mt = gnAnnMovetext(g.san, n.text) || moves; }catch(e){ mt = moves; } }
-      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? 'Your analysis from Chess Arcade: comments and side lines.' : '(analysis deleted)')+' } '+(mt ? mt+' ' : '')+result;
+      return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? 'Your analysis from Chess Arcade: comments, badges and side lines.' : '(analysis deleted)')+' } '+(mt ? mt+' ' : '')+result;
     }
     return t.join('\n')+'\n\n{ '+gnMeta(n)+'\n'+(n.text ? gnReadable(n.text) : '(note deleted)')+' } '+(moves ? moves+' ' : '')+result;
   }
-  // A game's moves with an analysis record's side lines and comments, as PGN movetext:
-  // '1. d4 d5 2. Nc3 { Jobava } (2. c4 e6) 2... Nf6'. Every move is replayed and written by
-  // the app's own SAN, so Lichess takes it; a line that doesn't replay is left out.
+  // A game's moves with an analysis record's side lines, comments and badges, as PGN movetext:
+  // '1. d4 d5 2. Nc3 $1 { Jobava } (2. c4 e6) 2... Nf6'. Every move is replayed and written by
+  // the app's own SAN, so Lichess takes it; a line that doesn't replay is left out. A badge with a
+  // PGN glyph (RL's nag numbers: !! $3, ! $1, ?! $6, ? $2, ?? $4) follows its move; the rest have none.
   function gnAnnMovetext(san, text){
     const A = JSON.parse(text);
     const toks = String(san || '').trim() ? String(san).trim().split(/\s+/) : [];
@@ -38269,6 +38415,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     (Array.isArray(A.l) ? A.l : []).forEach(L=> walk(L, true));
     (Array.isArray(A.c) ? A.c : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null; if(n && typeof x[1]==='string') n.com = x[1]; });
+    (Array.isArray(A.b) ? A.b : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null, B = n && n.parent && typeof x[1]==='string' && x[1].length===1 && HR_BY_CODE[x[1]]; if(B && B.nag) n.nag = B.nag; });
     const com = (t)=> '{ '+String(t).replace(/[{}]/g, m=> m==='{' ? '(' : ')').replace(/\[%/g, '[ %').replace(/\s+/g, ' ').trim()+' }';
     const out = [];
     const line = (start)=>{
@@ -38277,6 +38424,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const white = n.ply % 2===1, no = Math.ceil(n.ply/2);
         if(white) out.push(no+'.'); else if(num) out.push(no+'...');
         out.push(n.san);
+        if(n.nag) out.push('$'+n.nag);
         num = false;
         if(n.com){ out.push(com(n.com)); num = true; }
         const p = n.parent;
@@ -38422,8 +38570,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           } else {
             // this device's unsent edit lost to a newer one: kept, as its own
             if(unsent) n.conflict = { text:n.text, at:n.updatedAt, mine:true, lost:true };
+            // an older build's copy of a game's analysis: this device's badges stay in it (gnAnKeepB)
+            const kb = gnAnKeepB(gid, n.text, rt);
             n.base = n.updatedAt;
-            n.text = rt; n.updatedAt = best.up; n.pushedAt = best.up;
+            n.text = kb || rt; n.updatedAt = kb ? Math.max(Date.now(), best.up + 1) : best.up; n.pushedAt = best.up;
             gnSaw(n, rt);
             if(!n.g && best.g) n.g = best.g;
             if(!n.createdAt) n.createdAt = best.cr;
@@ -38431,7 +38581,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         } else if(best.up < n.updatedAt){
           // this device's edit wins; a remote change made since this device
           // last wrote, that it never had, is kept
-          const news = !!rt && rt!==n.text && best.up > n.pushedAt && !gnSeen(n, rt);
+          // (an older build's copy of this very text, only its badges gone, is nothing new: gnAnKeepB)
+          const olderCopy = !!n.text && gnAnKeepB(gid, n.text, rt)===n.text;
+          const news = !!rt && rt!==n.text && best.up > n.pushedAt && !gnSeen(n, rt) && !olderCopy;
           if(news && !n.text){
             n.base = n.updatedAt;
             n.text = rt;
@@ -41167,10 +41319,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function hvAnnRef(n){ return n.main ? n.ply : hvNodeRef(n).line; }
   function hvAnnNode(r){ return typeof r==='number' ? hvNodeFromRef({ ply:r }) : (Array.isArray(r) ? hvNodeFromRef({ line:r }) : null); }
-  // the record: { v:1, l:[side lines' ends, as refs], c:[[ref, comment]], m:[[ref, 'Ge2e4 ...', 'Re4 ...']] }
-  // ('' when there's nothing); arrows as shown (the profile's colors) in the diagram codes
+  // the record: { v:1, l:[side lines' ends, as refs], c:[[ref, comment]], m:[[ref, 'Ge2e4 ...', 'Re4 ...']],
+  // b:[[ref, 'x']] } ('' when there's nothing); arrows as shown (the profile's colors) in the diagram codes;
+  // b, your badges by their one-letter codes (HR_BADGES): only in a record that has had some (a record
+  // without stays as an older build wrote it), and then always, b:[] once they're all off (never ''):
+  // a newer copy without b over badges is an older build's (gnAnKeepB), not your edit
   function hvAnnText(noMarks){
-    const S = HV_STATE, lines = [], com = [], mk = [];
+    const S = HV_STATE, lines = [], com = [], mk = [], bd = [];
+    let hadB = false;
+    try{ const P = S.annText ? JSON.parse(S.annText) : null; hadB = !!P && Array.isArray(P.b); }catch(e){ hadB = false; }
     const prof = annoProfile();
     const marks = (n)=>{
       const m = n.marks;
@@ -41182,14 +41339,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     (function walk(n){
       if(n.comment) com.push([hvAnnRef(n), n.comment]);
+      if(n.parent && hvOwnBadge(n)) bd.push([hvAnnRef(n), hvOwnBadge(n).code]);
       marks(n);
       n.children.forEach(c=>{ if(!c.main && !c.children.length) lines.push(hvNodeRef(c).line); walk(c); });
     })(S.root);
-    return lines.length || com.length || mk.length ? JSON.stringify({ v:1, l:lines, c:com, m:mk }) : '';
+    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB) return '';
+    const A = { v:1, l:lines, c:com, m:mk };
+    if(bd.length || hadB) A.b = bd;
+    return JSON.stringify(A);
   }
-  // A record onto the tree: its side lines, comments and marks. mine: this device's comments
-  // and marks stay, and a different comment from the other version is added under it.
-  function hvAnnMerge(A, mine){
+  // A record onto the tree: its side lines, comments, marks and badges. mine: this device's comments,
+  // marks and badges stay, and a different comment from the other version is added under it. lost: the
+  // record is this device's own edit that lost to a newer one (the tree is the other's): its badges win.
+  function hvAnnMerge(A, mine, lost){
     if(!A || typeof A!=='object') return;
     hvAnnBusy = true;
     try{
@@ -41208,6 +41370,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(hasMarks(m)) return;
         String(x[1] || '').split(' ').forEach(t=>{ const k = /^([A-Z])([a-h][1-8])([a-h][1-8])$/.exec(t); if(k && NB_CODES[k[1]]) m.arrows.push({ from:nbAlgIdx(k[2]), to:nbAlgIdx(k[3]), color:NB_CODES[k[1]] }); });
         String(x[2] || '').split(' ').forEach(t=>{ const k = /^([A-Z])([a-h][1-8])$/.exec(t); if(k && NB_CODES[k[1]]) m.squares[nbAlgIdx(k[2])] = NB_CODES[k[1]]; });
+      });
+      (Array.isArray(A.b) ? A.b : []).forEach(x=>{
+        const n = Array.isArray(x) ? hvAnnNode(x[0]) : null, B = n && n.parent && typeof x[1]==='string' && x[1].length===1 ? HR_BY_CODE[x[1]] : null;
+        if(B && (lost || !(mine && n.badge))) n.badge = B.id;
       });
     } finally { hvAnnBusy = false; }
   }
@@ -41256,7 +41422,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const id = hvAnnId(), n = id ? GN.notes[id] : null;
     if(!n || !n.conflict) return null;
     const row = hvEl('div', 'hv-ann-conflict');
-    row.appendChild(hvEl('span', '', 'Another device saved different comments or lines for this game '+relTime(n.conflict.at)+'.'));
+    row.appendChild(hvEl('span', '', 'Another device saved different comments, badges or lines for this game '+relTime(n.conflict.at)+'.'));
     const b1 = hvEl('button', 'btn-link', 'Add them to these'); b1.type = 'button'; b1.dataset.ann = 'merge';
     const b2 = hvEl('button', 'btn-link', 'Keep only these'); b2.type = 'button'; b2.dataset.ann = 'keep';
     row.appendChild(b1); row.appendChild(b2);
@@ -41265,7 +41431,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvAnnResolve(merge){
     const id = hvAnnId(), n = id ? GN.notes[id] : null;
     if(!n || !n.conflict) return;
-    if(merge){ let A = null; try{ A = JSON.parse(n.conflict.text); }catch(e){ A = null; } hvAnnMerge(A, true); }
+    if(merge){ let A = null; try{ A = JSON.parse(n.conflict.text); }catch(e){ A = null; } hvAnnMerge(A, true, !!n.conflict.lost); }
     n.conflict = null;
     gnPersist();
     hvAnnSave();
