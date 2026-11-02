@@ -4841,6 +4841,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   :root[data-skin="bauhaus"] :is(.hv-head, .hv-card){ border-radius:0; border-width:2px; }
   .hv-head{ display:flex; flex-direction:column; gap:3px; }
+  /* the fold arrows of the left column's two cards: only in the three columns (see that band) */
+  .hv-head-top{ display:contents; }
+  .hv-fold{ display:none; }
   :root:not([data-skin="uptown"]) #hv-head .eyebrow{ color:var(--ink-soft); }   /* Uptown's eyebrow is a sign with its own ink */
   /* the list's result pill, with ink text: its colored text is under 4.5:1 on several skins */
   #hv-result .history-result-pill{ color:var(--ink); }
@@ -5175,6 +5178,33 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hv-notes-card #hv-note .nb-board-wrap{ flex:0 0 auto; width:clamp(104px, calc(45vh - 220px), 200px); width:clamp(104px, calc(45dvh - 220px), 200px); }
     #hv-notes-card #hv-note .nb-dg-foot{ flex-direction:column; align-items:flex-start; gap:6px; }
     #hv-notes-card #hv-note .nb-dg-x{ margin-left:0; }
+    /* Folding (hvApplyFold): an arrow on each of this column's cards folds it to its first lines
+       (the review: the players, the result, the game and its opening; Notes: its title) and the
+       other card takes the room at once. Both open is the layout above. */
+    .hv-head-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .hv-sidecol-review .hv-fold{ display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; width:28px; height:28px;
+      margin:-4px -6px -4px auto; padding:0; border:0; border-radius:6px; background:none; color:var(--ink-soft); cursor:pointer; }
+    .hv-sidecol-review .hv-fold:hover{ background:var(--surface-2); color:var(--ink); }
+    .hv-sidecol-review .hv-fold:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+    .hv-fold-chev{ width:8px; height:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:translateY(2px) rotate(-135deg); }
+    .hv-fold[aria-expanded="false"] .hv-fold-chev{ transform:translateY(-2px) rotate(45deg); }     /* folded: points down, to open */
+    /* Notes' arrow at the right end of its title line. The formatting bar shares that line only in
+       a wide card (otherwise it has its own line under it): there the line keeps the arrow's room. */
+    .hv-sidecol-review #hv-pane-notes{ container:hvnotes / inline-size; }
+    .hv-sidecol-review .hv-notes-head{ position:relative; }
+    @container hvnotes (min-width:300px){ .hv-notes-head{ padding-right:30px; } }
+    /* (25px tall: it ends where the bar's own line starts, when the bar wraps under the title) */
+    .hv-sidecol-review .hv-notes-head > .hv-fold{ position:absolute; top:-7px; right:-6px; height:25px; margin:0; }
+    #hv-fold-head{ margin:-9px -6px -9px auto; }       /* a 10px margin box: the eyebrow still sets its row's height */
+    /* A card folds only while the other one is there to take the room: not in a puzzle's analysis or
+       a played-out position (no Notes card), nor with either card turned off in Settings. */
+    .hv-sidecol-review:has(> #hv-notes-card[hidden]) #hv-fold-head, .hv-sidecol-review:has(> #hv-head.hv-card-off) #hv-fold-notes{ display:none; }
+    #view-play-history .hv-sidecol-review:has(> #hv-notes-card:not([hidden])) > #hv-head.hv-folded{ flex:0 0 auto; min-height:0; overflow:hidden; }
+    .hv-sidecol-review:has(> #hv-notes-card:not([hidden])) > #hv-head.hv-folded > :is(.hv-opx, .hv-prep, .hv-actions){ display:none !important; }
+    .hv-sidecol-review:has(> #hv-head.hv-folded) > .hv-notes-card{ flex:1 1 auto; }
+    #view-play-history .hv-sidecol-review:not(:has(> #hv-head.hv-card-off)) > .hv-notes-card.hv-folded{ flex:0 0 auto; min-height:0; }
+    .hv-sidecol-review:not(:has(> #hv-head.hv-card-off)) > .hv-notes-card.hv-folded #hv-pane-notes > :not(.hv-notes-head),
+    .hv-sidecol-review:not(:has(> #hv-head.hv-card-off)) > .hv-notes-card.hv-folded .hv-notes-head .nb-bar{ display:none !important; }
   }
   @media (max-width:899.98px){
     .wrap.play-mode:has(#view-play-history.active){ padding-inline:12px; }
@@ -6666,7 +6696,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="field-label" id="hvcards-label">Analysis board cards</div>
       <div class="toggle-row hvcards-row" id="hvcards-row" role="group" aria-labelledby="hvcards-label">
         <button type="button" class="toggle active" data-card="head" aria-pressed="true">Game review</button>
-        <button type="button" class="toggle active" data-card="phase" aria-pressed="true">Phase of the game</button>
+        <button type="button" class="toggle" data-card="phase" aria-pressed="false">Phase of the game</button>
         <button type="button" class="toggle active" data-card="notes" aria-pressed="true">Notes</button>
         <button type="button" class="toggle active" data-card="engine" aria-pressed="true">Engine</button>
         <button type="button" class="toggle active" data-card="tabs" aria-pressed="true">Moves &#183; Review &#183; Explorer</button>
@@ -7381,7 +7411,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
            cards stack as before. -->
       <div class="hv-sidecol hv-sidecol-review">
       <div class="hv-head" id="hv-head">
-        <div class="eyebrow">Game review</div>
+        <!-- the arrow folds this card to its first lines and Notes takes the room (three columns: hvApplyFold) -->
+        <div class="hv-head-top">
+          <div class="eyebrow">Game review</div>
+          <button class="hv-fold" id="hv-fold-head" type="button" aria-expanded="true" aria-controls="hv-head"><span class="hv-fold-chev" aria-hidden="true"></span></button>
+        </div>
         <h1 class="title hv-title" id="hv-title">Game</h1>
         <div class="hv-result" id="hv-result"></div>
         <div class="subtitle hv-meta" id="hv-meta"></div>
@@ -7504,7 +7538,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="hv-pane hv-pane-review" role="tabpanel" id="hv-pane-review" aria-labelledby="hv-tab-review"></div>
         <div class="hv-pane hv-pane-explorer" role="tabpanel" id="hv-pane-explorer" aria-labelledby="hv-tab-explorer"></div>
         <div class="hv-pane hv-pane-notes" role="tabpanel" id="hv-pane-notes" aria-labelledby="hv-tab-notes">
-          <div class="hv-notes-head"><label class="field-label" id="hv-note-label" for="hv-note">Notes</label></div>
+          <div class="hv-notes-head"><label class="field-label" id="hv-note-label" for="hv-note">Notes</label><button class="hv-fold" id="hv-fold-notes" type="button" aria-expanded="true" aria-controls="hv-note"><span class="hv-fold-chev" aria-hidden="true"></span></button></div>
           <div class="text-input gn-ta hv-note" id="hv-note" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" aria-labelledby="hv-note-label" data-placeholder="Your analysis: key moments, mistakes, plans, what to try next time."></div>
           <div class="gn-status" id="hv-note-status" aria-live="polite"></div>
         </div>
@@ -32962,7 +32996,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const HV_TABS = ['moves', 'review', 'explorer', 'notes'];
   const HV_CARDS = ['head', 'phase', 'notes', 'engine', 'tabs'];     // the cards around the board (Settings)
   const hvPrefs = (function(){
-    const p = { v:1, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters', cards:{ head:true, phase:true, notes:true, engine:true, tabs:true }, phaseOpen:false };
+    // v2 (2026-11-02): the phase card is off unless turned on in Settings (it was on); fold: the
+    // left column's two cards folded to their first lines (three columns)
+    const p = { v:2, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters', cards:{ head:true, phase:false, notes:true, engine:true, tabs:true }, phaseOpen:false,
+      fold:{ head:false, notes:false } };
     try{
       const raw = JSON.parse(localStorage.getItem(HV_PREFS_KEY) || 'null');
       if(raw && typeof raw==='object'){
@@ -32973,7 +33010,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(HV_TABS.indexOf(raw.tab)>=0) p.tab = raw.tab;
         if(raw.exDb==='masters' || raw.exDb==='lichess') p.exDb = raw.exDb;
         if(raw.cards && typeof raw.cards==='object') HV_CARDS.forEach(k=>{ if(typeof raw.cards[k]==='boolean') p.cards[k] = raw.cards[k]; });
+        // saved before v2, cards.phase was the old default (every save wrote it): off now, once
+        if(!(raw.v >= 2)) p.cards.phase = false;
         if(typeof raw.phaseOpen==='boolean') p.phaseOpen = raw.phaseOpen;     // the phase card open (small by default)
+        if(raw.fold && typeof raw.fold==='object') ['head', 'notes'].forEach(k=>{ if(typeof raw.fold[k]==='boolean') p.fold[k] = raw.fold[k]; });
       }
     }catch(e){}
     return p;
@@ -35766,6 +35806,38 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     sync();
   })();
   hvApplyCards();
+
+  // ---- folding the left column's two cards (three columns; the arrows are hidden elsewhere) ----
+  // A folded card keeps its first lines (the review: the players, the result, the game and its
+  // opening; Notes: its title) and the other card takes the room at once (CSS). Kept on this device.
+  // (the arrow's name stays put; aria-expanded says open or folded)
+  const HV_FOLD = { head:['hv-head', 'hv-fold-head', 'Game review card', 'Fold to its first lines (Notes takes the room)'],
+    notes:['hv-notes-card', 'hv-fold-notes', 'Notes card', 'Fold to its title (the game review takes the room)'] };
+  function hvApplyFold(){
+    Object.keys(HV_FOLD).forEach(k=>{
+      const [id, bid, name, tip] = HV_FOLD[k], folded = !!hvPrefs.fold[k], b = document.getElementById(bid);
+      document.getElementById(id).classList.toggle('hv-folded', folded);
+      b.setAttribute('aria-expanded', folded ? 'false' : 'true');
+      b.setAttribute('aria-label', name);
+      b.title = folded ? 'Show all of it' : tip;
+    });
+  }
+  // Notes opens when it's folded and something is added to it, or its title is clicked
+  function hvUnfoldNotes(){
+    if(!hvPrefs.fold.notes || !hvMqWide.matches) return;
+    hvPrefs.fold.notes = false;
+    hvSavePrefs();
+    hvApplyFold();
+  }
+  Object.keys(HV_FOLD).forEach(k=>{
+    document.getElementById(HV_FOLD[k][1]).addEventListener('click', ()=>{
+      hvPrefs.fold[k] = !hvPrefs.fold[k];
+      hvSavePrefs();
+      hvApplyFold();
+      if(hvPrefs.fold[k]) document.getElementById(HV_FOLD[k][0]).scrollTop = 0;    // its first lines in view
+    });
+  });
+  hvApplyFold();
 
   function hrRenderAll(){
     hrRenderPane();
@@ -39725,6 +39797,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function nbInsertBlocks(frag){
     const ed = nbReviewEd();
     if(!ed || !HV_STATE || typeof hvNote==='undefined' || !hvNote || !frag.length) return false;
+    hvUnfoldNotes();                     // folded (three columns): it opens, so what's added is seen
     const B0 = nbFromDom(ed.el).blocks;
     if(B0.filter(b=> b.t==='dg').length + frag.filter(b=> b.t==='dg').length > NB_MAX_DG){
       nbSay(ed, 'A note holds up to 20 diagrams.');
@@ -39830,7 +39903,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   nbMount(document.getElementById('hv-note'), { context:'review', barHost:document.querySelector('#hv-pane-notes .hv-notes-head') });
   nbMount(document.getElementById('gn-text'), { context:'popup' });
-  document.getElementById('hv-note-label').addEventListener('click', (e)=>{ e.preventDefault(); nbFocus(nbReviewEd()); });
+  document.getElementById('hv-note-label').addEventListener('click', (e)=>{ e.preventDefault(); hvUnfoldNotes(); nbFocus(nbReviewEd()); });
 
   /* ---- Editing: the editor over the list, and the review's Notes field.
      Both autosave; a textarea the user is typing in is never overwritten
