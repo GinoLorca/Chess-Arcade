@@ -3758,6 +3758,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gcp-wait .btn-link{ font-size:11.5px; }
   .gcp-row{ display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:8px; padding:7px 0; border-top:1px solid var(--line); }
   .gcp-mv{ font:600 12.5px/1.2 "JetBrains Mono",monospace; white-space:nowrap; }
+  .gcp-sq{ white-space:normal; }        /* a mark's squares after its move (q): up to four, wrapping under it */
+  .gcp-mv:has(.gcp-sq){ max-width:150px; }
   .gcp-note{
     min-width:0; margin:-3px -4px; padding:3px 4px; border:0; border-radius:4px; background:none; cursor:text;
     font:inherit; font-size:12.5px; line-height:1.3; text-align:left; color:var(--ink-soft); overflow-wrap:anywhere;
@@ -5236,6 +5238,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* each row's key (1, 2, 3, E) at its right end; "Hide suggested moves" sits apart */
   .hv-pop-check .kbd{ margin-left:auto; min-width:22px; box-sizing:border-box; text-align:center; font-size:10.5px; padding:1px 5px; }
   .hv-pop-sep{ height:1px; margin:4px 6px; background:var(--line); }
+  /* under them, B's key named (it plays the best move: no box to tick) */
+  .hv-pop-key{ display:flex; align-items:center; gap:9px; padding:4px 10px 6px; font-size:12px; color:var(--ink-soft); }
+  .hv-pop-key .kbd{ margin-left:auto; min-width:22px; box-sizing:border-box; text-align:center; font-size:10.5px; padding:1px 5px; }
   .hv-arrow-dot, .hv-eng-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 auto; box-shadow:0 0 0 1px rgba(0,0,0,.3); }
   .hv-eng-dot{ width:9px; height:9px; }
   .hv-eng-dot.is-off{ visibility:hidden; }
@@ -5405,7 +5410,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .wrap.play-mode .hv-boardcol > .back-link{ grid-row:1; justify-self:start; }
     #hv-row-top{ grid-row:2; }
     .hv-boardcol > .hv-frame{ grid-row:3; }
-    #hv-row-bottom{ grid-row:4; }
+    #hv-row-bottom, #hv-sq-ask{ grid-row:4; }
     #hv-controls{ grid-row:5; }
     #hv-anno-hint{ grid-row:6; }
     /* the padding already clears the corner buttons */
@@ -5481,7 +5486,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .wrap.play-mode .hv-boardcol > .back-link{ order:1; align-self:center; margin:8px auto 2px; min-height:32px; box-sizing:border-box; max-width:calc(100% - 112px); }
     #hv-row-top{ order:2; }
     .wrap.play-mode .hv-frame.board-frame{ order:3; padding:4px; }
-    #hv-row-bottom{ order:4; }
+    #hv-row-bottom, #hv-sq-ask{ order:4; }
     #hv-controls{ order:5; }
     #hv-anno-hint{ order:5; }
     #hv-px, #hv-com-card, #hv-engine{ order:6; }
@@ -5574,7 +5579,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* the Badge row on top of a game move's menu: chess.com's ten, five a row (HV_BDG_COLS), the
      name of the one under the pointer or the focus at the right of its heading */
   .hv-bdg-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
-  .hv-bdg-name{ padding-right:10px; font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; }
+  .hv-bdg-name{ min-width:0; padding-right:10px; font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .hv-bdg-grid{ display:grid; grid-template-columns:repeat(5, 36px); justify-content:center; gap:2px; padding:2px 6px 4px; }
   .hv-bdg-pick, .hv-clamp-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
   .hv-bdg-pick:hover, .hv-clamp-pick:hover{ background:var(--surface-2); }
@@ -5587,7 +5592,55 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-clamp-pick .clamp-d{ width:28px; height:28px; font-size:13px; }
   .hv-clamp-pick.is-on .clamp-d{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .hv-clamp-msg{ width:0; min-width:100%; box-sizing:border-box; padding:0 10px 4px; font-size:12px; line-height:1.35; color:var(--bad); }
-  .hv-clamp-svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4; overflow:visible; }
+  /* the move on the board's CLAMP letters (hvClampSqDraw): in the bottom-left corner of the squares they're about (the
+     badge has the top-right), side by side; three or more on one square smaller, three a row going up. White on the
+     letter's color with the badge's white ring: they read on every skin's squares */
+  .hv-sq-ck{
+    position:absolute; left:3%; bottom:3%; z-index:3; width:94%; display:flex; flex-wrap:wrap-reverse; gap:calc(var(--sq) * .03);
+    pointer-events:none;
+  }
+  .hv-sq-ckd{
+    box-sizing:border-box; flex:0 0 auto; width:calc(var(--sq) * .36); height:calc(var(--sq) * .36); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; color:#fff; font:800 calc(var(--sq) * .19)/1 "JetBrains Mono",monospace;
+    box-shadow:0 0 0 1.5px rgba(255,255,255,.9), 0 1px 3px rgba(0,0,0,.4);
+  }
+  .hv-sq-ck.is-many .hv-sq-ckd{ width:calc(var(--sq) * .28); height:calc(var(--sq) * .28); font-size:calc(var(--sq) * .16); }
+  /* a square's CLAMP box (Space + right-click, or "Mark a square"): the move and the square, what's on it, the five
+     letters (the move menu's CLAMP discs: on = this square carries it) */
+  .hv-sq-pop{ z-index:60; min-width:0; width:max-content; max-width:calc(100vw - 16px); padding:4px 4px 6px; }
+  .hv-sq-head{ display:flex; align-items:center; gap:8px; padding:4px 2px 0 10px; }
+  .hv-sq-title{ flex:1 1 auto; font:700 13px/1.25 "JetBrains Mono",monospace; color:var(--ink); white-space:nowrap; }
+  .hv-sq-x{
+    flex:0 0 auto; width:28px; height:28px; padding:0; border:0; border-radius:6px; background:none; cursor:pointer;
+    color:var(--ink-soft); font-size:19px; line-height:1; display:inline-flex; align-items:center; justify-content:center;
+  }
+  .hv-sq-x:hover{ background:var(--surface-2); color:var(--ink); }
+  .hv-sq-x:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
+  .hv-sq-what{ padding:0 10px 4px; font-size:12px; color:var(--ink-soft); }
+  /* the name under the letters never sizes the box (it changes as the pointer moves over them: a wider box would slide
+     the letters under the pointer, 2026-11-02); a long list of names ends in an ellipsis */
+  .hv-sq-name{
+    box-sizing:border-box; width:0; min-width:100%; height:15px; padding:0 10px; overflow:hidden; text-overflow:ellipsis;
+    font-size:12px; font-weight:600; line-height:15px; color:var(--ink); text-align:center; white-space:nowrap;
+  }
+  .hv-sq-pop.is-line{ padding:4px; }
+  .hv-sq-line{ max-width:260px; padding:8px 10px; font-size:13px; line-height:1.4; color:var(--ink); }
+  .hv-clamp-sq{ align-self:center; padding:4px 10px 6px; font-size:12px; color:var(--ink-soft); }
+  @media (pointer:coarse){ .hv-sq-x{ width:44px; height:44px; margin:-8px -2px -8px 0; } }
+  /* "Mark a square": the line asking for one, in the bottom player strip's place while it's there */
+  .hv-boardcol.is-asking #hv-row-bottom{ display:none; }
+  .hv-sq-ask{
+    display:flex; align-items:center; gap:8px; box-sizing:border-box; min-height:40px; padding:4px 6px 4px 12px;
+    border-radius:8px; background:var(--surface-2); color:var(--ink); font-size:13px; line-height:1.3;
+  }
+  .hv-sq-ask-t{ flex:1 1 auto; min-width:0; }
+  .hv-sq-ask-in{
+    flex:0 0 auto; box-sizing:border-box; width:4.2em; height:28px; padding:0 6px; border:1px solid var(--line); border-radius:5px;
+    background:var(--surface); color:var(--ink); font:600 13px/1 "JetBrains Mono",monospace;
+  }
+  .hv-sq-ask-in[aria-invalid="true"]{ border-color:var(--bad); }
+  .hv-sq-ask-x{ flex:0 0 auto; padding:6px 8px; }
+  @media (pointer:coarse){ .hv-sq-ask-in{ display:none; } .hv-sq-ask-x{ min-height:44px; } }
   .hr-vh{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
 
   .hr-wrap{ display:flex; flex-direction:column; gap:12px; }
@@ -7765,6 +7818,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         </div>
         <div class="ol-player-clock" id="hv-bottom-clock">&#8212;</div>
       </div>
+      <!-- CLAMP: the move menu's "Mark a square" asks for a square here, in the bottom strip's place (hvSqAsk) -->
+      <div class="hv-sq-ask" id="hv-sq-ask" hidden>
+        <span class="hv-sq-ask-t" id="hv-sq-ask-t" role="status"></span>
+        <input class="hv-sq-ask-in" id="hv-sq-ask-in" type="text" maxlength="2" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="h2" aria-label="Or type a square, then Enter">
+        <button class="btn-link hv-sq-ask-x" id="hv-sq-ask-x" type="button">Cancel</button>
+      </div>
       <div class="history-viewer-controls" id="hv-controls">
         <button class="btn btn-ghost" id="hv-flip" type="button" title="Flip board (X)">&#8635; Flip</button>
         <button class="btn btn-ghost" id="hv-start" type="button" title="Start (Home)" aria-label="Start">&#8676;</button>
@@ -7891,12 +7950,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="hv-card hv-com-card" id="hv-com-card" role="region" hidden></div>
       <div class="hv-card hv-engine" id="hv-engine">
         <div class="hv-eng-head">
-          <button class="hv-switch" id="hv-eng-toggle" type="button" role="switch" aria-checked="true" aria-keyshortcuts="L" title="Engine on or off (L) &#183; E hides the suggested moves">
+          <button class="hv-switch" id="hv-eng-toggle" type="button" role="switch" aria-checked="true" aria-keyshortcuts="L" title="Engine on or off (L) &#183; E hides the suggested moves &#183; B plays the best move">
             <span class="hv-switch-track" aria-hidden="true"><span class="hv-switch-knob"></span></span>
             <span class="hv-switch-text">Engine</span>
           </button>
           <div class="hv-eng-status" id="hv-eng-status" aria-live="polite"></div>
-          <button class="hv-icon-btn" id="hv-eng-arrow" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="hv-arrow-pop" aria-label="Engine arrows" title="Engine arrows: best (1), 2nd best (2), 3rd best (3) &#183; E hides the suggested moves"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.19 5.24 L10.50 2.52 L13.50 2.52 L13.81 5.24 A7.0 7.0 0 0 1 15.50 5.94 L17.64 4.23 L19.77 6.36 L18.06 8.50 A7.0 7.0 0 0 1 18.76 10.19 L21.48 10.50 L21.48 13.50 L18.76 13.81 A7.0 7.0 0 0 1 18.06 15.50 L19.77 17.64 L17.64 19.77 L15.50 18.06 A7.0 7.0 0 0 1 13.81 18.76 L13.50 21.48 L10.50 21.48 L10.19 18.76 A7.0 7.0 0 0 1 8.50 18.06 L6.36 19.77 L4.23 17.64 L5.94 15.50 A7.0 7.0 0 0 1 5.24 13.81 L2.52 13.50 L2.52 10.50 L5.24 10.19 A7.0 7.0 0 0 1 5.94 8.50 L4.23 6.36 L6.36 4.23 L8.50 5.94 A7.0 7.0 0 0 1 10.19 5.24 Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.9"/></svg></button>
+          <button class="hv-icon-btn" id="hv-eng-arrow" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="hv-arrow-pop" aria-label="Engine arrows" title="Engine arrows: best (1), 2nd best (2), 3rd best (3) &#183; E hides the suggested moves &#183; B plays the best move"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.19 5.24 L10.50 2.52 L13.50 2.52 L13.81 5.24 A7.0 7.0 0 0 1 15.50 5.94 L17.64 4.23 L19.77 6.36 L18.06 8.50 A7.0 7.0 0 0 1 18.76 10.19 L21.48 10.50 L21.48 13.50 L18.76 13.81 A7.0 7.0 0 0 1 18.06 15.50 L19.77 17.64 L17.64 19.77 L15.50 18.06 A7.0 7.0 0 0 1 13.81 18.76 L13.50 21.48 L10.50 21.48 L10.19 18.76 A7.0 7.0 0 0 1 8.50 18.06 L6.36 19.77 L4.23 17.64 L5.94 15.50 A7.0 7.0 0 0 1 5.24 13.81 L2.52 13.50 L2.52 10.50 L5.24 10.19 A7.0 7.0 0 0 1 5.94 8.50 L4.23 6.36 L6.36 4.23 L8.50 5.94 A7.0 7.0 0 0 1 10.19 5.24 Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.9"/></svg></button>
         </div>
         <div class="hv-eng-lines" id="hv-eng-lines"></div>
         <!-- E hides the suggested moves (arrows and lines); the eval bar and
@@ -25798,7 +25857,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   ];
   const CLAMP_BY = {};
   CLAMP_K.forEach(K=>{ CLAMP_BY[K.ch] = K; });
-  const CLAMP_NOTE_MAX = 140;
+  const CLAMP_NOTE_MAX = 140, CLAMP_SQ_MAX = 4;       // a note's length; the squares a letter can have on one move (q)
   var ghClampBox = null;          // the open letter box: { gid, ch, g, el, btn, ... }
   function ghThumb(g){
     if(ghThumbStyle!==PIECE_SVG){ GH_THUMBS.clear(); ghThumbStyle = PIECE_SVG; }   // a new piece set redraws them
@@ -26085,9 +26144,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const gid = String(g.id), id = 'an-'+gid;
     if(!gnIsAn(id)) return 'same';
     if(HV_STATE && hvAnnId()===id){
-      const S = HV_STATE, old = hvClampListOf(S), before = hvAnnText(false).length;
-      hvClampOnto(S, gnClampList({ k:mutate(old.map(x=> x.slice())) }));
-      if(!hvAnnFits(before)){ hvClampOnto(S, old); return 'full'; }
+      const S = HV_STATE, old = hvClampListOf(S), oldQ = hvClampSqOf(S), before = hvAnnText(false).length;
+      hvClampOnto(S, gnClampList({ k:mutate(old.map(x=> x.slice())) }));      // a mark taken off takes its squares
+      if(!hvAnnFits(before)){ hvClampOnto(S, old, oldQ); return 'full'; }
       hvAnnSave();
       return 'ok';
     }
@@ -26099,12 +26158,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const out = { v:1, l:'l' in A ? A.l : [], c:'c' in A ? A.c : [], m:'m' in A ? A.m : [] };
     if('b' in A) out.b = A.b;
     out.k = k;
+    if('q' in A) out.q = gnClampSqList(A, k);          // the squares of the marks kept
     const t = JSON.stringify(Object.assign(out, gnAnExtra(A)));
     if(t===cur) return 'same';
     if(t.length > GN_MAX) return 'full';
     gnSetNote(id, t, g);
     const tree = HV_TREES.get(gid);
-    if(tree) hvClampOnto(tree, k);
+    if(tree) hvClampOnto(tree, k, out.q || []);
     return 'ok';
   }
   // A letter's box: the moves of this game marked with it, in game order (the move as you'd write it, your note,
@@ -26238,7 +26298,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // the box's moves for its letter (drawn again after each change; what's typed below stays)
   function ghClampList(B){
-    const k = gnClampOf(B.gid).filter(x=> x[1]===B.ch), n = k.length, an = typeof GN==='object' && GN ? GN.notes['an-'+B.gid] : null;
+    const k = gnClampOf(B.gid).filter(x=> x[1]===B.ch), n = k.length, an = typeof GN==='object' && GN ? GN.notes['an-'+B.gid] : null, q = gnClampSqOf(B.gid);
     B.t = gnNoteText('an-'+B.gid);
     B.wt = an && an.conflict ? an.conflict.text : '';
     B.sub.textContent = n ? n+' move'+(n===1 ? '' : 's')+' in this game' : 'No moves marked yet';
@@ -26261,7 +26321,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       row.dataset.ply = String(p);
       go.type = rm.type = 'button';
       go.setAttribute('aria-label', 'Go to move '+label);
-      // the game in the review, at the position before the move, the move drawn in the letter's color (hvClampGo);
+      // the game in the review at the move: the position before it, then the move played (hvClampGo);
       // a mark past where the review's replay ends (another device's) can't be shown there
       go.addEventListener('click', ()=>{ ghClampClose(false); ghOpenGame(B.g, { at:{ ply:p-1 }, clamp:{ ply:p, ch:B.ch } }); });
       if(!B.noStart && B.toks.length && p > B.can){ go.disabled = true; go.title = 'The review can\u2019t show this move'; }
@@ -26277,7 +26337,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const rms = B.list.querySelectorAll('.gcp-rm');
         ghClampRefocus(B, e, rms[Math.min(i, rms.length - 1)] || B.mv);
       });
-      row.append(ghEl('span', 'gcp-mv', label), ghClampNoteBtn(B, p, x[2] || '', label), go, rm);
+      // its squares after it ("24...Be5 \u00b7 h2"), on a line of their own when they don't fit beside it
+      const mv = ghEl('span', 'gcp-mv', label), sqt = gnClampSqText(q, p, B.ch);
+      if(sqt) mv.appendChild(ghEl('span', 'gcp-sq', sqt));
+      row.append(mv, ghClampNoteBtn(B, p, x[2] || '', label), go, rm);
       B.list.appendChild(row);
     });
   }
@@ -31971,7 +32034,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let loss = 0;
     scope.forEach(g=>{
       const k = gnClampOf(String(g.id)), at = Number(g.createdAt) || 0, res = ghGameResult(g, u);
-      if(k.length) G.push({ g, k, at, res, color:ghMyColor(g, u)==='white' ? 'white' : 'black' });
+      if(k.length) G.push({ g, k, q:gnClampSqOf(String(g.id)), at, res, color:ghMyColor(g, u)==='white' ? 'white' : 'black' });
       else if(res==='loss' && at >= lossFrom && ctHasMine(g, u)) loss++;
     });
     G.sort((a, b)=> b.at - a.at);
@@ -32025,7 +32088,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // what the cards are drawn from: the same games (loaded or not), marks (notes too), Filters, tab and hour draw nothing again
   function ctSig(md){
     return [GH_UI.site, JSON.stringify(Object.assign({}, GH_FILTERS, { ck:'' })), Math.floor(ghoBriefNow()/36e5), md.scope.length, md.loss, md.any ? 1 : 0, md.other ? 1 : 0,
-      md.loading ? 1 : 0, md.G.map(e=> e.g.id+'@'+e.at+e.res+(e.g._summary ? 's' : '')+JSON.stringify(e.k)).join(';')].join('|');
+      md.loading ? 1 : 0, md.G.map(e=> e.g.id+'@'+e.at+e.res+(e.g._summary ? 's' : '')+JSON.stringify(e.k)+(e.q.length ? JSON.stringify(e.q) : '')).join(';')].join('|');
   }
   function ctRender(base){
     const sec = document.getElementById('ct'), t0 = performance.now();
@@ -32158,7 +32221,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       b.appendChild(r);
       const names = CLAMP_K.filter(K=> ctHas(e, K.ch)).map(K=> K.name).join(', ');
       let t = ctDay(e.at)+': '+ctRes(e.res).toLowerCase()+' against '+opp+'. '+names+'. ';
-      if(go){ b.dataset.ply = String(go[0]); b.dataset.ck = go[1]; t += 'Open the review before '+ghClampLabel(go[0], e.r.toks[go[0]-1], e.r.off); }
+      if(go){ b.dataset.ply = String(go[0]); b.dataset.ck = go[1]; t += 'Open the review at '+ghClampLabel(go[0], e.r.toks[go[0]-1], e.r.off); }
       else{ b.setAttribute('aria-disabled', 'true'); b.classList.add('is-off'); t += 'The review can\u2019t show its marked moves'; }
       b.setAttribute('aria-label', t);
       b.title = t;
@@ -32282,7 +32345,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     box.textContent = '';
     const head = ghEl('div', 'ct-mom-h'), ht = ghEl('div', ''), h = ghEl('h3', 'ct-h', 'Moments');
     h.id = 'ct-mom-h';
-    ht.append(h, ghEl('p', 'ct-sub', 'Every move you marked, newest first: the position before it, your move drawn in its letter\u2019s color. A card opens the review there.'));
+    ht.append(h, ghEl('p', 'ct-sub', 'Every move you marked, newest first: the position before it, your move drawn in its letter\u2019s color. A card opens the review at that move.'));
     head.appendChild(ht);
     const chips = ghEl('div', 'ct-chips');
     chips.setAttribute('role', 'group');
@@ -32340,11 +32403,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const ft = ghEl('span', 'ct-mft');
     ft.append(ghEl('b', '', ctRes(e.res)), document.createTextNode(' vs '+opp+' \u00b7 '+ctDay(e.at)));
     b.appendChild(ft);
-    if(can) b.setAttribute('aria-label', K.name+': '+lab+(x.ph!=null ? ', '+CT_PHASES[x.ph].toLowerCase() : '')+'. '+(x.note ? 'Your note: '+x.note+'. ' : '')
-      +ctRes(e.res)+' against '+opp+', '+ctDay(e.at)+'. Open the review before this move');
+    const sqs = (e.q || []).filter(y=> y[0]===x.p && y[1]===x.ch).map(y=> y[2]);          // its squares: outlined on the board (ctMomFill)
+    if(can) b.setAttribute('aria-label', K.name+': '+lab+(sqs.length ? ' on '+sqs.join(', ') : '')+(x.ph!=null ? ', '+CT_PHASES[x.ph].toLowerCase() : '')+'. '+(x.note ? 'Your note: '+x.note+'. ' : '')
+      +ctRes(e.res)+' against '+opp+', '+ctDay(e.at)+'. Open the review at this move');
     return b;
   }
-  // a card's board: the position before the move, from your side, your move as an arrow in its letter's color
+  // a card's board: the position before the move, from your side, your move as an arrow in its letter's color, the
+  // squares the mark is about (q) outlined in it
   function ctMomFill(root){
     const sq = (i)=> 'abcdefgh'[i % 8] + (Math.floor(i / 8) + 1);
     const fill = (bd)=>{
@@ -32353,7 +32418,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!e || !K) return;
       const p = Number(c.dataset.ply), x = ctReplay(e.g).at[p], st = x && x[0], mv = x && x[1];
       if(!st || !mv) return;
-      try{ bd.appendChild(nbMiniBoard({ fen:pzStateToFEN(st, p - 1), flip:e.color==='black', arrows:[{ f:sq(mv.from), t:sq(mv.to), c:K.color }], squares:[], label:'', ply:null, line:null, extra:[] })); }catch(err){}
+      const sqs = (e.q || []).filter(y=> y[0]===p && y[1]===K.ch).map(y=> ({ s:y[2], c:K.color, o:1 }));
+      try{ bd.appendChild(nbMiniBoard({ fen:pzStateToFEN(st, p - 1), flip:e.color==='black', arrows:[{ f:sq(mv.from), t:sq(mv.to), c:K.color }], squares:sqs, label:'', ply:null, line:null, extra:[] })); }catch(err){}
     };
     const list = root.querySelectorAll('.ct-mbd');
     if(!('IntersectionObserver' in window)){ list.forEach(fill); return; }
@@ -32377,7 +32443,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // from the brief's CLAMP fact: the tab, its Moments for that letter
   function ctFromBrief(ch){ ghoSetView('clamp'); ctSetMoments(ch, null, true); }
-  // the review at a marked move (Go to move: the position before it, the move drawn in its letter's color); back here
+  // the review at a marked move (Go to move: the position before it, then the move played, hvClampGo); back here
   // where you were, the keyboard on what opened it
   function ctOpen(e, p, ch, fid){
     CT.back = { y:window.scrollY, fid };
@@ -34796,12 +34862,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       });
     });
     hvBoardEl.appendChild(hvEngSvg);
-    hvBoardEl.appendChild(hvClampSvg);
     hvBoardEl.appendChild(arrowSvgHv);
     hvDrawEngArrow();
-    hvDrawClampArrow();
     renderMarks(hvBoardEl, arrowSvgHv, marksHv, st.board);
     if(typeof hrDecorateBoard==='function'){ try{ hrDecorateBoard(hvBoardEl, n); }catch(e){} }
+    if(n.clamp) hvClampSqDraw();          // the move's CLAMP letters on their squares
   }
   function hvBuildLabels(){
     const flipped = !!(HV_STATE && HV_STATE.flipped);
@@ -34833,7 +34898,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   wireAnnotations(
     hvBoardEl,
     ()=> marksHv,
-    ()=> renderMarks(hvBoardEl, arrowSvgHv, marksHv, HV_STATE ? HV_STATE.cur.state.board : [])
+    ()=> renderMarks(hvBoardEl, arrowSvgHv, marksHv, HV_STATE ? HV_STATE.cur.state.board : []),
+    ()=> hvSqSkip()          // Space + right-click is a square's CLAMP box, not a highlight (and while one is asked for)
   );
   // A touch screen scrolls this page (the panels are under the board), so a
   // swipe that starts on a piece must stay a scroll: a finger that sets off
@@ -34975,7 +35041,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     S.cur = node;
     hvSelected = null;
     if(hvPromoOpen) hvRemovePromo();
-    if(S.clampGo && node!==S.clampGo.at) S.clampGo = null;      // Go to move's arrow goes once the board moves
     marksHv = hvMarksOf(node);
     const step = !!(opts && opts.sound && prev && node.parent===prev && node.move);
     if(step){
@@ -35012,7 +35077,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   (hvBoardEl.closest('.hv-frame') || hvBoardEl.parentNode).appendChild(hvLive);
   hvBoardEl.setAttribute('role', 'group');
   let hvLiveT = 0, hvSayT = 0;
-  // A key that changes no move (1, 2, 3, E, a blocked Space) says what it did.
+  // A key that changes no move (1, 2, 3, E, a blocked B) says what it did.
   // Emptied first, so the same words twice are read twice.
   function hvSay(text){
     clearTimeout(hvSayT);
@@ -35466,6 +35531,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       alts.slice(0, 4).forEach(c=> add('Delete the line '+hvNodeLabel(c), ()=> hvDeleteFrom(c), 'hv-pop-delete-alt'));
     }
     pane.appendChild(el);
+    // its width as it opened, kept: the Badge and CLAMP rows' names (the one under the pointer) changing never narrows it,
+    // which moved the discs out from under the pointer between its arrival and its click
+    el.style.boxSizing = 'border-box';
+    el.style.width = Math.ceil(el.getBoundingClientRect().width)+'px';
     const pr = pane.getBoundingClientRect();
     let left = x - pr.left + pane.scrollLeft;
     left = Math.max(4, Math.min(left, pane.clientWidth - el.offsetWidth - 4));
@@ -35516,7 +35585,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       else if(e.key==='Tab'){ hvMenuClose(); }
     });
-    const first = el.querySelector('.hv-pop-item') || el.querySelector('.hv-bdg-pick');
+    const first = el.querySelector('.hv-pop-item:not(.hv-clamp-sq)') || el.querySelector('.hv-bdg-pick');
     if(first) try{ first.focus({ preventScroll:true }); }catch(e){}
   }
   // ---- your badge on a move: the move menu's Badge row (chess.com's ten) ----
@@ -35596,10 +35665,48 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     T.main.forEach(n=>{ if(n.clamp) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp) k.push(n.clamp[K.ch] ? [n.ply, K.ch, n.clamp[K.ch]] : [n.ply, K.ch]); }); });
     return k.concat((T.tree || T).clampPast || []);
   }
-  function hvClampOnto(T, k){
-    T.main.forEach(n=>{ if(n.clamp) delete n.clamp; });
+  // q: the marks' squares (a record's q, gnClampSqList); left out, the tree's own stay with the letters kept
+  function hvClampOnto(T, k, q){
+    if(!q) q = hvClampSqOf(T);
+    T.main.forEach(n=>{ if(n.clamp) delete n.clamp; if(n.clampSq) delete n.clampSq; });
     k.forEach(x=>{ const n = T.main[x[0]-1]; if(n) (n.clamp || (n.clamp = {}))[x[1]] = x[2] || ''; });
-    (T.tree || T).clampPast = k.filter(x=> x[0] > T.main.length).map(x=> x.slice());
+    const past = k.filter(x=> x[0] > T.main.length).map(x=> x.slice());
+    (T.tree || T).clampPast = past;
+    (T.tree || T).clampSqPast = [];
+    q.forEach(x=> hvClampSqAdd(T, x[0], x[1], x[2]));
+  }
+  // The squares of a tree's marks (node.clampSq = { L:['h2'] } on a main-line move with that letter), as a record's q;
+  // past the replay's end (clampSqPast) as they came, with their marks (clampPast).
+  function hvClampSqOf(T){
+    const q = [];
+    T.main.forEach(n=>{ if(n.clampSq && n.clamp) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp && n.clampSq[K.ch]) n.clampSq[K.ch].forEach(s=> q.push([n.ply, K.ch, s])); }); });
+    return q.concat((T.tree || T).clampSqPast || []);
+  }
+  // a square onto a mark of the tree's (the letter on that move already): false when it has no room (CLAMP_SQ_MAX) or no mark
+  function hvClampSqAdd(T, p, ch, s){
+    const n = T.main[p-1], R = T.tree || T;
+    if(p > T.main.length){
+      const past = R.clampSqPast || (R.clampSqPast = []);
+      if(!(R.clampPast || []).some(y=> y[0]===p && y[1]===ch) || past.some(y=> y[0]===p && y[1]===ch && y[2]===s)) return false;
+      if(past.filter(y=> y[0]===p && y[1]===ch).length >= CLAMP_SQ_MAX) return false;
+      past.push([p, ch, s]);
+      past.sort(gnClampSqCmp);
+      return true;
+    }
+    if(!n || !n.clamp || !(ch in n.clamp)) return false;
+    const Q = n.clampSq || (n.clampSq = {}), L = Q[ch] || (Q[ch] = []);
+    if(L.indexOf(s) >= 0) return true;
+    if(L.length >= CLAMP_SQ_MAX) return false;
+    L.push(s);
+    L.sort();
+    return true;
+  }
+  function hvClampSqOff(n, ch, s){
+    const Q = n.clampSq;
+    if(!Q || !Q[ch]) return;
+    if(s) Q[ch] = Q[ch].filter(x=> x!==s);
+    if(!s || !Q[ch].length) delete Q[ch];
+    if(!Object.keys(Q).length) delete n.clampSq;
   }
   // an edit fits the game's record when it doesn't push it past GN_MAX, nor push your arrows out of it to
   // make room (before: the record's length with them, as it was)
@@ -35655,6 +35762,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     wrap.appendChild(grid);
     wrap.appendChild(msg);
+    // the squares the letters are about, on the board (a touch screen has no Space + right-click): the menu closes,
+    // the board shows this move, and the next square tapped or clicked opens its box (hvSqAskStart). An item under the
+    // discs (the arrow keys reach it), never the one the menu's keyboard starts on.
+    const sqb = hvEl('button', 'hv-pop-item hv-clamp-sq', 'Mark a square\u2026');
+    sqb.type = 'button';
+    sqb.setAttribute('role', 'menuitem');
+    sqb.title = 'Pick a square on the board for this move\u2019s letters (or hold Space and right-click the square)';
+    sqb.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const back = hvMenu && hvMenu.opener;
+      hvMenuClose();
+      hvSqAskStart(node, !e.detail, back);
+    });
+    wrap.appendChild(sqb);
     el.appendChild(wrap);
     el.appendChild(hvEl('div', 'hv-pop-sep'));
   }
@@ -35664,50 +35785,378 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!K || !hvClampMine(node)) return false;
     const c = node.clamp || {}, on = ch in c, before = hvAnnText(false).length;
     const off = ()=>{ delete c[ch]; if(!Object.keys(c).length) delete node.clamp; };
-    if(on) off();
+    if(on){ off(); hvClampSqOff(node, ch); }          // a letter taken off takes its squares with it
     else { node.clamp = c; c[ch] = ''; }
     if(!on && !hvAnnFits(before)){ off(); hvSay(GH_CLAMP_FULL); return false; }
     hvSay(hvNodeLabel(node)+': '+K.name+(on ? ' taken off' : ' (CLAMP)'));
-    // the move's cell in the list shows its letters: redrawn in place, so the menu open over it stays put
-    const cell = document.querySelector('#hv-movelist .mv-san[data-node="'+node.id+'"]');
-    if(cell){ cell.querySelectorAll('.hv-clamp-m').forEach(x=> x.remove()); hvAddClamp(cell, node); }
-    hvComCard();
+    hvClampShown(node);
     hvAnnSave();
     return true;
   }
-  // Go to move from a row's letter box: the review opens at the position before the marked move, the move
-  // drawn in the letter's color on its own layer (never one of your arrows, never saved); the board moving
-  // takes it away, and the next move (the right arrow) is the one marked.
-  const hvClampSvg = document.createElementNS(ARROW_SVG_NS, 'svg');
-  hvClampSvg.setAttribute('class', 'hv-clamp-svg');
-  hvClampSvg.setAttribute('viewBox', '0 0 8 8');
-  hvClampSvg.setAttribute('preserveAspectRatio', 'none');
-  hvClampSvg.setAttribute('aria-hidden', 'true');
+  // a move's letters changed: its cell in the list (redrawn in place, so a menu open over it stays put), the comment
+  // card and, the move on the board, its discs there
+  function hvClampShown(node){
+    const cell = document.querySelector('#hv-movelist .mv-san[data-node="'+node.id+'"]');
+    if(cell){ cell.querySelectorAll('.hv-clamp-m').forEach(x=> x.remove()); hvAddClamp(cell, node); }
+    hvComCard();
+    if(HV_STATE && HV_STATE.cur===node) hvClampSqDraw();
+  }
+  // Go to move (a row's letter box, the CLAMP tab's columns and cards, the brief): the review opens at the position
+  // before the marked move (hvOpen's at), and after a short beat, so the eye finds the piece, plays it as the right
+  // arrow does: the board lands ON the marked move, the list's highlight on it, its letters on their squares.
+  // Reduced motion: straight onto it. The board moved meanwhile (or another game, or away): it stays where you took it.
+  // (2026-11-02, the user: "when we click go to move, I would like you to actually play the move"; before v109 it
+  // stopped before the move with the move drawn as an arrow, which read as the wrong move picked.)
+  const HV_CLAMP_GO_MS = 350;
+  let hvClampGoT = 0;
   function hvClampGo(at){
+    clearTimeout(hvClampGoT);
     const S = HV_STATE, K = at && CLAMP_BY[at.ch], n = S && K ? S.main[at.ply-1] : null;
     if(!n || !n.move) return;
+    const say = ()=>{ clearTimeout(hvLiveT); hvSay(hvNodeLabel(n)+' ('+K.name+')'); };     // in place of the plain move's words
+    if(reducedMotion()){ if(S.cur!==n) hvGoNode(n); say(); return; }
     if(S.cur!==n.parent) hvGoNode(n.parent);
-    S.clampGo = { at:n.parent, from:n.move.from, to:n.move.to, uci:n.uci, ch:K.ch, color:K.color };
-    hvDrawClampArrow();
-    clearTimeout(hvLiveT);          // the plain move hvGoNode was about to read out would take its place
-    hvSay('Before '+hvNodeLabel(n)+' ('+K.name+')');
+    clearTimeout(hvLiveT);          // the move before isn't read out: the marked one is, as it lands
+    hvClampGoT = setTimeout(()=>{
+      hvClampGoT = 0;
+      if(HV_STATE!==S || S.cur!==n.parent || !hvViewActive()) return;
+      hvGoNode(n, { sound:true });
+      say();
+    }, HV_CLAMP_GO_MS);
   }
-  function hvDrawClampArrow(){
-    while(hvClampSvg.firstChild) hvClampSvg.removeChild(hvClampSvg.firstChild);
-    const S = HV_STATE, G = S && S.clampGo;
-    if(!G || S.cur!==G.at) return;
-    const cx = (i)=>{ const c = i%8; return (S.flipped ? 7-c : c) + 0.5; };
-    const cy = (i)=>{ const r = Math.floor(i/8); return (S.flipped ? r : 7-r) + 0.5; };
-    const dr = Math.floor(G.to/8)-Math.floor(G.from/8), dc = G.to%8-G.from%8, shaft = 0.22;
-    const shp = annoArrowShape(cx(G.from), cy(G.from), cx(G.to), cy(G.to), dr, dc, 1);
-    const mk = (tag, attrs)=>{ const e = document.createElementNS(ARROW_SVG_NS, tag); Object.keys(attrs).forEach(k=> e.setAttribute(k, attrs[k])); return e; };
-    const g = mk('g', { 'class':'hv-clamp-arrow', 'data-uci':G.uci, 'data-ck':G.ch, opacity:'.9' });
-    g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:'rgba(255,255,255,.6)', 'stroke-width':shaft+0.08, 'stroke-linecap':'butt' }));
-    g.appendChild(mk('polygon', { points:shp.triPoints, fill:'none', stroke:'rgba(255,255,255,.6)', 'stroke-width':0.08, 'stroke-linejoin':'round' }));
-    g.appendChild(mk('path', { d:shp.pathD, fill:'none', stroke:G.color, 'stroke-width':shaft, 'stroke-linecap':'butt' }));
-    g.appendChild(mk('polygon', { points:shp.triPoints, fill:G.color }));
-    hvClampSvg.appendChild(g);
+  /* ---- CLAMP squares (2026-11-02, the user: "it wasn't the bishop that was loose, it was the rook that was loose"):
+     a letter of yours on a move can name the squares it's about (node.clampSq, the record's q). Hold Space and
+     right-click a square of the review's board for its box (on a touch screen, the move menu's "Mark a square" and a
+     tap): the five letters, each on or off for that square on the move on the board. On the board, the move's letters
+     show as discs in the bottom-left corner of their squares (the badge has the top-right); a letter with no square,
+     on the square the piece moved to. ---- */
+  const HV_SQ_PIECE = { k:'king', q:'queen', r:'rook', b:'bishop', n:'knight', p:'pawn' };
+  // the discs of the move on the board (hvRenderBoard): never a side line's, a puzzle's or a played-out position's
+  function hvClampSqDraw(){
+    hvBoardEl.querySelectorAll('.hv-sq-ck').forEach(x=> x.remove());
+    const S = HV_STATE, n = S && S.cur, c = n && n.main ? n.clamp : null;
+    if(!c || !n.move || !hvAnnId()) return;
+    const at = new Map();
+    CLAMP_K.forEach(K=>{
+      if(!(K.ch in c)) return;
+      const L = n.clampSq && n.clampSq[K.ch];
+      (L && L.length ? L.map(nbAlgIdx) : [n.move.to]).forEach(i=>{ if(!at.has(i)) at.set(i, []); at.get(i).push(K); });
+    });
+    at.forEach((Ks, i)=>{
+      const sq = hvBoardEl.querySelector('.sq[data-idx="'+i+'"]');
+      if(!sq) return;
+      const box = hvEl('span', 'hv-sq-ck'+(Ks.length > 2 ? ' is-many' : ''));
+      box.setAttribute('aria-hidden', 'true');          // the move list's discs carry the names
+      Ks.forEach(K=>{ const d = hvEl('span', 'hv-sq-ckd', K.ch); d.style.background = K.color; box.appendChild(d); });
+      sq.appendChild(box);
+    });
   }
+  function hvSqHas(n, ch, s){ return !!(n.clampSq && n.clampSq[ch] && n.clampSq[ch].indexOf(s) >= 0); }
+  // A letter on or off a square of a move of yours, kept at once. On: the letter goes on the move too when it isn't.
+  // Off: the letter stays on the move, unless this box (B.added) put it on and that was its last square (a pick
+  // taken back). true, or what stopped it (no room: the record or CLAMP_SQ_MAX squares)
+  function hvSqToggle(n, ch, s, B){
+    const K = CLAMP_BY[ch];
+    if(!K || !hvClampMine(n)) return '';
+    const on = hvSqHas(n, ch, s), had = !!n.clamp && ch in n.clamp, before = hvAnnText(false).length;
+    const letterOff = ()=>{ delete n.clamp[ch]; if(!Object.keys(n.clamp).length) delete n.clamp; };
+    if(on){
+      hvClampSqOff(n, ch, s);
+      if(B && B.added.has(ch) && !(n.clampSq && n.clampSq[ch])){ letterOff(); B.added.delete(ch); }
+    } else {
+      if(n.clampSq && n.clampSq[ch] && n.clampSq[ch].length >= CLAMP_SQ_MAX){ hvSay(HV_SQ_FULL); return HV_SQ_FULL; }
+      if(!had) (n.clamp || (n.clamp = {}))[ch] = '';
+      hvClampSqAdd(HV_STATE, n.ply, ch, s);
+      if(!hvAnnFits(before)){ hvClampSqOff(n, ch, s); if(!had) letterOff(); hvSay(GH_CLAMP_FULL); return GH_CLAMP_FULL; }
+      if(!had && B) B.added.add(ch);
+    }
+    hvSay(hvNodeLabel(n)+': '+K.name+(on ? ' off ' : ' on ')+s);
+    hvClampShown(n);
+    hvAnnSave();
+    return true;
+  }
+  const HV_SQ_FULL = 'Up to '+CLAMP_SQ_MAX+' squares for a letter on one move.';
+  // The box for a square (idx) on the move on the board, under the square (above it where that doesn't fit), inside
+  // the screen. Not a move of yours: one line saying so, so the gesture never does nothing. o.kb: opened from the
+  // keyboard (the prompt's square name): the keyboard goes into it, and back to o.back when it closes.
+  function hvSqOpen(idx, o){
+    o = o || {};
+    hvMenuClose();
+    const S = HV_STATE, sqEl = hvBoardEl.querySelector('.sq[data-idx="'+idx+'"]');
+    if(!S || !sqEl) return;
+    const n = S.cur, s = idxToAlg(idx), el = hvEl('div', 'hv-pop hv-sq-pop');
+    el.id = 'hv-sq-pop';
+    el.setAttribute('role', 'dialog');
+    let first = null;
+    if(!hvClampMine(n)){
+      const t = !S.me || !hvAnnId() ? 'CLAMP marks go on moves in your own games.' : 'Step to one of your moves to mark a square.';
+      el.classList.add('is-line');
+      el.setAttribute('aria-label', 'CLAMP');
+      el.appendChild(hvEl('div', 'hv-sq-line', t));
+      hvSay(t);
+    } else {
+      const lab = hvNodeLabel(n), p = n.state.board[idx];
+      const what = p ? (p.color===(S.me==='white' ? 'w' : 'b') ? 'your ' : 'their ')+HV_SQ_PIECE[p.type] : 'empty square';
+      el.setAttribute('aria-label', 'CLAMP on '+s+' for '+lab+', '+what);
+      const head = hvEl('div', 'hv-sq-head'), x = hvEl('button', 'hv-sq-x', '\u00d7');
+      head.appendChild(hvEl('span', 'hv-sq-title', lab+' \u00b7 '+s));
+      x.type = 'button';
+      x.title = 'Close';
+      x.setAttribute('aria-label', 'Close');
+      x.addEventListener('click', (e)=>{ e.stopPropagation(); hvMenuClose(true); });
+      head.appendChild(x);
+      el.appendChild(head);
+      el.appendChild(hvEl('div', 'hv-sq-what', what));
+      const grid = hvEl('div', 'hv-bdg-grid hv-clamp-grid'), name = hvEl('div', 'hv-sq-name'), msg = hvEl('div', 'hv-clamp-msg');
+      grid.setAttribute('role', 'group');
+      grid.setAttribute('aria-label', 'CLAMP');
+      name.setAttribute('aria-hidden', 'true');
+      msg.setAttribute('role', 'alert');
+      msg.hidden = true;
+      const B = { added:new Set() };
+      // under the discs: the letter under the pointer or the keyboard's focus by name; else those on this square
+      const rest = ()=>{ const on = CLAMP_K.filter(K=> hvSqHas(n, K.ch, s)); return on.length ? on.map(K=> K.short).join(', ') : ''; };
+      CLAMP_K.forEach(K=>{
+        const btn = hvEl('button', 'hv-clamp-pick'), disc = hvEl('span', 'clamp-d is-on', K.ch);
+        btn.type = 'button';
+        btn.dataset.ck = K.ch;
+        btn.setAttribute('role', 'checkbox');
+        btn.setAttribute('aria-label', K.name);
+        disc.setAttribute('aria-hidden', 'true');
+        disc.style.background = K.color;
+        btn.appendChild(disc);
+        const show = ()=>{ const on = hvSqHas(n, K.ch, s); btn.classList.toggle('is-on', on); btn.setAttribute('aria-checked', on ? 'true' : 'false'); };
+        show();
+        let pt = '';
+        btn.addEventListener('pointerdown', (e)=>{ pt = e.pointerType; });
+        btn.addEventListener('pointerenter', ()=>{ name.textContent = K.short; });
+        btn.addEventListener('pointerleave', ()=>{ name.textContent = rest(); });
+        btn.addEventListener('focus', ()=>{ if(btn.matches(':focus-visible')) name.textContent = K.short; });
+        btn.addEventListener('blur', ()=>{ name.textContent = rest(); });
+        btn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const r = hvSqToggle(n, K.ch, s, B);
+          show();
+          if(e.detail > 0 && pt && pt!=='mouse') name.textContent = rest();      // a tap: the pointer's gone
+          pt = '';
+          msg.textContent = r===true ? '' : r;
+          msg.hidden = r===true;
+        });
+        grid.appendChild(btn);
+      });
+      name.textContent = rest();
+      el.append(grid, name, msg);
+      first = grid.querySelector('.hv-clamp-pick.is-on') || grid.firstChild;
+      el.addEventListener('keydown', (e)=>{
+        const picks = [...grid.children], i = picks.indexOf(document.activeElement);
+        if(i >= 0 && (e.key==='ArrowRight' || e.key==='ArrowLeft')){
+          e.preventDefault(); e.stopPropagation();
+          picks[(i + (e.key==='ArrowRight' ? 1 : -1) + picks.length) % picks.length].focus();
+        } else if(e.key==='Tab'){
+          // Tab past its last control (Shift+Tab before its first) leaves it, back where the keyboard was: the page's
+          // order, the x first (it's in the head), then C to P
+          const f = [x].concat(picks), a = document.activeElement;
+          if(e.shiftKey ? a===f[0] : a===f[f.length - 1]){ e.preventDefault(); hvMenuClose(true); }
+        }
+      });
+    }
+    el.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); hvMenuClose(true); } });
+    // over it is over the board for Space (no scroll, no button). Space + a right-click on it is for the square under
+    // it (that square's box), as on the board; every left click stays its own, Space held or not (2026-11-02: a box
+    // the pointer went through gave its letters' clicks to the pieces under them)
+    el.addEventListener('pointerover', ()=>{ hvSpace.ptr = true; });
+    el.addEventListener('pointerleave', ()=>{ hvSpace.ptr = false; });
+    let rAt = null;
+    el.addEventListener('mousedown', (e)=>{ rAt = e.button===2 && hvSpace.down ? hvSqUnder(e) : null; });
+    el.addEventListener('mouseup', (e)=>{
+      if(e.button!==2 || rAt==null) return;
+      const i = rAt;
+      rAt = null;
+      if(hvSqUnder(e)===i) hvSqOpen(i);
+    });
+    el.addEventListener('contextmenu', (e)=>{ if(hvSpace.down) e.preventDefault(); });
+    document.body.appendChild(el);
+    // hung under its square (over it where that doesn't fit), centered on it, inside the screen; again when the layout
+    // moves the square or the box changes size (hvSqFollow). own: only the box changed (a refusal under the letters, a
+    // pointer of another kind): it stays on its side of the square, over it growing upward. Its square gone from sight
+    // (the board hidden): it closes.
+    let up = false;
+    const place = (own)=>{
+      const q = hvBoardEl.querySelector('.sq[data-idx="'+idx+'"]'), r = q ? q.getBoundingClientRect() : null;
+      if(!r || !r.width){ if(hvMenu && hvMenu.el===el) hvMenuClose(); return; }
+      const vw = document.documentElement.clientWidth || innerWidth, vh = innerHeight, w = el.offsetWidth, h = el.offsetHeight;
+      if(!own){ const below = vh - 8 - (r.bottom + 4), above = r.top - 4 - 8; up = h > below && (h <= above || above > below); }
+      el.style.left = (Math.max(8, Math.min(r.left + r.width/2 - w/2, vw - 8 - w)) + scrollX)+'px';
+      el.style.top = ((up ? Math.max(8, r.top - 4 - h) : r.bottom + 4) + scrollY)+'px';
+    };
+    place(false);
+    const outside = (e)=>{ if(!el.contains(e.target)) hvMenuClose(); };
+    const a = document.activeElement, ro = typeof ResizeObserver==='function' ? new ResizeObserver(()=> hvSqFollow(true)) : null;
+    if(ro) ro.observe(el);
+    hvMenu = { el, node:n, opener:o.back || (a && a!==document.body && !el.contains(a) ? a : null), outside, kind:'clampsq', idx, place,
+      onClose:()=>{ if(ro) ro.disconnect(); } };
+    setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
+    if(o.kb && first) try{ first.focus({ preventScroll:true }); }catch(e){}
+  }
+  // Space held, for Space + right-click: from its keydown to its keyup, never while typing; let go when the window loses
+  // the keys. Space does nothing else on the review (B plays the best move, 2026-11-02). over: the press began with the
+  // pointer over the review's board, where Space scrolls nothing and presses no button; anywhere else it's the page's
+  // and the focused button's as always.
+  const hvSpace = { down:false, over:false, ptr:false };
+  function hvSpaceKey(e){ return e.code==='Space' || e.key===' ' || e.key==='Spacebar'; }
+  function hvSpaceOff(){ hvSpace.down = hvSpace.over = false; }
+  // the board's square under a point of the square's box (its index), or null
+  function hvSqUnder(e){
+    const t = document.elementsFromPoint(e.clientX, e.clientY).find(x=> x.classList && x.classList.contains('sq') && hvBoardEl.contains(x));
+    return t ? Number(t.dataset.idx) : null;
+  }
+  // the square's box after its square when the layout moves (the window resized, a device turned, the board's size) or
+  // only the box changed size (own: true, it keeps its side of the square), once a frame (2026-11-02)
+  let hvSqRaf = 0, hvSqAll = false;
+  function hvSqFollow(own){
+    if(!hvMenu || hvMenu.kind!=='clampsq') return;
+    if(own!==true) hvSqAll = true;
+    if(hvSqRaf) return;
+    hvSqRaf = requestAnimationFrame(()=>{
+      const all = hvSqAll;
+      hvSqRaf = 0; hvSqAll = false;
+      if(hvMenu && hvMenu.kind==='clampsq') hvMenu.place(!all);
+    });
+  }
+  window.addEventListener('resize', hvSqFollow);
+  if(typeof ResizeObserver==='function') try{ new ResizeObserver(hvSqFollow).observe(hvBoardEl); }catch(e){}
+  // the box's or the line's control the keyboard took the focus to (Tab, the arrows, a square's name and Enter), read as
+  // the focus arrives: any key pressed after makes a focus :focus-visible, a mouse's too
+  let hvSqKbEl = null;
+  document.addEventListener('focusin', (e)=>{
+    const t = e.target;
+    hvSqKbEl = t && t.closest && t.closest('#hv-sq-pop, #hv-sq-ask') && t.matches(':focus-visible') ? t : null;
+  });
+  // the pointer over the board (its own events: a redraw under a still pointer keeps it, a finger's lift ends it)
+  hvBoardEl.addEventListener('pointerover', ()=>{ hvSpace.ptr = true; });
+  hvBoardEl.addEventListener('pointerleave', ()=>{ hvSpace.ptr = false; });
+  document.addEventListener('keydown', (e)=>{
+    if(!hvSpaceKey(e)) return;
+    const a = e.target, tag = a && a.tagName;
+    if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || (a && a.isContentEditable) || e.ctrlKey || e.metaKey || e.altKey) return;
+    // a letter or button of the square's box or the "Mark a square" line reached by the keyboard: Space is its own (it
+    // ticks the letter, presses the button), wherever the pointer is (2026-11-02). Focus a click left there isn't: a
+    // Space held for the next right-click doesn't untick the letter just clicked.
+    if(!hvSpace.down && a && a===hvSqKbEl) return;
+    if(!e.repeat || !hvSpace.down){
+      hvSpaceOff();
+      hvSpace.down = true;
+      hvSpace.over = !!HV_STATE && hvViewActive() && hvSpace.ptr;
+    }
+    if(hvSpace.over) e.preventDefault();
+  });
+  document.addEventListener('keyup', (e)=>{
+    if(!hvSpaceKey(e) || !hvSpace.down) return;
+    if(hvSpace.over) e.preventDefault();
+    hvSpaceOff();
+  });
+  window.addEventListener('blur', hvSpaceOff);
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden) hvSpaceOff(); });
+  // the annotations stand down (no highlight, no arrow) while Space is held or a square is being asked for
+  function hvSqSkip(){ return hvSpace.down || !!hvSqAsk; }
+  // Space + a right-click (its press and lift on the same square): that square's box
+  let hvSqDown = null;
+  hvBoardEl.addEventListener('mousedown', (e)=>{
+    hvSqDown = null;
+    if(e.button!==2 || !hvSpace.down || !HV_STATE) return;
+    const sq = e.target.closest('.sq');
+    if(sq && hvBoardEl.contains(sq)) hvSqDown = Number(sq.dataset.idx);
+  });
+  hvBoardEl.addEventListener('mouseup', (e)=>{
+    if(e.button!==2 || hvSqDown==null) return;
+    const sq = e.target.closest('.sq'), i = hvSqDown;
+    hvSqDown = null;
+    if(!sq || !hvBoardEl.contains(sq) || Number(sq.dataset.idx)!==i) return;
+    hvSqOpen(i);
+  });
+  // "Mark a square" (the move menu's CLAMP row): a line in the bottom player strip's place asks for a square, and the
+  // next one tapped or clicked on the board opens its box (never a piece's move, a highlight or a drawing); a square's
+  // name typed there and Enter does the same from the keyboard. It stays for the next square until Done or Cancel,
+  // Escape, the board moving to another move, or a press anywhere else.
+  let hvSqAsk = null, hvSqPress = null;       // { node, back: where the keyboard goes after }
+  const hvSqAskEl = document.getElementById('hv-sq-ask'), hvSqAskT = document.getElementById('hv-sq-ask-t');
+  const hvSqAskIn = document.getElementById('hv-sq-ask-in'), hvSqAskX = document.getElementById('hv-sq-ask-x');
+  function hvSqAskStart(node, kb, back){
+    hvSqAskEnd();
+    const S = HV_STATE;
+    if(!S || !hvClampMine(node)) return;
+    if(S.cur!==node) hvGoNode(node);
+    hvRevealBoard();
+    hvSqAsk = { node, back:back || null };
+    hvSqAskT.textContent = 'Tap or click a square for '+hvNodeLabel(node);
+    hvSqAskX.textContent = 'Cancel';
+    hvSqAskIn.value = '';
+    hvSqAskIn.removeAttribute('aria-invalid');
+    hvSqAskEl.hidden = false;
+    hvSqAskEl.parentNode.classList.add('is-asking');
+    if(kb) try{ hvSqAskIn.focus({ preventScroll:true }); }catch(e){}
+  }
+  function hvSqAskEnd(refocus){
+    if(!hvSqAsk) return;
+    const A = hvSqAsk, had = hvSqAskEl.contains(document.activeElement);
+    hvSqAsk = hvSqPress = null;
+    hvSqAskEl.hidden = true;
+    hvSqAskEl.parentNode.classList.remove('is-asking');
+    if(hvMenu && hvMenu.kind==='clampsq') hvMenuClose();
+    // back where the keyboard came from: a move's cell drawn again since (the board went to the move) is found by its move
+    const b = A.back && !document.contains(A.back) && A.back.dataset && A.back.dataset.node ? document.querySelector('#hv-movelist .mv-san[data-node="'+A.back.dataset.node+'"]') : A.back;
+    if((refocus || had) && b && document.contains(b)) try{ b.focus({ preventScroll:true }); }catch(e){}
+  }
+  function hvSqAskOpen(idx, kb){
+    hvSqAskX.textContent = 'Done';
+    hvSqOpen(idx, kb ? { kb:true, back:hvSqAskIn } : {});
+  }
+  hvSqAskX.addEventListener('click', ()=> hvSqAskEnd(true));
+  hvSqAskIn.addEventListener('keydown', (e)=>{
+    if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); hvSqAskEnd(true); return; }
+    if(e.key!=='Enter' || !hvSqAsk) return;
+    e.preventDefault();
+    const v = hvSqAskIn.value.trim().toLowerCase();
+    if(!/^[a-h][1-8]$/.test(v)){
+      hvSqAskIn.setAttribute('aria-invalid', 'true');
+      hvSqAskT.textContent = 'Type a square like h2, then Enter';
+      return;
+    }
+    hvSqAskIn.removeAttribute('aria-invalid');
+    hvSqAskT.textContent = 'Tap or click a square for '+hvNodeLabel(hvSqAsk.node);
+    hvSqAskOpen(nbAlgIdx(v), true);
+  });
+  // asking: a press on a square is the box's, opened on its lift on the same square; one anywhere but the prompt and
+  // the box puts the prompt away. On the window, first: the board's own listeners never hear of it.
+  window.addEventListener('pointerdown', (e)=>{
+    if(!hvSqAsk) return;
+    const t = e.target && e.target.closest ? e.target : null, sq = t ? t.closest('.sq') : null;
+    if(sq && hvBoardEl.contains(sq)){
+      e.preventDefault(); e.stopPropagation();
+      hvSqPress = e.isPrimary ? { id:e.pointerId, idx:Number(sq.dataset.idx) } : null;
+      return;
+    }
+    if(t && (t.closest('#hv-sq-ask') || t.closest('#hv-sq-pop'))) return;
+    hvSqAskEnd();
+  }, true);
+  window.addEventListener('pointerup', (e)=>{
+    const P = hvSqPress;
+    if(!P || e.pointerId!==P.id) return;
+    hvSqPress = null;
+    e.stopPropagation();
+    const u = document.elementFromPoint(e.clientX, e.clientY), sq = u && u.closest ? u.closest('.sq') : null;
+    if(hvSqAsk && sq && hvBoardEl.contains(sq) && Number(sq.dataset.idx)===P.idx) hvSqAskOpen(P.idx, false);
+  }, true);
+  window.addEventListener('click', (e)=>{
+    if(hvSqAsk && e.target && hvBoardEl.contains(e.target)){ e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
+  hvOnNode((node)=>{
+    if(hvMenu && hvMenu.kind==='clampsq' && hvMenu.node!==node) hvMenuClose();
+    if(hvSqAsk && hvSqAsk.node!==node) hvSqAskEnd();
+    if(hvClampGoT){ clearTimeout(hvClampGoT); hvClampGoT = 0; }      // Go to move's step waits on nothing you moved to
+  });
+  hvOnGame(()=> hvSqAskEnd());
+  onLeavePlay(()=>{ hvSqAskEnd(); clearTimeout(hvClampGoT); hvClampGoT = 0; });
   // ---- a game's Groups (the header's Groups button): in or out of each of your groups, or a new
   // one from this game (gpNewDialog: its name, this game, the position on the board if you like) ----
   function hvGroupsMenu(btn){
@@ -35810,7 +36259,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const cg = e.target.closest('.hv-com-go[data-node]');
       if(cg){ const n = HV_STATE.nodes.get(cg.dataset.node); if(n){ hvGoNode(n); hvRevealBoard(); } return; }
       const cf = e.target.closest('[data-ann]');
-      if(cf){ hvAnnResolve(cf.dataset.ann==='merge'); return; }
+      if(cf){
+        if(cf.dataset.ann==='ok'){ HV_STATE.annNote = ''; hvRenderMoveList(); return; }      // what didn't fit: read
+        hvAnnResolve(cf.dataset.ann==='merge');
+        return;
+      }
       const mb = e.target.closest('.hv-var-menu');
       if(mb){
         e.stopPropagation();
@@ -36350,7 +36803,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function hvBestLine(){ return hvEngLine(1); }
   function hvPlayBest(){
-    // with the suggested moves hidden, Space doesn't give the best one away
+    // with the suggested moves hidden, B doesn't give the best one away
     if(hvPrefs.hide && HV_STATE && HV_STATE.std && hvPrefs.engine && !hvTerminal(HV_STATE.cur)){ hvSay('Suggested moves are hidden. Press E to show them.'); return; }
     const l = hvBestLine();
     if(!l) return;
@@ -36518,6 +36971,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hb.addEventListener('change', ()=> hvSetHide(hb.checked, true));
     hideRow.appendChild(hb); hideRow.appendChild(hvEl('span', 'hv-pop-name', 'Hide suggested moves')); hideRow.appendChild(cap('E'));
     el.appendChild(hideRow);
+    const keyRow = hvEl('div', 'hv-pop-key');
+    keyRow.append(hvEl('span', '', 'Play the best move'), hvEl('span', 'kbd', 'B'));
+    el.appendChild(keyRow);
     card.appendChild(el);
     el.style.top = (btn.offsetTop + btn.offsetHeight + 6)+'px';
     const outside = (e)=>{ if(!el.contains(e.target) && !btn.contains(e.target)) hvMenuClose(); };
@@ -36532,9 +36988,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(e.key==='ArrowUp'){ e.preventDefault(); e.stopPropagation(); boxes[(i-1+boxes.length) % boxes.length].focus(); }
       else if(e.key==='Tab' && ((e.shiftKey && i===0) || (!e.shiftKey && i===boxes.length-1))){ hvMenuClose(); }
       // the keys it shows work in it too, as they do on the rest of the screen
-      else if((ak || e.key==='e' || e.key==='E') && !e.ctrlKey && !e.metaKey && !e.altKey){
+      else if((ak || e.key==='e' || e.key==='E' || e.key==='b' || e.key==='B') && !e.ctrlKey && !e.metaKey && !e.altKey){
         e.preventDefault(); e.stopPropagation();
-        if(!e.repeat){ if(ak) hvToggleArrow(ak); else hvToggleHide(); }
+        if(!e.repeat){ if(ak) hvToggleArrow(ak); else if(e.key==='b' || e.key==='B') hvPlayBest(); else hvToggleHide(); }
       }
     });
     try{ el.querySelector('input').focus({ preventScroll:true }); }catch(e){}
@@ -36644,6 +37100,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!HV_STATE) return;
     HV_STATE.flipped = !HV_STATE.flipped;
     hvRemovePromo();
+    if(hvMenu && hvMenu.kind==='clampsq') hvMenuClose();      // its square has moved
     hvBuildLabels();
     hvRenderBoard();
     hvRenderStrips();
@@ -36693,13 +37150,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(hvMenu) hvMenuClose(true); else { hvRemovePromo(); hvRenderBoard(); }
       return;
     }
+    if(e.key==='Escape' && hvSqAsk){ e.preventDefault(); hvSqAskEnd(true); return; }     // "Mark a square": not taken
     const a = document.activeElement, tag = a && a.tagName;
     if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || (a && a.isContentEditable)) return;
     if(e.ctrlKey || e.metaKey || e.altKey) return;
     if(a && a.closest && a.closest('.hv-pop')) return;
     const k = e.key;
-    if(pxPlaying() && (k==='l' || k==='L' || k==='e' || k==='E' || k===' ' || k==='Spacebar' || hvArrowKeyOf(e))){
-      if((k===' ' || k==='Spacebar') && (tag==='BUTTON' || tag==='A')) return;   // Space presses a focused button
+    if(pxPlaying() && (k==='l' || k==='L' || k==='e' || k==='E' || k==='b' || k==='B' || hvArrowKeyOf(e))){
       e.preventDefault(); return;
     }
     if(k==='ArrowLeft'){ e.preventDefault(); hvStep(-1); }
@@ -36710,10 +37167,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else if(k==='l' || k==='L'){ e.preventDefault(); hvToggleEngine(); }
     else if(hvArrowKeyOf(e)){ e.preventDefault(); if(!e.repeat) hvToggleArrow(hvArrowKeyOf(e)); }
     else if(k==='e' || k==='E'){ e.preventDefault(); if(!e.repeat) hvToggleHide(); }
-    else if(k===' ' || k==='Spacebar'){
-      if(tag==='BUTTON' || tag==='A') return;   // Space presses a focused button
-      e.preventDefault(); hvPlayBest();
-    }
+    // B plays the best move (2026-11-02: it was Space, which is now held for Space + right-click, a square's CLAMP
+    // box: hvSpace). Held down, it plays one.
+    else if(k==='b' || k==='B'){ e.preventDefault(); if(!e.repeat) hvPlayBest(); }
     else if(k==='Escape'){ e.preventDefault(); if(HV_STATE.game._practice) pxBack(); else if(HV_STATE.game._puzzle) pzaReturn(); else showView('history'); }
   });
   onLeavePlay(()=>{ try{ hvNoteFlush(); }catch(e){} try{ hvMenuClose(); }catch(e){} });   // before HV_STATE goes (and a menu open on the page goes with it)
@@ -39698,9 +40154,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(m) bits.push('arrows');
     return bits.join(' \u00b7 ');
   }
-  // A record's fields in the order this build writes them: v, l, c, m, then b and k when it has them, then any
+  // A record's fields in the order this build writes them: v, l, c, m, then b, k and q when it has them, then any
   // field a newer build added (gnAnExtra), kept as it came: this build never drops what it doesn't know.
-  const GN_AN_KNOWN = ['v', 'l', 'c', 'm', 'b', 'k'];
+  const GN_AN_KNOWN = ['v', 'l', 'c', 'm', 'b', 'k', 'q'];
   function gnAnExtra(A){
     const x = {};
     if(A && typeof A==='object' && !Array.isArray(A)) Object.keys(A).forEach(f=>{ if(GN_AN_KNOWN.indexOf(f) < 0 && f!=='__proto__') x[f] = A[f]; });
@@ -39724,7 +40180,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     return out.sort((a, b)=> a[0] - b[0] || 'CLAMP'.indexOf(a[1]) - 'CLAMP'.indexOf(b[1]));
   }
-  // a game's marks, read once per text of its record (every row of a redraw asks)
+  // A record's CLAMP squares (q, 2026-11-02): [[ply, letter, square]], the squares a mark of yours is about ("L: the
+  // rook on h2 was left loose"), up to CLAMP_SQ_MAX a letter on a move, by ply, then C L A M P, then square. Only a
+  // mark the record has (k) has squares: one without is dropped. k: the record's marks when already read.
+  function gnClampSqCmp(a, b){ return a[0] - b[0] || 'CLAMP'.indexOf(a[1]) - 'CLAMP'.indexOf(b[1]) || (a[2] < b[2] ? -1 : a[2] > b[2] ? 1 : 0); }
+  function gnClampSqList(A, k){
+    const has = new Set((k || gnClampList(A)).map(x=> x[0]+x[1])), seen = new Set(), n = {}, out = [];
+    (A && Array.isArray(A.q) ? A.q : []).forEach(x=>{
+      if(!Array.isArray(x) || !Number.isInteger(x[0]) || typeof x[1]!=='string' || !has.has(x[0]+x[1]) || typeof x[2]!=='string' || !/^[a-h][1-8]$/.test(x[2])) return;
+      const m = x[0]+x[1];
+      if(seen.has(m+x[2]) || (n[m] || 0) >= CLAMP_SQ_MAX) return;
+      seen.add(m+x[2]);
+      n[m] = (n[m] || 0) + 1;
+      out.push([x[0], x[1], x[2]]);
+    });
+    return out.sort(gnClampSqCmp);
+  }
+  // a game's marks, read once per text of its record (every row of a redraw asks); its squares when asked for
   const GN_CLAMP_MEMO = new Map();
   function gnClampOf(gid){
     const t = gnNoteText('an-'+gid);
@@ -39735,8 +40207,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ A = JSON.parse(t); }catch(e){ A = null; }
     const k = gnClampList(A);
     if(GN_CLAMP_MEMO.size > 600) GN_CLAMP_MEMO.clear();
-    GN_CLAMP_MEMO.set(gid, { t, k });
+    GN_CLAMP_MEMO.set(gid, { t, k, q:null });
     return k;
+  }
+  function gnClampSqOf(gid){
+    if(!gnClampOf(gid).length) return [];
+    const was = GN_CLAMP_MEMO.get(gid);
+    if(!was) return [];
+    if(!was.q){
+      let A = null;
+      try{ A = JSON.parse(was.t); }catch(e){ A = null; }
+      was.q = gnClampSqList(A, was.k);
+    }
+    return was.q;
+  }
+  // a mark's squares as written after its move ("24...Be5 \u00b7 h2"): '' when it has none
+  function gnClampSqText(q, p, ch){
+    const s = q.filter(x=> x[0]===p && x[1]===ch).map(x=> x[2]);
+    return s.length ? ' \u00b7 '+s.join(', ') : '';
   }
   // A waiting other version of the game's record (gnReconcile's conflict: this device's unsent edit that lost, or
   // another device's that didn't win) with different marks: those only it has ([] when it differs only in notes or
@@ -39759,17 +40247,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // A build from before badges writes a game's analysis record again without its b just by opening
   // the game (its hvAnnText has no b), and a badges-only one as deleted; a build from before CLAMP
-  // (a54537d and older) the same with k. A newer build keeps b and k in a record that has had them
-  // (b:[], k:[] once they're all off), so a newer copy without one, over badges or marks of this
-  // device's, is an older build's: the text to keep in its place (that copy with this device's b
-  // and k, sent out again by the sync), or '' when it isn't one.
+  // (a54537d and older) the same with k, and one from before v106 (which drops a field it doesn't
+  // know) with q, the marks' squares. A newer build keeps b, k and q in a record that has had them
+  // (b:[], k:[], q:[] once they're all off), so a newer copy without one, over badges, marks or
+  // squares of this device's, is an older build's: the text to keep in its place (that copy with
+  // this device's b, k and q, sent out again by the sync), or '' when it isn't one.
   function gnAnKeepB(id, mine, inc){
     if(!gnIsAn(id) || !mine || mine===inc) return '';
     let M = null, I = null;
     try{ M = JSON.parse(mine); I = inc ? JSON.parse(inc) : { v:1, l:[], c:[], m:[] }; }catch(e){ return ''; }
     if(!M || typeof M!=='object' || !I || typeof I!=='object' || Array.isArray(I)) return '';
     let kept = false;
-    ['b', 'k'].forEach(f=>{ if(Array.isArray(M[f]) && M[f].length && !(f in I)){ I[f] = M[f]; kept = true; } });
+    ['b', 'k', 'q'].forEach(f=>{ if(Array.isArray(M[f]) && M[f].length && !(f in I)){ I[f] = M[f]; kept = true; } });
     if(!kept) return '';
     const t = JSON.stringify(gnAnCanon(I));
     return t.length <= GN_MAX ? t : '';
@@ -40098,7 +40587,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the app's own SAN, so Lichess takes it; a line that doesn't replay is left out. A badge with a
   // PGN glyph (RL's nag numbers: !! $3, ! $1, ?! $6, ? $2, ?? $4) follows its move; the rest have none.
   // CLAMP marks (k) follow theirs as a comment: '{ CLAMP L: left the knight on e5 loose }', several
-  // letters joined ('{ CLAMP C; L: ... }'), braces in a note turned to parentheses (the PGN stays valid).
+  // letters joined ('{ CLAMP C; L: ... }'), a mark's squares (q) after its letter ('{ CLAMP L (h2): ... }'),
+  // braces in a note turned to parentheses (the PGN stays valid).
   function gnAnnMovetext(san, text){
     const A = JSON.parse(text);
     const toks = String(san || '').trim() ? String(san).trim().split(/\s+/) : [];
@@ -40134,6 +40624,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     (Array.isArray(A.c) ? A.c : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null; if(n && typeof x[1]==='string') n.com = x[1]; });
     (Array.isArray(A.b) ? A.b : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null, B = n && n.parent && typeof x[1]==='string' && x[1].length===1 && HR_BY_CODE[x[1]]; if(B && B.nag) n.nag = B.nag; });
     gnClampList(A).forEach(x=>{ const n = walk(x[0], false); if(n && n.parent) (n.clamp || (n.clamp = [])).push(x); });
+    const sq = {};          // a mark's squares (q) after its letter: '{ CLAMP L (h2): the rook hangs }'
+    gnClampSqList(A).forEach(x=>{ (sq[x[0]+x[1]] || (sq[x[0]+x[1]] = [])).push(x[2]); });
     const com = (t)=> '{ '+String(t).replace(/[{}]/g, m=> m==='{' ? '(' : ')').replace(/\[%/g, '[ %').replace(/\s+/g, ' ').trim()+' }';
     const out = [];
     const line = (start)=>{
@@ -40145,7 +40637,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(n.nag) out.push('$'+n.nag);
         num = false;
         if(n.com){ out.push(com(n.com)); num = true; }
-        if(n.clamp){ out.push(com('CLAMP '+n.clamp.map(x=> x[1]+(x[2] ? ': '+x[2] : '')).join('; '))); num = true; }
+        if(n.clamp){ out.push(com('CLAMP '+n.clamp.map(x=> x[1]+(sq[x[0]+x[1]] ? ' ('+sq[x[0]+x[1]].join(', ')+')' : '')+(x[2] ? ': '+x[2] : '')).join('; '))); num = true; }
         const p = n.parent;
         if(p.kids[0]===n && p.kids.length > 1){
           p.kids.slice(1).forEach(v=>{ out.push('('); line(v); out.push(')'); });
@@ -40905,7 +41397,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const at = (alg)=>{ const c = 'abcdefgh'.indexOf(alg.charAt(0)), r = Number(alg.charAt(1))-1; return { x:(dg.flip ? 7-c : c)+0.5, y:(dg.flip ? r : 7-r)+0.5, r, c }; };
     const mk = (tag, attrs)=>{ const e = document.createElementNS(ARROW_SVG_NS, tag); Object.keys(attrs).forEach(k=> e.setAttribute(k, attrs[k])); svg.appendChild(e); return e; };
     dg.squares.forEach(q=>{
-      const p = at(q.s), col = NB_CODES[q.c];
+      const p = at(q.s);
+      if(q.o){
+        // an outline only, in a #hex color of the app's own (a CLAMP mark's square, ct*), a light line inside it
+        mk('rect', { x:p.x-0.45, y:p.y-0.45, width:0.9, height:0.9, fill:'none', stroke:'rgba(255,255,255,.75)', 'stroke-width':'.16' });
+        mk('rect', { x:p.x-0.45, y:p.y-0.45, width:0.9, height:0.9, fill:'none', stroke:String(q.c), 'stroke-width':'.1' });
+        return;
+      }
+      const col = NB_CODES[q.c];
       mk('rect', { x:p.x-0.5, y:p.y-0.5, width:1, height:1, fill:col, 'fill-opacity':'.45' });
       mk('rect', { x:p.x-0.46, y:p.y-0.46, width:0.92, height:0.92, fill:'none', stroke:col, 'stroke-width':'.08' });
     });
@@ -43070,12 +43569,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // without stays as an older build wrote it), and then always, b:[] once they're all off (never ''):
   // a newer copy without b over badges is an older build's (gnAnKeepB), not your edit. k, your CLAMP
   // marks (2026-11-02): [[ply, letter, note?]] on main-line moves of yours, kept the same way (k:[] once
-  // they're all off). A field this build doesn't know (a newer build's) is kept from the record as it came.
+  // they're all off), and q their squares, [[ply, letter, square]] (q:[] the same). A field this build
+  // doesn't know (a newer build's) is kept from the record as it came.
   function hvAnnText(noMarks){
-    const S = HV_STATE, lines = [], com = [], mk = [], bd = [], kd = hvClampListOf(S);
+    const S = HV_STATE, lines = [], com = [], mk = [], bd = [], kd = hvClampListOf(S), qd = hvClampSqOf(S);
     let P = null;
     try{ P = S.annText ? JSON.parse(S.annText) : null; }catch(e){ P = null; }
-    const hadB = !!P && Array.isArray(P.b), hadK = !!P && Array.isArray(P.k), extra = gnAnExtra(P);
+    const hadB = !!P && Array.isArray(P.b), hadK = !!P && Array.isArray(P.k), hadQ = !!P && Array.isArray(P.q), extra = gnAnExtra(P);
     const prof = annoProfile();
     const marks = (n)=>{
       const m = n.marks;
@@ -43091,10 +43591,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       marks(n);
       n.children.forEach(c=>{ if(!c.main && !c.children.length) lines.push(hvNodeRef(c).line); walk(c); });
     })(S.root);
-    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !Object.keys(extra).length) return '';
+    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !qd.length && !hadQ && !Object.keys(extra).length) return '';
     const A = { v:1, l:lines, c:com, m:mk };
     if(bd.length || hadB) A.b = bd;
     if(kd.length || hadK) A.k = kd;
+    if(qd.length || hadQ) A.q = qd;
     return JSON.stringify(Object.assign(A, extra));
   }
   // A record onto the tree: its side lines, comments, marks, badges and CLAMP marks. mine: this device's
@@ -43141,6 +43642,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(!(x[1] in c)) c[x[1]] = t;
         else if(t && (lost || !mine || !c[x[1]])) c[x[1]] = t;
       });
+      // their squares join by move, letter and square (up to CLAMP_SQ_MAX a letter on a move): how many didn't fit
+      // is returned (2026-11-02: "Add them to these" says so, hvAnnResolve)
+      const Q = gnClampSqList(A);
+      Q.forEach(x=> hvClampSqAdd(S, x[0], x[1], x[2]));
+      const have = new Set(hvClampSqOf(S).map(x=> x.join(' ')));
+      return Q.filter(x=> !have.has(x.join(' '))).length;
     } finally { hvAnnBusy = false; }
   }
   // hvOpen: the game's saved analysis onto its tree (a tree kept from earlier in the session
@@ -43151,7 +43658,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     S.annText = id ? gnNoteText(id) : '';
     let A = null;
     if(S.annText) try{ A = JSON.parse(S.annText); }catch(e){ A = null; }
-    if(id) hvClampOnto(S, gnClampList(A));
+    if(id) hvClampOnto(S, gnClampList(A), gnClampSqList(A));
     if(A) hvAnnMerge(A, false);
   }
   function hvAnnSoon(){ clearTimeout(hvAnnTimer); hvAnnTimer = setTimeout(hvAnnSave, 700); }
@@ -43175,7 +43682,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // the same analysis: only an other-version notice to show or clear (a redraw for nothing
       // would take the keyboard's place from the move list, the line menu's button)
       const c = !!(GN.notes[id] && GN.notes[id].conflict);
-      if(c!==!!document.querySelector('#hv-movelist .hv-ann-conflict')) hvRenderMoveList();
+      if(c!==!!document.querySelector('#hv-movelist .hv-ann-conflict:not(.is-note)')) hvRenderMoveList();
       return;
     }
     if(hvAnnTimer || (hvMenu && hvMenu.kind==='com')) return;
@@ -43184,9 +43691,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     HV_TREES.delete(String(S.game.id));
     hvOpen(S.game, S.username, { at:{ ply:n ? n.ply : 0 }, flip:S.flipped });
   }
-  // another device's different version of this game's analysis: add it to this one, or not
+  // another device's different version of this game's analysis: add it to this one, or not. Added, in its place
+  // what of it didn't fit (S.annNote) until OK (2026-11-02)
   function hvAnnConflictRow(){
-    const id = hvAnnId(), n = id ? GN.notes[id] : null;
+    const id = hvAnnId(), n = id ? GN.notes[id] : null, S = HV_STATE;
+    if((!n || !n.conflict) && S && S.annNote){
+      const row = hvEl('div', 'hv-ann-conflict is-note'), ok = hvEl('button', 'btn-link', 'OK');
+      row.appendChild(hvEl('span', '', S.annNote));
+      ok.type = 'button';
+      ok.dataset.ann = 'ok';
+      row.appendChild(ok);
+      return row;
+    }
     if(!n || !n.conflict) return null;
     const row = hvEl('div', 'hv-ann-conflict');
     row.appendChild(hvEl('span', '', 'Another device saved different comments, badges, CLAMP marks or lines for this game '+relTime(n.conflict.at)+'.'));
@@ -43195,14 +43711,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     row.appendChild(b1); row.appendChild(b2);
     return row;
   }
+  // Squares of the other version past CLAMP_SQ_MAX on a letter of a move stay out, and the notice's place says so
+  // (2026-11-02: they were left out without a word)
+  const HV_SQ_LEFT = 'Some of the other device\'s squares didn\'t fit. '+HV_SQ_FULL;
   function hvAnnResolve(merge){
-    const id = hvAnnId(), n = id ? GN.notes[id] : null;
+    const id = hvAnnId(), n = id ? GN.notes[id] : null, S = HV_STATE;
     if(!n || !n.conflict) return;
-    if(merge){ let A = null; try{ A = JSON.parse(n.conflict.text); }catch(e){ A = null; } hvAnnMerge(A, true, !!n.conflict.lost); }
+    const a = document.activeElement, kb = !!(a && a.closest && a.closest('#hv-movelist .hv-ann-conflict'));
+    let left = 0;
+    if(merge){ let A = null; try{ A = JSON.parse(n.conflict.text); }catch(e){ A = null; } left = hvAnnMerge(A, true, !!n.conflict.lost) || 0; }
     n.conflict = null;
+    S.annNote = left ? HV_SQ_LEFT : '';
     gnPersist();
     hvAnnSave();
     hvRedraw();
+    if(!left) return;
+    hvSay(HV_SQ_LEFT);
+    const ok = kb && document.querySelector('#hv-movelist .hv-ann-conflict.is-note [data-ann="ok"]');
+    if(ok) try{ ok.focus({ preventScroll:true }); }catch(e){}
   }
   // ---- comments ----
   function hvComRow(n){
