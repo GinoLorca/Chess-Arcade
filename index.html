@@ -6866,11 +6866,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   #view-challenges .ch-head h1{ margin:0; }
   :root:not([data-skin="uptown"]) #view-challenges .ch-head .eyebrow{ color:var(--ink-soft); }   /* as #hv-head's: Uptown's is a sign */
   /* the back link as the review's small surface pill (bare text can't be read on Felt or over Uptown's map) */
-  #view-challenges > .back-link{ position:relative; align-self:flex-start; min-height:36px; padding:6px 14px; font-size:13px; line-height:1.3; color:var(--ink-soft);
+  #view-challenges > .back-link, .view > .back-link.pzd-back{ position:relative; align-self:flex-start; min-height:36px; padding:6px 14px; font-size:13px; line-height:1.3; color:var(--ink-soft);
     background:var(--surface); border:1px solid var(--line); border-radius:999px; box-shadow:var(--shadow); }
-  #view-challenges > .back-link::before{ content:""; position:absolute; inset:-5px -1px; }
-  #view-challenges > .back-link:hover{ color:var(--ink); }
-  :root[data-skin="bauhaus"] #view-challenges > .back-link{ border-radius:0; }
+  :is(#view-challenges > .back-link, .view > .back-link.pzd-back)::before{ content:""; position:absolute; inset:-5px -1px; }
+  :is(#view-challenges > .back-link, .view > .back-link.pzd-back):hover{ color:var(--ink); }
+  /* the focus ring on a band of the pill's surface: on Felt's green or Uptown's map the ring alone can't be seen */
+  :is(#view-challenges > .back-link, .view > .back-link.pzd-back):focus-visible{ outline:2px solid var(--focus); outline-offset:2px; box-shadow:0 0 0 5px var(--surface), var(--shadow); }
+  :root[data-skin="bauhaus"] :is(#view-challenges > .back-link, .view > .back-link.pzd-back){ border-radius:0; }
   #view-challenges .ch-cols{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:14px; align-items:start; }
   @media (max-width:999px){ #view-challenges .ch-cols{ grid-template-columns:minmax(0, 1fr); } }
   #view-challenges .ch-col{ display:flex; flex-direction:column; gap:14px; min-width:0; }
@@ -6996,7 +6998,132 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   :root[data-skin="uptown"] #home-history{--ux-line:#0039a6} :root[data-skin="uptown"] #home-saved{--ux-line:#b933ad}
   :root[data-skin="uptown"] :is(#home-challenges, #card-challenges){--ux-line:#ff6319}
   :root[data-skin="uptown"] :is(.ch-row, .ch-friend, .ch-banner){ border-radius:4px; }
-  :root[data-skin="uptown"] #view-challenges > .back-link{ border-radius:3px; }
+  :root[data-skin="uptown"] :is(#view-challenges > .back-link, .view > .back-link.pzd-back){ border-radius:3px; }
+
+  /* ---- Puzzle Dashboard (2026-11-03): Overview | History | Saved, one head on all three (PUZZLE DASHBOARD in the
+     script). The back pill is Challenges' (above); the tabs are Game History's Games | Openings switch; the period is
+     its quieter underline row (gh-sub), so it can't be read as a second set of page tabs ---- */
+  #view-puzzle-dash, #view-saved, #view-puzzle-history{ --pd-soft:color-mix(in srgb, var(--ink-soft) 62%, var(--ink)); --pzd-win:var(--gho-win, var(--good)); }
+  #view-puzzle-dash.active, #view-saved.active{ padding-bottom:64px; }    /* clear of the fixed Friends tab, like History */
+  :root:not([data-skin="uptown"]) .pzd-head .eyebrow{ color:var(--ink-soft); }   /* as Challenges': Uptown's is a sign */
+  .pzd-head h1{ margin:0; }
+  .history-head > .pzd-tabs{ align-self:center; flex-wrap:nowrap; }
+  .pzd-tabs .toggle{ position:relative; min-width:92px; }
+  .pzd-tabs .toggle::before{ content:""; position:absolute; inset:-5px -1px; }
+  :is(#view-puzzle-dash, #view-puzzle-history, #view-saved) .pzd-tabs .toggle.active{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  @media (max-width:620px){
+    .history-head > .pzd-tabs{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); width:100%; }
+    .pzd-tabs .toggle{ min-width:0; min-height:44px; }
+  }
+  .pzd-period{ display:flex; align-items:center; flex-wrap:wrap; gap:4px 12px; margin-top:-2px; }
+  .pzd-period .gh-sub{ margin:0; }
+  .pzd-days-l{ font-size:13px; color:var(--pd-soft); }
+  /* each its own width (gh-sub's phone rule shares the row out, 45px each in Chess Book); the tap area grows up and
+     down only, so neighbors never cover each other */
+  .pzd-days .gh-sub-b{ position:relative; flex:0 0 auto; padding-left:10px; padding-right:10px; }
+  .pzd-days .gh-sub-b::before{ content:""; position:absolute; inset:-9px 0; }
+  .pzd-wait{ font-size:12.5px; color:var(--pd-soft); }
+  .btn.pzd-ink{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  .btn.pzd-ink:hover{ background:color-mix(in srgb, var(--ink) 86%, var(--surface)); }
+  #view-puzzle-dash .ch-box .btn, .pzd-saved-acts .btn{ min-height:44px; }
+  .pzd-saved-acts{ margin-top:-4px; }
+
+  /* Overview: the brief, Themes, On this device */
+  .pzd-body{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+  /* the numbers dim while another period loads, under labels, source line and buttons that stay solid (the period's own
+     buttons are off meanwhile: pdb.lock); the cards stay solid too (Uptown's map must not show through) */
+  .pzd-body.is-loading :is(.pzd-delta, .pzd-spark, .pzd-big, .pzd-d, .pzd-bar, .pzd-legend, .pzd-yard, .pzd-nums, .pzd-perf, .pzd-none){ opacity:.55; }
+  .pzd-card, .pzd-brief{ min-width:0; display:flex; flex-direction:column; gap:10px; padding:16px 18px 14px; background:var(--surface); color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  :root[data-skin="bauhaus"] :is(.pzd-card, .pzd-brief){ border-radius:0; border-width:2px; }
+  :root[data-skin="uptown"] :is(.pzd-card, .pzd-brief){ border-radius:4px; }
+  .pzd-k{ margin:0; font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--pd-soft); }
+  .pzd-stats{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:0; }
+  .pzd-stat{ min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:2px 22px 4px; }
+  .pzd-stat:first-child{ padding-left:0; }
+  .pzd-stat:last-child{ padding-right:0; }
+  .pzd-stat + .pzd-stat{ border-left:1px solid var(--line); }
+  .pzd-hero{ font-size:54px; font-weight:800; line-height:1; letter-spacing:-.02em; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .pzd-big{ font-size:40px; font-weight:800; line-height:1; letter-spacing:-.02em; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .pzd-big small{ font-size:22px; font-weight:700; margin-left:1px; }
+  .pzd-prov{ font-size:12.5px; color:var(--pd-soft); }
+  .pzd-delta{ font-size:13.5px; font-weight:600; line-height:1.35; }
+  .pzd-arrow{ font-size:11px; margin-right:3px; }
+  .pzd-arrow.up{ color:var(--pzd-win); }
+  .pzd-arrow.down{ color:var(--bad); }
+  .pzd-d{ font-size:12.5px; line-height:1.45; color:var(--pd-soft); }
+  .pzd-d b{ color:var(--ink); font-weight:700; }
+  .pzd-spark{ display:block; width:100%; max-width:260px; height:46px; overflow:visible; }
+  .pzd-stat .pzd-acts{ margin-top:auto; padding-top:6px; max-width:100%; }
+  .pzd-bar{ display:flex; gap:2px; width:100%; height:8px; }
+  .pzd-bar > i{ display:block; min-width:3px; border-radius:2px; }
+  .pzd-bar .s1{ background:var(--pzd-win); }
+  .pzd-bar .s2{ background:var(--ink-soft); }
+  .pzd-bar .s3{ background:var(--bad); }
+  .pzd-bar.thin{ height:6px; }
+  .pzd-legend{ display:flex; flex-wrap:wrap; gap:2px 12px; font-size:12px; line-height:1.4; color:var(--ink); }
+  .pzd-legend span{ display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+  .pzd-legend i{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .pzd-src{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding-top:10px; border-top:1px solid var(--line); font-size:12px; line-height:1.45; color:var(--pd-soft); }
+  .pzd-src a{ position:relative; color:var(--ink); text-decoration:underline; text-underline-offset:2px; }
+  .pzd-src a::before{ content:""; position:absolute; inset:-14px -4px; }
+  .pzd-src .warn{ color:color-mix(in srgb, var(--bad) 60%, var(--ink)); font-weight:600; }
+  /* Lichess down: the warning, the time to try again and Try again on their own row, clear of the link's tap area */
+  .pzd-src-down{ flex:1 1 100%; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; margin-top:14px; }
+  .pzd-btn{ display:inline-flex; align-items:center; flex-wrap:wrap; gap:4px 8px; min-height:44px; max-width:100%; padding:9px 16px; white-space:normal; text-align:left; }
+  /* an off button (Needs Lichess, another period on its way, Try again before its time) keeps its words readable
+     (4.5:1): soft ink on no fill and a dashed edge say it's off, never a fade */
+  #view-puzzle-dash :is(.pzd-btn, .pzd-sbtn)[disabled]{ opacity:1; background:transparent; border-color:var(--line); border-style:dashed; color:var(--pd-soft); cursor:default; }
+  .pzd-tag{ display:inline-block; padding:2px 5px 1px; border:1px solid currentColor; border-radius:3px; font-family:"JetBrains Mono",monospace;
+    font-size:10px; font-weight:700; letter-spacing:.06em; line-height:1.2; text-transform:uppercase; white-space:nowrap; }
+  /* Themes: one card, the yardstick on top, Work on | Strengths side by side */
+  .pzd-yard{ margin:0; padding-bottom:10px; border-bottom:1px solid var(--line); font-size:13.5px; line-height:1.45; color:var(--ink); }
+  .pzd-yard b{ font-variant-numeric:tabular-nums; }
+  .pzd-cols{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:0; align-items:start; }
+  .pzd-col{ min-width:0; display:flex; flex-direction:column; gap:8px; }
+  .pzd-col:first-child{ padding-right:20px; }
+  .pzd-col + .pzd-col{ padding-left:20px; border-left:1px solid var(--line); }
+  @media (max-width:759px){
+    .pzd-cols{ grid-template-columns:minmax(0, 1fr); }
+    .pzd-col:first-child{ padding-right:0; }
+    .pzd-col + .pzd-col{ padding-left:0; border-left:0; border-top:1px solid var(--line); padding-top:12px; margin-top:6px; }
+  }
+  .pzd-card .ch-box-title{ margin:0; }
+  .pzd-sub{ margin:-4px 0 0; font-size:12.5px; line-height:1.45; color:var(--pd-soft); }
+  .pzd-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+  .pzd-row{ display:flex; flex-direction:column; gap:6px; padding:9px 0 10px; border-top:1px solid var(--line); min-width:0; }
+  .pzd-row-top{ display:flex; align-items:center; justify-content:space-between; gap:6px 10px; flex-wrap:wrap; min-height:22px; }
+  .pzd-row-mid{ display:flex; align-items:center; gap:12px; }
+  .pzd-row-mid .pzd-bar{ flex:0 0 34%; max-width:150px; }
+  .pzd-name{ font-size:15px; font-weight:700; line-height:1.3; overflow-wrap:anywhere; min-width:0; }
+  .pzd-perf{ font-size:12px; color:var(--pd-soft); white-space:nowrap; }
+  .pzd-perf b{ font-family:"JetBrains Mono",monospace; font-size:13.5px; color:var(--ink); margin-left:2px; }
+  .pzd-nums{ flex:1 1 auto; min-width:0; font-size:12.5px; line-height:1.4; color:var(--ink); }
+  .pzd-acts{ display:flex; flex-wrap:wrap; gap:8px; }
+  .pzd-sbtn{ position:relative; display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:6px 10px; font-size:13px; white-space:nowrap; }
+  .pzd-sbtn::before{ content:""; position:absolute; inset:-5px -1px; }
+  .pzd-more{ align-self:flex-start; position:relative; min-height:36px; padding:6px 0; background:none; border:0; font:inherit; font-size:13px; color:var(--ink);
+    text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+  .pzd-more::before{ content:""; position:absolute; inset:-5px -6px; }
+  .pzd-none{ margin:0; padding:10px 0 2px; border-top:1px solid var(--line); font-size:13px; line-height:1.45; color:var(--ink); }
+  .pzd-none.first{ border-top:0; padding-top:0; }
+  .pzd-drow{ display:flex; align-items:center; justify-content:space-between; gap:8px 14px; flex-wrap:wrap; padding:9px 0; border-top:1px solid var(--line); }
+  .pzd-dtext{ font-size:13.5px; line-height:1.4; min-width:0; flex:1 1 220px; }
+  .pzd-dtext b{ font-family:"JetBrains Mono",monospace; font-size:14px; }
+  .pzd-dtext span{ color:var(--pd-soft); font-size:12.5px; }
+  .pzd-waitcard{ font-size:13px; color:var(--pd-soft); }
+  .pzd-brief:focus{ outline:none; }
+  .pzd-brief:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }   /* the focus after Try again (pdbRender) */
+  /* Saved's sort, where "Saved, Missed first" sends the focus: the ring the app's selects drop on focus */
+  #saved-sort:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  #view-puzzle-dash .ch-box{ gap:12px; }
+  #view-puzzle-dash .ch-fix{ font-size:13.5px; line-height:1.5; }
+  @media (max-width:619px){
+    .pzd-stats{ grid-template-columns:minmax(0, 1fr); gap:16px; }
+    .pzd-stat{ padding:0; }
+    .pzd-stat + .pzd-stat{ border-left:0; border-top:1px solid var(--line); padding-top:14px; }
+    .pzd-hero{ font-size:50px; }
+  }
 </style>
 
 <button class="home-fab" id="home-fab" data-nav="menu" title="All drills" aria-label="All drills">&#8962;</button>
@@ -7521,7 +7648,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <button class="drill-card hub-tile" id="card-play-online"><div class="drill-name">Play Online</div><div class="drill-desc">A game against a person on Lichess, played here.</div></button>
       <button class="drill-card hub-tile" id="card-play-bot"><div class="drill-name">Play Bot</div><div class="drill-desc">A game against Lichess&rsquo;s computer, at the level you pick.</div></button>
       <button class="drill-card hub-tile" id="card-history"><div class="drill-name">Game History</div><div class="drill-desc">Your Lichess and chess.com games, and your openings.</div></button>
-      <button class="drill-card hub-tile" id="card-saved"><div class="drill-name">Saved Puzzles</div><div class="drill-desc">The puzzles you&rsquo;ve saved, to play again.</div></button>
+      <button class="drill-card hub-tile" id="card-saved"><div class="drill-name">Puzzle Dashboard</div><div class="drill-desc">Accuracy, rating, weak themes, history and saved puzzles.</div></button>
       <button class="drill-card hub-tile" id="card-challenges"><div class="hub-head"><div class="drill-name">Challenges</div><span class="pd-opt-hint" id="card-challenges-head" hidden></span></div><div class="drill-desc" id="card-challenges-desc">Games with friends on Lichess: answer theirs, or send one.</div></button>
     </div>
   </section>
@@ -7906,22 +8033,48 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   </section>
 
   <!-- ============ GAME HISTORY: single-game review ============ -->
-  <!-- Saved Puzzles: the library of puzzles saved from the Puzzles drill,
-       in the user's own collections and filterable by Lichess's themes. -->
-  <section class="view" id="view-saved">
-    <button class="back-link" data-nav="menu">&larr; All drills</button>
+  <!-- ============ PUZZLE DASHBOARD (2026-11-03) ============ -->
+  <!-- Overview | History | Saved: one head (the back pill, the title, the tabs) on this view and on Saved Puzzles' and
+       Puzzle History's (PUZZLE DASHBOARD in the script draws #pzd-body). The hidden doors are the #puzzle-dashboard and
+       #saved links' cards (DEEP_LINKS). -->
+  <section class="view" id="view-puzzle-dash">
+    <button class="back-link pzd-back" type="button" data-nav="hub">&larr; Play</button>
     <div class="panel">
-      <div class="history-head">
+      <div class="history-head pzd-head">
         <div>
           <div class="eyebrow">Puzzles</div>
-          <h1 class="title" style="font-size:26px;">Saved Puzzles</h1>
+          <h1 class="title" style="font-size:26px;">Puzzle Dashboard</h1>
+          <div class="subtitle" id="pzd-subtitle">Your Lichess puzzle numbers, and the puzzles on this device.</div>
+        </div>
+        <div class="toggle-row pzd-tabs" role="group" aria-label="Puzzle Dashboard"><button type="button" class="toggle" data-tab="puzzle-dash" aria-pressed="false">Overview</button><button type="button" class="toggle" data-tab="puzzle-history" aria-pressed="false">History</button><button type="button" class="toggle" data-tab="saved" aria-pressed="false">Saved</button></div>
+      </div>
+      <div class="pzd-period">
+        <span class="pzd-days-l" id="pzd-days-l">Last</span>
+        <div class="gh-sub pzd-days" id="pzd-days" role="group" aria-labelledby="pzd-days-l"><button type="button" class="gh-sub-b" data-val="7" aria-pressed="false">7 days</button><button type="button" class="gh-sub-b" data-val="30" aria-pressed="false">30 days</button><button type="button" class="gh-sub-b" data-val="90" aria-pressed="false">90 days</button></div>
+        <span class="pzd-wait" id="pzd-wait" role="status"></span>
+      </div>
+    </div>
+    <div class="pzd-body" id="pzd-body"></div>
+    <button type="button" id="pzd-door-dash" hidden></button>
+    <button type="button" id="pzd-door-saved" hidden></button>
+  </section>
+
+  <!-- Saved Puzzles (the Puzzle Dashboard's Saved tab): the library of puzzles saved from the Puzzles drill,
+       in the user's own collections and filterable by Lichess's themes. -->
+  <section class="view" id="view-saved">
+    <button class="back-link pzd-back" type="button" data-nav="hub">&larr; Play</button>
+    <div class="panel">
+      <div class="history-head pzd-head">
+        <div>
+          <div class="eyebrow">Puzzles</div>
+          <h1 class="title" style="font-size:26px;">Puzzle Dashboard</h1>
           <div class="subtitle" id="saved-subtitle">&#8212;</div>
         </div>
-        <div class="saved-head-actions">
-          <button class="btn btn-primary" id="saved-play">Play these</button>
-          <button class="btn btn-ghost" id="saved-shuffle">Shuffle</button>
-          <button class="btn btn-ghost" id="saved-ph-btn">History</button>
-        </div>
+        <div class="toggle-row pzd-tabs" role="group" aria-label="Puzzle Dashboard"><button type="button" class="toggle" data-tab="puzzle-dash" aria-pressed="false">Overview</button><button type="button" class="toggle" data-tab="puzzle-history" aria-pressed="false">History</button><button type="button" class="toggle" data-tab="saved" aria-pressed="false">Saved</button></div>
+      </div>
+      <div class="btn-row pzd-saved-acts">
+        <button class="btn btn-primary" id="saved-play">Play these</button>
+        <button class="btn btn-ghost" id="saved-shuffle">Shuffle</button>
       </div>
       <div class="saved-sync" id="saved-warn" data-state="error" role="status" style="display:none;">
         <span class="saved-sync-dot" aria-hidden="true"></span>
@@ -7947,19 +8100,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     <div class="history-empty" id="saved-empty" style="display:none;"></div>
   </section>
 
-  <!-- ============ PUZZLE HISTORY ============ -->
+  <!-- ============ PUZZLE HISTORY (the Puzzle Dashboard's History tab) ============ -->
   <!-- Every puzzle the Puzzles drill showed on this device (even ones left
        before a move), plus the user's Lichess puzzle activity. -->
   <section class="view" id="view-puzzle-history">
-    <button class="back-link" id="ph-back" data-nav="setup-puzzle">&larr; Puzzles</button>
+    <button class="back-link pzd-back" id="ph-back" type="button" data-nav="setup-puzzle">&larr; Puzzles</button>
     <div class="panel">
-      <div class="history-head">
+      <div class="history-head pzd-head">
         <div>
           <div class="eyebrow">Puzzles</div>
-          <h1 class="title" style="font-size:26px;">Puzzle History</h1>
+          <h1 class="title" style="font-size:26px;">Puzzle Dashboard</h1>
           <div class="subtitle" id="ph-subtitle">&#8212;</div>
         </div>
-        <div class="saved-head-actions"><button class="btn btn-ghost" id="ph-saved-btn">Saved puzzles</button></div>
+        <div class="toggle-row pzd-tabs" role="group" aria-label="Puzzle Dashboard"><button type="button" class="toggle" data-tab="puzzle-dash" aria-pressed="false">Overview</button><button type="button" class="toggle" data-tab="puzzle-history" aria-pressed="false">History</button><button type="button" class="toggle" data-tab="saved" aria-pressed="false">Saved</button></div>
       </div>
       <div class="field-hint" id="ph-notice" role="status" hidden></div>
       <div class="saved-sync" id="ph-warn" data-state="scope" role="status" style="display:none;">
@@ -8247,7 +8400,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <button class="pd-opt" id="home-play-online" type="button" data-door="card-play-online"><span class="pd-opt-name">Play Online</span><span class="pd-opt-hint">A real person</span></button>
           <button class="pd-opt" id="home-play-bot" type="button" data-door="card-play-bot"><span class="pd-opt-name">Play Bot</span><span class="pd-opt-hint">Lichess&rsquo;s computer</span></button>
           <button class="pd-opt" id="home-history" type="button" data-door="card-history"><span class="pd-opt-name">Game History</span><span class="pd-opt-hint">Lichess, chess.com</span></button>
-          <button class="pd-opt" id="home-saved" type="button" data-door="card-saved"><span class="pd-opt-name">Saved Puzzles</span><span class="pd-opt-hint">To play again</span></button>
+          <button class="pd-opt" id="home-saved" type="button" data-door="card-saved"><span class="pd-opt-name">Puzzle Dashboard</span><span class="pd-opt-hint">Stats and saved</span></button>
           <button class="pd-opt" id="home-challenges" type="button" data-door="card-challenges"><span class="pd-opt-name">Challenges</span><span class="pd-opt-hint" id="home-challenges-hint">Challenge a friend</span></button>
         </div>
       </div>
@@ -12160,7 +12313,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // Game History's filters ride in the link (lazy: their code runs later)
     history:      { view:'history',          card:'card-history',     startBtn:null, fields:[],
                     getParams:()=> ghViewParams(), applyParams:p=> ghApplyViewParams(p) },
-    saved:        { view:'saved',            card:'card-saved',       startBtn:null, fields:[] },
+    // the Puzzle Dashboard's three tabs: Overview (?days=7|90, the PUZZLE DASHBOARD block), Saved, History; #saved and
+    // #puzzle-dashboard open through hidden doors (the Play tile opens Overview), and go back to Play
+    'puzzle-dashboard': { view:'puzzle-dash', card:'pzd-door-dash', startBtn:null, fields:[],
+                    getParams:()=> pdbLinkParams(), applyParams:p=> pdbApplyLinkParams(p) },
+    saved:        { view:'saved',            card:'pzd-door-saved',   startBtn:null, fields:[] },
     'puzzle-history': { view:'puzzle-history', card:'setup-ph-btn', startBtn:null,
                     fields:[ {param:'show', type:'toggle', row:'ph-show-row'} ] }
   };
@@ -12308,6 +12465,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // Puzzle History (all bail until its block has run: boot shows the menu first).
     if(PH) phSaveGen++;                      // a history Save still fetching won't open over the new screen
     if(name==='puzzle-history') phShown();
+    // the Puzzle Dashboard: its tabs and back pill, Overview's numbers, a RATED run's setup put back once it's left
+    if(pdbReady) pdbOnView(name);
     if(name==='menu' || name==='setup-puzzle') phRenderLeft();
     // Refresh whether there's a live Lichess game to offer "Return to
     // game" for every time the menu comes on screen -- covers both
@@ -23044,7 +23203,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       document.getElementById('pz-side-dot').className = 'side-dot ' + roundPz.solverColor;
       document.getElementById('pz-hud-mode-text').textContent = (roundPz.solverColor==='w'?'WHITE':'BLACK') + ' TO MOVE';
       document.getElementById('pz-hud-round').textContent = replay
-        ? (replay.kind==='history' ? 'Practice' : 'Saved '+replay.pos+' of '+replay.total)+' \u00b7 rating '+roundPz.rating+' \u00b7 '+replay.label
+        ? (replay.kind==='history' ? 'Practice' : replay.kind==='misses' ? 'Practice '+replay.pos+' of '+replay.total : 'Saved '+replay.pos+' of '+replay.total)+' \u00b7 rating '+roundPz.rating+' \u00b7 '+replay.label
         : 'Puzzle '+roundNumPz+' \u00b7 rating '+roundPz.rating+' \u00b7 '+pzThemeLabel(settingsPz.theme);
       pzRefreshMeta();
       pzRefreshTurnCard();
@@ -40662,10 +40821,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const skip = document.getElementById('pz-skip');
     const back = document.querySelector('#view-play-puzzle > .back-link');
     // Where the run goes back to: Saved puzzles, Puzzle history (a one-puzzle
-    // practice run from there), or the Puzzles setup for a live session.
+    // practice run from there), the Puzzle Dashboard (its misses to replay),
+    // or the Puzzles setup for a live session.
     const home = on ? (SP_PLAY.home||'saved') : 'setup-puzzle';
-    const name = home==='puzzle-history' ? 'Puzzle history' : home==='saved' ? 'Saved puzzles' : 'Change settings';
-    next.textContent = on ? (last ? 'Back to '+name.toLowerCase() : 'Next saved puzzle') : 'Next puzzle';
+    const name = home==='puzzle-history' ? 'Puzzle history' : home==='saved' ? 'Saved puzzles' : home==='puzzle-dash' ? 'Puzzle Dashboard' : 'Change settings';
+    next.textContent = on ? (last ? 'Back to '+(home==='puzzle-dash' ? name : name.toLowerCase()) : SP_PLAY.byId ? 'Next missed puzzle' : 'Next saved puzzle') : 'Next puzzle';
     skip.textContent = on ? (last ? 'Skip' : 'Skip to next') : 'Skip puzzle';
     [pzResultBanner, pzErrorBanner].forEach(b=>{
       const btn = b.querySelector('.btn-row button[data-nav]');
@@ -40691,7 +40851,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function spAdvance(){
     if(!SP_PLAY) return;
     SP_PLAY.index++;
-    if(SP_PLAY.index >= SP_PLAY.queue.length){ const home = SP_PLAY.home; SP_PLAY = null; spPlayUi(); if(home==='puzzle-history') phOpen(); else spOpenLibrary(); return; }
+    if(SP_PLAY.index >= SP_PLAY.queue.length){
+      const home = SP_PLAY.home; SP_PLAY = null; spPlayUi();
+      if(home==='puzzle-history') phOpen(); else if(home==='puzzle-dash') pdbOpen('puzzle-dash'); else spOpenLibrary();
+      return;
+    }
     spStartCurrent();
   }
   // The literal pzStartRound takes ({game, puzzle}, the batch/by-id shape)
@@ -40703,7 +40867,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
   }
   function spStartCurrent(){
-    if(SP_PLAY && SP_PLAY.home==='puzzle-history') return phStartCurrent();
+    // by id (Puzzle History's one puzzle, the Puzzle Dashboard's misses): not only saved puzzles
+    if(SP_PLAY && (SP_PLAY.home==='puzzle-history' || SP_PLAY.byId)) return phStartCurrent();
     if(!SP_PLAY) return;
     while(SP_PLAY.index < SP_PLAY.queue.length && !SP.puzzles[SP_PLAY.queue[SP_PLAY.index]]) SP_PLAY.index++;
     if(SP_PLAY.index >= SP_PLAY.queue.length){ SP_PLAY = null; spPlayUi(); spOpenLibrary(); return; }
@@ -40839,8 +41004,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     spScheduleSync(400);
   }
   function spLibraryShown(){ if(spLibDirty) spRenderLibrary(); }
-  document.getElementById('card-saved').addEventListener('click', spOpenLibrary);
-  document.getElementById('setup-saved-btn').addEventListener('click', spOpenLibrary);
+  // the Play tile and the setup's Saved puzzles open the Puzzle Dashboard (its PUZZLE DASHBOARD block wires them)
   function spInCol(p, col){
     return col==='all' ? true : col===SP_UNSORTED ? !p.collections.length : p.collections.includes(col);
   }
@@ -41101,6 +41265,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function spTokenChanged(){
     liTokenDrop();
+    if(pdbReady) pdbTokenChanged();         // the Puzzle Dashboard's kept numbers wait until the new token's account is known
     GH_STATE.username = null;
     // Loaded games stay while the new token's account is checked (the same
     // account keeps them all); another account's are cleared then, by
@@ -45401,7 +45566,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var PH_ACT = phBlankAct('');      // Lichess activity, this visit only
   var phFetched = new Map();        // id -> spCleanPuzzle entry fetched by id this visit (cap 20)
   var phThumbCache = new Map(), phThumbOwner = null;   // apart from spThumbCache: a node lives in one place only
-  var phFilter = { show:'all' }, phLimit = 40, phReturn = 'setup-puzzle', phDirty = false, phSaveTimer = 0, phStoreFull = false;
+  var phFilter = { show:'all' }, phLimit = 40, phDirty = false, phSaveTimer = 0, phStoreFull = false;   // where it goes back to: pdbReturn
   var phKeepLimit = 0;              // coming back from Analyze: the list as long as it was
   var phFocusKey = null;            // a focused control that came back disabled ("Loading..."), refocused once enabled
   var PH = null;                    // { v:1, dis:{id,at}|null, rows:[...] }, set at the end of this block
@@ -45503,6 +45668,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function phResult(clean){
     if(!PH || !roundPz) return;
     try{
+      // every practice round, logged here or not: the Puzzle Dashboard's practice record (a Lichess-only replay id has no row)
+      if(roundPz.replay && !roundPz.ppCounted){ roundPz.ppCounted = true; pdbPracticeRecord(String(roundPz.id), clean); }
       const row = PH.rows.find(x=> x.id===String(roundPz.id)); if(!row) return;
       if(roundPz.replay){                                   // practice: counters only, once per round
         if(roundPz.phCounted) return; roundPz.phCounted = true;
@@ -45545,10 +45712,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     net:['Couldn\u2019t reach Lichess.', 'This puzzle\u2019s moves come from Lichess the first time it opens here. Check the connection and retry.'],
     bad:['This puzzle wouldn\u2019t load.', 'Open it on Lichess instead.']
   };
-  // From spStartCurrent while SP_PLAY.home is 'puzzle-history' (so Retry,
-  // Next and Skip in the play view work unchanged).
+  // From spStartCurrent while SP_PLAY.home is 'puzzle-history', or for any
+  // run by id (SP_PLAY.byId: the Puzzle Dashboard's misses to replay), so
+  // Retry, Next and Skip in the play view work unchanged. Puzzle History's
+  // run is one puzzle; a run by id plays its queue in turn.
   function phStartCurrent(){
-    const id = SP_PLAY.queue[0];
+    const run = SP_PLAY, id = run.queue[run.index];
     const myFetch = pzResetForRound();
     spPlayUi();
     const sp = SP.puzzles[id];
@@ -45556,15 +45725,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!p){
       pzStatusEl.textContent = 'Fetching puzzle #'+id+' from Lichess\u2026';
       phFetchEntry(id).then(res=>{
-        if(myFetch!==pzFetchToken || !SP_PLAY || SP_PLAY.home!=='puzzle-history') return;
+        if(myFetch!==pzFetchToken || SP_PLAY!==run || run.queue[run.index]!==id) return;
         if(res.entry) return phStartCurrent();
         const m = PH_FETCH_MSG[res.why] || PH_FETCH_MSG.net;
-        pzShowError(m[0].replace('#ID', '#'+id), m[1]);
+        pzShowError(m[0].replace('#ID', '#'+id), run.byId && res.why==='missing' ? 'Skip to the next one.' : m[1]);
       });
       return;
     }
-    try{ pzStartRound(spRoundEntry(p), myFetch, { pos:1, total:1, label:SP_PLAY.label, kind:'history', firstTry:SP_PLAY.firstTry||null }); }
-    catch(e){ pzShowError('This puzzle wouldn\u2019t load.', 'Go back to Puzzle history and try another, or open it on Lichess.'); }
+    try{ pzStartRound(spRoundEntry(p), myFetch, { pos:run.index+1, total:run.queue.length, label:run.label, kind:run.kind||'history', firstTry:run.firstTry||null }); }
+    catch(e){ pzShowError('This puzzle wouldn\u2019t load.', run.byId ? 'Skip to the next one, or open it on Lichess.' : 'Go back to Puzzle history and try another, or open it on Lichess.'); }
   }
   // The public by-id call (no token), as spHydrateOne makes it.
   async function phFetchEntry(id){
@@ -45657,12 +45826,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* ---- The view ---- */
   function phOpen(from, notice){
     if(!PH) return;
-    if(from) phReturn = from;                                   // phOpen() keeps the old target (the end of a practice run)
-    const back = document.getElementById('ph-back');
-    back.dataset.nav = phReturn;
-    back.innerHTML = phReturn==='saved' ? '&larr; Saved puzzles' : phReturn==='menu' ? '&larr; All drills' : '&larr; Puzzles';
+    // the Puzzle Dashboard's one return target (all three tabs); phOpen() keeps it (the end of a practice run, a tab)
+    if(from) pdbSetReturn(from);
     const n = document.getElementById('ph-notice'); n.textContent = notice || ''; n.hidden = !notice;
-    showView('puzzle-history');                                 // phShown() runs from showView
+    showView('puzzle-history');                                 // phShown() and the back pill (pdbSyncHeads) run from showView
   }
   function phShown(){ if(!PH) return; phLimit = phKeepLimit || 40; phKeepLimit = 0; phRender(); phLoadActivity(false); }
 
@@ -45941,6 +46108,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       act.state = 'error';
       if(err && err.status===429){
         act.detail = 'slow'; act.until = Date.now() + 60000;
+        spBackoffUntil = Math.max(spBackoffUntil, act.until);    // one wait for everything that talks to Lichess
         setTimeout(()=>{ if(views['puzzle-history'].classList.contains('active')){ phRenderSync(); phRender(); } }, 60500);
       }
       else act.detail = 'net';
@@ -46039,8 +46207,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(had) phFocusCard((t, i)=> i >= n, 'ph-more');                       // the first new card, where the button was
   });
   document.getElementById('setup-ph-btn').addEventListener('click', ()=> phOpen('setup-puzzle'));
-  document.getElementById('saved-ph-btn').addEventListener('click', ()=> phOpen('saved'));
-  document.getElementById('ph-saved-btn').addEventListener('click', spOpenLibrary);
   ['ph-left-menu', 'ph-left-setup'].forEach(bid=>{
     const b = document.getElementById(bid);
     b.querySelector('.ph-left-go').addEventListener('click', ()=>{ if(b.dataset.pid) phReplay(b.dataset.pid, 'Puzzle history'); });
@@ -46067,6 +46233,687 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     btn.addEventListener('click', ()=>{ if(roundPz) phShare(String(roundPz.id), btn, document.querySelector('.pz-meta-card')); });
   })();
 
+  /* ================= PUZZLE DASHBOARD =================
+     One screen for puzzles, three tabs under one head (the back pill, "Puzzle Dashboard", Overview | History | Saved):
+     Overview (#view-puzzle-dash, #puzzle-dashboard[?days=7|90]) is drawn here; History and Saved are Puzzle History's
+     and Saved Puzzles' own views, unchanged inside (#puzzle-history, #saved). Home's 00 tile (#home-saved, through its
+     door) and the Play page's tile (#card-saved) open Overview; the Puzzles setup's two buttons open their own tab.
+     All three tabs go back to one place (pdbReturn), set by whoever opened the screen.
+     Overview reads Lichess one request at a time (behind Game notes, Game History and the Saved sync, with their shared
+     429 wait, spBackoffUntil), each answer standing on its own:
+       - GET /api/puzzle/dashboard/{days} (puzzle:read): first try, fixed later, to replay, and the themes, listed by
+         lila's own rules (PuzzleDashboard.scala): a theme counts when nb > global.nb / 40; Work on = 3 or more misses
+         and a performance under yours, worst first (a tie: the more played first); Strengths = 3 or more first-try
+         wins and a performance over yours, best first (lila's takeRight + reverse: a tie, the less played first); 8
+         each. performance = puzzleRatingAvg - 500 + round(1000 * firstWins / nb), clear only with nb >= 6, 2
+         first-try wins and 2 misses (Lichess's "?"; the words here say why). A 404 is a period with no puzzle first
+         played in it, never "Lichess didn't answer".
+       - GET /api/account (perfs.puzzle: the live rating) and GET /api/user/{id}/rating-history (its "puzzle" series,
+         "Puzzles" before lila bdd7977) for the trend: the live rating against the last daily point on or before the
+         period's start.
+       - GET /api/puzzle/replay/{days}/{theme}, only when Replay is pressed: the misses still to replay, oldest first
+         (PuzzleReplay.scala: every one of them, its $limit 100 is inside the per-round $lookup; Chess Arcade keeps the
+         oldest 100, "Replay the oldest 100"). Its count names the buttons for the hour Lichess keeps the list (an
+         older kept list names nothing). They play as a practice run by id (SP_PLAY.byId, through phStartCurrent): never reported
+         (pzReportResult's replay guard), so Lichess keeps listing them, and this device keeps its own record of what
+         was practiced (wavyChessPrepPuzzlePractice, written by phResult; its own key, so an old build's phPersist can't
+         drop it).
+     RATED buttons start the Puzzles drill itself through its link (#puzzle?theme=..&start=1), which reports as it
+     always does; Harder puzzles is Harder for that run only (pdbRunRestore puts the setup back, after a reload of the
+     run too: wavyChessPrepPuzzleDashRun in sessionStorage, read once the boot's link has started the run again).
+     Kept on this device: one copy per Lichess account and token (wavyChessPrepPuzzleDash, shown while Lichess doesn't
+     answer; tk, a hash of the token it was read with, so a new token never shows it before Lichess says whose the token
+     is), and the period last picked (wavyChessPrepPuzzleDashPrefs; a link's period wins). A token saved while an answer
+     is on its way: pdb.gen moves on, and that answer is dropped unread.
+     Everything here is a var: showView runs before this block at boot, and pdbReady says when it's set up. */
+  var PDB_KEY = 'wavyChessPrepPuzzleDash', PDB_PRACTICE_KEY = 'wavyChessPrepPuzzlePractice', PDB_PREFS_KEY = 'wavyChessPrepPuzzleDashPrefs';
+  var PDB_RUN_KEY = 'wavyChessPrepPuzzleDashRun';
+  var PDB_DAYS = [7, 30, 90], PDB_MIN = 60000, PDB_DAY = 864e5, PDB_PRACTICE_MAX = 500;
+  // fresh enough: Lichess keeps the dashboard 10 s, the rating chart 10 minutes and the replay list an hour
+  var PDB_FRESH = { token:10 * PDB_MIN, dash:PDB_MIN, acct:10 * PDB_MIN, hist:10 * PDB_MIN, replay:60 * PDB_MIN };
+  var PDB_SAVED_SYNC = 5 * PDB_MIN;          // the Saved tab syncs only when the last sync is older than this
+  // lila's irrelevantThemes (lengths, mate in N, the eval goals, master games) and the hidden checkFirst
+  var PDB_SKIP = ['oneMove', 'short', 'long', 'veryLong', 'mateIn1', 'mateIn2', 'mateIn3', 'mateIn4', 'mateIn5', 'equality', 'advantage',
+    'crushing', 'master', 'masterVsMaster', 'checkFirst'];
+  var PDB_BACK = { menu:'&larr; All drills', 'setup-puzzle':'&larr; Puzzles', hub:'&larr; Play' };
+  var PDB_TABS = ['puzzle-dash', 'puzzle-history', 'saved'];
+  // where all three tabs go back to: home's 00 card 'menu', the Play page 'hub', the setup 'setup-puzzle'. Every door
+  // names its own; the paths that name none (a cold #puzzle/<id> link's practice, then History) go where v113 went.
+  var pdbReturn = 'setup-puzzle';
+  var pdbRunRestore = null;           // a RATED run's setup theme and difficulty, put back once the run is left
+  var pdbReady = false;
+  // state: 'off' no token | 'wait' not checked yet | 'bad' Lichess no longer accepts it | 'scope' no puzzle:read | 'ok' |
+  // 'down' Lichess didn't answer and nothing is kept for the period. shown: the period whose numbers are on screen.
+  // held: what was kept, set aside after a token change until Lichess says whose the new token is. tk: the token the
+  // numbers in memory were read with (pdbTk). gen: moves on with every token change (an answer from before is dropped).
+  // down: the period Lichess didn't answer for (its own numbers only get the warning). lock: another period is on its
+  // way, so the period's own buttons (Replay, the themes' RATED) wait for it.
+  var pdb = { days:30, shown:0, state:'off', user:'', tk:'', gen:0, acct:null, hist:null, histFail:false, dash:{}, replay:{}, held:null,
+    down:null, retryAt:0, retryTimer:0, open:{ weak:false, strong:false }, busy:null, replaying:false, lock:false };
+
+  /* ---- the head: tabs, back pill, period ---- */
+  function pdbBackOf(f){ return PDB_BACK[f] ? f : 'hub'; }
+  function pdbSetReturn(f){ pdbReturn = pdbBackOf(f); }
+  // the active tab and the back pill on all three views (from showView, whichever way a tab came on)
+  function pdbSyncHeads(){
+    PDB_TABS.forEach(v=>{
+      const view = views[v];
+      if(!view) return;
+      view.querySelectorAll('.pzd-tabs [data-tab]').forEach(b=>{ const on = b.dataset.tab===currentView; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+      const back = view.querySelector(':scope > .back-link.pzd-back');
+      if(back){ back.dataset.nav = pdbReturn; back.innerHTML = PDB_BACK[pdbReturn]; }
+    });
+  }
+  // open a tab: from = who opened the screen (omitted: the target stays, as on a tab flip); focus: onto the new view's tab
+  function pdbOpen(tab, from, focus){
+    if(from) pdbSetReturn(from);
+    if(tab==='saved'){
+      spLibDirty = true;
+      showView('saved');
+      // a tab flip is no reason to read every study again: only a sync more than 5 minutes old
+      if(Date.now() - ((SP.sync && SP.sync.lastSync) || 0) > PDB_SAVED_SYNC) spScheduleSync(400);
+    } else if(tab==='puzzle-history') phOpen();
+    else showView('puzzle-dash');
+    if(focus){ const b = views[currentView] && views[currentView].querySelector('.pzd-tabs .toggle.active'); if(b) b.focus({ preventScroll:true }); }
+  }
+  // showView: a screen came on
+  function pdbOnView(name){
+    if(PDB_TABS.includes(name)) pdbSyncHeads();
+    if(name==='puzzle-dash') pdbShown();
+    if(pdbRunRestore && name.indexOf('play')!==0) pdbRestoreRun();
+  }
+  function pdbSetDays(d, keep){
+    if(!PDB_DAYS.includes(d)) return;
+    pdb.days = d;
+    document.querySelectorAll('#pzd-days [data-val]').forEach(b=>{ const on = Number(b.dataset.val)===d; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    if(keep){ try{ localStorage.setItem(PDB_PREFS_KEY, JSON.stringify({ days:d })); }catch(e){} }
+    if(currentView==='puzzle-dash') dlSyncHash('puzzle-dashboard');
+  }
+  // the link: ?days= unless it's the 30 days Lichess's own page opens on (a link without it means 30)
+  function pdbLinkParams(){ return new URLSearchParams(pdb.days!==30 ? { days:String(pdb.days) } : {}); }
+  function pdbApplyLinkParams(p){ const d = Number(p.get('days')) || 30; if(PDB_DAYS.includes(d) && d!==pdb.days){ pdbSetDays(d); pdbLoad(); } }
+  function pdbShown(){
+    pdbRender();
+    // a tick later: a link's ?days= (openDeepLink applies it right after the door's click) is the period asked for
+    Promise.resolve().then(()=>{ if(currentView==='puzzle-dash') pdbLoad(); });
+  }
+
+  /* ---- the kept copy: one record, tied to the Lichess account ---- */
+  function pdbInt(x){ const n = Math.round(Number(x)); return isFinite(n) && n > 0 ? n : 0; }
+  function pdbCleanPerf(r){
+    if(!r || typeof r!=='object') return null;
+    const nb = pdbInt(r.nb), fw = Math.min(nb, pdbInt(r.firstWins)), rw = Math.min(nb - fw, pdbInt(r.replayWins));
+    return nb ? { nb, firstWins:fw, replayWins:rw, puzzleRatingAvg:pdbInt(r.puzzleRatingAvg), performance:pdbInt(r.performance) } : null;
+  }
+  // Lichess's answer, or a kept one: whole numbers, theme keys that can't carry markup; no puzzles = null
+  function pdbCleanDash(j){
+    const g = j && typeof j==='object' ? pdbCleanPerf(j.global) : null;
+    if(!g) return null;
+    const themes = {};
+    if(j.themes && typeof j.themes==='object') Object.keys(j.themes).slice(0, 200).forEach(k=>{
+      const t = j.themes[k], r = t && typeof t==='object' ? pdbCleanPerf(t.results) : null;
+      if(r && PH_THEME_RE.test(k)) themes[k] = { theme:typeof t.theme==='string' ? t.theme.slice(0, 60) : k, results:r };
+    });
+    return { global:g, themes };
+  }
+  // the oldest 100 of Lichess's list (it sends them all, oldest first)
+  function pdbCleanIds(a){ return (Array.isArray(a) ? a : []).map(String).filter(id=> /^\w{5}$/.test(id)).slice(0, 100); }
+  // the token the kept numbers were read with: a short hash (gnFnv), never the token itself
+  function pdbTk(){ const t = getLichessToken(); return t ? gnFnv(t) : ''; }
+  function pdbCacheRead(){ try{ const c = JSON.parse(localStorage.getItem(PDB_KEY) || 'null'); return c && c.v===2 && typeof c.user==='string' && c.user ? c : null; }catch(e){ return null; } }
+  function pdbCacheWrite(){
+    if(!pdb.user || !pdb.tk) return;
+    const dash = {}, replay = {};
+    PDB_DAYS.forEach(d=>{ const x = pdb.dash[d]; if(x && x.data) dash[d] = x; });     // a 404 is the truth now, never a copy to fall back on
+    Object.keys(pdb.replay).forEach(k=>{ if(pdbFresh(pdb.replay[k], PDB_FRESH.replay)) replay[k] = pdb.replay[k]; });   // past its hour, a list names nothing
+    try{ localStorage.setItem(PDB_KEY, JSON.stringify({ v:2, user:pdb.user, tk:pdb.tk, acct:pdb.acct, hist:pdb.hist, dash, replay })); }catch(e){}
+  }
+  function pdbCacheDrop(){
+    Object.assign(pdb, { user:'', tk:'', acct:null, hist:null, histFail:false, dash:{}, replay:{}, shown:0, held:null });
+    try{ localStorage.removeItem(PDB_KEY); }catch(e){}
+  }
+  function pdbAdopt(c){
+    try{
+      const at = (x)=> x && typeof x==='object' && isFinite(x.at) ? Number(x.at) : 0;
+      pdb.user = c.user.toLowerCase().slice(0, 40);
+      pdb.tk = String(c.tk || '').slice(0, 16);
+      if(at(c.acct)){ const pz = c.acct.puzzle; pdb.acct = { at:at(c.acct), puzzle: pz && pdbInt(pz.rating) ? { rating:pdbInt(pz.rating), prov:!!pz.prov } : null, name:String(c.acct.name || '').slice(0, 40) }; }
+      if(at(c.hist) && Array.isArray(c.hist.points)) pdb.hist = { at:at(c.hist), points:c.hist.points.filter(p=> Array.isArray(p) && pdbInt(p[0]) && pdbInt(p[1])).map(p=> [pdbInt(p[0]), pdbInt(p[1])]).slice(-200) };
+      PDB_DAYS.forEach(d=>{ const x = c.dash && c.dash[d], data = at(x) ? pdbCleanDash(x.data) : null; if(data) pdb.dash[d] = { at:at(x), data }; });
+      if(c.replay && typeof c.replay==='object') Object.keys(c.replay).slice(0, 60).forEach(k=>{
+        const x = c.replay[k];
+        if(/^(7|30|90)\/[A-Za-z0-9]{1,30}$/.test(k) && pdbFresh({ at:at(x) }, PDB_FRESH.replay)){
+          const ids = pdbCleanIds(x.remaining);
+          pdb.replay[k] = { at:at(x), nb:ids.length, all:Math.max(ids.length, pdbInt(x.all)), remaining:ids };
+        }
+      });
+    }catch(e){ pdbCacheDrop(); }
+  }
+  // a token saved in Settings: what's kept waits aside until Lichess says whose the new token is (pdbTokenState); an
+  // answer still on its way was asked with the old token, so it's dropped (pdb.gen)
+  function pdbTokenChanged(){
+    pdb.gen++;
+    if(!pdb.held && pdb.user) pdb.held = { user:pdb.user, acct:pdb.acct, hist:pdb.hist, dash:pdb.dash, replay:pdb.replay };
+    Object.assign(pdb, { user:'', tk:'', acct:null, hist:null, histFail:false, dash:{}, replay:{}, shown:0, down:null, state:getLichessToken() ? 'wait' : 'off' });
+    if(currentView==='puzzle-dash') pdbShown();
+  }
+
+  /* ---- Lichess: one request at a time, each answer on its own ---- */
+  function pdbFresh(x, ms){ return !!x && !!x.at && Date.now() - x.at < ms; }
+  function pdbNap(ms){ return new Promise(r=> setTimeout(r, ms)); }
+  async function pdbApi(path){
+    for(let i = 0; i < 100 && (gnSyncRunning || ghFetching || spSyncRunning); i++) await pdbNap(200);
+    if(Date.now() < spBackoffUntil){ const e = new Error('Lichess asked to slow down'); e.status = 429; e.until = spBackoffUntil; throw e; }
+    try{ return await spApi(path); }
+    catch(e){ pdbSlow(e); throw e; }
+  }
+  // a 429 from Lichess: one wait for everything that talks to Lichess (Game History, Game notes and the Saved sync read
+  // it too), the token check's included
+  function pdbSlow(e){ if(e && e.status===429){ spBackoffUntil = Math.max(spBackoffUntil, Date.now() + 65000); e.until = spBackoffUntil; } }
+  // Lichess didn't answer for period d: Try again turns on by itself once the wait is over (nothing promises a retry it
+  // doesn't make), and only d's numbers say so
+  function pdbMarkDown(e, d){
+    const st = (e && e.status) || 0;
+    pdb.down = { status:st, at:Date.now(), days:d };
+    pdb.retryAt = (e && e.until) || Date.now() + (st===429 ? 65000 : 30000);
+    clearTimeout(pdb.retryTimer);
+    pdb.retryTimer = setTimeout(()=>{ if(currentView==='puzzle-dash') pdbRender(); }, Math.max(0, pdb.retryAt - Date.now()) + 50);
+  }
+  // g: the token generation the caller asked under ('stale' once a token was saved meanwhile: nothing is touched)
+  async function pdbTokenState(maxAge, g){
+    const c = spScopeCache, fresh = c.token===getLichessToken() && c.checkedAt && Date.now() - c.checkedAt < maxAge;
+    if(!fresh && Date.now() < spBackoffUntil){ const e = new Error('Lichess asked to slow down'); e.status = 429; e.until = spBackoffUntil; throw e; }
+    let info;
+    try{ info = await liTokenInfo(maxAge); }
+    catch(e){ pdbSlow(e); throw e; }
+    if(g!==pdb.gen) return 'stale';
+    if(!info) return 'off';
+    if(info.bad) return 'bad';
+    if(!info.scopes.has('puzzle:read')) return 'scope';
+    const uid = info.userId || '';
+    // another account's numbers never show: the kept copy is that account's
+    if(pdb.held){ const h = pdb.held; pdb.held = null; if(h.user && h.user===uid) Object.assign(pdb, { user:h.user, acct:h.acct, hist:h.hist, dash:h.dash, replay:h.replay }); else pdbCacheDrop(); }
+    if(pdb.user && uid && pdb.user!==uid) pdbCacheDrop();
+    if(uid) pdb.user = uid;
+    pdb.tk = pdbTk();
+    return 'ok';
+  }
+  // Lichess turned the token down (a 401 / 403): checked again, then the token box ("no longer accepts" even when the
+  // check passes); the check not answering is Lichess not answering for period d
+  async function pdbTokenTurnedDown(g, d){
+    liTokenDrop();
+    let s;
+    try{ s = await pdbTokenState(0, g); }
+    catch(e){ if(g===pdb.gen){ pdbMarkDown(e, d); pdb.state = pdb.dash[d] ? 'ok' : 'down'; } return; }
+    if(g===pdb.gen) pdb.state = s==='ok' ? 'bad' : s;
+  }
+  async function pdbLoadOnce(d, force){
+    const g = pdb.gen, live = ()=> g===pdb.gen;          // a token saved meanwhile: what comes back was asked with the old one
+    if(!getLichessToken()){ pdb.state = 'off'; return; }
+    let ts;
+    try{ ts = await pdbTokenState(PDB_FRESH.token, g); }
+    catch(e){ if(live()){ pdbMarkDown(e, d); pdb.state = pdb.dash[d] && !pdb.held && pdb.tk===pdbTk() ? 'ok' : 'down'; } return; }
+    if(!live()) return;
+    pdb.state = ts;
+    if(ts!=='ok') return;
+    if(force || !pdbFresh(pdb.dash[d], PDB_FRESH.dash)){
+      try{
+        const r = await pdbApi('/api/puzzle/dashboard/'+d);
+        if(!live()) return;
+        if(r.status===401 || r.status===403){ await pdbTokenTurnedDown(g, d); return; }
+        let data = null;                                     // a 404: no puzzle first played in the period
+        if(r.status!==404 && !r.ok){ const e = new Error('status '+r.status); e.status = r.status; throw e; }
+        if(r.status!==404){ data = pdbCleanDash(await r.json()); if(!live()) return; }
+        pdb.dash[d] = { at:Date.now(), data };
+        pdb.down = null;
+      }catch(e){ if(!live()) return; pdbMarkDown(e, d); if(!pdb.dash[d]){ pdb.state = 'down'; return; } }
+    } else if(pdb.down && pdb.down.days!==d) pdb.down = null;    // this period's own answer is on screen, and it's fresh
+    pdb.state = 'ok';
+    if(pdb.down) return;                                     // Lichess isn't answering: the rest stays as it was
+    if(!pdbFresh(pdb.acct, PDB_FRESH.acct)){
+      try{
+        const r = await pdbApi('/api/account');
+        if(r.ok){
+          const j = await r.json(), pz = j && j.perfs && j.perfs.puzzle;
+          if(!live()) return;
+          pdb.acct = { at:Date.now(), puzzle: pz && pdbInt(pz.rating) ? { rating:pdbInt(pz.rating), prov:!!pz.prov } : null, name:String((j && (j.username || j.id)) || '').slice(0, 40) };
+        }
+      }catch(e){}                                            // the kept rating stays
+    }
+    if(!live()) return;
+    if(!pdbFresh(pdb.hist, PDB_FRESH.hist)){
+      try{
+        const who = pdb.user || (pdb.acct && pdb.acct.name) || '';
+        if(!who) throw new Error('no account');
+        const r = await pdbApi('/api/user/'+encodeURIComponent(who)+'/rating-history');
+        if(!r.ok) throw new Error('status '+r.status);
+        const all = await r.json(), s = Array.isArray(all) ? all.find(x=> x && (x.name==='puzzle' || x.name==='Puzzles')) : null;
+        if(!live()) return;
+        const pts = [];
+        (s && Array.isArray(s.points) ? s.points : []).forEach(p=>{
+          if(!Array.isArray(p)) return;
+          const t = new Date(Number(p[0]), Number(p[1]), Number(p[2])).getTime(), rt = pdbInt(p[3]);   // the month counts from 0
+          if(isFinite(t) && rt) pts.push([t, rt]);
+        });
+        pts.sort((a, b)=> a[0] - b[0]);
+        const cut = Date.now() - 91 * PDB_DAY, i = pts.findIndex(p=> p[0] > cut);       // 90 days and the point before them
+        pdb.hist = { at:Date.now(), points: i < 0 ? pts.slice(-1) : pts.slice(Math.max(0, i - 1)) };
+        pdb.histFail = false;
+      }catch(e){ if(live()) pdb.histFail = true; }
+    }
+    if(live()) pdbCacheWrite();
+  }
+  // Loads the period on screen, then again while the period (a fast 7 then 90) or the token changed under it: what
+  // shows is always labeled with the period it is for, and read with the token saved
+  async function pdbLoad(force){
+    if(pdb.busy){ if(!pdbFresh(pdb.dash[pdb.days], PDB_FRESH.dash)) pdbWait(pdb.days); return pdb.busy; }
+    const run = (async ()=>{
+      try{
+        let d, g;
+        do{
+          d = pdb.days; g = pdb.gen;
+          if(force || !pdbFresh(pdb.dash[d], PDB_FRESH.dash)) pdbWait(d);
+          await pdbLoadOnce(d, force);
+          force = false;
+          if(g===pdb.gen && pdb.dash[d] && pdb.state==='ok') pdb.shown = d;
+        } while(d!==pdb.days || g!==pdb.gen);
+      } finally {
+        pdbWait(0);
+        if(currentView==='puzzle-dash') pdbRender();
+      }
+    })();
+    pdb.busy = run;
+    try{ await run; }catch(e){} finally{ if(pdb.busy===run) pdb.busy = null; }
+  }
+  // "Asking Lichess..." beside the period; the numbers on screen dim under their labels (the page keeps its height),
+  // and while they're another period's, that period's Replay and theme buttons wait (pdb.lock)
+  function pdbWait(d){
+    const w = document.getElementById('pzd-wait'), body = document.getElementById('pzd-body');
+    if(!w || !body) return;
+    w.textContent = d ? 'Asking Lichess for the last '+d+' days\u2026' : '';
+    body.classList.toggle('is-loading', !!d && !!pdb.shown);
+    body.setAttribute('aria-busy', d ? 'true' : 'false');
+    const lock = !!d && !!pdb.shown && d!==pdb.shown, turned = lock!==pdb.lock;
+    pdb.lock = lock;
+    if(d && !pdb.shown && getLichessToken() && currentView==='puzzle-dash') pdbRender(true);
+    else if(turned && currentView==='puzzle-dash') pdbRender();
+  }
+  // Replay: Lichess's list for the period (kept an hour, as Lichess keeps it); all: how many Lichess sent
+  async function pdbReplayList(d, theme, g){
+    const k = d+'/'+theme;
+    if(!pdbFresh(pdb.replay[k], PDB_FRESH.replay)){
+      const r = await pdbApi('/api/puzzle/replay/'+d+'/'+encodeURIComponent(theme));
+      const j = r.ok ? await r.json() : null;
+      if(g!==pdb.gen){ const e = new Error('the token changed'); e.stale = true; throw e; }      // the old token's list
+      if(r.status===404) pdb.replay[k] = { at:Date.now(), nb:0, all:0, remaining:[] };          // nothing to replay
+      else if(!r.ok){ const e = new Error('status '+r.status); e.status = r.status; throw e; }
+      else {
+        const all = j && j.replay && Array.isArray(j.replay.remaining) ? j.replay.remaining : [], ids = pdbCleanIds(all);
+        pdb.replay[k] = { at:Date.now(), nb:ids.length, all:Math.max(ids.length, Math.min(5000, all.length)), remaining:ids };
+      }
+      pdbCacheWrite();
+    }
+    return pdb.replay[k];
+  }
+  // the list Lichess sent within the hour, else none (an older one names no button: the dashboard's count does)
+  function pdbReplayKnown(days, theme){ const x = pdb.replay[days+'/'+theme]; return pdbFresh(x, PDB_FRESH.replay) ? x : null; }
+
+  /* ---- practice: this device's record, and the queue ---- */
+  function pdbPracticeLoad(){
+    const out = new Map();
+    try{
+      const o = JSON.parse(localStorage.getItem(PDB_PRACTICE_KEY) || 'null'), p = o && o.v===1 && o.p && typeof o.p==='object' ? o.p : {};
+      Object.keys(p).forEach(id=>{ const v = p[id]; if(/^\w{5}$/.test(id) && Array.isArray(v)) out.set(id, { pt:pdbInt(v[0]), pc:pdbInt(v[1]), pl:pdbInt(v[2]) }); });
+    }catch(e){}
+    return out;
+  }
+  // every practice round, saved or not, logged or not (phResult): the only trace a Lichess-only replay id leaves
+  function pdbPracticeRecord(id, clean){
+    if(!/^\w{5}$/.test(id)) return;
+    try{
+      const m = pdbPracticeLoad(), x = m.get(id) || { pt:0, pc:0, pl:0 };
+      x.pt++; if(clean) x.pc++; x.pl = Date.now();
+      m.set(id, x);
+      const p = {};
+      [...m.entries()].sort((a, b)=> (b[0]===id) - (a[0]===id) || b[1].pl - a[1].pl).slice(0, PDB_PRACTICE_MAX).forEach(([k, v])=> p[k] = [v.pt, v.pc, v.pl]);
+      localStorage.setItem(PDB_PRACTICE_KEY, JSON.stringify({ v:1, p }));
+    }catch(e){}
+  }
+  // practiced here: the record, plus Puzzle History's and Saved's own practice counters
+  function pdbPracticed(){
+    const m = pdbPracticeLoad();
+    if(PH) PH.rows.forEach(r=>{ if(r.pt && !m.has(r.id)) m.set(r.id, { pt:r.pt, pc:r.pc || 0, pl:r.pl || 0 }); });
+    Object.values(SP.puzzles).forEach(p=>{ if(p.practice && p.practice.tries && !m.has(p.id)) m.set(p.id, { pt:p.practice.tries, pc:p.practice.solved || 0, pl:p.practice.last || 0 }); });
+    return m;
+  }
+  // not practiced here first, then practiced, then solved clean; Lichess's order (oldest first) within each
+  function pdbPracticeOrder(ids){
+    const pr = pdbPracticed(), tier = (id)=>{ const p = pr.get(id); return !p ? 0 : p.pc ? 2 : 1; };
+    return ids.map((id, i)=> [tier(id), i, id]).sort((a, b)=> a[0] - b[0] || a[1] - b[1]).map(x=> x[2]);
+  }
+  // a practice run through the Saved machinery, puzzle by puzzle by id (saved copy, the log's moves, else Lichess's
+  // public by-id call): every round has replay set, so nothing is reported; the end comes back to Overview
+  function pdbPracticeQueue(ids, label){
+    if(!ids.length) return;
+    spPlayQueue(ids, 0, label, { home:'puzzle-dash', byId:true, kind:'misses', firstTry:'missed' });
+  }
+  async function pdbReplay(theme, btn){
+    if(pdb.replaying) return;
+    const days = pdb.shown || pdb.days, g = pdb.gen;
+    pdb.replaying = true;
+    pzaBusy(btn, true);
+    let r = null, err = null;
+    try{ r = await pdbReplayList(days, theme, g); }
+    catch(e){ err = e; }
+    finally{ pdb.replaying = false; if(document.contains(btn)) pzaBusy(btn, false); }
+    if(err && !err.stale){
+      // a 401 / 403: the token box, as on the dashboard; anything else: Lichess didn't answer for this period
+      if(err.status===401 || err.status===403) await pdbTokenTurnedDown(g, days);
+      else if(g===pdb.gen) pdbMarkDown(err, days);
+    }
+    if(currentView!=='puzzle-dash') return;                  // left while Lichess answered
+    if(err || g!==pdb.gen || !r.remaining.length){ pdbRender(); return; }
+    pdbPracticeQueue(pdbPracticeOrder(r.remaining), (theme==='mix' ? 'Your misses' : pdbThemeName(theme, '')+' misses')+', last '+days+' days');
+  }
+  // RATED: the drill itself, through its own link; Harder (and the theme) for that run only. The setup's own values
+  // wait in this tab's sessionStorage with the run's address, so a reload mid-run (the link starts the run again)
+  // still puts them back (pdbRunResume).
+  function pdbRated(theme, diff){
+    const was = { theme:settingsPz.theme, difficulty:settingsPz.difficulty };
+    pdbRunRestore = null;
+    openDeepLink('puzzle?theme='+encodeURIComponent(theme)+(diff ? '&difficulty='+encodeURIComponent(diff) : '')+'&start=1');
+    pdbRunRestore = was;
+    if(currentView.indexOf('play')!==0) pdbRestoreRun();     // no run (no token: the setup screen says why)
+    else try{ sessionStorage.setItem(PDB_RUN_KEY, JSON.stringify(Object.assign({ link:decodeURIComponent(location.hash.slice(1)) }, was))); }catch(e){}
+  }
+  // after the boot's own link (openDeepLink(initialHash)): the run a reload started again, by its address
+  function pdbRunResume(){
+    let w = null;
+    try{ w = JSON.parse(sessionStorage.getItem(PDB_RUN_KEY) || 'null'); }catch(e){}
+    if(!w) return;
+    const ok = w.link===initialHash && PUZZLE_THEMES.some(t=> t.v===w.theme)
+      && [...document.querySelectorAll('#puzzle-diff-row .toggle')].some(b=> b.dataset.val===w.difficulty);
+    if(!ok){ try{ sessionStorage.removeItem(PDB_RUN_KEY); }catch(e){} return; }
+    pdbRunRestore = { theme:w.theme, difficulty:w.difficulty };
+    if(currentView.indexOf('play')!==0) pdbRestoreRun();
+  }
+  // set straight on the setup's controls: a click would rewrite the address bar for the Puzzles setup
+  function pdbRestoreRun(){
+    const w = pdbRunRestore;
+    pdbRunRestore = null;
+    try{ sessionStorage.removeItem(PDB_RUN_KEY); }catch(e){}
+    if(!w) return;
+    settingsPz.theme = w.theme; settingsPz.difficulty = w.difficulty;
+    document.querySelectorAll('#puzzle-theme-grid .puzzle-theme-card').forEach(c=> c.classList.toggle('active', c.dataset.val===w.theme));
+    document.querySelectorAll('#puzzle-diff-row .toggle').forEach(b=> b.classList.toggle('active', b.dataset.val===w.difficulty));
+    if(currentView==='setup-puzzle') dlSyncHash('puzzle');
+  }
+
+  /* ---- the numbers ---- */
+  function pdbPct(a, b){ return b ? Math.floor(100 * a / b) : 0; }       // lila floors (firstWinPercent), so 199 of 200 is 99%
+  function pdbFailed(r){ return r.nb - r.firstWins; }
+  function pdbToReplay(r){ return Math.max(0, r.nb - r.firstWins - r.replayWins); }
+  function pdbClear(r){ return r.nb >= 6 && r.firstWins >= 2 && pdbFailed(r) >= 2; }     // lila Results.clear
+  function pdbHasCard(k){ return PUZZLE_THEMES.some(t=> t.v===k); }
+  function pdbThemeName(k, lich){ const l = pzThemeLabel(k); return l && l!==k ? l : (lich || k); }
+  function pdbThemeLists(d){
+    const g = d.global, lim = Math.floor(g.nb / 40);
+    const all = Object.keys(d.themes).filter(k=> !PDB_SKIP.includes(k) && d.themes[k].results.nb > lim)
+      .map(k=> Object.assign({ key:k, name:pdbThemeName(k, d.themes[k].theme) }, d.themes[k].results))
+      .sort((a, b)=> a.performance - b.performance || b.nb - a.nb);
+    return { weak:all.filter(r=> pdbFailed(r) >= 3 && r.performance < g.performance).slice(0, 8),
+      strong:all.filter(r=> r.firstWins >= 3 && r.performance > g.performance).slice(-8).reverse() };
+  }
+  // the live rating (/api/account) against the last daily point on or before the period's start. A point before the
+  // start means no rated puzzle between it and the start (the chart has a point for every day played), so the trend
+  // runs from the start (from: its date); with none before, from the first point in the period.
+  function pdbTrend(days, live){
+    const pts = (pdb.hist && pdb.hist.points) || [];
+    if(!pts.length || !live) return null;
+    const start = Date.now() - days * PDB_DAY;
+    const before = pts.filter(p=> p[0] <= start), inside = pts.filter(p=> p[0] > start);
+    const base = before.length ? before[before.length - 1] : inside[0];
+    const line = (before.length ? [base] : []).concat(inside).map(p=> ({ t:p[0], r:p[1] }));
+    line.push({ t:Date.now(), r:live });
+    return { base:{ t:base[0], r:base[1] }, now:live, line, start, from:Math.max(base[0], start) };
+  }
+  // this device: the log's finished rows in the period (an unfinished one was never reported), History's Not finished,
+  // and Saved
+  function pdbDeviceFacts(days){
+    const rows = PH ? PH.rows : [], since = Date.now() - days * PDB_DAY;
+    const fin = rows.filter(r=> r.t >= since && r.out);
+    let open = 0;
+    try{ open = phMerged().filter(x=> phStateOf(x)==='open').length; }catch(e){}
+    const sp = Object.values(SP.puzzles);
+    return { finished:fin.length, solved:fin.filter(r=> r.out==='solved').length, missedAny:fin.filter(r=> r.out!=='solved').length,
+      open, saved:sp.length, savedMissed:sp.filter(p=> p.firstTry==='missed').length };
+  }
+
+  /* ---- drawing ---- */
+  function pdbDay(ms){ try{ return new Date(ms).toLocaleDateString('en-US', { month:'short', day:'numeric' }); }catch(e){ return new Date(ms).toDateString(); } }
+  function pdbTime(ms){ try{ return new Date(ms).toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }); }catch(e){ return new Date(ms).toTimeString().slice(0, 5); } }
+  // a time of day, with its day when it isn't today ("Oct 31, 4:09 PM": a copy kept from another day)
+  function pdbWhen(ms){ return new Date(ms).toDateString()===new Date().toDateString() ? pdbTime(ms) : pdbDay(ms)+', '+pdbTime(ms); }
+  function pdbPl(n, one, many){ return n+' '+(n===1 ? one : (many || one+'s')); }
+  function pdbTag(t){ return '<span class="pzd-tag">'+t+'</span>'; }
+  function pdbBar(r, thin){
+    const a = r.firstWins, b = r.replayWins, c = pdbToReplay(r);
+    const seg = (cls, v)=> v ? '<i class="'+cls+'" style="flex:'+v+' 1 0"></i>' : '';
+    return '<div class="pzd-bar'+(thin ? ' thin' : '')+'" role="img" aria-label="'+a+' first try, '+b+' fixed later, '+c+' to replay">'+seg('s1', a)+seg('s2', b)+seg('s3', c)+'</div>';
+  }
+  function pdbSpark(tr){
+    if(!tr || tr.line.length < 2) return '';
+    const W = 260, H = 46, P = 4, xs = tr.line.map(p=> p.t), ys = tr.line.map(p=> p.r);
+    let y0 = Math.min(...ys), y1 = Math.max(...ys);
+    if(y1 - y0 < 100){ const m = (y0 + y1) / 2; y0 = m - 50; y1 = m + 50; }      // 100 points at least: a change of 2 looks like 2
+    const x0 = tr.start, x1 = xs[xs.length - 1];                 // the period across the chart; a base point before it sits at its left edge
+    const X = (t)=> P + (W - 2 * P) * (t - x0) / ((x1 - x0) || 1), Y = (r)=> H - P - (H - 2 * P) * (r - y0) / ((y1 - y0) || 1);
+    const path = tr.line.map((p, i)=> (i ? 'L' : 'M')+X(Math.max(p.t, x0)).toFixed(1)+' '+Y(p.r).toFixed(1)).join(' ');
+    const e = tr.line[tr.line.length - 1], by = Y(tr.base.r).toFixed(1);
+    return '<svg class="pzd-spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="Puzzle rating, '+pdbDay(tr.from)+' to today: '+tr.base.r+' to '+tr.now+'">'
+      +'<line x1="'+P+'" x2="'+(W - P)+'" y1="'+by+'" y2="'+by+'" stroke="var(--ink-soft)" stroke-opacity=".7" stroke-width="1" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>'
+      +'<path d="'+path+'" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
+      +'<circle cx="'+X(e.t).toFixed(1)+'" cy="'+Y(e.r).toFixed(1)+'" r="4" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/></svg>';
+  }
+  // no card in the setup's theme grid, no way to start it: no button. Each name starts with the words on the button
+  // (what a voice command says), then what it starts; dis: another period is on its way (pdb.lock)
+  function pdbRatedBtn(key, diff, text, what, cls, dis){
+    return pdbHasCard(key) ? '<button type="button" class="btn btn-ghost '+(cls || 'pzd-sbtn')+'" data-act="rated" data-theme="'+key+'"'+(diff ? ' data-diff="'+diff+'"' : '')
+      +(dis ? ' disabled' : '')+' aria-label="'+text+', rated: '+chEsc(what)+'">'+text+pdbTag('Rated')+'</button>' : '';
+  }
+  // Replay's words: Lichess's own list once it has answered (within the hour), else the dashboard's count; past 100,
+  // the oldest 100 (all Chess Arcade plays). left: the dashboard's "to replay"; no words, no button.
+  function pdbReplayText(left, rp, many){
+    const n = rp ? rp.nb : Math.min(100, left), cut = rp ? rp.all > rp.nb : left > 100;
+    return !n ? '' : cut ? 'Replay the oldest '+n : many ? 'Replay '+pdbPl(n, 'miss', 'misses') : 'Replay '+n;
+  }
+  function pdbThemeRow(r, kind, days){
+    const sure = pdbClear(r), off = !!pdb.down && pdb.down.days===days, lock = pdb.lock, name = chEsc(r.name);
+    if(kind==='weak'){
+      const text = pdbReplayText(pdbToReplay(r), pdbReplayKnown(days, r.key), false);
+      const acts = pdbRatedBtn(r.key, '', 'Puzzles', r.name, '', lock)
+        + (text ? '<button type="button" class="btn btn-ghost pzd-sbtn" data-act="replay" data-theme="'+r.key+'"'+(off || lock ? ' disabled' : '')
+          +' aria-label="'+text+', '+(off ? 'needs Lichess' : 'practice')+': missed '+name+' puzzles">'+text+pdbTag(off ? 'Needs Lichess' : 'Practice')+'</button>' : '');
+      return '<li class="pzd-row"><div class="pzd-row-top"><span class="pzd-name">'+name+'</span>'
+        +'<span class="pzd-perf">'+(sure ? 'performance<b>'+r.performance+'</b>' : 'too few for a performance')+'</span></div>'
+        +'<div class="pzd-row-mid"><span class="pzd-nums">'+r.nb+' played &middot; '+pdbPct(r.firstWins, r.nb)+'% first try</span>'+pdbBar(r, true)+'</div>'
+        +(acts ? '<div class="pzd-acts">'+acts+'</div>' : '')+'</li>';
+    }
+    return '<li class="pzd-row"><div class="pzd-row-top"><span class="pzd-name">'+name+'</span>'
+      +pdbRatedBtn(r.key, 'harder', 'Harder puzzles', r.name, '', lock)+'</div>'
+      +'<div class="pzd-nums">'+r.nb+' played &middot; '+pdbPct(r.firstWins, r.nb)+'% first try &middot; '+(sure ? 'performance '+r.performance : 'too few for a performance')+'</div></li>';
+  }
+  function pdbUseMore(days){
+    if(days >= 90) return '';
+    const to = days===7 ? 30 : 90;
+    return '<div class="pzd-acts"><button type="button" class="btn btn-ghost pzd-sbtn" data-act="days" data-days="'+to+'">Use '+to+' days</button></div>';
+  }
+  function pdbListCol(kind, rows, days){
+    const title = kind==='weak' ? 'Work on' : 'Strengths';
+    const sub = kind==='weak' ? 'Lichess&rsquo;s improvement areas: 3 or more misses, performance under yours.'
+      : 'Lichess&rsquo;s strengths: 3 or more first-try wins, performance over yours.';
+    let body;
+    if(!rows.length) body = '<p class="pzd-none">'+(kind==='weak' ? 'No theme is under your performance with 3 or more misses.' : 'No theme is over your performance with 3 or more first-try wins.')+'</p>';
+    else {
+      const max = 3, open = pdb.open[kind], shown = open ? rows : rows.slice(0, max);
+      body = '<ol class="pzd-list">'+shown.map(r=> pdbThemeRow(r, kind, days)).join('')+'</ol>'
+        +(rows.length > max ? '<button type="button" class="pzd-more" data-act="more" data-kind="'+kind+'" aria-expanded="'+open+'">'+(open ? 'Show '+max : 'Show all '+rows.length)+'</button>' : '');
+    }
+    return '<div class="pzd-col"><h2 class="ch-box-title" id="pzd-h-'+kind+'">'+title+'</h2><p class="pzd-sub">'+sub+'</p>'+body+'</div>';
+  }
+  function pdbThemesCard(d, days){
+    const g = d.global, lists = pdbThemeLists(d), sure = pdbClear(g);
+    const yard = sure
+      ? 'Each theme is measured against your performance, <b>'+g.performance+'</b>: your puzzles averaged '+g.puzzleRatingAvg+', and '
+        +pdbPct(g.firstWins, g.nb)+'% first try '+(g.performance >= g.puzzleRatingAvg ? 'adds '+(g.performance - g.puzzleRatingAvg) : 'takes off '+(g.puzzleRatingAvg - g.performance))+'.'
+      : 'Too few puzzles in the last '+days+' days for a performance yet: Lichess needs 6, with at least 2 first-try wins and 2 misses.';
+    if(!lists.weak.length && !lists.strong.length && (!sure || g.nb < 20))
+      return '<section class="pzd-card pzd-themes" aria-label="Themes"><p class="pzd-yard">'+yard+'</p>'
+        +'<p class="pzd-none first">Not enough puzzles in the last '+days+' days to sort into themes. A theme shows here after 3 misses (Work on) or 3 first-try wins (Strengths).</p>'+pdbUseMore(days)+'</section>';
+    return '<section class="pzd-card pzd-themes" aria-label="Themes"><p class="pzd-yard">'+yard+'</p><div class="pzd-cols">'+pdbListCol('weak', lists.weak, days)+pdbListCol('strong', lists.strong, days)+'</div></section>';
+  }
+  // each row's count is the list its button opens, and the button names that list
+  function pdbDeviceCard(days, withAccuracy){
+    const f = pdbDeviceFacts(days), rows = [];
+    const btn = (act, show, text)=> '<button type="button" class="btn btn-ghost pzd-sbtn" data-act="'+act+'" data-show="'+show+'">'+text+'</button>';
+    if(withAccuracy && f.finished) rows.push(['<b>'+f.solved+'</b> of <b>'+f.finished+'</b> solved first try here in the last '+days+' days <span>('+pdbPct(f.solved, f.finished)+'%)</span>', btn('ph', 'all', 'History')]);
+    rows.push([f.open ? '<b>'+f.open+'</b> not finished <span>(shown here, no move made)</span>' : 'Nothing left unfinished', f.open ? btn('ph', 'open', 'History &middot; Not finished') : '']);
+    rows.push([f.missedAny ? '<b>'+f.missedAny+'</b> missed, viewed or skipped here in the last '+days+' days' : 'Nothing missed here in the last '+days+' days', f.missedAny ? btn('ph', 'missed', 'History &middot; Missed') : '']);
+    rows.push(['<b>'+f.saved+'</b> saved'+(f.savedMissed ? ', <b>'+f.savedMissed+'</b> missed the first time' : ''), f.saved ? btn('saved', 'missed', 'Saved &middot; Missed first') : '']);
+    return '<section class="pzd-card" aria-labelledby="pzd-h-dev"><h2 class="ch-box-title" id="pzd-h-dev">On this device</h2>'
+      +'<p class="pzd-sub">From this device&rsquo;s puzzle log (its last 200 puzzles) and your saved puzzles.</p><ul class="pzd-list">'
+      +rows.map(x=> '<li class="pzd-drow"><div class="pzd-dtext">'+x[0]+'</div>'+x[1]+'</li>').join('')+'</ul></section>';
+  }
+  function pdbTokenBox(){
+    const btns = '<div class="btn-row"><button class="btn pzd-ink" type="button" data-act="newtoken">Make a new token on Lichess</button>'
+      +'<button class="btn btn-ghost" type="button" data-act="settings">Open Settings</button></div>';
+    const made = 'it opens Lichess with every permission Chess Arcade uses already checked.';
+    const box = (t, b)=> '<div class="panel ch-box" id="pzd-token"><div class="ch-box-head"><h2 class="ch-box-title">'+t+'</h2></div>'+b+btns+'</div>';
+    if(pdb.state==='off') return box('Connect Lichess to see your puzzle numbers', '<div class="ch-fix">Your rating, accuracy and themes come from your Lichess puzzle dashboard. Make a token with the button below: '+made+' Then paste it in Settings.</div>');
+    if(pdb.state==='bad') return box('Lichess no longer accepts your token', '<div class="ch-fix">It may have been deleted on Lichess, or it ran out. Make a new one with the button below: '+made+' Then paste it in Settings in place of the old one.</div>');
+    return box('Your Lichess token needs one more permission', '<ul class="ch-scopes"><li><b>puzzle:read</b> to read your puzzle dashboard, rating and history</li></ul>'
+      +'<div class="ch-fix">Make a new token with the button below: '+made+' Then paste the new token in Settings in place of the old one.</div>');
+  }
+  // Try again, off until the wait is over; the time it turns on is said in words beside it (pdbRetryWhen), never only
+  // on a dimmed button
+  function pdbRetryBtn(){ return '<button class="btn btn-ghost pzd-sbtn" type="button" data-act="retry"'+(Date.now() < pdb.retryAt ? ' disabled' : '')+'>Try again</button>'; }
+  function pdbRetryWhen(){ return Date.now() < pdb.retryAt ? 'You can try again after '+pdbTime(Math.ceil(pdb.retryAt / PDB_MIN) * PDB_MIN)+'.' : ''; }
+  function pdbDraw(waiting){
+    const days = pdb.shown || pdb.days, tok = !!getLichessToken();
+    if(waiting || (tok && (pdb.state==='wait' || pdb.state==='off')))
+      return '<div class="pzd-card"><div class="pzd-waitcard">Asking Lichess for your last '+pdb.days+' days&hellip;</div></div>'+pdbDeviceCard(pdb.days, false);
+    if(!tok || pdb.state==='off' || pdb.state==='bad' || pdb.state==='scope') return pdbTokenBox()+pdbDeviceCard(pdb.days, true);
+    if(pdb.state==='down' || !pdb.dash[days])
+      return '<div class="panel ch-box" id="pzd-down"><div class="ch-box-head"><h2 class="ch-box-title">Lichess didn&rsquo;t answer</h2></div><div class="ch-fix">'
+        +(pdb.down && pdb.down.status===429 ? 'Lichess asked for a minute&rsquo;s wait.' : 'It may be busy or down.')+' Nothing is kept on this device for the last '+pdb.days+' days yet.'
+        +(pdbRetryWhen() ? ' '+pdbRetryWhen() : '')+'</div>'
+        +'<div class="btn-row">'+pdbRetryBtn()+'</div></div>'+pdbDeviceCard(pdb.days, true);
+    // off: Lichess didn't answer for this period (another period's outage is that period's); at: when these numbers
+    // were read, so the window and the times are the copy's own
+    const d = pdb.dash[days].data, at = pdb.dash[days].at, off = !!pdb.down && pdb.down.days===days;
+    const pz = pdb.acct && pdb.acct.puzzle, rating = pz ? pz.rating : 0;
+    const tr = pdb.histFail ? null : pdbTrend(days, rating), diff = tr ? tr.now - tr.base.r : 0;
+    const ratingCol = '<div class="pzd-stat"><p class="pzd-k">Puzzle rating</p><div class="pzd-hero">'+(rating || '&mdash;')+'</div>'
+      +(pz && pz.prov ? '<div class="pzd-prov">provisional</div>' : '')
+      +(tr ? '<div class="pzd-delta">'+(diff ? '<span class="pzd-arrow '+(diff > 0 ? 'up' : 'down')+'" aria-hidden="true">'+(diff > 0 ? '&#9650;' : '&#9660;')+'</span>'+(diff > 0 ? 'Up ' : 'Down ')+Math.abs(diff) : 'No change')+' since '+pdbDay(tr.from)+'</div>' : '')
+      +pdbSpark(tr)+'<div class="pzd-acts">'+pdbRatedBtn('mix', '', 'Puzzles', 'healthy mix', 'pzd-btn')+'</div></div>';
+    let firstCol;
+    if(!d) firstCol = '<div class="pzd-stat"><p class="pzd-k">First try</p><div class="pzd-d">No Lichess puzzles first played in the last '+days+' days.</div>'+pdbUseMore(days)+'</div>';
+    else {
+      const g = d.global, left = pdbToReplay(g), rp = pdbReplayKnown(days, 'mix');
+      let practiced = '';
+      if(rp && rp.remaining.length){
+        const pr = pdbPracticed(), done = rp.remaining.filter(id=> pr.has(id)), clean = done.filter(id=> pr.get(id).pc).length;
+        if(done.length) practiced = '<div class="pzd-d">Practiced here: <b>'+done.length+'</b> of the '+rp.nb+(clean ? ', '+clean+' solved clean' : '')+'</div>';
+      }
+      const text = pdbReplayText(left, rp, true);
+      firstCol = '<div class="pzd-stat"><p class="pzd-k">First try</p><div class="pzd-big">'+pdbPct(g.firstWins, g.nb)+'<small>%</small></div>'
+        +'<div class="pzd-d"><b>'+g.firstWins+'</b> of <b>'+g.nb+'</b> puzzles</div>'+pdbBar(g)
+        +'<div class="pzd-legend"><span><i style="background:var(--pzd-win)"></i>first try</span><span><i style="background:var(--ink-soft)"></i>'+g.replayWins+' fixed later</span><span><i style="background:var(--bad)"></i>'+left+' to replay</span></div>'
+        +(text ? '<div class="pzd-acts"><button type="button" class="btn pzd-ink pzd-btn" data-act="replay" data-theme="mix"'+(off || pdb.lock ? ' disabled' : '')+' aria-label="'+text+', '+(off ? 'needs Lichess' : 'practice')+'">'+text+pdbTag(off ? 'Needs Lichess' : 'Practice')+'</button></div>' : '')
+        +practiced+'</div>';
+    }
+    const src = '<div class="pzd-src"><span>From Lichess: your puzzle rating, and your puzzle dashboard for puzzles first played '+pdbDay(at - days * PDB_DAY)+' &ndash; '+pdbDay(at)+'.</span>'
+      +'<a href="https://lichess.org/training/dashboard/'+days+'" target="_blank" rel="noopener">lichess.org/training/dashboard/'+days+'</a>'
+      +(off ? '<div class="pzd-src-down"><span class="warn">Lichess didn&rsquo;t answer at '+pdbWhen(pdb.down.at)+'. These numbers are from '+pdbWhen(at)+'.</span>'
+        +(pdbRetryWhen() ? '<span>'+pdbRetryWhen()+'</span>' : '')+pdbRetryBtn()+'</div>' : '')
+      +(!off && pdb.histFail ? '<span>Lichess didn&rsquo;t send your rating history, so the trend is hidden.</span>' : '')+'</div>';
+    return '<section class="pzd-brief" tabindex="-1" aria-label="Your puzzle numbers"><div class="pzd-stats">'+ratingCol+firstCol+'</div>'+src+'</section>'
+      +(d ? pdbThemesCard(d, days) : '')+pdbDeviceCard(days, false);
+  }
+  // redrawn whole; the button that had the focus (Show all, a theme's buttons) has it again after. When it's gone (Try
+  // again once Lichess answered, a Replay with nothing left) or off, the focus goes to its row's other button, the
+  // numbers (the brief), else the period that's on: never the page body.
+  function pdbRender(waiting){
+    const body = document.getElementById('pzd-body');
+    if(!body) return;
+    const a = document.activeElement, k = a && body.contains(a) && a.dataset && a.dataset.act ? a : null;
+    const sel = k ? '[data-act="'+k.dataset.act+'"]'+['kind', 'theme', 'show', 'days'].map(x=> k.dataset[x] ? '[data-'+x+'="'+k.dataset[x]+'"]' : '').join('') : null;
+    const theme = k && k.closest('.pzd-themes') ? k.dataset.theme : '';
+    const html = pdbDraw(waiting);
+    if(body._pdbHtml===html) return;
+    body.innerHTML = html; body._pdbHtml = html;
+    if(sel){
+      const b = [body.querySelector(sel), theme ? body.querySelector('.pzd-themes [data-theme="'+theme+'"]:not([disabled])') : null,
+        body.querySelector('.pzd-brief'), document.querySelector('#pzd-days .gh-sub-b.is-on')].find(x=> x && !x.disabled);
+      if(b) b.focus({ preventScroll:true });
+    }
+  }
+  // a control pressed from the keyboard that a redraw moved off the screen (Show all under its new rows, the period
+  // row above Use 30 days): back in view at the nearest edge. A mouse press scrolls nothing.
+  function pdbReveal(el){
+    if(!el || !el.matches || !el.matches(':focus-visible')) return;
+    const r = el.getBoundingClientRect();
+    if(r.bottom > innerHeight || r.top < 0) el.scrollIntoView({ block:'nearest' });
+  }
+
+  /* ---- wiring ---- */
+  views['puzzle-dash'] = document.getElementById('view-puzzle-dash');
+  (function(){
+    const c = pdbCacheRead();
+    // only with the token it was read with: a token saved since (here or before a reload) waits for Lichess to say whose
+    if(c && c.tk && c.tk===pdbTk() && (!spScopeCache.userId || spScopeCache.userId===c.user.toLowerCase())) pdbAdopt(c);
+    try{ const p = JSON.parse(localStorage.getItem(PDB_PREFS_KEY) || 'null'); if(p && PDB_DAYS.includes(p.days)) pdb.days = p.days; }catch(e){}
+    pdb.state = getLichessToken() ? 'wait' : 'off';
+  })();
+  pdbSetDays(pdb.days);
+  // the doors: the Play tile (and home's 00 tile, which clicks it from home), the links' hidden doors, the setup's Saved
+  document.getElementById('card-saved').addEventListener('click', ()=> pdbOpen('puzzle-dash', currentView==='menu' ? 'menu' : 'hub'));
+  document.getElementById('pzd-door-dash').addEventListener('click', ()=> pdbOpen('puzzle-dash', 'hub'));
+  document.getElementById('pzd-door-saved').addEventListener('click', ()=> pdbOpen('saved', 'hub'));
+  document.getElementById('setup-saved-btn').addEventListener('click', ()=> pdbOpen('saved', 'setup-puzzle'));
+  document.querySelectorAll('.pzd-tabs [data-tab]').forEach(b=> b.addEventListener('click', ()=> pdbOpen(b.dataset.tab, null, true)));
+  document.querySelectorAll('#pzd-days [data-val]').forEach(b=> b.addEventListener('click', ()=>{ pdbSetDays(Number(b.dataset.val), true); pdbLoad(); }));
+  document.getElementById('pzd-body').addEventListener('click', (e)=>{
+    const b = e.target.closest('button[data-act]');
+    if(!b || b.disabled) return;
+    const a = b.dataset.act;
+    if(a==='more'){ pdb.open[b.dataset.kind] = !pdb.open[b.dataset.kind]; pdbRender(); pdbReveal(document.activeElement); }
+    else if(a==='days'){
+      // Use 30 days goes with the redraw: its focus goes to the period now on (pressed)
+      const had = document.activeElement===b;
+      pdbSetDays(Number(b.dataset.days), true); pdbLoad();
+      const t = document.querySelector('#pzd-days [data-val="'+b.dataset.days+'"]');
+      if(had && t){ t.focus({ preventScroll:true }); pdbReveal(t); }
+    }
+    else if(a==='retry') pdbLoad(true);
+    else if(a==='newtoken') window.open(chNewTokenUrl(), '_blank', 'noopener');
+    else if(a==='settings') document.getElementById('settings-fab').click();
+    else if(a==='replay') pdbReplay(b.dataset.theme, b);
+    else if(a==='rated') pdbRated(b.dataset.theme, b.dataset.diff || '');
+    else if(a==='ph'){
+      pdbOpen('puzzle-history');
+      const t = document.querySelector('#ph-show-row [data-val="'+b.dataset.show+'"]');
+      if(t){ t.click(); t.focus({ preventScroll:true }); }
+    } else if(a==='saved'){
+      pdbOpen('saved');
+      const s = document.getElementById('saved-sort');
+      s.value = 'missed'; s.dispatchEvent(new Event('change', { bubbles:true })); s.focus({ preventScroll:true });
+    }
+  });
+  pdbReady = true;
+  pdbSyncHeads();
+
   /* ================= ANALYZE A FINISHED PUZZLE =================
      A finished puzzle (solved, missed, or its solution shown) opens on the
      review's analysis board (hv*): from the Puzzles drill, live or practice
@@ -46084,7 +46931,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var PZA_OUT = { solved:['history-result-win','Solved'], solvedAfterMiss:['history-result-draw','Solved after a miss'],
     missed:['history-result-loss','Missed'], viewed:['history-result-loss','Solution shown'], skipped:['history-result-loss','Skipped'],
     practiced:['history-result-draw','Practiced'] };
-  var PZA_BACK = { 'play-puzzle':'Puzzle', 'play-rush':'Puzzle Rush', saved:'Saved puzzles', 'puzzle-history':'Puzzle history' };
+  var PZA_BACK = { 'play-puzzle':'Puzzle', 'play-rush':'Puzzle Rush', saved:'Saved puzzles', 'puzzle-history':'Puzzle history', 'puzzle-dash':'Puzzle Dashboard' };
   var PZA_BAD = 'This puzzle\u2019s moves don\u2019t replay here, so it can\u2019t open on the board.';
   // h = { id, tokens, solution, tries, outcome (a PZA_OUT key), rating, themes,
   // players (spCleanPlayers), ret: { view, y, top, focus, box, inner, limit } }.
@@ -46950,6 +47797,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // unspecified (shown at its real current value, not just omitted).
   }
   openDeepLink(initialHash);
+  if(pdbReady) pdbRunResume();          // a RATED run started again by a reload: its setup values come back after (PUZZLE DASHBOARD)
   window.addEventListener('hashchange', ()=> openDeepLink(decodeURIComponent(location.hash.slice(1))));
   // Challenges: home's option names fitted, then the first look a moment after boot (every 20 s from there, chRefresh)
   if(chReady){ pdFit(); setTimeout(()=> chRefresh(currentView==='challenges'), 1500); }
