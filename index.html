@@ -26489,8 +26489,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // inside a box counts only where it shows. tier (chBannerSpot tries each in turn, the first with a clear spot wins):
   //   0  the board's whole frame and the moves of a move list kept clear too
   //   1  the frame's empty edge allowed, 8px off the squares and the coordinates (a drill whose frame fills the width)
-  //   2  the moves too (the review on an upright iPad or a phone, where nothing else is clear: never the board, the
-  //      buttons under it or the tabs)
+  // The moves of a move list are never covered (the user, 2026-11-03: on an upright iPad or a phone the review has no
+  // other clear spot, so the banner waits until you leave it), nor Puzzle Rush's clock, score, strikes, prompt and turn
+  // badge (the user, 2026-11-03: a timed drill; on a phone the banner waits for the rush to end).
   const CH_KEEP_PLAY = 'button, input, select, textarea, a[href], [role="button"], [role="tab"], [role="switch"], [role="group"], [role="tablist"], [role="toolbar"], '
     + '.toggle, [contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex="-1"]), .timer-track';
   function chKeepClear(tier){
@@ -26526,7 +26527,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(tier < 1) v.querySelectorAll('.board-frame').forEach(el=> add(el, 4));
       if(currentView.indexOf('play')===0){
         v.querySelectorAll(CH_KEEP_PLAY).forEach(el=> add(el, 4, true));
-        if(tier < 2) v.querySelectorAll('.mv-san:not(:empty)').forEach(el=> add(el, 2, true));
+        v.querySelectorAll('.mv-san:not(:empty)').forEach(el=> add(el, 2, true));
+        if(currentView==='play-rush') v.querySelectorAll('.hud, .rush-turn-badge, .rush-card, .arcade-prompt').forEach(el=> add(el, 4));
       }
     }
     return out;
@@ -26553,7 +26555,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const [mode, l, t, tier] = el._spot, z = chBannerShape(mode);
       if(chSpotClear(keepOf(tier), l, t, z.w, z.h)) return { left:l, top:t };
     }
-    for(const tier of [0, 1, 2]){
+    for(const tier of [0, 1]){
       const keep = keepOf(tier);
       for(const mode of vw >= 560 ? ['stack', 'row', 'slim'] : ['stack']){
         const { w, h } = chBannerShape(mode);
