@@ -3885,6 +3885,121 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ghb-sum[hidden]{ display:none; }
   @media (max-width:520px){ .ghb-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; } .ghb-vs{ display:none; } .ghb-pawns{ width:60px; } }
   @media (pointer:coarse){ .ghb-acts .btn-link{ min-height:44px; display:inline-flex; align-items:center; } }
+  /* ---- CLAMP (ct*, 2026-11-02): the third top tab, the analytics of your CLAMP letters. Cards on the page as the Openings
+     view's; each letter's own color (CLAMP_K) for its discs, bars, counts and arrows. The grid and the table scroll
+     sideways inside their cards on a narrow screen (their letters stay at the left), never the page. ---- */
+  .ct{ display:flex; flex-direction:column; gap:14px; }
+  .ct[hidden], .ct-card[hidden], .ct-src[hidden]{ display:none; }
+  .ct-card{ min-width:0; display:flex; flex-direction:column; gap:10px; padding:14px 16px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  :root[data-skin="bauhaus"] .ct-card{ border-radius:0; border-width:2px; }
+  .ct-k{ margin:0; font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+  .ct-h{ margin:0; font-size:15px; font-weight:800; line-height:1.3; }
+  .ct-sub{ margin:2px 0 0; font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
+  .ct-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:2px 12px; }
+  .ct-n{ font-size:12px; color:var(--ink-soft); }
+  .ct-l{ font:inherit; font-size:12.5px; color:var(--ink); background:none; border:0; padding:0; cursor:pointer; text-align:left; text-decoration:underline; text-underline-offset:2px; }
+  .ct-l:focus-visible, .ct-bar:focus-visible, .ct-gl:focus-visible, .ct-wc:focus-visible, .ct-chip:focus-visible, .ct-m:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .ct-gl:focus-visible, .ct-wc:focus-visible{ outline-offset:-2px; }        /* inside a sideways scroll: the ring stays whole */
+  .ct-empty-b{ align-self:flex-start; }
+  /* your pattern: the letter in most of your marked games, big, beside each letter's bar */
+  .ct-two{ display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:18px; align-items:start; }
+  .ct-hero{ display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:16px; row-gap:2px; align-items:start; }
+  .ct-fig{ grid-row:1 / span 4; width:84px; height:84px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font:800 40px/1 "JetBrains Mono",monospace; }
+  .ct-big{ font-size:44px; font-weight:800; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .ct-what{ font-size:14px; font-weight:700; line-height:1.3; }
+  .ct-vs{ font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
+  .ct-acts{ display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:8px; }
+  .ct-bars{ display:flex; flex-direction:column; gap:2px; padding-left:18px; border-left:1px solid var(--line); }
+  .ct-bars .ct-k{ margin-bottom:4px; }
+  .ct-bar{ display:grid; grid-template-columns:18px 92px minmax(0,1fr) 24px; align-items:center; gap:8px; padding:3px 0; font:inherit; font-size:12.5px; color:var(--ink); background:none; border:0; text-align:left; }
+  button.ct-bar{ cursor:pointer; }
+  @media (hover:hover){ button.ct-bar:hover .ct-bar-n{ text-decoration:underline; text-underline-offset:2px; } }
+  .ct-tr{ height:8px; border-radius:4px; background:color-mix(in srgb, var(--ink-soft) 14%, transparent); overflow:hidden; }
+  .ct-tr i{ display:block; height:100%; border-radius:4px; }
+  .ct-bar b{ text-align:right; font:700 12.5px/1 "JetBrains Mono",monospace; }
+  .ct-todo{ display:flex; flex-wrap:wrap; gap:4px 12px; align-items:baseline; padding-top:10px; border-top:1px solid var(--line); font-size:12.5px; line-height:1.4; }
+  .ct-todo b{ font-weight:700; }
+  /* your last 24 marked games: a column per game (one button), the letters' totals at the right */
+  .ct-scroll{ min-width:0; overflow-x:auto; }
+  .ct-g{ --ct-lw:112px; --ct-cw:18px; position:relative; display:grid; column-gap:2px; align-items:start; margin-top:4px; }
+  .ct-gc{ display:flex; flex-direction:column; align-items:stretch; min-width:0; }
+  .ct-gc > *{ height:24px; display:flex; align-items:center; justify-content:center; }
+  .ct-gc > .ct-gh{ height:20px; font-size:10.5px; font-weight:700; color:var(--ink-soft); white-space:nowrap; justify-content:flex-end; }
+  .ct-gc > .ct-gr{ height:14px; }
+  .ct-glab, .ct-gd0{ position:sticky; left:0; z-index:1; background:var(--surface); }      /* the dates slide under it too */
+  .ct-gl{ justify-content:flex-start !important; gap:8px; font:inherit; font-size:12.5px; font-weight:600; color:var(--ink); background:none; border:0; padding:0 6px 0 0; cursor:pointer; text-align:left; white-space:nowrap; }
+  @media (hover:hover){ .ct-gl:hover .ct-gl-n{ text-decoration:underline; text-underline-offset:2px; } }
+  .ct-grl{ justify-content:flex-start !important; font-size:11px; color:var(--ink-soft); }
+  .ct-gcol{ font:inherit; color:inherit; background:none; border:0; padding:0; border-radius:6px; cursor:pointer; }
+  @media (hover:hover){ .ct-gcol:hover{ background:color-mix(in srgb, var(--ink) 7%, transparent); } }
+  .ct-gcol:focus-visible{ outline:2px solid var(--focus); outline-offset:0; }
+  .ct-gcol.is-off{ cursor:default; }
+  .ct-ring{ box-sizing:border-box; width:12px; height:12px; border-radius:50%; border:1.5px solid color-mix(in srgb, var(--ink-soft) 35%, transparent); }
+  /* the result by shape as well as color: a solid bar won, a thin line drew, an outline lost */
+  .ct-gr i{ display:block; box-sizing:border-box; width:14px; height:2px; border-radius:1px; background:color-mix(in srgb, var(--ink-soft) 70%, transparent); }
+  .ct-gr i.is-win{ height:6px; border-radius:2px; background:var(--good); }
+  .ct-gr i.is-loss{ height:6px; border-radius:2px; background:none; border:1.5px solid var(--bad); }
+  .ct-gs > .ct-gv{ justify-content:flex-end; font:700 12.5px/1 "JetBrains Mono",monospace; font-variant-numeric:tabular-nums; }
+  .ct-gd{ height:16px; display:block; min-width:0; overflow:visible; white-space:nowrap; font:10.5px/16px "JetBrains Mono",monospace; color:var(--ink-soft); }
+  .ct-trend{ font:700 11.5px/1.2 "JetBrains Mono",monospace; padding:2px 6px; border-radius:6px; white-space:nowrap; background:var(--surface-2); color:color-mix(in srgb, var(--ink-soft) 45%, var(--ink)); }
+  .ct-trend.is-up{ background:var(--bad-soft); color:color-mix(in srgb, var(--bad) 60%, var(--ink)); }
+  .ct-trend.is-down{ background:var(--good-soft); color:color-mix(in srgb, var(--good) 60%, var(--ink)); }
+  .ct-foot{ font-size:11.5px; }
+  /* where they happen: each letter's marked moves by phase, color, speed and clock */
+  .ct-w{ border-collapse:separate; border-spacing:3px; width:100%; font-size:12.5px; }
+  .ct-w th{ padding:2px 3px; font-size:11px; font-weight:600; line-height:1.2; color:var(--ink-soft); text-align:center; white-space:nowrap; vertical-align:bottom; }
+  .ct-w th.ct-wclk{ white-space:normal; min-width:44px; }
+  .ct-w th.ct-wg{ font-family:"JetBrains Mono",monospace; font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; border-bottom:1px solid var(--line); }
+  .ct-w th.ct-wr{ position:sticky; left:0; z-index:1; background:var(--surface); text-align:left; padding-right:6px; vertical-align:middle; }
+  .ct-wrn{ display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--ink); }
+  .ct-w td{ height:30px; padding:0; text-align:center; border-radius:6px; background-clip:padding-box; font:600 13px/1 "JetBrains Mono",monospace; font-variant-numeric:tabular-nums; }
+  .ct-w .gs{ border-left:8px solid transparent; background-clip:padding-box; }
+  .ct-w td.z{ color:var(--ink-soft); font-weight:400; }
+  .ct-w td.max{ box-shadow:inset 0 0 0 2px var(--c); }
+  .ct-wc{ width:100%; height:100%; min-width:30px; font:inherit; color:var(--ink); background:none; border:0; border-radius:6px; cursor:pointer; }
+  @media (hover:hover){ .ct-wc:hover{ text-decoration:underline; text-underline-offset:2px; } }
+  /* moments: every marked move as a board, the move in its letter's color */
+  .ct-mom-h{ display:flex; flex-wrap:wrap; gap:8px 16px; align-items:flex-start; justify-content:space-between; }
+  .ct-mom-h > div:first-child{ flex:1 1 300px; min-width:0; }
+  .ct-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .ct-chip{ display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12px; line-height:1.2; padding:3px 10px 3px 4px; border:1px solid var(--line); border-radius:999px; background:none; color:var(--ink-soft); cursor:pointer; }
+  .ct-chip.is-all, .ct-chip.is-b{ padding-left:10px; }
+  .ct-chip[aria-pressed="true"]{ color:var(--ink); border-color:var(--ink); font-weight:600; }
+  .ct-chip.is-b{ color:var(--ink); border-color:var(--ink); }
+  :root[data-skin="bauhaus"] .ct-chip{ border-radius:0; }
+  .ct-mgrid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(172px, 1fr)); gap:10px; }
+  .ct-m{ display:flex; flex-direction:column; gap:5px; min-width:0; padding:6px 6px 8px; border:1px solid var(--line); border-left:4px solid var(--c); border-radius:8px; background:var(--surface); color:var(--ink); font:inherit; text-align:left; cursor:pointer; }
+  @media (hover:hover){ .ct-m:hover{ border-color:var(--ink-soft); border-left-color:var(--c); } }
+  :root[data-skin="bauhaus"] .ct-m{ border-radius:0; }
+  .ct-mbd{ display:block; width:100%; }
+  .ct-mbd:empty::before{ content:''; display:block; padding-top:100%; background:var(--surface-2); border-radius:2px; }
+  .ct-m.is-off{ cursor:default; }
+  .ct-moff{ font-size:11.5px; line-height:1.3; color:var(--ink-soft); }
+  .ct-mmv{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; min-width:0; }
+  .ct-mlab{ font:700 12.5px/1.2 "JetBrains Mono",monospace; white-space:nowrap; }
+  .ct-mph{ margin-left:auto; padding:3px 6px; border-radius:5px; background:var(--surface-2); color:color-mix(in srgb, var(--ink-soft) 45%, var(--ink)); font:600 10px/1 "JetBrains Mono",monospace; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap; }
+  .ct-mnt{ font-size:12px; line-height:1.35; font-style:italic; overflow-wrap:anywhere; }
+  .ct-mft{ font-size:11.5px; line-height:1.3; color:var(--ink-soft); }
+  .ct-mft b{ color:var(--ink); }
+  .ct-more{ align-self:flex-start; }
+  .ct-src{ margin:0 0 4px; padding:8px 12px; font-size:12px; line-height:1.45; color:var(--ink-soft); text-align:center; background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow); }      /* on its own card: readable on every wallpaper (as .gho-foot) */
+  @media (max-width:640px){
+    .ct-two{ grid-template-columns:minmax(0,1fr); }
+    .ct-bars{ padding:12px 0 0; border-left:0; border-top:1px solid var(--line); }
+    .ct-card{ padding:12px 13px; }
+    .ct-fig{ width:68px; height:68px; font-size:32px; }
+    .ct-big{ font-size:38px; }
+  }
+  @media (max-width:520px){
+    .ct-mgrid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; }
+    .ct-g{ --ct-lw:30px; }                                  /* a phone: the letters' discs only (their names read out), more games in view */
+    .ct-gl-n{ display:none !important; }
+    .ct-grl{ font-size:0; }                                 /* its word goes, its cell stays: the result row slides under it too */
+  }
+  @media (pointer:coarse){ .ct-l, .ct-chip{ min-height:44px; } .ct-l{ display:inline-flex; align-items:center; } .ct-bar{ min-height:40px; } }
+  @media (pointer:coarse), (max-width:520px){ .ct-g{ --ct-cw:24px; } }           /* a game's column: 24px at least to tap */
+  /* the Games view's CLAMP filter chip, its letter's disc first */
+  .gh-ck-chip .clamp-d{ width:16px; height:16px; font-size:8px; }
   .gh-filters{ display:flex; flex-direction:column; gap:10px; }
   .gh-fbar{ display:flex; align-items:center; gap:8px 14px; flex-wrap:wrap; }
   .gh-filter-toggle{ display:none; align-items:center; gap:7px; padding:8px 14px; font-size:13.5px; }
@@ -4040,6 +4155,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-brief-hero{ display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto 1fr; column-gap:16px; row-gap:2px; align-items:start; min-height:128px; }
   .gho-brief-fig{ grid-row:1 / span 3; width:92px; height:92px; }
   .gho-brief-fig svg{ display:block; width:100%; height:100%; overflow:visible; }
+  .gho-brief-fig{ position:relative; }
+  .gho-brief-mid{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font:800 30px/1 "JetBrains Mono",monospace; }      /* CLAMP: its top letter, in its color */
   .gho-brief-big{ font-size:46px; font-weight:800; line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
   .gho-brief-what{ font-size:14px; font-weight:700; line-height:1.3; }
   .gho-brief-vs{ font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
@@ -4068,6 +4185,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-fact-tag{ flex:0 0 auto; font-family:"JetBrains Mono",monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:6px; background:var(--surface-2); color:var(--ink); }
   .gho-fact-tag.is-bad{ background:var(--bad-soft); color:color-mix(in srgb, var(--bad) 55%, var(--ink)); }
   .gho-fact-tag.is-you{ background:var(--partial-soft); color:color-mix(in srgb, var(--partial) 45%, var(--ink)); }
+  .gho-fact-tag.is-clamp{ color:#fff; }            /* on its letter's color (inline): 4.5:1 or more on each */
   .gho-fact-t{ flex:1 1 280px; min-width:0; font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
   .gho-fact-t b{ font-family:"JetBrains Mono",monospace; font-weight:700; }
   .gho-fact-ls{ display:flex; flex-wrap:wrap; gap:4px 12px; flex:0 0 auto; }
@@ -4407,8 +4525,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (max-width:640px){
     .history-head > .gh-view{ width:100%; }
     .history-head > .gh-view .toggle{ flex:1 1 0; }
-    /* Games | Openings, side by side across the phone */
-    #view-history .gh-view{ display:grid; grid-template-columns:1fr 1fr; }
+    /* Games | Openings | CLAMP, side by side across the phone */
+    #view-history .gh-view{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); }
     .gh-sub{ gap:0; }
     .gh-sub-b{ flex:1 1 0; min-width:0; padding:8px 4px 7px; }
     #view-history .gh-view .toggle{ min-width:0; }
@@ -7176,12 +7294,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <h1 class="title" style="font-size:26px;">Game History</h1>
           <div class="subtitle" id="history-subtitle">Connect your Lichess account in Settings to see your games.</div>
         </div>
-        <div class="toggle-row gh-seg gh-view" id="gh-view" role="group" aria-label="Show"><button type="button" class="toggle active" data-val="games" aria-pressed="true">Games</button><button type="button" class="toggle" data-val="openings" aria-pressed="false">Openings</button></div>
+        <div class="toggle-row gh-seg gh-view" id="gh-view" role="group" aria-label="Show"><button type="button" class="toggle active" data-val="games" aria-pressed="true">Games</button><button type="button" class="toggle" data-val="openings" aria-pressed="false">Openings</button><button type="button" class="toggle" data-val="clamp" aria-pressed="false">CLAMP</button></div>
       </div>
       <div class="gh-sites" id="gh-site" role="tablist" aria-label="Games from">
-        <button type="button" role="tab" id="gh-site-all" class="gh-site-tab" data-site="all" aria-selected="true" aria-controls="history-list gho cc-setup">All <span class="gh-site-n"></span></button>
-        <button type="button" role="tab" id="gh-site-lichess" class="gh-site-tab" data-site="lichess" aria-selected="false" tabindex="-1" aria-controls="history-list gho cc-setup">Lichess <span class="gh-site-n"></span></button>
-        <button type="button" role="tab" id="gh-site-chesscom" class="gh-site-tab" data-site="chesscom" aria-selected="false" tabindex="-1" aria-controls="history-list gho cc-setup">Chess.com <span class="gh-site-n"></span></button>
+        <button type="button" role="tab" id="gh-site-all" class="gh-site-tab" data-site="all" aria-selected="true" aria-controls="history-list gho ct cc-setup">All <span class="gh-site-n"></span></button>
+        <button type="button" role="tab" id="gh-site-lichess" class="gh-site-tab" data-site="lichess" aria-selected="false" tabindex="-1" aria-controls="history-list gho ct cc-setup">Lichess <span class="gh-site-n"></span></button>
+        <button type="button" role="tab" id="gh-site-chesscom" class="gh-site-tab" data-site="chesscom" aria-selected="false" tabindex="-1" aria-controls="history-list gho ct cc-setup">Chess.com <span class="gh-site-n"></span></button>
       </div>
       <div class="gh-sub" id="gh-sub" role="group" aria-label="Games: what to show"><button type="button" class="gh-sub-b is-on" data-val="games" aria-pressed="true">All games</button><button type="button" class="gh-sub-b" data-val="groups" aria-pressed="false">Groups</button><button type="button" class="gh-sub-b" data-val="positions" aria-pressed="false">Positions</button></div>
       <div class="gh-sub" id="gho-sub" role="group" aria-label="Openings: what to show" hidden><button type="button" class="gh-sub-b is-on" data-val="overview" aria-pressed="true">Overview</button><button type="button" class="gh-sub-b" data-val="variations" aria-pressed="false">Variations</button></div>
@@ -7220,6 +7338,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="gh-count" id="gh-count" aria-live="polite"></div>
           <div class="toggle-row gh-seg gh-bv" id="gh-bv" role="group" aria-label="Show the games as"><button type="button" class="toggle" data-v="list" aria-pressed="true">List</button><button type="button" class="toggle" data-v="boards" aria-pressed="false">Boards</button></div>
           <button type="button" class="toggle gh-chip gh-rep-chip" id="gh-rep-chip" hidden></button>
+          <button type="button" class="toggle gh-chip gh-rep-chip gh-ck-chip" id="gh-ck-chip" hidden></button>
           <button type="button" class="btn-link gh-clear" id="gh-clear" hidden>Clear filters</button>
         </div>
         <div class="gh-fpanel" id="gh-fpanel">
@@ -7506,6 +7625,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="gho-side panel" id="gho-white"></div>
       <div class="gho-side panel" id="gho-black"></div>
       <div class="gho-foot" id="gho-foot" hidden></div>
+    </section>
+    <!-- CLAMP (ct*, 2026-11-02, the user: "the analytics page for the clamp. It keeps track of my games and tries to see the
+         patterns in my games"): the letters you put on your moves by hand, over the games the site tab and the Filters keep.
+         Your pattern, your last 24 marked games letter by letter, where the marked moves happen, and every marked move as a
+         board. Built in the script (ctRender); nothing here is guessed by the engine. -->
+    <section class="ct" id="ct" role="tabpanel" aria-labelledby="gh-site-all" hidden>
+      <div class="ct-card ct-empty" id="ct-empty" hidden></div>
+      <section class="ct-card ct-pat" id="ct-pat" aria-labelledby="ct-pat-k" hidden></section>
+      <section class="ct-card" id="ct-grid" aria-labelledby="ct-grid-h" hidden></section>
+      <section class="ct-card" id="ct-where" aria-labelledby="ct-where-h" hidden></section>
+      <section class="ct-card" id="ct-mom" aria-labelledby="ct-mom-h" hidden></section>
+      <p class="ct-src" id="ct-src" hidden>From the CLAMP letters you put on your games by hand. Nothing here is guessed by the engine. The Filters above apply.</p>
     </section>
     <div class="history-footer">
       <div class="history-loading" id="history-loading" style="display:none;">Loading&#8230;</div>
@@ -25330,11 +25461,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   /* ---- Filters: state, validation, storage, the #history link ---- */
-  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', eg:'', oj:'', len:'', date:'', variant:'', notes:false, rep:'' };
+  const GH_F_DEFAULT = { speed:'', result:'', opening:'', oq:'', color:'', tc:'', rated:'', opp:'', gap:'', end:'', eg:'', oj:'', len:'', date:'', variant:'', notes:false, rep:'', ck:'' };
   const GH_F_SETS = { speed:['ultraBullet','bullet','blitz','rapid','classical','correspondence'], result:['win','loss','draw'],
     color:['white','black'], rated:['rated','casual'], gap:['higher','even','lower'], end:['mate','resign','time','draw','other'],
     len:['short','medium','long'], date:['7','30','90','year'], oj:['done','not','lost','away','open'], eg:['yes','no','pawn','rook','queen','bishopOpp','bishopSame','knight','bishopKnight','minor','rookMinor','queenMix','uneven'] };
-  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','oj','len','date','variant','notes','rep'];
+  const GH_PARAM_KEYS = ['speed','result','opening','oq','color','tc','rated','opp','gap','end','eg','oj','len','date','variant','notes','rep','ck'];
   var EG = new Map(), EG_JOB = null, EG_SIG = '', EG_DONE = false;       // each game's endgame (where it begins, the kinds it went through): egEnsure
   // the repertoire filter (gho*, SPEC B.7): opening / trunk / course / chapter / line, outside, or a spot
   const GH_REP_RE = /^(?:w\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}\.(?:[0-9a-f]{32}|n)\.[0-9a-z]{1,12}|[ot]\.[A-Za-z0-9_-]{1,64}|[kc]\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|l(?:\.[A-Za-z0-9_-]{1,64}){3}|x\.[wb](?:\.(?:none|[a-z0-9]+(?:-[a-z0-9]+)*))?|s\.[0-9a-f]{8}(?:\.(?:t\.[A-Za-z0-9_-]{1,64}|c\.[A-Za-z0-9_-]{1,64}\.[A-Za-z0-9_-]{1,64}|x\.[wb]))?)$/;
@@ -25354,6 +25485,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     o.opp = ghCleanText(f.opp).trim();
     o.notes = f.notes===true || f.notes==='1' || f.notes===1;
     if(typeof f.rep==='string' && f.rep.length<=200 && GH_REP_RE.test(f.rep)) o.rep = f.rep;
+    if(/^(?:[CLAMP]|none)$/.test(String(f.ck))) o.ck = String(f.ck);      // CLAMP: games with that letter, or with no marks (ct*)
     return o;
   }
   (function ghLoadFilters(){
@@ -25361,7 +25493,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const d = JSON.parse(localStorage.getItem(GH_FILTERS_KEY) || 'null');
       if(d && typeof d==='object'){
         GH_FILTERS = ghValidFilters(d.f); GH_UI.more = !!(d.ui && d.ui.more);
-        GH_UI.view = d.ui && (d.ui.view==='openings' || d.ui.view==='groups' || d.ui.view==='positions') ? d.ui.view : 'games';
+        GH_UI.view = d.ui && (d.ui.view==='openings' || d.ui.view==='groups' || d.ui.view==='positions' || d.ui.view==='clamp') ? d.ui.view : 'games';
         if(d.ui && typeof d.ui.osort==='string' && /^[a-z]{1,8}$/.test(d.ui.osort)) GH_UI.osort = d.ui.osort;
         if(d.ui && /^(all|lichess|chesscom)$/.test(String(d.ui.site))) GH_UI.site = d.ui.site;
         GH_UI.boards = !!(d.ui && d.ui.boards); GH_UI.bmom = d.ui && (d.ui.bmom==='b' || d.ui.bmom==='k') ? d.ui.bmom : 'a';
@@ -25490,6 +25622,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(f.variant && (g.variant || 'standard')!==f.variant) return false;
     if(f.notes && !gnHasNote(g.id) && !gnHasAnn(g.id)) return false;      // a note, or your analysis on the board
     if(f.rep && rpReady() && !rpRepMatch(g, f.rep)) return false;     // kept but ignored until your repertoire is here
+    if(f.ck){ const k = gnClampOf(String(g.id)); if(f.ck==='none' ? k.length > 0 || !ctHasMine(g, u) : !k.some(x=> x[1]===f.ck)) return false; }     // your CLAMP marks (none: a game with a move of yours to mark)
     return true;
   }
 
@@ -25655,12 +25788,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // Passed pawns). You mark a move of yours with its letters, from the review's move menu (hvClampRow) or a Game
   // History row's letter box (ghClampOpen); the game's analysis record keeps them as k. Nothing is marked for you.
   // A white letter reads at 4.5:1 or more on each color; the hues stay apart on every skin, light and dark.
+  // what: the CLAMP tab's and the brief's words for it ("6 of 12 games had loose pieces")
   const CLAMP_K = [
-    { ch:'C', name:'Checks', short:'Checks', color:'#d73b33' },
-    { ch:'L', name:'Loose pieces & loose squares', short:'Loose pieces', color:'#be570d' },
-    { ch:'A', name:'Alignments', short:'Alignments', color:'#2675cd' },
-    { ch:'M', name:'Mobility restrictions', short:'Mobility', color:'#845cdc' },
-    { ch:'P', name:'Passed pawns', short:'Passed pawns', color:'#1b864a' },
+    { ch:'C', name:'Checks', short:'Checks', what:'checks', color:'#d73b33' },
+    { ch:'L', name:'Loose pieces & loose squares', short:'Loose pieces', what:'loose pieces', color:'#be570d' },
+    { ch:'A', name:'Alignments', short:'Alignments', what:'alignments', color:'#2675cd' },
+    { ch:'M', name:'Mobility restrictions', short:'Mobility', what:'mobility restrictions', color:'#845cdc' },
+    { ch:'P', name:'Passed pawns', short:'Passed pawns', what:'passed pawns', color:'#1b864a' },
   ];
   const CLAMP_BY = {};
   CLAMP_K.forEach(K=>{ CLAMP_BY[K.ch] = K; });
@@ -26359,20 +26493,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ghShowSub();
     // the Chess.com tab with no account: the setup card instead of the list (chesscom SPEC B.4)
     const only = ghCcPanel(base);
-    const ov = ghoOn(), gv = ghgOn(), pv = GH_UI.view==='positions';
+    const ov = ghoOn(), gv = ghgOn(), pv = GH_UI.view==='positions', cv = ctOn();
     document.getElementById('gho').hidden = !ov || only;
     document.getElementById('ghg').hidden = !gv || only;
     document.getElementById('ghp').hidden = !pv || only;
+    document.getElementById('ct').hidden = !cv || only;
     const bv = ghbOn() && !(ov || gv || pv || only);
-    listEl.hidden = ov || gv || pv || only || bv;
+    listEl.hidden = ov || gv || pv || cv || only || bv;
     document.getElementById('ghb').hidden = !bv;
-    document.getElementById('gh-bv').hidden = ov || gv || pv || only;
+    document.getElementById('gh-bv').hidden = ov || gv || pv || cv || only;
     ghbSyncToggle();
-    if(ov || gv || pv || only) ghLineCard(null);
+    if(ov || gv || pv || cv || only) ghLineCard(null);
     ['.gh-filters', '.history-footer'].forEach(q=>{ const el = document.querySelector('#view-history '+q); if(el) el.hidden = only || gv || (pv && q==='.gh-filters'); });
     document.getElementById('view-history').classList.toggle('is-gho', ov);
     document.getElementById('view-history').classList.toggle('is-ghg', gv);
     document.getElementById('view-history').classList.toggle('is-ghp', pv);
+    document.getElementById('view-history').classList.toggle('is-ghc', cv);
     if(only){
       document.getElementById('gh-list-note').hidden = true;
       document.getElementById('gh-count').textContent = '';
@@ -26392,6 +26528,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       return;
     }
     if(!ov) ghoBriefTimer(false);                  // the brief's 7 s cycle runs only on the Openings tab
+    if(cv){
+      document.getElementById('gh-list-note').hidden = true;
+      ctRender(base);
+      ghRenderFooter(0, false);
+      try{ ghOpeningCombo.refresh(); ghOppCombo.refresh(); }catch(e){}
+      return;
+    }
     if(ov){
       document.getElementById('gh-list-note').hidden = true;
       ghoRender(base);
@@ -26450,6 +26593,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // nothing to redraw. The batch that ends the sorting always redraws.
   function ghRpBatchIdle(){
     if(currentView==='history' && ghbOn() && !GH_FILTERS.rep && !ghoOn()) return true;     // Boards shows no repertoire lines
+    if(currentView==='history' && ctOn() && !GH_FILTERS.rep) return true;                   // nor does CLAMP (its games don't change)
     if(currentView!=='history' || ghoOn() || ghgOn() || GH_UI.view==='positions' || GH_FILTERS.rep || !RP_JOB || !GH_DRAWN) return false;
     const L = document.getElementById('history-list');
     if(!L || L.hidden) return false;
@@ -26536,7 +26680,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     load.style.display = showLoad ? '' : 'none';
     load.textContent = GH_STATE.games.length ? (mix ? 'Load more Lichess games' : 'Load more games') : 'Try again';
     load.disabled = backoff;
-    if(ghoOn() || GH_UI.view==='positions'){ more.style.display = 'none'; empty.style.display = 'none'; }
+    if(ghoOn() || GH_UI.view==='positions' || ctOn()){ more.style.display = 'none'; empty.style.display = 'none'; }
     if(ghbOn()) more.style.display = 'none';         // Boards shows every listed game, by structure
     clearTimeout(ghBackoffTimer);
     if(backoff && showLoad) ghBackoffTimer = setTimeout(()=>{ if(currentView==='history') ghRender(); }, spBackoffUntil - Date.now() + 100);
@@ -28222,7 +28366,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghoModel(base){
     GHO_MIX = ghMixed();          // All with chess.com in it, once for the whole model (ghoMetrics runs per row)
     const u = ghMe(), f = GH_FILTERS;
-    const fo = Object.assign({}, f, { opening:'', oq:'', result:'', rep:'' });
+    const fo = Object.assign({}, f, { opening:'', oq:'', result:'', rep:'', ck:'' });
     const games = base.filter(g=> ghMatch(g, u, fo));
     const counted = games.filter(rpCounted);
     const rep = rpReady();
@@ -28330,12 +28474,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ (first || (chip && !chip.hidden ? chip : null) || document.getElementById('gh-count')).focus({ preventScroll:true }); }catch(e){}
   }
   function ghoSetView(v){
-    v = v==='openings' || v==='groups' || v==='positions' ? v : 'games';
+    v = v==='openings' || v==='groups' || v==='positions' || v==='clamp' ? v : 'games';
     if(v==='groups' && GH_UI.view==='groups' && GH_UI.group){ ghgOpen(''); return; }     // Groups again: back to all of them
     if(GH_UI.view===v) return;
     if(GH_UI.view==='groups') ghgLeave();
-    if(v==='games') GHO_Y = window.scrollY;
+    if(v==='games' && GH_UI.view==='openings') GHO_Y = window.scrollY;
+    if(GH_UI.view==='clamp') CT.y = window.scrollY;          // back to CLAMP: where you were on it
     if(v==='openings' && GHB_DRILL){ GH_UI.boards = GHB_DRILL.boards; GH_UI.bmom = GHB_DRILL.bmom; GHB_DRILL = null; }
+    if(v==='clamp' && CT_DRILL){
+      // back from a CLAMP drill-down (a letter's games, the losses with no letters): its filters as they were, unless changed since
+      const back = {};
+      CT_DRILL.forEach(([k, was, set])=>{ if((GH_FILTERS[k] || '')===set) back[k] = was; });
+      CT_DRILL = null;
+      if(Object.keys(back).length) GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, back));
+    }
     if(v==='openings' && GHO_DRILL){
       // back from a drill-down: its extra filters as they were (unless you changed them since)
       const back = {};
@@ -28351,6 +28503,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       rpQueue();
       if(GHO_Y!=null){ const y = GHO_Y; GHO_Y = null; window.scrollTo({ top:y }); }     // back where you were in the tree
     }
+    if(v==='clamp' && CT.y!=null){ const y = CT.y; CT.y = null; window.scrollTo({ top:y }); }
   }
   /* ---- Openings -> Variations (ghv*, 2026-10-31): your chapters (or their lines; signed out, Lichess's openings or
      their variations) in one ranked list: by games, by score (Best: highest first; Struggling: lowest first) or by how
@@ -28376,7 +28529,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the games at each speed with every other filter on (the chips' counts), for the colors shown; once per model
   function ghvSpeeds(model){
     if(model.vsp) return model.vsp;
-    const u = ghMe(), fo = Object.assign({}, GH_FILTERS, { opening:'', oq:'', result:'', rep:'', speed:'' }), c = new Map();
+    const u = ghMe(), fo = Object.assign({}, GH_FILTERS, { opening:'', oq:'', result:'', rep:'', speed:'', ck:'' }), c = new Map();
     let all = 0;
     ghBaseList().forEach(g=>{ if(!ghMatch(g, u, fo) || !rpCounted(g)) return; all++; c.set(g.speed, (c.get(g.speed) || 0) + 1); });
     return (model.vsp = { all, c });
@@ -29436,6 +29589,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(GH_UI.site==='lichess' || GH_UI.site==='chesscom') p.set('site', GH_UI.site);     // the tab first (All: none); never a username
     ghFilterParams().forEach((v, k)=> p.set(k, v));
     if(ghoOn()) p.set('view', 'openings');
+    else if(ctOn()) p.set('view', 'clamp');
     else if(ghgOn()){ p.set('view', 'groups'); if(GH_UI.group) p.set('group', GH_UI.group); }
     else if(GH_UI.view==='positions'){ p.set('view', 'positions'); const f = ghpPlacement(); if(f!=='8/8/8/8/8/8/8/8') p.set('fen', f); }
     return p;
@@ -29448,7 +29602,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const site = sp!=null ? (sp==='lichess' || sp==='chesscom' ? sp : 'all') : (hasF || v!=null ? 'all' : GH_UI.site);
     const siteChanged = site!==GH_UI.site;
     if(siteChanged){ GH_UI.site = site; GH_STATE.shown = GH_WINDOW; }
-    const want = v==='openings' || v==='groups' || v==='positions' ? v : (v==='games' || hasF) ? 'games' : GH_UI.view;
+    const want = v==='openings' || v==='groups' || v==='positions' || v==='clamp' ? v : (v==='games' || hasF) ? 'games' : GH_UI.view;
     let fenSet = false;            // a link's position: shown and searched (the first call can come before GHP exists)
     if(want==='positions' && p && p.get('fen')){ const was = ghpPlacement(); fenSet = ghpLoadFen(p.get('fen')) && ghpPlacement()!==was; }
     const grp = want==='groups' && p && /^gp-[0-9a-f]{8}$/.test(p.get('group') || '') ? p.get('group') : (want==='groups' && v==='groups' ? '' : GH_UI.group || '');
@@ -29509,20 +29663,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   var GH_GSUB = 'games';           // the Games view last shown (All games, Groups, Positions): the top Games button goes back to it
   function ghoSyncControls(){
-    const on = ghoOn();
-    if(!on) GH_GSUB = GH_UI.view==='groups' || GH_UI.view==='positions' ? GH_UI.view : 'games';
-    // the top switch: Games (any of its three views) | Openings
+    const on = ghoOn(), cv = ctOn();
+    if(!on && !cv) GH_GSUB = GH_UI.view==='groups' || GH_UI.view==='positions' ? GH_UI.view : 'games';
+    // the top switch: Games (any of its three views) | Openings | CLAMP
     document.querySelectorAll('#gh-view .toggle').forEach(b=>{
-      const a = b.dataset.val===(on ? 'openings' : 'games');
+      const a = b.dataset.val===(on ? 'openings' : cv ? 'clamp' : 'games');
       b.classList.toggle('active', a);
       b.setAttribute('aria-pressed', a ? 'true' : 'false');
     });
     // under the site tabs, in the Games view only: All games / Groups / Positions
     const sub = document.getElementById('gh-sub');
     if(sub){
-      sub.hidden = on;
+      sub.hidden = on || cv;
       sub.querySelectorAll('.gh-sub-b').forEach(b=>{
-        const a = !on && b.dataset.val===GH_GSUB;
+        const a = !on && !cv && b.dataset.val===GH_GSUB;
         b.classList.toggle('is-on', a);
         b.setAttribute('aria-pressed', a ? 'true' : 'false');
       });
@@ -29548,6 +29702,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     off(document.getElementById('history-result-filter'));
     const cl = document.querySelector('#gh-opening-wrap .gh-combo-clear');
     if(cl) cl.disabled = on;
+    ctSyncChip(on, cv);
     const chip = document.getElementById('gh-rep-chip');
     if(!chip) return;
     const rep = GH_FILTERS.rep;
@@ -30252,16 +30407,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(e.key==='Enter'){ e.preventDefault(); qNow(qi.value); if(matchMedia('(pointer:coarse)').matches) qi.blur(); }    // a phone's keyboard goes away
     });
     qx.addEventListener('click', ()=>{ qi.value = ''; qNow(''); try{ qi.focus({ preventScroll:true }); }catch(e){} });
-    // Games: from Openings, back to the Games view you were on (All games, Groups or Positions); from Groups or Positions,
-    // All games (the list). Openings: the Openings view
+    // Games: from Openings or CLAMP, back to the Games view you were on (All games, Groups or Positions); from Groups or
+    // Positions, All games (the list). Openings, CLAMP: those views
     document.getElementById('gh-view').addEventListener('click', e=>{
       const b = e.target.closest('.toggle');
       if(!b) return;
-      if(b.dataset.val==='openings') ghoSetView('openings');
-      else ghoSetView(ghoOn() ? GH_GSUB : 'games');
+      if(b.dataset.val==='openings' || b.dataset.val==='clamp') ghoSetView(b.dataset.val);
+      else ghoSetView(ghoOn() || ctOn() ? GH_GSUB : 'games');
     });
     document.getElementById('gh-sub').addEventListener('click', e=>{ const b = e.target.closest('.gh-sub-b'); if(b) ghoSetView(b.dataset.val); });
-    document.getElementById('gh-rep-chip').addEventListener('click', ()=>{ if(!ghoOn()) ghSetFilters({ rep:'' }); });
+    document.getElementById('gh-rep-chip').addEventListener('click', ()=>{ if(!ghoOn()){ ghSetFilters({ rep:'' }); ctFocusList(); } });
     document.getElementById('gho-connect-btn').addEventListener('click', ()=>{
       if(rlState()==='in' && !RP && rlMessage().kind!=='error') rlRefresh(); else rlOpenSettings();      // no copy, nothing wrong: read it here
     });
@@ -30335,8 +30490,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var GHO_BRIEF = { stats:[], i:0, user:false, facts:[], allFacts:false, timer:0, key:'', mg:null, model:null, work:[] };
   const GHO_FACTS_N = 4;
   function ghoBriefNow(){ return GHO_NOW || Date.now(); }
-  // a ring: a fraction f of the circle in the accent, the rest a track; or arcs (wins, draws, losses)
-  function ghoRing(parts){
+  // a ring: a fraction f of the circle in the accent, the rest a track; or arcs (wins, draws, losses); gap: a sliver
+  // of track between arcs (the CLAMP letters, side by side in colors that can sit close)
+  function ghoRing(parts, gap){
     const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'), R = 40, C = 2*Math.PI*R;
     svg.setAttribute('viewBox', '0 0 100 100');
     const arc = (col, from, len)=>{
@@ -30350,7 +30506,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     arc('var(--line)', 0, 1);
     let at = 0;
-    parts.forEach(([col, f])=>{ f = Math.max(0, Math.min(1, f)); if(f > 0) arc(col, at, f); at += f; });
+    parts.forEach(([col, f])=>{ f = Math.max(0, Math.min(1, f)); if(f > 0) arc(col, at, gap ? Math.max(0.004, f - gap) : f); at += f; });
     return svg;
   }
   function ghoSignedTxt(x, dp){ const v = Math.abs(x).toFixed(dp); return (x > 0 ? '+' : x < 0 ? '\u2212' : '\u00b1')+v; }
@@ -30397,6 +30553,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const wd = W.length ? Math.max(1, Math.round((Math.max(...W.map(e=> e.at)) - Math.min(...W.map(e=> e.at)))/86400e3)) : 0;
     out.push({ k:'games', dot:'Games', big:String(W.length), what:W.length===1 ? 'Game' : 'Games',
       vs:(week ? '' : 'Played over '+ghoN(wd, 'day')+'. ')+'Usually about '+Math.round(all.length/span*7)+' a week', fig:[['var(--good)', m.n ? m.W/m.n : 0], ['var(--ink-soft)', m.n ? m.D/m.n : 0], ['var(--bad)', m.n ? m.L/m.n : 0]], d:0 });
+    // CLAMP (2026-11-02): the letter in most of these games you marked, against all your marked games here (ctBriefOf)
+    const cb = ctBriefOf(W, all);
+    if(cb){
+      const K = CLAMP_BY[cb.ch], tot = CLAMP_K.reduce((t, X)=> t + cb.n[X.ch], 0);
+      const by = CLAMP_K.filter(X=> cb.n[X.ch]).sort((a, b)=> (b.ch===cb.ch) - (a.ch===cb.ch) || cb.n[b.ch] - cb.n[a.ch]);      // the letter in the middle first, then most first (a tie in CLAMP order)
+      const sW = cb.n[cb.ch]/cb.MW.length, sU = cb.MA.filter(x=> ctHas(x, cb.ch)).length/cb.MA.length, same = cb.MA.length===cb.MW.length;
+      out.push({ k:'clamp', dot:'CLAMP', big:cb.n[cb.ch]+' of '+cb.MW.length, what:(cb.MW.length===1 ? 'marked game had ' : 'marked games had ')+K.what,
+        vs:'Your marks'+(week ? ' this week' : '')+': '+by.map(X=> X.ch+' '+cb.n[X.ch]).join(' \u00b7 ')+'.'+(same ? '' : ' Usually '+ctRate(sU, cb.ch)+'.'),
+        fig:by.map(X=> [X.color, cb.n[X.ch]/tot]), gap:by.length > 1 ? 0.012 : 0, mid:{ ch:K.ch, color:K.color }, d:same ? 0 : Math.abs(sW - sU)*10 });
+    }
     return out;
   }
   function ghoBriefShow(i, user, anim){
@@ -30407,7 +30573,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const st = S[B.i], hero = document.getElementById('gho-brief-hero');
     hero.setAttribute('aria-live', user || B.user ? 'polite' : 'off');   // the 7 s cycle is never read out; a number you pick is (a redraw keeps it)
     const fig = document.getElementById('gho-brief-fig');
-    fig.textContent = ''; fig.appendChild(ghoRing(st.fig));
+    fig.textContent = ''; fig.appendChild(ghoRing(st.fig, st.gap));
+    if(st.mid){ const c = ghEl('span', 'gho-brief-mid', st.mid.ch); c.style.color = st.mid.color; fig.appendChild(c); }     // CLAMP: its top letter
     document.getElementById('gho-brief-big').textContent = st.big;
     document.getElementById('gho-brief-what').textContent = st.what;
     document.getElementById('gho-brief-vs').textContent = st.vs;
@@ -30443,6 +30610,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(l) acts.push({ t:'Learn', line:l, mode:'learn' });
       F.push({ tag:last===newest ? 'Latest game' : 'Latest in your openings', text:[t.name+(t.sub || '')+'. ', [t.depth, t.left].filter(Boolean).join(' ')], acts });
     }
+    const cf = ctBriefFact(W, week);            // a CLAMP letter again (2026-11-02)
+    if(cf) F.push(cf);
     if(rep){
       const spots = (who)=>{
         const m = new Map();
@@ -30673,7 +30842,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const shown = B.allFacts ? B.facts : B.facts.slice(0, GHO_FACTS_N);
     shown.forEach((f, fi)=>{
       const li = ghEl('li', 'gho-fact'), fid = 'fact|'+f.tag;
-      li.appendChild(ghEl('span', 'gho-fact-tag'+(f.cls ? ' '+f.cls : ''), f.tag));
+      const tg = li.appendChild(ghEl('span', 'gho-fact-tag'+(f.cls ? ' '+f.cls : ''), f.tag));
+      if(f.bg) tg.style.background = f.bg;            // a CLAMP letter's color
       const t = ghEl('span', 'gho-fact-t');
       f.text.forEach(p=> t.appendChild(Array.isArray(p) ? ghEl('b', '', p[0]) : document.createTextNode(p)));
       li.appendChild(t);
@@ -30884,7 +31054,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the games without an endgame yet get one; only when the filter or the Openings tab wants them, and only when the
   // games changed (a draw costs nothing otherwise)
   function egEnsure(){
-    if(!GH_FILTERS.eg && !ghoOn() && !(GH_UI.view==='games' && (GH_FILTERS.oj || ghbOn()))) return;
+    if(!GH_FILTERS.eg && !ghoOn() && !((GH_UI.view==='games' || ctOn()) && (GH_FILTERS.oj || ghbOn()))) return;
     if(EG_JOB){ EG_JOB.more = true; return; }
     const sig = GH_STATE.games.length+'|'+(ghCcUp() ? ccGames().length : 0)+'|'+(typeof GN==='object' && GN && GN.notes ? Object.keys(GN.notes).length : 0);
     if(sig===EG_SIG) return;
@@ -31017,7 +31187,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // ---- the background checks ----
   function ojWanted(){
-    return OJ_ON && !OJ_NOENG && OJ_LOADED && egReady() && currentView==='history' && !document.hidden && (ghoOn() || (GH_UI.view==='games' && (ghbOn() || !!GH_FILTERS.oj)));
+    return OJ_ON && !OJ_NOENG && OJ_LOADED && egReady() && currentView==='history' && !document.hidden && (ghoOn() || (GH_UI.view==='games' && (ghbOn() || !!GH_FILTERS.oj)) || (ctOn() && !!GH_FILTERS.oj));
   }
   // what's left to score: each game's checkpoint, then (games that did their job and were lost) the endgame's; newest first
   // (so the numbers on screen are fair while the checks run). A score from a review or Lichess is kept too, so it outlasts
@@ -31679,6 +31849,669 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   })();
   function ghbSyncToggle(){
     document.querySelectorAll('#gh-bv .toggle').forEach(t=>{ const on = (t.dataset.v==='boards')===!!GH_UI.boards; t.classList.toggle('active', on); t.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+  }
+  /* ---- CLAMP (ct*, 2026-11-02; the user: "how we have games on the top tab and openings, let's put clamp. And in clamp,
+     that's just going to be basically the analytics page for the clamp. It keeps track of my games and tries to see the
+     patterns in my games if I'm falling into the same type of blunder issues"). The third top tab, over the CLAMP letters
+     you put on your moves by hand (gnClampOf) in the games the site tab and the Filters keep (the CLAMP filter itself is
+     the Games view's). Your pattern: the letter in most of your marked games of the last 30 days (fewer than 5 there:
+     your last 12), against the same window before. Your last 24 marked games letter by letter. Where the marked moves
+     happen: the phase (hpfDivide, as the review's phase card divides a game), your color, the speed, low on time (the
+     Boards cards' clocks). Every marked move as a board, the move drawn in its letter's color. A redraw that changes
+     nothing touches nothing (CT.sig, CT.msig); boards fill in as they come on screen. Nothing is guessed by the engine. ---- */
+  const CT_DAYS = 30, CT_MIN = 5, CT_LAST = 12, CT_GRID = 24, CT_HALF = 12, CT_MOM_N = 16;
+  const CT_PHASES = ['Opening', 'Middlegame', 'Endgame'];
+  var CT = { sig:'', msig:'', m:{ ch:'', b:null }, shown:CT_MOM_N, model:null, back:null, y:null, ps:null, psN:0, gx:null };     // gx: the grid's sideways scroll (null: never moved)
+  var CT_DRILL = null;          // filters a CLAMP drill-down set (a letter, losses, a date): put back on return, unless changed since
+  var CT_RP = new Map();        // game id -> the review's replay of a marked game (ctReplay)
+  var CT_IO = null, CT_MS = 0, CT_DFMT = null;
+  function ctOn(){ return GH_UI.view==='clamp'; }
+  function ctHas(e, ch){ return e.k.some(x=> x[1]===ch); }
+  // games per letter over entries L ({ k }): { C:n, L:n, A:n, M:n, P:n }
+  function ctCount(L){
+    const n = {};
+    CLAMP_K.forEach(K=>{ n[K.ch] = 0; });
+    L.forEach(e=> CLAMP_K.forEach(K=>{ if(ctHas(e, K.ch)) n[K.ch]++; }));
+    return n;
+  }
+  // the letter in the most of L's games (L newest first); a tie: the one marked in the newest game (then C L A M P)
+  function ctTop(L, n){
+    const best = Math.max(...CLAMP_K.map(K=> n[K.ch]));
+    if(!best) return null;
+    const tied = CLAMP_K.filter(K=> n[K.ch]===best).map(K=> K.ch);
+    if(tied.length > 1) for(const e of L){ const c = tied.find(ch=> ctHas(e, ch)); if(c) return c; }
+    return tied[0];
+  }
+  // your points in L's games, as a percentage (null for none)
+  function ctPts(L){ return L.length ? 100*L.reduce((t, e)=> t + (e.res==='win' ? 1 : e.res==='draw' ? 0.5 : 0), 0)/L.length : null; }
+  function ctRes(r){ return r==='win' ? 'Won' : r==='loss' ? 'Lost' : 'Drew'; }
+  // "Oct 30" (this year), else with its year
+  function ctDay(ts){
+    const d = new Date(Number(ts) || 0);
+    if(d.getFullYear()!==new Date(ghoBriefNow()).getFullYear()) return ghFormatDate(ts);
+    try{ if(!CT_DFMT) CT_DFMT = new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric' }); return CT_DFMT.format(d); }catch(e){ return ghFormatDate(ts); }
+  }
+  // "1 game in 5 has an L", "6 games in 10 have a C", "every marked game has a P"
+  function ctRate(s, ch){
+    const a = /[ALM]/.test(ch) ? 'an ' : 'a ';
+    if(s >= 0.999) return 'every marked game has '+a+ch;
+    if(s <= 0.5) return '1 game in '+Math.max(2, Math.round(1/s))+' has '+a+ch;
+    return Math.min(9, Math.round(s*10))+' games in 10 have '+a+ch;
+  }
+  function ctDisc(K){ const d = ghEl('span', 'clamp-d is-on', K.ch); d.style.background = K.color; d.setAttribute('aria-hidden', 'true'); return d; }
+  // a marked game as the review replays it (its moves through the review's resolver: a Chess960 castle or a bad move ends
+  // it, as there), kept per game, moves and marks: how far it goes (can), the phases (hpfDivide, standard games only, as
+  // the review's phase card), the Black-first offset of a set-up game (off) and, for the boards, the position before each
+  // marked move with the move (at). Replayed only up to its last marked move: where the middlegame and the endgame begin
+  // up to there doesn't depend on the moves after it (the endgame's rule implies the middlegame's), so a marked move's
+  // phase is the same as over the whole game, at a fraction of the work
+  function ctReplay(g){
+    const id = String(g.id), mv = String(g.moves || '').trim(), K = gnClampOf(id), upTo = K.reduce((t, x)=> Math.max(t, x[0]), 0);
+    const key = mv+'|'+(g.variant || '')+'|'+(g.initialFen || '')+'|'+(g._summary ? 1 : 0)+'|'+upTo+'|'+K.map(x=> x[0]).join(',');
+    let r = CT_RP.get(id);
+    if(r && r.key===key) return r;
+    const toks = mv ? mv.split(/\s+/) : [];
+    const noStart = !!g._summary && !ghIsStd(g) && !(typeof g.initialFen==='string' && g.initialFen.trim());
+    const st0 = hvStartState(g), states = [st0], moves = [], n = Math.min(toks.length, upTo);
+    let st = st0;
+    if(!noStart) for(let i = 0; i < n; i++){
+      let m = null;
+      try{ m = rpSanToMove(st, toks[i]); }catch(e){ m = null; }
+      if(!m) break;
+      st = pzApplyMoveRaw(st, m);
+      states.push(st); moves.push(m);
+    }
+    const std = ghIsStd(g) && !noStart, at = {};
+    K.forEach(x=>{ const p = x[0]; if(p >= 1 && p <= moves.length) at[p] = [states[p-1], moves[p-1]]; });
+    r = { key, toks, can:moves.length, off:st0.turn==='b' ? 1 : 0, std, d: std && moves.length ? hpfDivide(states) : null, at };
+    CT_RP.set(id, r);
+    return r;
+  }
+  function ctBucket(m, k){
+    if(k==='phase') return m.ph==null ? null : String(m.ph);
+    if(k==='color') return m.e.color;
+    if(k==='speed') return m.e.g.speed || '';
+    return m.clk && m.clk.low ? 'low' : null;
+  }
+  function ctSpeedName(s){ const x = GHO_SPEEDS.find(y=> y[0]===s); return x ? x[1] : (s ? s.charAt(0).toUpperCase()+s.slice(1) : 'Other'); }
+  function ctBucketName(k, v){
+    if(k==='phase') return CT_PHASES[Number(v)] || '';
+    if(k==='color') return v==='white' ? 'White' : 'Black';
+    if(k==='speed') return ctSpeedName(v);
+    return 'Low on time';
+  }
+  // the game has a move of yours (one you could mark): White's is the first ply, Black's the second (the first in a set-up
+  // with Black to move). "Not marked yet" counts only these, and the Games view's "No CLAMP marks" filter (ghMatch) lists them
+  function ctHasMine(g, u){ const bf = / b /.test(String(g.initialFen || '')); return ghPlies(g) >= ((ghMyColor(g, u)==='white')!==bf ? 1 : 2); }
+  // your marked games that aren't loaded yet (older than the games loaded so far): from their analysis records' summaries,
+  // as the Games view's "Has notes" adds them (ghBaseList), so a mark on an old game never drops out of the tab on a reload.
+  // Lichess games only (the Chess.com tab holds all its games); never one against the computer
+  function ctExtras(base){
+    if(typeof GN!=='object' || !GN || GH_UI.site==='chesscom') return [];
+    const have = new Set(base.map(g=> String(g.id))), out = [];
+    Object.keys(GN.notes).forEach(id=>{
+      if(!gnIsAn(id)) return;
+      const n = GN.notes[id], gid = id.slice(3);
+      if(!n || !n.g || ccIsId(gid) || have.has(gid) || GH_STATE.ids.has(gid) || !gnClampOf(gid).length) return;
+      const g = GH_STATE.extras.get(gid) || ghGameFromSummary(Object.assign({}, n, { id:gid }));
+      if(!ghVsComputer(g)) out.push(g);
+    });
+    return out;
+  }
+  // what the tab shows, from the games the tab and the Filters keep (its own CLAMP filter aside), plus your marked games not
+  // loaded yet. This part is quick (no replays): its signature (ctSig) decides whether anything is drawn again (ctModelMoves)
+  function ctModel(base){
+    const u = ghMe(), f = Object.assign({}, GH_FILTERS, { ck:'' }), now = ghoBriefNow(), from = now - CT_DAYS*86400e3;
+    const all = base.concat(ctExtras(base));
+    const scope = all.filter(g=> ghMatch(g, u, f));
+    // Not marked yet: your losses of the last 30 days (the Date filter's days when it is shorter) with no letters
+    const df = f.date ? (f.date==='year' ? new Date(new Date(now).getFullYear(), 0, 1).getTime() : now - Number(f.date)*86400e3) : 0;
+    const lossFrom = Math.max(from, df), lossDate = lossFrom===from ? '30' : f.date;
+    const G = [];
+    let loss = 0;
+    scope.forEach(g=>{
+      const k = gnClampOf(String(g.id)), at = Number(g.createdAt) || 0, res = ghGameResult(g, u);
+      if(k.length) G.push({ g, k, at, res, color:ghMyColor(g, u)==='white' ? 'white' : 'black' });
+      else if(res==='loss' && at >= lossFrom && ctHasMine(g, u)) loss++;
+    });
+    G.sort((a, b)=> b.at - a.at);
+    // nothing marked here: are there marks outside the Filters, or in another site's tab? (the empty card says so)
+    let any = G.length > 0, other = false;
+    if(!any) any = all.some(g=> gnClampOf(String(g.id)).length > 0);
+    if(!any && GH_UI.site!=='all') other = ghBaseList('all').some(g=> gnClampOf(String(g.id)).length > 0);
+    const byId = new Map(G.map(e=> [String(e.g.id), e]));
+    // the pattern's window: the last 30 days with 5+ marked games, else your last 12; before it, the same kind of window
+    const in30 = G.filter(e=> e.at >= from), days = in30.length >= CT_MIN;
+    const W = days ? in30 : G.slice(0, CT_LAST);
+    const B = days ? G.filter(e=> e.at >= from - CT_DAYS*86400e3 && e.at < from) : G.slice(W.length, 2*W.length);
+    const nW = ctCount(W), nG = ctCount(G), top = ctTop(W, nW);
+    let P = null;
+    if(top){
+      const tied = CLAMP_K.filter(K=> nW[K.ch]===nW[top]).length > 1;
+      P = { ch:top, n:nW[top], of:W.length, tied, nB:B.length ? ctCount(B)[top] : 0, ofB:B.length, score:ctPts(W.filter(e=> ctHas(e, top))) };
+    }
+    // the grid: your newest 24 marked games. Last 12 from 13 of them: the newest half against the half before (12 and 12;
+    // with fewer, as many as both halves have, so the two counts always compare like with like: "Last 10")
+    const GG = G.slice(0, CT_GRID), hn = Math.min(CT_HALF, Math.floor(GG.length/2));
+    const half = GG.length > CT_HALF ? { n:hn, a:GG.slice(0, hn), b:GG.slice(hn, 2*hn) } : null;
+    const rows = CLAMP_K.map(K=>{
+      const L = GG.filter(e=> ctHas(e, K.ch));
+      return { K, n:L.length, score:ctPts(L), a:half ? half.a.filter(e=> ctHas(e, K.ch)).length : 0, b:half ? half.b.filter(e=> ctHas(e, K.ch)).length : 0 };
+    });
+    return { scope, G, any, other, loading:!base.length && ghTabBusy(), byId, days, W, B, nW, nG, P, GG, half, rows, M:null, loss, lossDate,
+      lossWhen: lossFrom===from ? 'in the last '+CT_DAYS+' days' : f.date==='7' ? 'in the last 7 days' : 'this year' };
+  }
+  // every marked move: its phase and clock only where the review replays it (standard games, as far as their moves go).
+  // The slow part (a replay per marked game, kept in CT_RP): only when the signature changed
+  function ctModelMoves(md){
+    const M = [];
+    md.G.forEach(e=>{
+      const r = e.r = ctReplay(e.g), mine = e.color==='white' ? 'w' : 'b';
+      e.k.forEach(x=>{
+        const p = x[0], ok = r.std && p <= r.can;
+        let ck = null;
+        if(ok){ try{ ck = ghbClocks(e.g, p - 1, mine); }catch(err){ ck = null; } }
+        M.push({ e, p, ch:x[1], note:x[2] || '', ph: ok && r.d ? hpfPhaseOf(r.d, p - 1) : null, clk: ck ? { low:!!ck.trouble } : null });
+      });
+    });
+    M.sort((a, b)=> b.e.at - a.e.at || b.p - a.p || 'CLAMP'.indexOf(a.ch) - 'CLAMP'.indexOf(b.ch));
+    const sp = GHO_SPEEDS.map(x=> x[0]).filter(s=> M.some(m=> m.e.g.speed===s));
+    M.forEach(m=>{ const s = m.e.g.speed || ''; if(sp.indexOf(s) < 0) sp.push(s); });
+    Object.assign(md, { M, sp, clkN:M.filter(m=> m.clk).length, phN:M.filter(m=> m.ph!=null).length });
+    // the replays kept: every marked game here, and others while there's room (going back to a filter costs nothing)
+    if(CT_RP.size > Math.max(400, 2*md.G.length)) CT_RP.forEach((r, id)=>{ if(!md.byId.has(id)) CT_RP.delete(id); });
+    return md;
+  }
+  // what the cards are drawn from: the same games (loaded or not), marks (notes too), Filters, tab and hour draw nothing again
+  function ctSig(md){
+    return [GH_UI.site, JSON.stringify(Object.assign({}, GH_FILTERS, { ck:'' })), Math.floor(ghoBriefNow()/36e5), md.scope.length, md.loss, md.any ? 1 : 0, md.other ? 1 : 0,
+      md.loading ? 1 : 0, md.G.map(e=> e.g.id+'@'+e.at+e.res+(e.g._summary ? 's' : '')+JSON.stringify(e.k)).join(';')].join('|');
+  }
+  function ctRender(base){
+    const sec = document.getElementById('ct'), t0 = performance.now();
+    const md = ctModel(base);
+    const cnt = document.getElementById('gh-count');
+    const ct = md.loading ? '' : ghoN(md.G.length, 'marked game')+' of '+ghoN(md.scope.length, 'game')+' against people';
+    if(cnt.textContent!==ct) cnt.textContent = ct;
+    const sig = ctSig(md);
+    if(sig!==CT.sig || !CT.model){
+      const fa = document.activeElement, fid = fa && sec.contains(fa) && fa.dataset ? fa.dataset.fid || '' : '';
+      CT.sig = sig;
+      CT.model = ctModelMoves(md);
+      ctDrawAll(md);
+      ctDrawMoments();
+      if(fid){ const el = Array.from(sec.querySelectorAll('[data-fid]')).find(x=> x.dataset.fid===fid); if(el) try{ el.focus({ preventScroll:true }); }catch(e){} }
+    } else ctDrawMoments();              // its own state (a chip, Show more, the piece set) may have changed
+    ctBack();
+    CT_MS = performance.now() - t0;
+  }
+  function ctDrawAll(md){
+    const ids = ['ct-pat', 'ct-grid', 'ct-where'], empty = document.getElementById('ct-empty');
+    const show = md.G.length > 0;
+    ids.forEach(id=>{ document.getElementById(id).hidden = !show; });
+    document.getElementById('ct-src').hidden = !show;
+    empty.textContent = '';
+    empty.hidden = show || md.loading;      // games still loading: the footer says so
+    if(!show){
+      if(empty.hidden) return;
+      // nothing marked here: how to mark; or your marks are outside the Filters, or in another site's tab
+      const out = md.any && ghActiveCount() > (GH_FILTERS.ck ? 1 : 0), tab = !md.any && md.other;
+      empty.appendChild(ghEl('h3', 'ct-h', out ? 'No marked games match the Filters' : tab ? 'No marked games in this tab' : 'No CLAMP marks yet'));
+      empty.appendChild(ghEl('p', 'ct-sub', out ? 'Your games with CLAMP letters are outside the Filters you set.' : tab ? 'Your games with CLAMP letters are in the other site\u2019s games: see them in All.'
+        : 'Mark a move of yours with its letter: tap a letter under a game\u2019s opening in Games, or right-click your move in a review (press and hold on a phone) and use the CLAMP row. Your pattern shows here.'));
+      const b = ghEl('button', 'btn btn-ghost ct-empty-b', out ? 'Clear filters' : tab ? 'Show All' : 'Go to Games');
+      b.type = 'button'; b.dataset.act = out ? 'clear' : tab ? 'all' : 'to-games'; b.dataset.fid = 'empty';
+      empty.appendChild(b);
+      return;
+    }
+    ctDrawPat(md);
+    ctDrawGrid(md);
+    ctDrawWhere(md);
+  }
+  function ctDrawPat(md){
+    const box = document.getElementById('ct-pat'), P = md.P, K = CLAMP_BY[P.ch];
+    box.textContent = '';
+    const head = ghEl('div', 'ct-head'), h = ghEl('h3', 'ct-k', md.days ? 'Your pattern \u00b7 last '+CT_DAYS+' days' : 'Your pattern \u00b7 your last '+ghoN(md.W.length, 'marked game'));
+    h.id = 'ct-pat-k';
+    head.append(h, ghEl('span', 'ct-n', md.days ? ghoN(md.W.length, 'marked game') : 'Fewer than '+CT_MIN+' in the last '+CT_DAYS+' days'));
+    box.appendChild(head);
+    const two = ghEl('div', 'ct-two'), hero = ghEl('div', 'ct-hero'), fig = ghEl('div', 'ct-fig', K.ch);
+    fig.style.background = K.color;
+    fig.setAttribute('aria-hidden', 'true');
+    let vs = (P.tied ? 'Tied for your most repeated letter' : 'Your most repeated letter');
+    if(P.ofB){
+      const a = P.n/P.of, b = P.nB/P.ofB;
+      vs += ', '+(Math.abs(a - b) < 1e-9 ? 'same as ' : a > b ? 'up from ' : 'down from ')+P.nB+' of '+P.ofB+(md.days ? ' in the '+CT_DAYS+' days before' : ' before');
+    }
+    vs += '. You scored '+ghoPct(P.score)+' in those games.';
+    hero.append(fig, ghEl('div', 'ct-big', P.n+' of '+P.of), ghEl('div', 'ct-what', (P.of===1 ? 'game had ' : 'games had ')+K.what), ghEl('div', 'ct-vs', vs));
+    // the Games view can't list "your last 12 marked games": there, a letter opens every game with it (and says how many)
+    const allOf = (ch)=> !md.days && md.nG[ch] > md.nW[ch] ? 'All '+md.nG[ch]+' games with '+(/[ALM]/.test(ch) ? 'an ' : 'a ')+ch : '';
+    const acts = ghEl('div', 'ct-acts'), nm = md.M.filter(m=> m.ch===P.ch).length, ao = allOf(P.ch);
+    const a1 = ghEl('button', 'ct-l', nm===1 ? 'See the moment' : 'See the '+nm+' moments'), a2 = ghEl('button', 'ct-l', ao || 'Their games');
+    a1.type = a2.type = 'button';
+    a1.dataset.act = 'mom'; a1.dataset.ch = P.ch; a1.dataset.fid = 'pat|mom';
+    a1.setAttribute('aria-label', (nm===1 ? 'See the move' : 'See the '+nm+' moves')+' you marked '+K.name);
+    a2.dataset.act = 'games'; a2.dataset.ch = P.ch; a2.dataset.win = '1'; a2.dataset.fid = 'pat|games';
+    a2.setAttribute('aria-label', ao ? ao+': all your games with '+K.name : 'Their games: your games with '+K.name+(md.days ? ' in the last '+CT_DAYS+' days' : ''));
+    acts.append(a1, a2);
+    hero.appendChild(acts);
+    two.appendChild(hero);
+    // each letter's games in the window (a bar's width: its share of them); a bar opens those games
+    const bars = ghEl('div', 'ct-bars');
+    bars.appendChild(ghEl('h4', 'ct-k', 'By letter'));
+    CLAMP_K.forEach(X=>{
+      const n = md.nW[X.ch], b = ghEl(n ? 'button' : 'div', 'ct-bar'), tr = ghEl('span', 'ct-tr'), i = ghEl('i');
+      i.style.width = (md.W.length ? 100*n/md.W.length : 0).toFixed(1)+'%';
+      i.style.background = X.color;
+      tr.appendChild(i);
+      b.append(ctDisc(X), ghEl('span', 'ct-bar-n', X.short), tr, ghEl('b', '', String(n)));
+      if(n){
+        b.type = 'button'; b.dataset.act = 'games'; b.dataset.ch = X.ch; b.dataset.win = '1'; b.dataset.fid = 'bar|'+X.ch;
+        const ao = allOf(X.ch);
+        b.setAttribute('aria-label', X.name+': '+n+' of '+md.W.length+' games. '+(ao ? 'Show all '+md.nG[X.ch]+' of your games with it' : 'Show them'));
+        if(ao) b.title = 'Show all '+md.nG[X.ch]+' of your games with it';
+      }
+      bars.appendChild(b);
+    });
+    two.appendChild(bars);
+    box.appendChild(two);
+    if(md.loss){
+      const todo = ghEl('div', 'ct-todo'), t = ghEl('span', 'ct-todo-t'), o = ghEl('button', 'ct-l', 'Open them');
+      todo.appendChild(ghEl('span', 'ct-k', 'Not marked yet'));
+      t.append(ghEl('b', '', md.loss===1 ? '1 loss' : md.loss+' losses'), document.createTextNode(' '+md.lossWhen+(md.loss===1 ? ' has' : ' have')+' no letters.'));
+      o.type = 'button'; o.dataset.act = 'todo'; o.dataset.fid = 'todo';
+      o.setAttribute('aria-label', 'Open them: your '+(md.loss===1 ? 'loss' : md.loss+' losses')+' '+md.lossWhen+' with no CLAMP letters');
+      todo.append(t, o);
+      box.appendChild(todo);
+    }
+  }
+  function ctDrawGrid(md){
+    const box = document.getElementById('ct-grid'), GG = md.GG.slice().reverse(), n = GG.length, u = ghMe(), H = md.half;
+    box.textContent = '';
+    const h = ghEl('h3', 'ct-h', n===1 ? 'Your last marked game' : 'Your last '+n+' marked games');
+    h.id = 'ct-grid-h';
+    box.append(h, ghEl('p', 'ct-sub', 'One column per game, oldest on the left. A filled letter: you marked that kind of mistake in the game. A column opens the game at its first marked move.'));
+    const sc = ghEl('div', 'ct-scroll'), g = ghEl('div', 'ct-g');
+    g.style.gridTemplateColumns = 'var(--ct-lw) repeat('+n+', minmax(var(--ct-cw), 1fr)) 46px'+(H ? ' 76px' : '')+' 52px';
+    g.style.minWidth = 'calc(var(--ct-lw) + '+n+' * (var(--ct-cw) + 2px) + '+(H ? 174 : 98)+'px)';
+    // the letters (each opens its games)
+    const lab = ghEl('div', 'ct-gc ct-glab');
+    lab.appendChild(ghEl('span', 'ct-gh'));
+    CLAMP_K.forEach(K=>{
+      const b = ghEl('button', 'ct-gl');
+      b.type = 'button'; b.dataset.act = 'games'; b.dataset.ch = K.ch; b.dataset.fid = 'gl|'+K.ch;
+      b.append(ctDisc(K), ghEl('span', 'ct-gl-n', K.short));
+      b.setAttribute('aria-label', K.name+': show your games with it');
+      lab.appendChild(b);
+    });
+    lab.appendChild(ghEl('span', 'ct-gr ct-grl', 'Result'));
+    g.appendChild(lab);
+    // a column per game: one button (the review at its first marked move the review can show; none: it opens nothing)
+    GG.forEach(e=>{
+      const b = ghEl('button', 'ct-gc ct-gcol'), go = e.k.find(x=> x[0] <= e.r.can), opp = ghOppName(ghPlayers(e.g, u).opp);
+      b.type = 'button'; b.dataset.gid = String(e.g.id); b.dataset.fid = 'gc|'+e.g.id;
+      b.appendChild(ghEl('span', 'ct-gh'));
+      CLAMP_K.forEach(K=>{ const c = ghEl('span', 'ct-gx'); c.appendChild(ctHas(e, K.ch) ? ctDisc(K) : ghEl('span', 'ct-ring')); b.appendChild(c); });
+      const r = ghEl('span', 'ct-gr'), ri = ghEl('i', 'is-'+e.res);
+      r.appendChild(ri);
+      b.appendChild(r);
+      const names = CLAMP_K.filter(K=> ctHas(e, K.ch)).map(K=> K.name).join(', ');
+      let t = ctDay(e.at)+': '+ctRes(e.res).toLowerCase()+' against '+opp+'. '+names+'. ';
+      if(go){ b.dataset.ply = String(go[0]); b.dataset.ck = go[1]; t += 'Open the review before '+ghClampLabel(go[0], e.r.toks[go[0]-1], e.r.off); }
+      else{ b.setAttribute('aria-disabled', 'true'); b.classList.add('is-off'); t += 'The review can\u2019t show its marked moves'; }
+      b.setAttribute('aria-label', t);
+      b.title = t;
+      g.appendChild(b);
+    });
+    // each letter over these games: in how many, Last 12 (the newest half against the half before), your score in them.
+    // Each value names its letter for a screen reader ([shown, read]: the shown part is hidden from it)
+    const col = (head, vals, cls)=>{
+      const c = ghEl('div', 'ct-gc ct-gs'+(cls ? ' '+cls : ''));
+      c.appendChild(ghEl('span', 'ct-gh', head));
+      vals.forEach(([v, sr])=>{
+        const x = ghEl('span', 'ct-gv'), w = v && v.nodeType ? v : ghEl('span', '', v);
+        w.setAttribute('aria-hidden', 'true');
+        x.append(ghEl('span', 'ph-sr', sr), w);
+        c.appendChild(x);
+      });
+      c.appendChild(ghEl('span', 'ct-gr'));
+      return c;
+    };
+    g.appendChild(col('Games', md.rows.map(x=> [String(x.n), x.K.name+': in '+x.n+' of '+n+' games'])));
+    if(H) g.appendChild(col('Last '+H.n, md.rows.map(x=>{
+      const k = x.a===x.b ? 'flat' : x.a > x.b ? 'up' : 'down', t = x.K.name+': '+x.a+' of your newest '+H.n+' marked games, '+x.b+' of the '+H.n+' before them';
+      const s = ghEl('span', 'ct-trend is-'+k, (k==='up' ? '\u2191 ' : k==='down' ? '\u2193 ' : '')+x.a+' vs '+x.b);
+      s.title = t;
+      return [s, t];
+    }), 'ct-gt'));
+    g.appendChild(col('Scored', md.rows.map(x=> x.n ? [ghoPct(x.score), x.K.name+': you scored '+ghoPct(x.score)+' in its games'] : ['\u2014', x.K.name+': in none of them'])));
+    // the dates under the columns, every sixth
+    const dt = (t, c)=>{ const d = ghEl('span', 'ct-gd'+(c ? ' '+c : ''), t); d.setAttribute('aria-hidden', 'true'); g.appendChild(d); };
+    dt('', 'ct-gd0');
+    GG.forEach((e, j)=> dt(j % 6===0 ? ctDay(e.at) : ''));
+    dt(''); if(H) dt(''); dt('');
+    sc.appendChild(g);
+    box.appendChild(sc);
+    box.appendChild(ghEl('p', 'ct-sub ct-foot', (H ? 'Last '+H.n+': your newest '+H.n+' marked games against the '+H.n+' before them. ' : '')+'Scored: your points in the games with that letter. '
+      +'Result: a solid bar won, a thin line drew, an outline lost.'));
+    // a narrow screen: opened at the newest games and the totals (the letters stay at the left); drawn again, where you had it
+    sc.addEventListener('scroll', ()=>{ CT.gx = { x:sc.scrollLeft, end:sc.scrollLeft >= sc.scrollWidth - sc.clientWidth - 1 }; ctGridDates(sc); }, { passive:true });
+    requestAnimationFrame(()=>{
+      const max = sc.scrollWidth - sc.clientWidth;
+      if(max > 1) sc.scrollLeft = !CT.gx || CT.gx.end ? max : Math.min(CT.gx.x, max);
+      ctGridDates(sc);
+    });
+  }
+  // a date whose column has slid under the letters isn't shown at all (not cut to "ct 19")
+  function ctGridDates(sc){
+    const lab = sc.querySelector('.ct-glab'), lw = lab ? lab.offsetWidth : 0, x = sc.scrollLeft;
+    sc.querySelectorAll('.ct-gd').forEach(d=>{
+      if(!d.textContent) return;
+      const v = x > 0 && d.offsetLeft < x + lw ? 'hidden' : '';
+      if(d.style.visibility!==v) d.style.visibility = v;
+    });
+  }
+  function ctDrawWhere(md){
+    const box = document.getElementById('ct-where'), M = md.M;
+    box.textContent = '';
+    const h = ghEl('h3', 'ct-h', 'Where they happen');
+    h.id = 'ct-where-h';
+    const off = M.length - md.phN;
+    box.append(h, ghEl('p', 'ct-sub', 'Your marked moves, counted. An outlined count is where a letter shows up most in its group. Phase: as the review\u2019s phase card divides the game.'
+      +(md.clkN ? ' Low on time: under 10% of your starting time left before the move ('+md.clkN+' of '+ghoN(M.length, 'move')+' had clocks).' : '')
+      +(off ? ' '+(off===1 ? '1 move' : off+' moves')+' from Chess960, other variants or set-up games '+(off===1 ? 'isn\u2019t' : 'aren\u2019t')+' in Phase'+(md.clkN ? ' or Clock' : '')+'.' : '')));
+    const groups = [['phase', 'Phase', ['0', '1', '2']], ['color', 'Color', ['white', 'black']], ['speed', 'Speed', md.sp]];
+    if(md.clkN) groups.push(['clock', 'Clock', ['low']]);
+    const T = ghEl('table', 'ct-w'), hd = ghEl('thead'), r1 = ghEl('tr'), r2 = ghEl('tr'), bd = ghEl('tbody');
+    const c1 = ghEl('th', 'ct-wr'), c2 = ghEl('th', 'ct-wr');
+    c1.appendChild(ghEl('span', 'ph-sr', 'Letter'));
+    r1.appendChild(c1); r2.appendChild(c2);
+    groups.forEach(([k, name, vals])=>{
+      const th = ghEl('th', 'ct-wg gs', name);
+      th.colSpan = vals.length; th.scope = 'colgroup';
+      r1.appendChild(th);
+      vals.forEach((v, i)=>{ const x = ghEl('th', (i ? '' : 'gs')+(k==='clock' ? ' ct-wclk' : ''), ctBucketName(k, v)); x.scope = 'col'; r2.appendChild(x); });
+    });
+    hd.append(r1, r2);
+    CLAMP_K.forEach(K=>{
+      const tr = ghEl('tr'), th = ghEl('th', 'ct-wr'), sp = ghEl('span', 'ct-wrn');
+      tr.style.setProperty('--c', K.color);
+      th.scope = 'row';
+      sp.append(ctDisc(K), document.createTextNode(K.short));
+      th.appendChild(sp);
+      tr.appendChild(th);
+      const mine = M.filter(m=> m.ch===K.ch);
+      groups.forEach(([k, name, vals])=>{
+        const n = vals.map(v=> mine.filter(m=> ctBucket(m, k)===v).length), mx = Math.max(0, ...n);
+        const one = mx > 0 && vals.length > 1 && n.filter(x=> x===mx).length===1;
+        vals.forEach((v, i)=>{
+          const td = ghEl('td', (i ? '' : 'gs ')+(n[i] ? 'has' : 'z'));
+          if(!n[i]){ td.textContent = '0'; tr.appendChild(td); return; }
+          td.style.backgroundColor = 'color-mix(in srgb, '+K.color+' '+Math.round(8 + 40*n[i]/mx)+'%, transparent)';      // (the color alone: the group's gap stays clear)
+          if(one && n[i]===mx) td.classList.add('max');
+          const b = ghEl('button', 'ct-wc', String(n[i])), what = ctBucketName(k, v);
+          b.type = 'button'; b.dataset.act = 'bucket'; b.dataset.ch = K.ch; b.dataset.g = k; b.dataset.v = v; b.dataset.fid = 'wc|'+K.ch+'|'+k+'|'+v;
+          b.setAttribute('aria-label', K.name+', '+(k==='speed' ? what : what.toLowerCase())+': '+(n[i]===1 ? '1 move' : n[i]+' moves')+(td.classList.contains('max') ? ', the most' : '')+'. Show them');
+          td.appendChild(b);
+          tr.appendChild(td);
+        });
+      });
+      bd.appendChild(tr);
+    });
+    T.append(hd, bd);
+    const sc = ghEl('div', 'ct-scroll');
+    sc.appendChild(T);
+    box.appendChild(sc);
+  }
+  // Moments: the marked moves the chips keep, newest first (16, then 16 more a tap); drawn again only when they change
+  function ctDrawMoments(){
+    const box = document.getElementById('ct-mom'), md = CT.model;
+    if(!md || !md.G.length){ box.hidden = true; box.textContent = ''; CT.msig = ''; return; }
+    if(CT.ps!==PIECE_SVG){ CT.ps = PIECE_SVG; CT.psN++; }          // a new piece set: the boards drawn again
+    // a letter (or one of Where's groups) with no moves left here (the Filters changed, its last mark went): back to All
+    if(CT.m.ch && !md.M.some(x=> x.ch===CT.m.ch)){ CT.m = { ch:'', b:null }; CT.shown = CT_MOM_N; }
+    else if(CT.m.b && !md.M.some(x=> x.ch===CT.m.ch && ctBucket(x, CT.m.b.g)===CT.m.b.v)){ CT.m = { ch:CT.m.ch, b:null }; CT.shown = CT_MOM_N; }
+    const m = CT.m, bk = m.b, L = md.M.filter(x=> (!m.ch || x.ch===m.ch) && (!bk || ctBucket(x, bk.g)===bk.v));
+    const shown = L.slice(0, Math.max(CT_MOM_N, CT.shown));
+    const msig = CT.sig+'|'+m.ch+'|'+(bk ? bk.g+':'+bk.v : '')+'|'+shown.length+'|'+CT.psN;
+    if(msig===CT.msig && box.firstChild){ box.hidden = false; return; }
+    const fa = document.activeElement, fid = fa && box.contains(fa) && fa.dataset ? fa.dataset.fid || '' : '';
+    CT.msig = msig;
+    box.hidden = false;
+    box.textContent = '';
+    const head = ghEl('div', 'ct-mom-h'), ht = ghEl('div', ''), h = ghEl('h3', 'ct-h', 'Moments');
+    h.id = 'ct-mom-h';
+    ht.append(h, ghEl('p', 'ct-sub', 'Every move you marked, newest first: the position before it, your move drawn in its letter\u2019s color. A card opens the review there.'));
+    head.appendChild(ht);
+    const chips = ghEl('div', 'ct-chips');
+    chips.setAttribute('role', 'group');
+    chips.setAttribute('aria-label', 'Show');
+    const chip = (ch, n)=>{
+      const K = CLAMP_BY[ch], b = ghEl('button', 'ct-chip'+(K ? '' : ' is-all'));
+      b.type = 'button'; b.dataset.act = 'chip'; b.dataset.ch = ch; b.dataset.fid = 'chip|'+(ch || 'all');
+      if(K) b.append(ctDisc(K), document.createTextNode(String(n))); else b.textContent = 'All '+n;
+      b.setAttribute('aria-pressed', (ch ? m.ch===ch : !m.ch && !bk) ? 'true' : 'false');
+      b.setAttribute('aria-label', K ? K.name+': '+(n===1 ? '1 move' : n+' moves') : 'All: '+(n===1 ? '1 move' : n+' moves'));
+      chips.appendChild(b);
+    };
+    chip('', md.M.length);
+    CLAMP_K.forEach(K=>{ const n = md.M.filter(x=> x.ch===K.ch).length; if(n) chip(K.ch, n); });
+    if(bk && CLAMP_BY[m.ch]){
+      const t = CLAMP_BY[m.ch].short+' \u00b7 '+ctBucketName(bk.g, bk.v), b = ghEl('button', 'ct-chip is-b');
+      b.type = 'button'; b.dataset.act = 'unb'; b.dataset.fid = 'chip|b';
+      b.appendChild(ghEl('span', '', t+' ('+L.length+')'));
+      const x = ghEl('span', 'gh-rep-x', '\u00d7');
+      x.setAttribute('aria-hidden', 'true');
+      b.appendChild(x);
+      b.setAttribute('aria-label', 'Remove: '+t);
+      chips.appendChild(b);
+    }
+    head.appendChild(chips);
+    box.appendChild(head);
+    const grid = ghEl('div', 'ct-mgrid');
+    shown.forEach(x=> grid.appendChild(ctMomCard(x)));
+    box.appendChild(grid);
+    if(L.length > shown.length){
+      const k = Math.min(CT_MOM_N, L.length - shown.length), b = ghEl('button', 'ct-l ct-more', 'Show '+k+' more');
+      b.type = 'button'; b.dataset.act = 'more'; b.dataset.fid = 'more';
+      b.setAttribute('aria-label', 'Show '+k+' more of '+L.length);
+      box.appendChild(b);
+    }
+    ctMomFill(grid);
+    if(fid){
+      const el = Array.from(box.querySelectorAll('[data-fid]')).find(x=> x.dataset.fid===fid);
+      if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+    }
+  }
+  function ctMomCard(x){
+    const e = x.e, g = e.g, K = CLAMP_BY[x.ch], r = e.r, lab = ghClampLabel(x.p, r.toks[x.p-1], r.off), opp = ghOppName(ghPlayers(g, ghMe()).opp);
+    const can = x.p <= r.can, b = ghEl(can ? 'button' : 'div', 'ct-m'+(can ? '' : ' is-off'));
+    if(can) b.type = 'button';
+    b.style.setProperty('--c', K.color);
+    b.dataset.gid = String(g.id); b.dataset.ply = String(x.p); b.dataset.ck = x.ch; b.dataset.fid = 'm|'+g.id+'|'+x.p+'|'+x.ch;
+    if(can) b.appendChild(ghEl('span', 'ct-mbd'));          // the board: filled as it comes on screen (ctMomFill)
+    else b.append(ghEl('span', 'ph-sr', K.name+': '), ghEl('span', 'ct-moff', 'The review can\u2019t show this move'));     // past a Chess960 castle, say: no board, nothing to open
+    const mv = ghEl('span', 'ct-mmv');
+    mv.append(ctDisc(K), ghEl('span', 'ct-mlab', lab));
+    if(x.ph!=null) mv.appendChild(ghEl('span', 'ct-mph', CT_PHASES[x.ph]));
+    b.appendChild(mv);
+    if(x.note) b.appendChild(ghEl('span', 'ct-mnt', '\u201c'+x.note+'\u201d'));
+    const ft = ghEl('span', 'ct-mft');
+    ft.append(ghEl('b', '', ctRes(e.res)), document.createTextNode(' vs '+opp+' \u00b7 '+ctDay(e.at)));
+    b.appendChild(ft);
+    if(can) b.setAttribute('aria-label', K.name+': '+lab+(x.ph!=null ? ', '+CT_PHASES[x.ph].toLowerCase() : '')+'. '+(x.note ? 'Your note: '+x.note+'. ' : '')
+      +ctRes(e.res)+' against '+opp+', '+ctDay(e.at)+'. Open the review before this move');
+    return b;
+  }
+  // a card's board: the position before the move, from your side, your move as an arrow in its letter's color
+  function ctMomFill(root){
+    const sq = (i)=> 'abcdefgh'[i % 8] + (Math.floor(i / 8) + 1);
+    const fill = (bd)=>{
+      if(bd.firstChild || !bd.isConnected) return;
+      const c = bd.closest('.ct-m'), e = c && CT.model ? CT.model.byId.get(c.dataset.gid) : null, K = c ? CLAMP_BY[c.dataset.ck] : null;
+      if(!e || !K) return;
+      const p = Number(c.dataset.ply), x = ctReplay(e.g).at[p], st = x && x[0], mv = x && x[1];
+      if(!st || !mv) return;
+      try{ bd.appendChild(nbMiniBoard({ fen:pzStateToFEN(st, p - 1), flip:e.color==='black', arrows:[{ f:sq(mv.from), t:sq(mv.to), c:K.color }], squares:[], label:'', ply:null, line:null, extra:[] })); }catch(err){}
+    };
+    const list = root.querySelectorAll('.ct-mbd');
+    if(!('IntersectionObserver' in window)){ list.forEach(fill); return; }
+    if(!CT_IO){
+      const cb = (ents)=>{ ents.forEach(en=>{ if(en.isIntersecting){ CT_IO.unobserve(en.target); fill(en.target); } }); };
+      try{ CT_IO = new IntersectionObserver(cb, { root:document, rootMargin:'600px 0px' }); }catch(e){ CT_IO = new IntersectionObserver(cb, { rootMargin:'600px 0px' }); }
+    }
+    list.forEach(bd=>{ if(!bd.firstChild) CT_IO.observe(bd); });
+  }
+  // Moments for a letter (and one of the table's groups), drawn from the first again; go: scrolled to, the keyboard on its chip
+  function ctSetMoments(ch, b, go){
+    CT.m = { ch:CLAMP_BY[ch] ? ch : '', b:b && CLAMP_BY[ch] ? { g:String(b.g), v:String(b.v) } : null };
+    CT.shown = CT_MOM_N;
+    ctDrawMoments();
+    if(!go) return;
+    const box = document.getElementById('ct-mom');
+    if(!box || box.hidden) return;
+    window.scrollTo({ top:Math.max(0, window.scrollY + box.getBoundingClientRect().top - 12) });
+    const el = box.querySelector(CT.m.b ? '.ct-chip.is-b' : '.ct-chip[aria-pressed="true"]');
+    if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+  }
+  // from the brief's CLAMP fact: the tab, its Moments for that letter
+  function ctFromBrief(ch){ ghoSetView('clamp'); ctSetMoments(ch, null, true); }
+  // the review at a marked move (Go to move: the position before it, the move drawn in its letter's color); back here
+  // where you were, the keyboard on what opened it
+  function ctOpen(e, p, ch, fid){
+    CT.back = { y:window.scrollY, fid };
+    ghOpenGame(e.g, { at:{ ply:p - 1 }, clamp:{ ply:p, ch } });
+  }
+  function ctBack(){
+    const B = CT.back;
+    if(!B || currentView!=='history') return;
+    CT.back = null;
+    const put = ()=>{
+      if(currentView!=='history' || !ctOn()) return;
+      window.scrollTo({ top:B.y });
+      ctFocus(B.fid ? Array.from(document.querySelectorAll('#ct [data-fid]')).find(x=> x.dataset.fid===B.fid) : null);     // a column: in view in its grid too
+    };
+    put();
+    requestAnimationFrame(put);
+  }
+  // the Games view narrowed by a CLAMP drill-down (a letter's games, your losses with no letters); its filters go back on return
+  function ctApply(patch){
+    CT.y = window.scrollY;
+    CT_DRILL = Object.keys(patch).map(k=> [k, GH_FILTERS[k] || '', patch[k]]);
+    GH_UI.view = 'games';
+    GH_FILTERS = ghValidFilters(Object.assign({}, GH_FILTERS, patch));
+    ghFiltersChanged(true);
+    const bar = document.querySelector('#view-history .gh-fbar');
+    if(bar){
+      const top = bar.getBoundingClientRect().top;
+      if(top < 0 || top > innerHeight*0.6) window.scrollTo({ top:Math.max(0, scrollY + top - 12) });
+    }
+    const first = ghbOn() ? document.querySelector('#ghb .ghb-card, #ghb button') : document.querySelector('#history-list .history-row');
+    const chip = document.getElementById('gh-ck-chip');
+    try{ (first || (chip && !chip.hidden ? chip : null) || document.getElementById('gh-count')).focus({ preventScroll:true }); }catch(e){}
+  }
+  // a letter's games: in the pattern's window too (its last 30 days) when win is set
+  function ctGames(ch, win){
+    const md = CT.model, patch = { ck:ch };
+    if(win && md && md.days) patch.date = md.lossDate;
+    ctApply(patch);
+  }
+  // the Games view's CLAMP filter, as a chip to take it off (Openings and CLAMP don't use it)
+  function ctSyncChip(on, cv){
+    const chip = document.getElementById('gh-ck-chip');
+    if(!chip) return;
+    const v = GH_FILTERS.ck, K = CLAMP_BY[v];
+    chip.hidden = !v;
+    if(!v){ chip.textContent = ''; return; }
+    const text = K ? 'CLAMP: '+K.name : 'No CLAMP marks';
+    if(chip.dataset.v!==v){
+      chip.dataset.v = v;
+      chip.textContent = '';
+      if(K) chip.appendChild(ctDisc(K));
+      chip.appendChild(ghEl('span', 'gh-rep-l', text));
+      const x = ghEl('span', 'gh-rep-x', '\u00d7');
+      x.setAttribute('aria-hidden', 'true');
+      chip.appendChild(x);
+    }
+    chip.setAttribute('aria-label', 'Remove the filter: '+text);
+    chip.disabled = on || cv;
+    chip.title = on ? 'Not used in the Openings view' : cv ? 'Not used in the CLAMP view' : 'Remove this filter';
+  }
+  // after a chip takes a filter off (the CLAMP and repertoire chips): the keyboard on the list's first game, else on the
+  // view switch, never lost to the page
+  function ctFocusList(){
+    const el = (ghbOn() ? document.querySelector('#ghb .ghb-card') : document.querySelector('#history-list .history-row')) || document.querySelector('#gh-view .toggle[aria-pressed="true"]');
+    if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
+  }
+  // the keyboard on an element of the tab: a column or a cell inside a card's sideways scroll is brought into view there
+  // (clear of the letters that stay at its left)
+  function ctFocus(el, scroll){
+    if(!el) return;
+    try{ el.focus({ preventScroll:!scroll }); }catch(e){}
+    const sc = el.closest('.ct-scroll');
+    if(!sc) return;
+    const st = sc.querySelector('.ct-glab, th.ct-wr'), lw = st ? st.getBoundingClientRect().width : 0, r = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
+    if(r.left < b.left + lw) sc.scrollLeft -= b.left + lw - r.left + 4;
+    else if(r.right > b.right) sc.scrollLeft += r.right - b.right + 4;
+  }
+  (function ctWire(){
+    document.getElementById('gh-ck-chip').addEventListener('click', ()=>{ if(!ghoOn() && !ctOn()){ ghSetFilters({ ck:'' }); ctFocusList(); } });
+    const sec = document.getElementById('ct');
+    sec.addEventListener('click', (e)=>{
+      const t = e.target.closest('button');
+      if(!t || !sec.contains(t)) return;
+      const md = CT.model, a = t.dataset.act;
+      if(!md) return;
+      if(t.classList.contains('ct-gcol') || t.classList.contains('ct-m')){
+        const x = md.byId.get(t.dataset.gid);
+        if(!x || !t.dataset.ply || t.getAttribute('aria-disabled')==='true') return;      // a game the review can't show at its marks
+        ctOpen(x, Number(t.dataset.ply), t.dataset.ck, t.dataset.fid);
+        return;
+      }
+      if(a==='mom') ctSetMoments(t.dataset.ch, null, true);
+      else if(a==='games') ctGames(t.dataset.ch, !!t.dataset.win);
+      else if(a==='todo') ctApply({ result:'loss', date:md.lossDate, ck:'none' });
+      else if(a==='bucket') ctSetMoments(t.dataset.ch, { g:t.dataset.g, v:t.dataset.v }, true);
+      else if(a==='chip') ctSetMoments(t.dataset.ch || '', null, false);
+      else if(a==='unb'){ ctSetMoments(CT.m.ch, null, false); ctFocus(document.querySelector('#ct-mom .ct-chip[aria-pressed="true"]')); }
+      else if(a==='more'){
+        // the keyboard on the first new card, scrolled to (the button has moved below them)
+        const was = document.querySelectorAll('#ct-mom .ct-m').length;
+        CT.shown = Math.max(CT_MOM_N, CT.shown) + CT_MOM_N;
+        ctDrawMoments();
+        const next = Array.from(document.querySelectorAll('#ct-mom .ct-m')).slice(was).find(c=> c.tagName==='BUTTON') || document.querySelector('#ct-mom .ct-more');
+        if(next) try{ next.focus(); }catch(e2){}
+      }
+      else if(a==='to-games'){ ghoSetView('games'); ctFocusList(); }
+      else if(a==='clear' || a==='all'){
+        if(a==='clear') ghClearFilters(); else ghSetSite('all');
+        ctFocus(document.querySelector('#ct-pat:not([hidden]) .ct-l, #ct-empty:not([hidden]) button') || document.querySelector('#gh-view .toggle[aria-pressed="true"]'));
+      }
+    });
+  })();
+  // The brief's CLAMP number and fact (2026-11-02): your marks in the window's games, the letter in most of them (ctTop),
+  // against every marked game the tab counts (all); null when none of the window's games is marked
+  function ctBriefOf(W, all){
+    const mk = (L)=> L.map(e=> ({ g:e.g, at:e.at, res:e.res, k:gnClampOf(String(e.g.id)) })).filter(x=> x.k.length).sort((a, b)=> b.at - a.at);
+    const MW = mk(W);
+    if(!MW.length) return null;
+    const n = ctCount(MW);
+    return { MW, n, ch:ctTop(MW, n), MA:all ? mk(all) : null };
+  }
+  // "Loose pieces again: 3 of your 5 marked games this week. Your note on 9. Bg6: ..." when the letter is in 2+ of them
+  function ctBriefFact(W, week){
+    const cb = ctBriefOf(W, null);
+    if(!cb || cb.n[cb.ch] < 2) return null;
+    const K = CLAMP_BY[cb.ch];
+    // its newest mark the review can show (the newest game, its last such move; not one past a Chess960 castle), and its newest note
+    let go = null, nt = null;
+    cb.MW.forEach(x=> x.k.slice().reverse().forEach(y=>{ if(y[1]!==cb.ch) return; if(!go && y[0] <= ctReplay(x.g).can) go = { x, p:y[0] }; if(!nt && y[2]) nt = { x, p:y[0], t:y[2] }; }));
+    const text = [K.what.charAt(0).toUpperCase()+K.what.slice(1)+' again: '+cb.n[cb.ch]+(week ? ' of your '+cb.MW.length+' marked games this week.' : ' of the '+cb.MW.length+' marked games among your last '+W.length+'.')];
+    if(nt){ const r = ctReplay(nt.x.g); text.push(' Your note on ', [ghClampLabel(nt.p, r.toks[nt.p-1], r.off)], ': \u201c'+nt.t+'\u201d.'); }
+    const acts = [{ t:'See them in CLAMP', go:()=>{ ctFromBrief(cb.ch); } }];
+    if(go) acts.unshift({ t:'Go to move', go:()=>{ ghOpenGame(go.x.g, { at:{ ply:go.p - 1 }, clamp:{ ply:go.p, ch:cb.ch } }); } });
+    return { tag:'CLAMP', cls:'is-clamp', bg:K.color, text, acts };
   }
   // { reach: entries that reached an endgame, kinds: [[kind, entries], ...] most first } over entries L
   function egGroups(L){
@@ -33417,7 +34250,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!bar) return;
     const li = GH_STATE.humans || 0, cc = GH_STATE.ccHumans || 0, n = { all:li + cc, lichess:li, chesscom:cc };
     const tid = 'gh-site-'+GH_UI.site;          // the list and the Openings view are the selected tab's panel
-    ['history-list', 'gho'].forEach(id=>{ const p = document.getElementById(id); if(p && p.getAttribute('aria-labelledby')!==tid) p.setAttribute('aria-labelledby', tid); });
+    ['history-list', 'gho', 'ct'].forEach(id=>{ const p = document.getElementById(id); if(p && p.getAttribute('aria-labelledby')!==tid) p.setAttribute('aria-labelledby', tid); });
     bar.querySelectorAll('.gh-site-tab').forEach(b=>{
       const on = b.dataset.site===GH_UI.site;
       b.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -40077,9 +40910,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       mk('rect', { x:p.x-0.46, y:p.y-0.46, width:0.92, height:0.92, fill:'none', stroke:col, 'stroke-width':'.08' });
     });
     dg.arrows.forEach(a=>{
-      const A = at(a.f), Z = at(a.t), col = NB_CODES[a.c];
+      // a note's color code (NB_CODES), or a #hex color of the app's own (a CLAMP letter's, ct*): with a light halo, as the review draws it
+      const hex = /^#[0-9a-f]{6}$/i.test(String(a.c)), A = at(a.f), Z = at(a.t), col = hex ? String(a.c) : NB_CODES[a.c];
       const sh = annoArrowShape(A.x, A.y, Z.x, Z.y, Z.r-A.r, Z.c-A.c, 1);
-      const halo = ANNO_LIGHT_HALO.indexOf(col) >= 0 ? 'rgba(255,255,255,.6)' : 'rgba(0,0,0,.45)';
+      const halo = hex || ANNO_LIGHT_HALO.indexOf(col) >= 0 ? 'rgba(255,255,255,.6)' : 'rgba(0,0,0,.45)';
       mk('path', { d:sh.pathD, fill:'none', stroke:halo, 'stroke-width':'.36', 'stroke-linecap':'butt' });
       mk('polygon', { points:sh.triPoints, fill:'none', stroke:halo, 'stroke-width':'.1', 'stroke-linejoin':'round' });
       mk('path', { d:sh.pathD, fill:'none', stroke:col, 'stroke-opacity':'.88', 'stroke-width':'.26', 'stroke-linecap':'butt' });
