@@ -4981,14 +4981,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-side{ display:flex; flex-direction:column; gap:10px; min-width:0; }
   .hv-sidecol{ display:contents; }
   #view-play-history .hv-card-off{ display:none !important; }      /* turned off in Settings (Analysis board cards) */
-  /* the tabs turned off but Notes on, below three columns (where Notes is a tab or pinned in the
-     tabs card): the card stays, holding Notes alone */
-  #view-play-history #hv-tabs.hv-card-off:has(> #hv-pane-notes:not([hidden])){ display:flex !important; }
-  #view-play-history #hv-tabs.hv-card-off > .hv-tablist, #view-play-history #hv-tabs.hv-card-off > .hv-pane:not(#hv-pane-notes){ display:none !important; }
-  #view-play-history #hv-tabs.hv-card-off > #hv-pane-notes:not([hidden]){ display:flex; flex-direction:column; flex:1 1 auto; height:auto; border-top:0; }
   /* hidden while empty: holding Notes across a resize, it stays rendered
      until hvPlaceNotes moves it, so a note being typed keeps the focus */
   .hv-notes-card:not(:has(> #hv-pane-notes)){ display:none; }
+  .hv-notes-card > #hv-pane-notes{ display:flex; }      /* (and shown in it at any width: the pinned Notes below three columns, until 2026-11-02, kept it so) */
   .hv-strip{ margin-bottom:0; padding:4px 8px 4px 10px; min-height:36px; box-sizing:border-box; gap:10px; }
   .hv-strip .ol-player-info{ align-items:center; gap:7px; min-width:0; flex:1 1 auto; }
   .hv-strip .ol-player-name{ font-size:14px; min-width:0; }
@@ -5222,7 +5218,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (pointer:coarse){ .hv-px-acts .btn{ min-height:44px; } }
   /* until the game's over and Analyze is pressed: no engine card, arrows or eval, no Explorer (they'd give moves away);
      never the review, notes, prep or phase cards (a position played out here isn't one of your games) */
-  #view-play-history.is-px :is(#hv-opx, #hv-prep, #hpf, #hv-tab-review, #hv-tab-notes, #hv-notes-card, #hv-com-card){ display:none !important; }
+  #view-play-history.is-px :is(#hv-opx, #hv-prep, #hpf, #hv-tab-notes, #hv-notes-card, #hv-com-card){ display:none !important; }
+  #view-play-history.is-px:not(.hv-tabbed) #hv-tab-review{ display:none !important; }      /* (tabbed: the Game review tab, the header alone) */
   #view-play-history.is-px-play :is(#hv-engine, #hv-tab-explorer){ display:none !important; }
   #view-play-history.is-px-play .hv-eval{ visibility:hidden; }          /* kept for its room: the board doesn't move when Analyze shows it */
   /* the row wraps where it can't hold the button too (a phone): it takes a line of its own under the arrows */
@@ -5282,6 +5279,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-pane-notes.active{ display:flex; }
   .hv-pane-notes{ flex-direction:column; gap:6px; }
   .hv-pane-notes .hv-note{ flex:1 1 auto; min-height:96px; }
+  /* Under three columns (hvPlaceTabs, 2026-11-02) the side panels are two tabbed cards: Game review
+     (the header, then the review's results) | Moves | Notes, and Engine | Explorer, the comment card
+     between them. The header and the engine card move into their panes, flat (the card around them
+     is the tabs'); the Explorer's tab and pane move to the second card, unused in the three columns.
+     A tab whose card is off (Settings, a puzzle, Play it out) is .hv-tab-gone, a card with no tab
+     left .hv-tabs-none. */
+  #hv-card2{ display:none; }
+  #view-play-history.hv-tabbed #hv-card2:not(.hv-tabs-none){ display:flex; overflow:visible; }      /* (the cog's pop-up opens past its edges) */
+  #view-play-history .hv-tab.hv-tab-gone, #view-play-history .hv-tabs.hv-tabs-none{ display:none; }
+  #hv-pane-review > #hv-head{ padding:0; background:none; border:0; border-radius:0; box-shadow:none; }
+  #hv-pane-review > #hv-head.is-game .eyebrow{ display:none; }      /* a game's would say the tab's name again (a puzzle's, Play it out's stay) */
+  #hv-pane-review > #hv-head:not(.hv-card-off) + .hr-wrap{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+  #hv-pane-review.hv-res-off > .hr-wrap{ display:none; }        /* the tabs' card off, or Play it out: the header alone */
+  #hv-pane-engine{ padding:0; }
+  #hv-pane-engine.active{ overflow:visible; }
+  #hv-pane-engine > #hv-engine{ background:none; border:0; border-radius:0; box-shadow:none; }
   .hv-movelist.ol-movelist{ max-height:none; overflow:visible; gap:2px 8px; }
   /* the shown move: ink on the raised surface with a brass ring (the list's
      brass-soft fill under ink is near 1:1 on the dark skins) */
@@ -5351,33 +5364,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .hv-side{ position:sticky; top:6px; max-height:calc(100vh - 70px); max-height:calc(100dvh - 70px); }
     .hv-tabs{ flex:1 1 auto; min-height:0; }
     .hv-pane.active{ flex:1 1 auto; overflow:auto; }
-    /* A long comment leaves the move list its room: the card stops where the side column would keep
-       under about 210px for the tabs (670 = 70 the column's margin + about 210 header + 150 Engine +
-       210 tabs + 30 gaps), never under its head and two lines; its words scroll inside. */
-    #hv-com-card{ max-height:max(84px, calc(100vh - 670px)); max-height:max(84px, calc(100dvh - 670px)); }
+    /* The two tabbed cards (under three columns, 2026-11-02): the first takes the room the comment
+       card and the second leave (its pane scrolls inside); the second keeps its own height, the
+       Explorer at most about 45% of the column (scrolling inside). The column keeps its height, so
+       the board never moves; Notes is the first card's tab at every height. The column is always that
+       height: a short list of moves would leave the view shorter than the screen, and its auto margins
+       would centre it, the board lower. */
+    #view-play-history.hv-tabbed .hv-side{ height:calc(100vh - 70px); height:calc(100dvh - 70px); }
+    #view-play-history.hv-tabbed #hv-card2{ flex:0 0 auto; max-height:max(150px, calc((100vh - 70px) * .45)); max-height:max(150px, calc((100dvh - 70px) * .45)); }
+    /* A long comment leaves the first card its room: the card stops where the column would keep under
+       about 240px for it (520 = 70 the column's margin + 240 + about 190 for the Engine tab + 20
+       gaps; on the Explorer, 260 = 240 + 20 gaps from what its 45% leaves), never under its head and
+       two lines; its words scroll inside. */
+    #hv-com-card{ max-height:max(84px, calc(100vh - 520px)); max-height:max(84px, calc(100dvh - 520px)); }
+    #view-play-history.hv-tabbed .hv-side:has(#hv-card2 > #hv-pane-explorer.active) #hv-com-card{ max-height:max(84px, calc((100vh - 70px) * .55 - 260px)); max-height:max(84px, calc((100dvh - 70px) * .55 - 260px)); }
     /* clear of the home and settings buttons in the corners */
     .wrap.play-mode .hv-boardcol > .back-link{ margin-left:max(0px, calc(44px - var(--fab-gutter))); }
     #hv-row-top{ padding-left:max(12px, calc(56px - var(--fab-gutter))); }
     #hv-head{ padding-right:max(14px, calc(60px - var(--fab-gutter))); }
-    /* the header turned off: the card on top drops below the settings button while the gutter can't clear it */
-    .hv-side:has(> .hv-sidecol-review > #hv-head.hv-card-off){ padding-top:clamp(0px, calc((36px - var(--fab-gutter)) * 100), 50px); }
-  }
-  /* Notes stay in view under the active tab when there's room for both:
-     from 950px tall the tab above keeps about 300px (header and engine
-     cards take about 380), so a laptop screen keeps Notes as a tab. */
-  @media (min-width:1180px) and (max-width:1439.98px) and (min-height:950px){
-    #hv-tab-notes{ display:none; }
-    #hv-pane-notes{ display:flex; flex:0 0 auto; height:clamp(200px, calc(100vh - 750px), 300px); height:clamp(200px, calc(100dvh - 750px), 300px); border-top:1px solid var(--line); }
-    #hv-pane-notes .hv-note{ resize:none; }
-    #hv-com-card{ max-height:max(84px, calc(100vh - 670px - clamp(200px, calc(100vh - 750px), 300px))); max-height:max(84px, calc(100dvh - 670px - clamp(200px, calc(100dvh - 750px), 300px))); }      /* and the pinned Notes */
-  }
-  /* Two columns on a short screen (a 1366x768 laptop, 1024x600): while the comment card is up, the
-     game's header gives way before the moves do, down to its first lines and scrolling inside, so
-     the tabs keep about 170px (the card alone took the move list down to one row). A cap, not a
-     shrink: the column keeps its height, so the board never moves. 504 = 70 the column's margin +
-     84 card + 150 Engine + 30 gaps + 170 tabs; from about 715px tall the header is whole. */
-  @media (min-width:900px) and (max-width:1439.98px) and (min-height:561px){
-    .hv-side:has(#hv-com-card:not([hidden], .hv-card-off)) #hv-head{ flex-shrink:0; max-height:max(96px, calc(100vh - 504px)); max-height:max(96px, calc(100dvh - 504px)); overflow:auto; }      /* (scrolling, it would shrink too) */
+    #view-play-history.hv-tabbed #hv-tabs > .hv-tablist{ padding-right:max(8px, calc(60px - var(--fab-gutter))); }
+    /* no first card (every tab of it off): the card on top drops below the settings button while the gutter can't clear it
+       (54: the comment card's float lifts it 3px) */
+    .hv-side:has(#hv-tabs.hv-tabs-none){ padding-top:clamp(0px, calc((36px - var(--fab-gutter)) * 100), 54px); }
   }
   /* Wide screens: three columns. The game's header moves left of the board
      with Notes as its own card under it; the engine takes the header's
@@ -5481,7 +5489,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       --sq:clamp(30px, min(calc((100vw - 72px - var(--hv-frame-extra)) / 8), calc((100vh - 230px - var(--hv-frame-extra)) / 8)), 85px);
       --sq:clamp(30px, min(calc((100vw - 72px - var(--hv-frame-extra)) / 8), calc((100dvh - 230px - var(--hv-frame-extra)) / 8)), 85px);
     }
-    /* one column: board first, the panels after it, the header last */
+    /* one column: board first, then the Play it out card (as before), the first tabbed card, the comment
+       card and the second (2026-11-02; the header and the engine card are in their tabs) */
     .hv-boardcol, .hv-side{ display:contents; }
     .wrap.play-mode .hv-boardcol > .back-link{ order:1; align-self:center; margin:8px auto 2px; min-height:32px; box-sizing:border-box; max-width:calc(100% - 112px); }
     #hv-row-top{ order:2; }
@@ -5489,10 +5498,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hv-row-bottom, #hv-sq-ask{ order:4; }
     #hv-controls{ order:5; }
     #hv-anno-hint{ order:5; }
-    #hv-px, #hv-com-card, #hv-engine{ order:6; }
+    #hv-px{ order:6; }
     #hv-tabs{ order:7; overflow:visible; }
-    #hpf{ order:8; }
-    #hv-head{ order:9; }
+    #hv-com-card, #hv-engine{ order:8; }
+    #hv-card2{ order:9; }
+    #hpf{ order:10; }
+    #hv-head{ order:11; }
     /* the page ends clear of the Friends pill in the bottom corner */
     .wrap.play-mode #view-play-history.active{ padding-bottom:56px; }
     /* In one column the review scrolls under the floating Friends pill and
@@ -5507,6 +5518,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* Touch: the review's rows and small buttons are big enough for a
      finger (the line menu is the only way to delete a line on an iPhone). */
   @media (pointer:coarse){
+    #view-play-history.hv-tabbed .hv-tab{ min-height:44px; }
     #view-play-history .hv-movelist > .mv-san, #view-play-history .hv-movelist > .mv-num{ padding-top:6px; padding-bottom:6px; }
     #view-play-history .hv-movelist .hv-var{ align-items:center; }
     #view-play-history .hv-var-menu{ width:34px; height:34px; margin-top:0; line-height:34px; font-size:18px; }
@@ -5537,6 +5549,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #view-play-history .hv-side{ position:static; max-height:none; }
     #view-play-history #hv-com-card{ max-height:none; }       /* the page scrolls here: the comment's own 260px only */
     #view-play-history .hv-pane.active{ overflow:visible; }
+    #view-play-history.hv-tabbed #hv-card2{ max-height:none; }
+    #view-play-history.hv-tabbed .hv-side{ height:auto; }
   }
   @media (max-width:899.98px) and (orientation:landscape) and (max-height:560px){
     #view-play-history, :root[data-anno-prof="on"] #view-play-history{
@@ -5953,14 +5967,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   #view-play-history .hv-notes-head .nb-bar{ margin-left:-6px; }
   #view-play-history .hv-pane-notes .nb-wrap{ flex:1 1 auto; }
   #view-play-history .hv-pane-notes .hv-note{ flex:1 1 0; min-height:160px; overflow:auto; resize:none; }
-  @media (min-width:1180px) and (max-width:1439.98px) and (min-height:950px){
-    #view-play-history #hv-pane-notes .hv-note{ min-height:0; }
-    /* pinned Notes is short: a diagram sits beside its caption, small enough to see whole */
-    #hv-note .nb-dg{ flex-direction:row; align-items:flex-end; gap:12px; width:auto; max-width:100%; }
-    #hv-note .nb-board-wrap{ flex:0 0 auto; width:clamp(104px, calc(100vh - 874px), 172px); width:clamp(104px, calc(100dvh - 874px), 172px); }
-    #hv-note .nb-dg-foot{ flex-direction:column; align-items:flex-start; gap:6px; }
-    #hv-note .nb-dg-x{ margin-left:0; }
-  }
   @media (max-width:899.98px){
     #view-play-history .hv-pane-notes .hv-note{ flex:0 0 auto; min-height:160px; overflow:visible; }
   }
@@ -7967,11 +7973,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
 
       <div class="hv-card hv-tabs" id="hv-tabs">
+        <!-- each tab's key (4-7) is in its title and aria-keyshortcuts (hvTabKey) -->
         <div class="hv-tablist" role="tablist" aria-label="Analysis">
-          <button class="hv-tab" role="tab" type="button" id="hv-tab-moves" aria-controls="hv-pane-moves" aria-selected="true">Moves</button>
-          <button class="hv-tab" role="tab" type="button" id="hv-tab-review" aria-controls="hv-pane-review" aria-selected="false" tabindex="-1">Review</button>
-          <button class="hv-tab" role="tab" type="button" id="hv-tab-explorer" aria-controls="hv-pane-explorer" aria-selected="false" tabindex="-1">Explorer</button>
-          <button class="hv-tab" role="tab" type="button" id="hv-tab-notes" aria-controls="hv-pane-notes" aria-selected="false" tabindex="-1">Notes</button>
+          <button class="hv-tab" role="tab" type="button" id="hv-tab-moves" aria-controls="hv-pane-moves" aria-selected="true" aria-keyshortcuts="5" title="Moves (5)">Moves</button>
+          <button class="hv-tab" role="tab" type="button" id="hv-tab-review" aria-controls="hv-pane-review" aria-selected="false" tabindex="-1" aria-keyshortcuts="4" title="Review (4)"><span class="hv-tab-name" id="hv-tab-review-name">Review</span></button>
+          <button class="hv-tab" role="tab" type="button" id="hv-tab-explorer" aria-controls="hv-pane-explorer" aria-selected="false" tabindex="-1" aria-keyshortcuts="7" title="Explorer (7)">Explorer</button>
+          <button class="hv-tab" role="tab" type="button" id="hv-tab-notes" aria-controls="hv-pane-notes" aria-selected="false" tabindex="-1" aria-keyshortcuts="6" title="Notes (6)">Notes</button>
         </div>
         <div class="hv-pane hv-pane-moves active" role="tabpanel" id="hv-pane-moves" aria-labelledby="hv-tab-moves">
           <div class="ol-movelist hv-movelist" id="hv-movelist"></div>
@@ -7983,6 +7990,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           <div class="text-input gn-ta hv-note" id="hv-note" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" aria-labelledby="hv-note-label" data-placeholder="Your analysis: key moments, mistakes, plans, what to try next time."></div>
           <div class="gn-status" id="hv-note-status" aria-live="polite"></div>
         </div>
+      </div>
+      <!-- Under three columns (hvPlaceTabs, 2026-11-02) the side panels are two tabbed cards: the one
+           above is Game review (the header, then the review's results) | Moves | Notes, and this one
+           Engine | Explorer (the engine card and the Explorer's tab and pane move in). Unused in three columns. -->
+      <div class="hv-card hv-tabs hv-tabs2" id="hv-card2">
+        <div class="hv-tablist" role="tablist" aria-label="Engine and explorer" id="hv-tablist2">
+          <button class="hv-tab" role="tab" type="button" id="hv-tab-engine" aria-controls="hv-pane-engine" aria-selected="true" aria-keyshortcuts="E" title="Engine (E)">Engine</button>
+        </div>
+        <div class="hv-pane hv-pane-engine active" role="tabpanel" id="hv-pane-engine" aria-labelledby="hv-tab-engine"></div>
       </div>
       </div>
     </div>
@@ -34593,13 +34609,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   //      hidden (E: the arrows and lines, never the eval), last tab, explorer database ----
   const HV_PREFS_KEY = 'wavyChessPrepReviewPrefs';
   const HV_TABS = ['moves', 'review', 'explorer', 'notes'];
+  const HV_TABS1 = ['review', 'moves', 'notes'], HV_TABS2 = ['engine', 'explorer'];      // the two cards under three columns
   const HV_CARDS = ['head', 'phase', 'notes', 'comment', 'engine', 'tabs'];     // the cards around the board (Settings)
   const hvPrefs = (function(){
     // v2 (2026-11-02): the phase card is off unless turned on in Settings (it was on); fold: the
     // left column's two cards folded to their first lines (three columns). cards.comment (2026-11-02,
     // the comment card over the engine): on, and on for a save from before it (no key)
+    // tab1 / tab2 (2026-11-02): the two tabbed cards' tabs under three columns (Game review | Moves |
+    // Notes, Engine | Explorer); tab is the three columns' own
     const p = { v:2, engine:true, arrows:[true, true, true], hide:false, tab:'moves', exDb:'masters', cards:{ head:true, phase:false, notes:true, comment:true, engine:true, tabs:true }, phaseOpen:false,
-      fold:{ head:false, notes:false } };
+      fold:{ head:false, notes:false }, tab1:'moves', tab2:'engine' };
     try{
       const raw = JSON.parse(localStorage.getItem(HV_PREFS_KEY) || 'null');
       if(raw && typeof raw==='object'){
@@ -34608,6 +34627,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         else if(raw.arrow===false) p.arrows = [false, false, false];   // the earlier best-move switch, turned off
         if(typeof raw.hide==='boolean') p.hide = raw.hide;
         if(HV_TABS.indexOf(raw.tab)>=0) p.tab = raw.tab;
+        if(HV_TABS1.indexOf(raw.tab1)>=0) p.tab1 = raw.tab1;
+        if(HV_TABS2.indexOf(raw.tab2)>=0) p.tab2 = raw.tab2;
         if(raw.exDb==='masters' || raw.exDb==='lichess') p.exDb = raw.exDb;
         if(raw.cards && typeof raw.cards==='object') HV_CARDS.forEach(k=>{ if(typeof raw.cards[k]==='boolean') p.cards[k] = raw.cards[k]; });
         // saved before v2, cards.phase was the old default (every save wrote it): off now, once
@@ -35234,6 +35255,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvModeUi(){
     const Z = HV_STATE ? HV_STATE.game._puzzle : null, P = HV_STATE ? HV_STATE.game._practice : null;
     document.querySelector('#hv-head .eyebrow').textContent = P ? 'Play it out' : Z ? 'Puzzle analysis' : 'Game review';
+    document.getElementById('hv-head').classList.toggle('is-game', !P && !Z);       // (in the Game review tab its eyebrow would be the tab's name again)
     const back = document.querySelector('#view-play-history .back-link');
     back.textContent = '\u2190 '+(P ? pxBackText(P) : Z ? Z.back : 'Game History');
     back.dataset.nav = Z && !P ? Z.view : 'history';
@@ -36309,10 +36331,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   })();
 
   // ---- tabs ----
-  let hvTab = HV_TABS.indexOf(hvPrefs.tab)>=0 ? hvPrefs.tab : 'moves';
-  const hvMqPinned = window.matchMedia ? matchMedia('(min-width:1180px) and (min-height:950px), (min-width:1440px) and (min-height:561px)') : { matches:false };
-  // three columns (CSS at 1440px): Notes is its own card under the header
+  // three columns (CSS at 1440px): Notes is its own card under the header. Narrower (or a short
+  // window) the side panels are two tabbed cards (hvPlaceTabs, 2026-11-02): Game review | Moves |
+  // Notes, and Engine | Explorer. Notes is pinned (a card of its own) in the three columns only.
   const hvMqWide = window.matchMedia ? matchMedia('(min-width:1440px) and (min-height:561px)') : { matches:false };
+  function hvTabbed(){ return !hvMqWide.matches; }
+  // the shown tab: three columns, the tabs card's (Moves | Review | Explorer); else card 1's
+  // (Game review | Moves | Notes), with card 2's in hvTab2 (Engine | Explorer). Each layout keeps its own.
+  let hvTab = hvTabbed() ? hvPrefs.tab1 : (HV_TABS.indexOf(hvPrefs.tab)>=0 ? hvPrefs.tab : 'moves');
+  let hvTab2 = hvPrefs.tab2;
   function hvPlaceNotes(){
     const pane = document.getElementById('hv-pane-notes');
     const host = document.getElementById(hvMqWide.matches ? 'hv-notes-card' : 'hv-tabs');
@@ -36322,19 +36349,100 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(had) try{ document.getElementById('hv-note').focus({ preventScroll:true }); }catch(e){}
   }
   const hvMqPhone = window.matchMedia ? matchMedia('(max-width:899.98px)') : { matches:false };
-  function hvNotesPinned(){ return !!hvMqPinned.matches; }
+  function hvNotesPinned(){ return !!hvMqWide.matches; }
   // A puzzle on the board (pzaOpen) or a position played out (px*) has no Notes: its id isn't a game's.
   let hvTabAway = null;      // the tab a puzzle or a played-out position stood in for: hvOpen gives it back to the next game
   function hvNotesOff(){ return !!(HV_STATE && (HV_STATE.game._puzzle || HV_STATE.game._practice)) || !hvPrefs.cards.notes; }      // a puzzle, played out, or Notes off in Settings
+  // ---- the two tabbed cards (under three columns, 2026-11-02) ----
+  // The same elements as the three columns' cards, moved (their ids and listeners kept): the header
+  // goes to the top of the Review pane (the tab is "Game review"), the engine card into card 2's
+  // Engine pane, the Explorer's tab and pane into card 2; card 1 goes under the Play it out card
+  // (on top, where it was) and above the comment card. Each tab is there while what it shows is on
+  // (Settings: Analysis board cards; a puzzle or a played-out position): the Game review tab holds the header (head) and the
+  // review's results (tabs), Moves and Explorer are the tabs card's, Notes and Engine their own.
+  const HV_TAB_KEYS = { review:'4', moves:'5', notes:'6', explorer:'7', engine:'E' };
+  function hvTabName(t){ return t==='review' ? (hvTabbed() ? 'Game review' : 'Review') : t.charAt(0).toUpperCase()+t.slice(1); }
+  function hvTabTitle(t){ return hvTabName(t)+' ('+HV_TAB_KEYS[t]+')'; }
+  function hvResOff(){ return !hvPrefs.cards.tabs || !!(HV_STATE && HV_STATE.game._practice); }      // the review's results not in the Game review tab
+  function hvTabOn(t){
+    if(t==='review') return !!hvPrefs.cards.head || !hvResOff();
+    if(t==='moves') return !!hvPrefs.cards.tabs;
+    if(t==='notes') return !hvNotesOff();
+    if(t==='engine') return !!hvPrefs.cards.engine && !pxPlaying();       // (while a position is played out: no engine, no explorer)
+    if(t==='explorer') return !!hvPrefs.cards.tabs && !pxPlaying();
+    return false;
+  }
+  // the tab a card shows: the one picked, or while that's off the first of its own that's on (null: none, the card hides)
+  function hvShownTab(card){
+    const set = card===2 ? HV_TABS2 : HV_TABS1, pick = card===2 ? hvTab2 : hvTab;
+    if(set.indexOf(pick)>=0 && hvTabOn(pick)) return pick;      // (a card's own only: the three columns' Explorer isn't card 1's)
+    return (card===2 ? HV_TABS2 : ['moves', 'review', 'notes']).find(hvTabOn) || null;
+  }
+  function hvPlaceTabs(){
+    const t2 = hvTabbed(), $ = (id)=> document.getElementById(id);
+    const v = $('view-play-history'), tabs = $('hv-tabs'), card2 = $('hv-card2'), head = $('hv-head'), eng = $('hv-engine'), rp = $('hv-pane-review');
+    const tl1 = tabs.querySelector('.hv-tablist'), tl2 = $('hv-tablist2');
+    const col = v.querySelector('.hv-sidecol-analysis'), rcol = v.querySelector('.hv-sidecol-review');
+    if(t2!==(head.parentNode===rp)){
+      const fa = document.activeElement, had = fa && [tabs, card2, head, eng].some(e=> e.contains(fa)) ? fa : null;
+      if(t2){
+        col.insertBefore(tabs, $('hv-px').nextSibling);
+        tl1.insertBefore($('hv-tab-review'), tl1.firstElementChild);
+        rp.insertBefore(head, rp.firstChild);
+        $('hv-pane-engine').appendChild(eng);
+        tl2.appendChild($('hv-tab-explorer'));
+        card2.appendChild($('hv-pane-explorer'));
+      } else {
+        rcol.insertBefore(head, rcol.firstElementChild);
+        tl1.insertBefore($('hv-tab-review'), $('hv-tab-moves').nextSibling);
+        tl1.insertBefore($('hv-tab-explorer'), $('hv-tab-review').nextSibling);
+        tabs.insertBefore($('hv-pane-explorer'), rp.nextSibling);
+        col.insertBefore(eng, card2);
+        col.insertBefore(tabs, card2);
+      }
+      if(had && had.isConnected) try{ had.focus({ preventScroll:true }); }catch(e){}
+    }
+    v.classList.toggle('hv-tabbed', t2);
+    tl1.setAttribute('aria-label', t2 ? 'Game review, moves and notes' : 'Analysis');
+    $('hv-tab-review-name').textContent = hvTabName('review');
+    Object.keys(HV_TAB_KEYS).forEach(t=>{ $('hv-tab-'+t).title = hvTabTitle(t); });
+    hrRenderTabDot();       // (a review running: its progress is the tab's title)
+  }
+  // which tabs and cards show (tabbed), and which tab of each is selected; the three columns keep
+  // their own (the tabs card off in Settings hides it there)
+  function hvSyncTabs(){
+    const t2 = hvTabbed(), tabs = document.getElementById('hv-tabs'), card2 = document.getElementById('hv-card2');
+    tabs.classList.toggle('hv-card-off', !t2 && !hvPrefs.cards.tabs);
+    HV_TABS1.concat(HV_TABS2).forEach(t=> document.getElementById('hv-tab-'+t).classList.toggle('hv-tab-gone', t2 && !hvTabOn(t)));
+    tabs.classList.toggle('hv-tabs-none', t2 && !hvShownTab(1));
+    card2.classList.toggle('hv-tabs-none', t2 && !hvShownTab(2));
+    document.getElementById('hv-pane-review').classList.toggle('hv-res-off', t2 && hvResOff());
+    if(!t2) return;
+    const a = hvShownTab(1), b = hvShownTab(2);
+    [[HV_TABS1, a], [HV_TABS2, b]].forEach(([set, cur])=> set.forEach(t=>{
+      const tab = document.getElementById('hv-tab-'+t), on = t===cur;
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+      tab.classList.toggle('active', on);
+      document.getElementById('hv-pane-'+t).classList.toggle('active', on);
+    }));
+  }
   function hvVisiblePanes(){
     if(!HV_STATE || !hvViewActive()) return [];
+    if(hvTabbed()){
+      const v = [], a = hvShownTab(1);
+      if(a && !(a==='review' && hvResOff())) v.push(a);          // the Game review tab holding the header alone: no review on screen
+      if(hvShownTab(2)==='explorer') v.push('explorer');
+      return v;
+    }
     const v = hvPrefs.cards.tabs ? [hvTab] : [];          // the tabs card turned off: none of its panes is on screen (the explorer asks nothing)
-    // Notes pinned beside the active tab, or, with the tabs off, a card of its own (three columns) or alone in the tabs card
+    // Notes pinned beside the active tab, or, with the tabs off, a card of its own (three columns)
     if(!hvNotesOff() && v.indexOf('notes') < 0 && (hvNotesPinned() || !hvPrefs.cards.tabs)) v.push('notes');
     return v;
   }
   function hvPaneShown(name){ return hvVisiblePanes().indexOf(name)>=0; }
   function hvSetTab(name, opts){
+    if(hvTabbed()) return hvSetTabT(name, opts);
     if(HV_TABS.indexOf(name)<0) name = 'moves';
     const px = !!(HV_STATE && HV_STATE.game._practice);
     if(px && !pxTabOk(name)) name = 'moves';
@@ -36357,31 +36465,70 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(name==='moves') requestAnimationFrame(hvKeepInView);
     hvVisiblePanes().forEach(p=>{ if(before.indexOf(p)<0) hvFire(hvPaneLs, p); });
   }
-  (function(){
-    const tl = document.querySelector('#hv-tabs .hv-tablist');
-    tl.addEventListener('click', (e)=>{
-      const t = e.target.closest('.hv-tab');
-      if(t) hvSetTab(t.id.slice(7), { save:true });
-    });
-    tl.addEventListener('keydown', (e)=>{
-      const t = e.target.closest('.hv-tab');
-      if(!t || (e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Home' && e.key!=='End')) return;
-      e.preventDefault(); e.stopPropagation();
-      const vis = HV_TABS.filter(x=> !(x==='notes' && (hvNotesPinned() || hvNotesOff())) && !(HV_STATE && HV_STATE.game._practice && !pxTabOk(x)));
-      let i = vis.indexOf(t.id.slice(7));
-      if(e.key==='ArrowLeft') i = (i-1+vis.length) % vis.length;
-      else if(e.key==='ArrowRight') i = (i+1) % vis.length;
-      else i = e.key==='Home' ? 0 : vis.length-1;
-      hvSetTab(vis[i], { save:true, focus:true });
-    });
-    const onMq = ()=>{
-      if(hvTab==='notes' && hvNotesPinned()) hvSetTab('moves');
-      else if(HV_STATE && hvNotesPinned() && !hvNotesOff()) hvFire(hvPaneLs, 'notes');
-      if(HV_STATE) hvRenderEngineNow();
-    };
+  // the two tabbed cards: a tab of card 2 (Engine, Explorer) or card 1 (the rest)
+  function hvSetTabT(name, opts){
+    const px = !!(HV_STATE && HV_STATE.game._practice), two = HV_TABS2.indexOf(name)>=0;
+    if(!two && HV_TABS1.indexOf(name)<0) name = 'moves';
+    if(HV_TABS1.indexOf(hvTab)<0) hvTab = 'moves';       // a tab of the three columns' (the Explorer, given back by pxDrop): card 1 on Moves
+    if(px && !two && name!=='moves' && name!=='review') name = 'moves';
+    if(name==='notes' && hvNotesOff() && !(opts && opts.save)) hvTabAway = 'notes';
+    if(name==='notes' && hvNotesOff()) name = 'moves';
+    if(opts && opts.save && !px && !two) hvTabAway = null;      // a tab picked by hand is the one to keep
+    const before = hvVisiblePanes();
+    if(two) hvTab2 = name; else hvTab = name;
+    hvSyncTabs();
+    if(opts && opts.save && !px){ if(two) hvPrefs.tab2 = name; else hvPrefs.tab1 = name; hvSavePrefs(); }
+    if(opts && opts.silent) return;
+    if(opts && opts.focus) try{ document.getElementById('hv-tab-'+name).focus({ preventScroll:true }); }catch(e){}
+    if(name==='moves') requestAnimationFrame(hvKeepInView);
+    hvVisiblePanes().forEach(p=>{ if(before.indexOf(p)<0) hvFire(hvPaneLs, p); });
+  }
+  // the layout changed (three columns or not): the cards move, each layout's own tabs come back
+  function hvTabsLayout(){
+    const fa = document.activeElement, sl = window.getSelection ? getSelection() : null;
+    const caret = fa && sl && sl.rangeCount && fa.contains(sl.anchorNode) ? [sl.anchorNode, sl.anchorOffset, sl.focusNode, sl.focusOffset] : null;
     hvPlaceNotes();
-    try{ hvMqWide.addEventListener('change', hvPlaceNotes); }catch(e){ try{ hvMqWide.addListener(hvPlaceNotes); }catch(e2){} }
-    try{ hvMqPinned.addEventListener('change', onMq); }catch(e){ try{ hvMqPinned.addListener(onMq); }catch(e2){} }
+    hvPlaceTabs();
+    const P = HV_STATE && HV_STATE.game._practice, own = hvTabbed() ? hvPrefs.tab1 : (HV_TABS.indexOf(hvPrefs.tab)>=0 ? hvPrefs.tab : 'moves');
+    if(!P) hvTab = own;
+    // a position played out keeps its tab where this layout has one (else Moves); the tab it stands in
+    // for, which pxDrop gives back, is this layout's own
+    else { if((hvTabbed() ? HV_TABS1 : HV_TABS).indexOf(hvTab)<0) hvTab = 'moves'; P.tabWas = own; }
+    // what has the keys (a note being typed, the opening notes, an explorer move) stays on screen: its tab shows (not remembered)
+    const fp = hvTabbed() && fa && fa.isConnected && fa.closest ? fa.closest('#hv-tabs > .hv-pane, #hv-card2 > .hv-pane') : null;
+    if(fp){ const t = fp.id.slice(8); if(HV_TABS2.indexOf(t)>=0) hvTab2 = t; else if(HV_TABS1.indexOf(t)>=0) hvTab = t; }
+    hvSyncTabs();
+    hvSetTab(hvTab, { silent:true });
+    // and keeps it: a card moved takes the focus away (its tab hidden a moment), the caret comes back where it was
+    if(fa && fa!==document.body && fa.isConnected)
+      try{ if(document.activeElement!==fa) fa.focus({ preventScroll:true }); if(caret && document.activeElement===fa) sl.setBaseAndExtent(caret[0], caret[1], caret[2], caret[3]); }catch(e){}
+    if(!HV_STATE) return;
+    hvVisiblePanes().forEach(p=> hvFire(hvPaneLs, p));
+    if(hvPaneShown('moves')) requestAnimationFrame(hvKeepInView);
+    hvRenderEngineNow();
+  }
+  (function(){
+    // each tablist: a click picks a tab; Left / Right / Home / End move between the tabs it shows
+    [document.querySelector('#hv-tabs .hv-tablist'), document.getElementById('hv-tablist2')].forEach(tl=>{
+      tl.addEventListener('click', (e)=>{
+        const t = e.target.closest('.hv-tab');
+        if(t) hvSetTab(t.id.slice(7), { save:true });
+      });
+      tl.addEventListener('keydown', (e)=>{
+        const t = e.target.closest('.hv-tab');
+        if(!t || (e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Home' && e.key!=='End')) return;
+        e.preventDefault(); e.stopPropagation();
+        const vis = Array.from(tl.querySelectorAll('.hv-tab')).filter(b=> b.getClientRects().length).map(b=> b.id.slice(7));
+        let i = vis.indexOf(t.id.slice(7));
+        if(i < 0 || !vis.length) return;
+        if(e.key==='ArrowLeft') i = (i-1+vis.length) % vis.length;
+        else if(e.key==='ArrowRight') i = (i+1) % vis.length;
+        else i = e.key==='Home' ? 0 : vis.length-1;
+        hvSetTab(vis[i], { save:true, focus:true });
+      });
+    });
+    hvPlaceNotes();         // (the cards move once the review pane is built: hvPlaceTabs at hvApplyCards' first run)
+    try{ hvMqWide.addEventListener('change', hvTabsLayout); }catch(e){ try{ hvMqWide.addListener(hvTabsLayout); }catch(e2){} }
     try{ hvMqPhone.addEventListener('change', ()=>{ if(HV_STATE) hvRenderEngineNow(); }); }catch(e){}
   })();
 
@@ -36976,6 +37123,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     el.appendChild(keyRow);
     card.appendChild(el);
     el.style.top = (btn.offsetTop + btn.offsetHeight + 6)+'px';
+    // with the engine at the foot of the side column (card 2, under three columns) it opens upward where the screen ends under it
+    const er = el.getBoundingClientRect(), bt = btn.getBoundingClientRect().top;
+    if(er.bottom > window.innerHeight - 8 && bt - er.height - 6 >= 8) el.style.top = (btn.offsetTop - el.offsetHeight - 6)+'px';
     const outside = (e)=>{ if(!el.contains(e.target) && !btn.contains(e.target)) hvMenuClose(); };
     hvMenu = { el, node:null, opener:btn, outside, kind:'arrows', onClose: ()=> btn.setAttribute('aria-expanded', 'false') };
     btn.setAttribute('aria-expanded', 'true');
@@ -37091,6 +37241,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(opts.clamp) hvClampGo(opts.clamp);       // Go to move from a CLAMP letter's box
     hvFire(hvPaneLs, hvTab);
     if(hvNotesPinned() && hvTab!=='notes' && !hvNotesOff()) hvFire(hvPaneLs, 'notes');
+    if(hvTabbed() && hvPaneShown('explorer')) hvFire(hvPaneLs, 'explorer');       // card 2 on the Explorer
   }
   document.getElementById('hv-start').addEventListener('click', ()=>{ if(HV_STATE) hvGoNode(HV_STATE.root); });
   document.getElementById('hv-prev').addEventListener('click', ()=> hvStep(-1));
@@ -37142,6 +37293,45 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const m = /^(?:Digit|Numpad)([123])$/.exec(e.code || '');
     return m && e.key && e.key.length===1 ? Number(m[1]) : 0;
   }
+  // 4, 5, 6 or 7 (0 for any other key), the same way: the tabs' keys
+  function hvTabKeyOf(e){
+    if(e.key==='4' || e.key==='5' || e.key==='6' || e.key==='7') return Number(e.key);
+    const m = /^(?:Digit|Numpad)([4567])$/.exec(e.code || '');
+    return m && e.key && e.key.length===1 ? Number(m[1]) : 0;
+  }
+  // ---- keys 4 / 5 / 6 / 7: the tabs (2026-11-02) ----
+  // 4 Game review, 5 Moves, 6 Notes, 7 Explorer. Under three columns, a tab of the two tabbed
+  // cards (picked as a click picks it, and remembered); in the three columns, the Review /
+  // Moves / Explorer tab, 4 also opening the folded header card and 6 the folded Notes card
+  // (brought into view, never focused). The keys stay where they were (the arrows still step).
+  function hvTabKey(n){
+    const t = ['review', 'moves', 'notes', 'explorer'][n-4], name = hvTabName(t);
+    if(hvTabbed()){
+      if(!hvTabOn(t)){ hvSay(name+' isn\u2019t shown here'); return; }
+      hvSetTab(t, { save:true });
+      hvSay(name);
+      return;
+    }
+    const px = !!HV_STATE.game._practice;
+    if(t==='notes'){
+      if(hvNotesOff()){ hvSay(name+' isn\u2019t shown here'); return; }
+      hvUnfoldNotes();
+      try{ document.getElementById('hv-notes-card').scrollIntoView({ block:'nearest' }); }catch(e){}
+      hvSay(name);
+      return;
+    }
+    let did = false;
+    if(t==='review' && hvPrefs.fold.head && hvPrefs.cards.head){ hvPrefs.fold.head = false; hvSavePrefs(); hvApplyFold(); did = true; }
+    if(hvPrefs.cards.tabs && !(px && !pxTabOk(t))){ hvSetTab(t, { save:true }); did = true; }
+    hvSay(did ? name : name+' isn\u2019t shown here');
+  }
+  // E with card 2 on the Explorer (under three columns): back to the Engine, the suggested moves as they were
+  function hvEKeyTab(){
+    if(!hvTabbed() || hvShownTab(2)!=='explorer' || !hvTabOn('engine')) return false;
+    hvSetTab('engine', { save:true });
+    hvSay('Engine');
+    return true;
+  }
   document.addEventListener('keydown', (e)=>{
     if(!HV_STATE || !hvViewActive()) return;
     if(document.querySelector('.modal-overlay.active')) return;   // Settings or a dialog has the keys
@@ -37166,7 +37356,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else if(k==='x' || k==='X'){ e.preventDefault(); hvFlip(); }
     else if(k==='l' || k==='L'){ e.preventDefault(); hvToggleEngine(); }
     else if(hvArrowKeyOf(e)){ e.preventDefault(); if(!e.repeat) hvToggleArrow(hvArrowKeyOf(e)); }
-    else if(k==='e' || k==='E'){ e.preventDefault(); if(!e.repeat) hvToggleHide(); }
+    else if(hvTabKeyOf(e)){ e.preventDefault(); if(!e.repeat) hvTabKey(hvTabKeyOf(e)); }
+    else if(k==='e' || k==='E'){ e.preventDefault(); if(!e.repeat && !hvEKeyTab()) hvToggleHide(); }
     // B plays the best move (2026-11-02: it was Space, which is now held for Space + right-click, a square's CLAMP
     // box: hvSpace). Held down, it plays one.
     else if(k==='b' || k==='B'){ e.preventDefault(); if(!e.repeat) hvPlayBest(); }
@@ -38093,13 +38284,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const HV_CARD_EL = { head:'hv-head', comment:'hv-com-card', engine:'hv-engine', tabs:'hv-tabs' };
   function hvApplyCards(){
     Object.keys(HV_CARD_EL).forEach(k=> document.getElementById(HV_CARD_EL[k]).classList.toggle('hv-card-off', !hvPrefs.cards[k]));
+    hvSyncTabs();       // the two tabbed cards: a tab for each card that's on (the tabs card itself never hides there)
     if(HV_STATE){
       hvModeUi();
       hvComCard();
       if(hvNotesOff() && hvTab==='notes') hvSetTab('moves', { silent:true });
       hvPlaceNotes();
-      if(hvPaneShown(hvTab)) hvFire(hvPaneLs, hvTab);
-      if(hvTab!=='notes' && hvPaneShown('notes')) hvFire(hvPaneLs, 'notes');
+      if(hvTabbed()) hvVisiblePanes().forEach(p=> hvFire(hvPaneLs, p));      // what each card shows now
+      else {
+        if(hvPaneShown(hvTab)) hvFire(hvPaneLs, hvTab);
+        if(hvTab!=='notes' && hvPaneShown('notes')) hvFire(hvPaneLs, 'notes');
+      }
       if(hvPaneShown('moves')) requestAnimationFrame(hvKeepInView);     // the move list was hidden or changed size: the current move back in view
     }
     hpfRender();
@@ -38117,6 +38312,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
     sync();
   })();
+  hvPlaceTabs();        // (here: the review pane is built, hrUI empties #hv-pane-review first)
   hvApplyCards();
 
   // ---- folding the left column's two cards (three columns; the arrows are hidden elsewhere) ----
@@ -38262,7 +38458,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const p = job.total ? Math.round(job.done / job.total * 100) : 0;
       dot.style.setProperty('--hr-p', p+'%');
       tab.title = 'Game review running: '+p+'% done';
-    } else tab.removeAttribute('title');
+    } else tab.title = hvTabTitle('review');
   }
 
   // ---- the eval graph (#hr-graph) ----
@@ -44842,8 +45038,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function pxModeClass(){
     const v = views['play-history'], P = HV_STATE ? HV_STATE.game._practice : null;
+    const ex = !!P && hvTabbed() && hvViewActive() && document.getElementById('hv-pane-explorer').getClientRects().length > 0;
     v.classList.toggle('is-px', !!P);
     v.classList.toggle('is-px-play', !!P && P.phase!=='analysis');
+    hvSyncTabs();       // the two tabbed cards: no Engine or Explorer tab while you play (card 2 goes)
+    if(P && !ex && hvPaneShown('explorer')) hvFire(hvPaneLs, 'explorer');      // Analyze brings card 2 back on the Explorer
   }
   // back to playing (a move, Take back, Start again): the engine and the explorer out of sight again
   function pxToPlay(P){
