@@ -1440,13 +1440,6 @@
       linear-gradient(#00933c, #00933c) 7px 50% / calc(100% - 14px) 5px no-repeat;
   }
   :root[data-skin="uptown"] .history-cta{ font-size:13px; letter-spacing:.01em; }
-  :root[data-skin="uptown"] .neon-sign{                       /* amber LED destination board */
-    padding:8px 18px 7px; border:2px solid #3a3e44; border-radius:4px; background:#050505;
-    font-family:"Doto","JetBrains Mono",monospace; font-weight:900; font-size:20px;
-    letter-spacing:.02em; text-transform:none; color:#ffb020;
-    text-shadow:0 0 6px rgba(255,176,32,.45); box-shadow:inset 0 0 0 1px #000;
-  }
-  :root[data-skin="uptown"] .neon-sign:hover{ background:#000; }   /* existing opacity flicker kept */
   :root[data-skin="uptown"] .arcade-bar{                      /* lit strip map over the doors */
     --surface:#141517; --surface-2:#202328; --ink:#f4f4f0; --ink-soft:#b9c0c6; --line:#2e3238;
     --brass:#ffb52e; --brass-soft:#ffd27a; --brass-ink:#141517; --brass-text:#ffb52e;
@@ -4743,12 +4736,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .drill-card:hover:not(:disabled){ transform:translateY(-2px); border-color:var(--brass-soft); }
   .drill-card:disabled{ cursor:not-allowed; opacity:.55; }
 
-  /* Play Online lives in the header plaque, as its own glowing call-to-action
-     rather than another drill card -- .plaque-cta claims the flex space left
-     between the title block and the theme-preview board, and centers the
-     sign within it. */
-  .plaque-cta{ flex:1 1 auto; display:flex; flex-direction:column; align-items:center; gap:10px; justify-content:center; min-width:140px; }
-  #card-play{ min-width:150px; font-size:18px; padding:11px 34px; }
   .hub-panel{ gap:4px; }
   .hub-tile{ text-align:left; min-height:110px; }
   .history-cta{
@@ -4758,28 +4745,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     cursor:pointer;
   }
   .history-cta:hover{ background:var(--brass); color:var(--brass-ink,#1c1608); }
-  .neon-sign{
-    padding:9px 24px;
-    border-radius:6px;
-    border:2px solid #39f3ff;
-    background:rgba(8,22,30,.4);
-    font-family:"Big Shoulders Display",sans-serif;
-    font-weight:700;
-    font-size:15px;
-    letter-spacing:.07em;
-    text-transform:uppercase;
-    color:#a9fbff;
-    text-shadow:0 0 4px #39f3ff, 0 0 11px #39f3ff, 0 0 22px #0ff;
-    box-shadow:0 0 6px #39f3ff, 0 0 18px rgba(57,243,255,.5), inset 0 0 8px rgba(57,243,255,.3);
-    cursor:pointer;
-    animation:neonFlicker 3.4s infinite steps(1,end);
-  }
-  .neon-sign:hover{ background:rgba(8,22,30,.6); transform:scale(1.04); }
-  @keyframes neonFlicker{
-    0%,3%,6%,7%,9%,100%{ opacity:1; }
-    4%,5%,8%{ opacity:.7; }
-  }
-  @media (prefers-reduced-motion:reduce){ .neon-sign{ animation:none; } }
   .drill-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
   .drill-num{
     font-family:"JetBrains Mono",monospace;
@@ -6695,9 +6660,6 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      Scoped to #view-play-sb / #sb-board / .sb-*: nothing here reaches another
      drill, Puzzles (pzCentreBoard) or the shared has-side rules. Tokens only;
      motion is transform/opacity only and stops under prefers-reduced-motion. */
-  /* With 13 drills the menu's last row holds one card: it takes the whole
-     row, so every row of the two-column grid stays full. */
-  .drill-grid > .drill-card:last-child:nth-child(odd){ grid-column:1 / -1; }
   #view-play-sb [hidden]{ display:none !important; }
   #sb-step-banner{ display:none !important; }
   /* The board and the tray on one screen: the house width rule plus a height
@@ -6821,6 +6783,220 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .sb-tp{ transition:none; }
     .sb-tp.is-picked, .sb-tp:hover{ transform:none !important; }
   }
+
+  /* ---- Play's doors and Challenges (2026-11-03) ----
+     The header's Play sign is gone: the logo is the door to the Play page (#play), and home's 00 card heads the drill
+     grid with the five doors one tap from home. The option names wear the skin's own display face (pdFace copies it off
+     a drill name into --pd-*), at one size for all five (pdFit). Challenges (ch*): games with the friends you follow. */
+  #plaque-logo-wrap{ cursor:pointer; }
+  #plaque-logo-wrap .plaque-logo{ transition:transform .18s ease; }
+  #plaque-logo-wrap:hover .plaque-logo{ transform:scale(1.04); }
+  #plaque-logo-wrap:focus-visible{ outline:2px solid var(--focus, var(--brass)); outline-offset:4px; border-radius:20px; }
+  /* iPad widths: the header reaches the fixed gear, so the logo steps left of it */
+  @media (min-width:481px) and (max-width:991px){ #page-header{ padding-right:60px; } }
+  /* a phone: no row of its own any more; a 64px logo sits beside the subtitle, under the gear */
+  @media (max-width:480px){
+    #page-header{ display:grid; grid-template-columns:minmax(0, 1fr) auto; column-gap:12px; row-gap:4px; align-items:center; }
+    #page-header .plaque-text{ display:contents; }
+    #page-header .plaque-text > .eyebrow{ grid-column:1 / -1; justify-self:start; }
+    #page-header .plaque-text > .title{ grid-column:1 / -1; }
+    #page-header .plaque-text > .subtitle{ grid-column:1; }
+    #plaque-logo-wrap{ grid-column:2; grid-row:3; width:64px; height:64px; margin:0 -2px 0 0; }
+  }
+  /* the corner buttons and the friends pill: 44px to tap, drawn the same size (the play screens are laid out around
+     the 40px buttons: --fab-clear); measured from the padding box, so a 1px border + 3px = 44 */
+  .home-fab::before, .settings-fab::before{ content:""; position:absolute; inset:-3px; border-radius:inherit; }
+  :root[data-skin="bauhaus"] .home-fab::before{ inset:-4px; }
+  .friends-tab{ position:relative; }
+  .friends-tab::before{ content:""; position:absolute; inset:-7px -1px; }
+  /* home, Play and Challenges keep room for the friends pill at the end of the scroll (#wrap comes out exactly the
+     screen's height, so its own 64px of bottom padding is lost and the pill would sit on the last card) */
+  #view-menu.active, #view-hub.active, #view-challenges.active{ padding-bottom:56px; }
+  #card-play-home, #card-challenges, #view-challenges, #ch-banner{ --pd-soft:color-mix(in srgb, var(--ink-soft) 62%, var(--ink)); }
+
+  /* 00: the Play card, the full width at the top of the drill grid; the card itself isn't a button, its title is */
+  .drill-grid > .play-home{ grid-column:1 / -1; cursor:default; gap:12px; border-color:var(--brass-soft); box-shadow:inset 0 4px 0 var(--brass), var(--shadow); }
+  .drill-grid > .play-home:hover{ transform:none; border-color:var(--brass-soft); }
+  /* only the title and the options answer a hover (the drill cards' shine and Uptown's line edge stay off the card) */
+  :root[data-glass="on"] .drill-grid > .play-home:hover .pd-title:not(:hover) .drill-name::after{ transform:translateX(-130%); }
+  .play-home .pd-top{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 18px; }
+  .play-home .pd-title{ appearance:none; background:none; border:0; margin:0; padding:4px 0; min-height:44px; display:flex; align-items:center;
+    text-align:left; cursor:pointer; color:inherit; font:inherit; }
+  .play-home .pd-title .drill-name{ display:block; font-size:calc(var(--pd-opt-fs-base, 17px) * 1.5); line-height:1.1; transition:transform .15s ease; }
+  .play-home .pd-title:hover .drill-name{ transform:translateY(-2px); }
+  :root[data-glass="on"] .play-home .pd-title:hover .drill-name::after{ transform:translateX(130%); }
+  .play-home .drill-desc{ flex:1 1 220px; }
+  .pd-opts{ display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:10px; margin-top:2px; }
+  .pd-opt{ position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:6px;
+    min-height:74px; padding:12px 14px; text-align:left; cursor:pointer; color:var(--ink);
+    background:var(--surface-2); border:var(--pd-bw, 1px) solid var(--line); border-radius:var(--pd-r, 7px);
+    transition:transform .15s ease, border-color .15s ease; }
+  .pd-opt:hover{ transform:translateY(-2px); border-color:var(--brass-soft); }
+  .pd-opt-name, .ch-box-title{ font-family:var(--pd-ff, inherit); text-transform:var(--pd-tt, none); letter-spacing:var(--pd-ls, 0); font-variant:var(--pd-fv, normal);
+    font-weight:700; color:var(--ink); line-height:1.08; }
+  /* one line, one size for all five (the largest that fits every tile); a face that can't fit at a readable size sets
+     every name on two lines instead, so the five still match */
+  .pd-opt-name{ font-size:var(--pd-opt-fs, 17px); max-width:100%; white-space:nowrap; }
+  .pd-opts.two-line .pd-opt-name{ white-space:normal; text-wrap:balance; min-height:calc(2em * 1.08); }
+  /* hints pinned to the tile's foot on a common 22px line, so they sit level */
+  .pd-opt-hint{ margin-top:auto; min-height:22px; display:flex; align-items:center; flex-wrap:wrap; gap:6px; font-size:12.5px; line-height:1.3; color:var(--pd-soft); }
+  .pd-opt-hint.warn, .ch-err{ color:color-mix(in srgb, var(--bad) 60%, var(--ink)); font-weight:600; }
+  /* the one live number on home: the skin's ink as the chip, its surface as the number (body-text contrast in every skin) */
+  .pd-count{ display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:22px; padding:0 7px; border-radius:99px;
+    background:var(--ink); color:var(--surface); font-family:"JetBrains Mono",monospace; font-weight:700; font-size:12.5px; font-variant-numeric:tabular-nums; }
+  /* under 900px: three across, then two wider ones; a phone: two across, Challenges the full width */
+  @media (min-width:621px) and (max-width:899px){
+    .pd-opts{ grid-template-columns:repeat(6, minmax(0, 1fr)); }
+    .pd-opt{ grid-column:span 2; }
+    .pd-opt:nth-child(n+4){ grid-column:span 3; }
+  }
+  @media (max-width:620px){
+    .pd-opts{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    .pd-opt{ min-height:64px; }
+    .pd-opt:last-child{ grid-column:1 / -1; }
+  }
+  /* the Play page's fifth door, the full width at the foot */
+  .hub-grid > #card-challenges{ grid-column:1 / -1; }
+  .hub-tile .hub-head{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .hub-tile .hub-head .pd-opt-hint{ margin-top:0; font-size:13px; }
+  .hub-tile .hub-head .pd-opt-hint[hidden]{ display:none; }
+  .hub-tile .hub-head .pd-count{ height:24px; }
+
+  /* ---- Challenges ---- */
+  #view-challenges .ch-head h1{ margin:0; }
+  :root:not([data-skin="uptown"]) #view-challenges .ch-head .eyebrow{ color:var(--ink-soft); }   /* as #hv-head's: Uptown's is a sign */
+  /* the back link as the review's small surface pill (bare text can't be read on Felt or over Uptown's map) */
+  #view-challenges > .back-link{ position:relative; align-self:flex-start; min-height:36px; padding:6px 14px; font-size:13px; line-height:1.3; color:var(--ink-soft);
+    background:var(--surface); border:1px solid var(--line); border-radius:999px; box-shadow:var(--shadow); }
+  #view-challenges > .back-link::before{ content:""; position:absolute; inset:-5px -1px; }
+  #view-challenges > .back-link:hover{ color:var(--ink); }
+  :root[data-skin="bauhaus"] #view-challenges > .back-link{ border-radius:0; }
+  #view-challenges .ch-cols{ display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); gap:14px; align-items:start; }
+  @media (max-width:999px){ #view-challenges .ch-cols{ grid-template-columns:minmax(0, 1fr); } }
+  #view-challenges .ch-col{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+  #view-challenges .ch-box{ gap:12px; min-width:0; }
+  .ch-box-head{ display:flex; align-items:center; gap:10px; }
+  .ch-box-title{ font-size:var(--pd-box-fs, 19px); margin:0; }
+  .ch-row{ position:relative; display:flex; flex-direction:column; gap:7px; padding:12px 14px; min-width:0;
+    background:var(--surface-2); border:var(--pd-bw, 1px) solid var(--line); border-radius:var(--pd-r, 7px); }
+  .ch-row.gone > :not(.ch-acts):not(.ch-menu){ opacity:.62; }
+  .ch-row.ch-hi{ border-color:var(--brass); box-shadow:inset 0 0 0 1px var(--brass); }
+  .ch-who{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0; }
+  .ch-dot{ width:9px; height:9px; border-radius:50%; background:var(--good); flex:0 0 auto; }
+  .ch-dot.off{ background:transparent; box-shadow:inset 0 0 0 1.5px var(--ink-soft); }
+  .ch-name{ font-weight:700; font-size:15px; color:var(--ink); overflow-wrap:anywhere; min-width:0; }
+  .ch-rating{ font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--pd-soft); font-variant-numeric:tabular-nums; }
+  /* every item carries a leading dot, and the line is pulled 16px left inside a clipping box: a dot that would start a
+     wrapped line falls outside the box, so no line ever begins with a separator */
+  .ch-meta-clip{ overflow:hidden; }
+  .ch-meta{ display:flex; flex-wrap:wrap; gap:2px 0; margin-left:-16px; font-size:13.5px; color:var(--ink); }
+  .ch-meta > span{ white-space:nowrap; }
+  .ch-meta > span::before{ content:"\00b7"; display:inline-block; width:16px; text-align:center; color:var(--ink-soft); }
+  .ch-meta .ch-tc{ font-family:"JetBrains Mono",monospace; font-weight:700; }
+  .ch-note{ font-size:12.5px; line-height:1.45; color:var(--pd-soft); }
+  .ch-note b{ color:var(--ink); }
+  .ch-err{ font-size:13px; line-height:1.45; }
+  .ch-acts{ display:flex; flex-wrap:wrap; gap:8px; margin-top:3px; }
+  .ch-acts .btn{ min-height:44px; padding:10px 18px; }
+  .ch-caret{ font-size:10px; margin-left:6px; opacity:.8; }
+  .ch-menu{ position:absolute; z-index:6; left:14px; top:calc(100% - 8px); min-width:250px; max-width:calc(100% - 8px); padding:6px;
+    background:var(--surface); border:1px solid var(--ink-soft); border-radius:var(--pd-r, 7px);
+    box-shadow:0 16px 36px -8px rgba(0,0,0,.45), var(--shadow); }
+  .ch-menu-head{ padding:6px 10px 4px; font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:color-mix(in srgb, var(--ink-soft) 40%, var(--ink)); }
+  .ch-menu button{ display:block; width:100%; min-height:44px; padding:9px 10px; text-align:left; background:none; border:0; border-radius:calc(var(--pd-r, 7px) * .8);
+    color:var(--ink); font-size:14px; cursor:pointer; }
+  .ch-menu button:hover, .ch-menu button:focus-visible{ background:var(--surface-2); }
+  /* dark: the menu is lifted off the rows it covers (lighter than any card, a bright edge, a deep shadow) */
+  :root[data-theme="dark"] .ch-menu{ background:color-mix(in srgb, var(--surface-2) 84%, var(--ink)); border-color:color-mix(in srgb, var(--ink) 55%, transparent);
+    box-shadow:0 22px 48px -6px rgba(0,0,0,.8), 0 0 0 4px rgba(0,0,0,.28); }
+  :root[data-theme="dark"] .ch-menu button:is(:hover, :focus-visible){ background:color-mix(in srgb, var(--surface-2) 66%, var(--ink)); }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]) .ch-menu{ background:color-mix(in srgb, var(--surface-2) 84%, var(--ink)); border-color:color-mix(in srgb, var(--ink) 55%, transparent);
+      box-shadow:0 22px 48px -6px rgba(0,0,0,.8), 0 0 0 4px rgba(0,0,0,.28); }
+    :root:not([data-theme="light"]) .ch-menu button:is(:hover, :focus-visible){ background:color-mix(in srgb, var(--surface-2) 66%, var(--ink)); }
+  }
+  .ch-empty{ font-size:13px; color:var(--pd-soft); }
+  .ch-friends{ display:flex; flex-direction:column; gap:6px; }
+  .ch-friend{ display:flex; align-items:center; gap:10px; min-height:46px; padding:8px 12px; text-align:left; cursor:pointer; color:var(--ink); font:inherit;
+    background:var(--surface-2); border:var(--pd-bw, 1px) solid var(--line); border-radius:var(--pd-r, 7px); }
+  .ch-friend:hover{ border-color:var(--brass-soft); }
+  .ch-friend.sel{ border-color:var(--brass); box-shadow:inset 0 0 0 1px var(--brass); }
+  .ch-friend[aria-disabled="true"]{ cursor:default; }
+  .ch-friend[aria-disabled="true"]:hover{ border-color:var(--line); }
+  .ch-radio{ width:16px; height:16px; border-radius:50%; flex:0 0 auto; box-shadow:inset 0 0 0 2px var(--ink-soft); }
+  .ch-radio.none{ box-shadow:none; }
+  .ch-friend.sel .ch-radio{ box-shadow:inset 0 0 0 2px var(--brass), inset 0 0 0 5px var(--surface-2), inset 0 0 0 9px var(--brass); }
+  .ch-fr-main{ display:flex; flex-direction:column; gap:1px; min-width:0; flex:1 1 auto; }
+  .ch-fr-sub{ font-size:12.5px; color:var(--pd-soft); }
+  .ch-fr-sub .ch-rating{ font-size:12px; }
+  .ch-fr-sub b{ color:var(--ink); font-weight:600; }
+  .ch-fr-go{ flex:0 0 auto; font-size:12.5px; font-weight:700; color:var(--ink); text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
+  .ch-offline{ font-size:12.5px; line-height:1.5; color:var(--pd-soft); }
+  .ch-send-row{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+  .ch-send-row .btn{ min-height:46px; }
+  .ch-send-row .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  #view-challenges .toggle{ min-height:44px; min-width:52px; }
+  #view-challenges .btn{ min-height:44px; }
+  .ch-fix{ font-size:14px; line-height:1.55; color:var(--ink); }
+  .ch-scopes{ display:flex; flex-direction:column; gap:6px; margin:2px 0; padding:0; list-style:none; }
+  .ch-scopes li{ font-size:14px; line-height:1.45; color:var(--ink); }
+  .ch-scopes b{ font-family:"JetBrains Mono",monospace; font-size:13px; margin-right:2px; }
+
+  /* the banner: a friend's new challenge on any other screen (chBanner*); a spot clear of the board, the move controls,
+     the corner buttons and the friends pill is picked per layout (chBannerSpot), so left/top are set from there */
+  .ch-banner{ position:fixed; z-index:42; left:16px; top:16px; width:min(360px, calc(100vw - 32px)); box-sizing:border-box;
+    display:flex; flex-direction:column; gap:8px; padding:12px 14px; color:var(--ink);
+    background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--brass); border-radius:10px;
+    box-shadow:0 14px 32px -10px rgba(0,0,0,.45), var(--shadow); }
+  .ch-banner[hidden]{ display:none; }
+  .ch-sr{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; border:0; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+  .ch-bn-who{ font-weight:700; font-size:14px; line-height:1.35; overflow-wrap:anywhere; }
+  .ch-bn-who .ch-rating{ font-weight:400; white-space:nowrap; }
+  .ch-bn-terms{ font-size:13px; line-height:1.4; color:var(--pd-soft); }
+  .ch-bn-acts{ display:flex; flex-wrap:wrap; gap:8px; }
+  .ch-bn-acts .btn{ min-height:44px; padding:8px 14px; }
+  .ch-bn-acts .btn[hidden]{ display:none; }
+  /* a phone: tighter, so it fits the band a drill leaves between its answer buttons and the friends pill */
+  @media (max-width:480px){ .ch-banner{ padding:9px 12px; gap:6px; } .ch-bn-who{ font-size:13.5px; line-height:1.3; } .ch-bn-terms{ font-size:12.5px; line-height:1.3; } }
+  .ch-banner.ch-bn-row{ flex-direction:row; align-items:center; gap:12px; }
+  .ch-banner.ch-bn-row .ch-bn-main{ flex:1 1 auto; min-width:0; }
+  .ch-banner.ch-bn-row .ch-bn-acts{ flex:0 0 auto; flex-wrap:nowrap; }
+  @media (prefers-reduced-motion:no-preference){
+    .ch-banner.ch-bn-in{ animation:chBnIn .22s ease-out; }
+    @keyframes chBnIn{ from{ transform:translateY(10px); opacity:0; } }
+  }
+  /* Play Online: the opponent asks to take back a move */
+  .ol-takeback{ display:flex; flex-direction:column; gap:8px; padding:10px 12px; border:1px solid var(--brass-soft); border-radius:8px; background:var(--surface); }
+  .ol-takeback[hidden]{ display:none; }
+  .ol-takeback-text{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .ol-takeback .btn{ min-height:44px; }
+  @media (prefers-reduced-motion:reduce){
+    .pd-opt, .play-home .pd-title .drill-name, #plaque-logo-wrap .plaque-logo{ transition:none; }
+    .pd-opt:hover, .play-home .pd-title:hover .drill-name, #plaque-logo-wrap:hover .plaque-logo{ transform:none; }
+  }
+
+  /* ---- Game Boy (light): dark text on the magenta reads 3.0:1; cream reads 5.5:1, across the skin ---- */
+  :root[data-skin="gameboy"]:not([data-theme="dark"]) :is(.btn-primary, .toggle.active){ color:#f7f5e8; }
+  :root[data-skin="gameboy"]:not([data-theme="dark"]) .btn-primary:hover{ background:var(--brass); box-shadow:inset 0 0 0 2px var(--brass-ink); }
+  @media (prefers-color-scheme:dark){
+    :root[data-skin="gameboy"]:not([data-theme="light"]) :is(.btn-primary, .toggle.active){ color:var(--brass-ink); }
+    :root[data-skin="gameboy"]:not([data-theme="light"]) .btn-primary:hover{ background:var(--brass-soft); box-shadow:none; }
+  }
+
+  /* ---- Uptown: each door rides its line (the same as on the Play page); the count is the amber LED board ---- */
+  :root[data-skin="uptown"] .drill-grid > .play-home{ box-shadow:var(--ux-band), var(--shadow); border-color:var(--ux-sign-edge); }
+  :root[data-skin="uptown"] .drill-grid > .play-home:hover{ border-color:var(--ux-sign-edge); }
+  :root[data-skin="uptown"] .pd-opt{ background:var(--surface); box-shadow:inset 0 5px 0 var(--ux-line, #a7a9ac); padding-top:17px; border-radius:4px; }
+  :root[data-skin="uptown"] .pd-opt:hover{ border-color:var(--ux-line, #a7a9ac); }
+  :root[data-skin="uptown"] :is(.pd-opt-name, .ch-box-title){ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; text-transform:none; letter-spacing:-.01em; }
+  :root[data-skin="uptown"] .play-home .pd-title .drill-name{ font-size:19px; }
+  :root[data-skin="uptown"] .pd-count{ border-radius:3px; background:#050505; color:#ffb020; box-shadow:inset 0 0 0 1px #3a3e44; text-shadow:0 0 6px rgba(255,176,32,.45); }
+  :root[data-skin="uptown"] #home-play-online{--ux-line:#ee352e} :root[data-skin="uptown"] #home-play-bot{--ux-line:#00933c}
+  :root[data-skin="uptown"] #home-history{--ux-line:#0039a6} :root[data-skin="uptown"] #home-saved{--ux-line:#b933ad}
+  :root[data-skin="uptown"] :is(#home-challenges, #card-challenges){--ux-line:#ff6319}
+  :root[data-skin="uptown"] :is(.ch-row, .ch-friend, .ch-banner){ border-radius:4px; }
+  :root[data-skin="uptown"] #view-challenges > .back-link{ border-radius:3px; }
 </style>
 
 <button class="home-fab" id="home-fab" data-nav="menu" title="All drills" aria-label="All drills">&#8962;</button>
@@ -6850,6 +7026,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     <span class="friends-chevron" id="friends-chevron">&#9650;</span>
   </button>
 </div>
+
+<!-- a friend's new challenge on any other screen (the CHALLENGES block's chBanner*): never takes the focus. A screen
+     reader hears it from #ch-bn-say, a live region that is always there (one that appears already filled is often not read) -->
+<div class="ch-banner" id="ch-banner" role="region" aria-label="Challenge from a friend" hidden>
+  <div class="ch-bn-main"><div class="ch-bn-who" id="ch-bn-who"></div><div class="ch-bn-terms" id="ch-bn-terms"></div></div>
+  <div class="ch-bn-acts">
+    <button class="btn btn-primary" id="ch-bn-accept" type="button">Accept</button>
+    <button class="btn btn-ghost" id="ch-bn-see" type="button">See it</button>
+    <button class="btn btn-ghost" id="ch-bn-later" type="button">Later</button>
+  </div>
+</div>
+<div class="ch-sr" id="ch-bn-say" role="status" aria-live="polite"></div>
 
 <div class="spotify-widget" id="spotify-widget">
   <div class="spotify-card" id="gl-spotify-card" style="display:none;">
@@ -7185,7 +7373,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="btn-row">
         <button class="btn btn-ghost" id="lichess-token-clear">Disconnect</button>
       </div>
-      <div class="field-hint">Needed for the Puzzles drill, Play Online, Play Bot, and the friends-online list. Create a token at lichess.org/account/oauth/token with <b>puzzle:read</b>, <b>puzzle:write</b>, <b>board:play</b>, <b>challenge:write</b>, <b>bot:play</b>, <b>follow:read</b>, <b>study:read</b> and <b>study:write</b> &#8212; puzzle:write because Lichess only serves a new puzzle once the last one's result is reported, board:play to seek and play real games, challenge:write and bot:play to start a game against the Lichess AI, follow:read to see which of your followed players are online, study:read and study:write to keep your Saved Puzzles in private Lichess studies so they appear on all your devices. Paste it here &#8212; it's saved on this device only, in this browser's local storage, and is never written into the app itself. These features need a real network origin (this app's Netlify URL, or a locally-saved copy) &#8212; the hosted claude.ai preview link's security sandbox blocks outside network calls entirely.</div>
+      <div class="field-hint">Needed for the Puzzles drill, Play Online, Play Bot, Challenges, and the friends-online list. Create a token at lichess.org/account/oauth/token with <b>puzzle:read</b>, <b>puzzle:write</b>, <b>board:play</b>, <b>challenge:read</b>, <b>challenge:write</b>, <b>bot:play</b>, <b>follow:read</b>, <b>study:read</b> and <b>study:write</b> &#8212; puzzle:write because Lichess only serves a new puzzle once the last one's result is reported, board:play to seek and play real games, challenge:write and bot:play to start a game against the Lichess AI, challenge:read and challenge:write to answer and send challenges to the friends you follow, follow:read to see which of your followed players are online, study:read and study:write to keep your Saved Puzzles in private Lichess studies so they appear on all your devices. Paste it here &#8212; it's saved on this device only, in this browser's local storage, and is never written into the app itself. These features need a real network origin (this app's Netlify URL, or a locally-saved copy) &#8212; the hosted claude.ai preview link's security sandbox blocks outside network calls entirely.</div>
     </div>
 
     <div class="modal-sep"></div>
@@ -7318,15 +7506,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <h1 class="title">Pattern and Vision Drills</h1>
       <div class="subtitle">A private chess dojo to train pattern recognition and intuition</div>
     </div>
-    <div class="plaque-cta">
-      <button class="neon-sign" id="card-play">Play</button>
-    </div>
     <div class="plaque-board" id="theme-preview-board" aria-hidden="true"></div>
-    <span class="plaque-logo-wrap" id="plaque-logo-wrap"><img class="plaque-logo" src="data:image/webp;base64,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" alt="Chess Arcade" width="108" height="108" decoding="async"></span>
+    <span class="plaque-logo-wrap" id="plaque-logo-wrap" role="button" tabindex="0" aria-label="Play" title="Play"><img class="plaque-logo" src="data:image/webp;base64,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" alt="Chess Arcade" width="108" height="108" decoding="async"></span>
   </header>
 
-  <!-- ============ PLAY (the header's Play sign, 2026-10-31): where to go, four doors; the buttons keep the ids
-       the header had (deep links click them) ============ -->
+  <!-- ============ PLAY (2026-10-31; the logo and home's 00 card open it since 2026-11-03): where to go, five
+       doors; the buttons keep their ids (deep links click them) ============ -->
   <section class="view" id="view-hub">
     <div class="panel hub-panel">
       <div class="eyebrow">Chess Arcade</div>
@@ -7337,7 +7522,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <button class="drill-card hub-tile" id="card-play-bot"><div class="drill-name">Play Bot</div><div class="drill-desc">A game against Lichess&rsquo;s computer, at the level you pick.</div></button>
       <button class="drill-card hub-tile" id="card-history"><div class="drill-name">Game History</div><div class="drill-desc">Your Lichess and chess.com games, and your openings.</div></button>
       <button class="drill-card hub-tile" id="card-saved"><div class="drill-name">Saved Puzzles</div><div class="drill-desc">The puzzles you&rsquo;ve saved, to play again.</div></button>
+      <button class="drill-card hub-tile" id="card-challenges"><div class="hub-head"><div class="drill-name">Challenges</div><span class="pd-opt-hint" id="card-challenges-head" hidden></span></div><div class="drill-desc" id="card-challenges-desc">Games with friends on Lichess: answer theirs, or send one.</div></button>
     </div>
+  </section>
+
+  <!-- ============ CHALLENGES (2026-11-03): games with the friends you follow on Lichess (the CHALLENGES block
+       draws #ch-body). Its own view, "challenges", never play-*: showView hides the header and tears Play Online
+       down for play* views ============ -->
+  <section class="view" id="view-challenges">
+    <button class="back-link" type="button" data-nav="hub">&larr; Play</button>
+    <div class="panel hub-panel ch-head">
+      <div class="eyebrow">Play</div>
+      <h1 class="title" style="font-size:26px;">Challenges</h1>
+      <div class="field-hint">Games with friends on Lichess, played on this board.</div>
+    </div>
+    <div class="ch-body" id="ch-body"></div>
   </section>
 
   <!-- ============ GAME HISTORY ============ -->
@@ -8033,6 +8232,25 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       </div>
     </div>
     <div class="drill-grid">
+
+      <!-- 00: Play, five doors one tap from home (the same handlers as the Play page's tiles); the title opens #play -->
+      <div class="drill-card arcade play-home" id="card-play-home" role="group" aria-labelledby="card-play">
+        <div class="drill-head">
+          <span class="drill-num">00</span>
+          <span class="chip arcade-chip">Lichess</span>
+        </div>
+        <div class="pd-top">
+          <button class="pd-title" id="card-play" type="button"><span class="drill-name">Play</span></button>
+          <div class="drill-desc">Real games on Lichess, and everything you&rsquo;ve played and saved.</div>
+        </div>
+        <div class="pd-opts" id="pd-opts">
+          <button class="pd-opt" id="home-play-online" type="button" data-door="card-play-online"><span class="pd-opt-name">Play Online</span><span class="pd-opt-hint">A real person</span></button>
+          <button class="pd-opt" id="home-play-bot" type="button" data-door="card-play-bot"><span class="pd-opt-name">Play Bot</span><span class="pd-opt-hint">Lichess&rsquo;s computer</span></button>
+          <button class="pd-opt" id="home-history" type="button" data-door="card-history"><span class="pd-opt-name">Game History</span><span class="pd-opt-hint">Lichess, chess.com</span></button>
+          <button class="pd-opt" id="home-saved" type="button" data-door="card-saved"><span class="pd-opt-name">Saved Puzzles</span><span class="pd-opt-hint">To play again</span></button>
+          <button class="pd-opt" id="home-challenges" type="button" data-door="card-challenges"><span class="pd-opt-name">Challenges</span><span class="pd-opt-hint" id="home-challenges-hint">Challenge a friend</span></button>
+        </div>
+      </div>
 
       <button class="drill-card arcade" id="card-kiss">
         <div class="drill-head">
@@ -9944,6 +10162,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
     <div class="side-panel">
       <div class="arcade-prompt" id="ol-status">&nbsp;</div>
+      <div class="ol-takeback" id="ol-takeback" hidden>
+        <div class="ol-takeback-text" id="ol-takeback-text"></div>
+        <div class="btn-row"><button class="btn btn-primary" id="ol-takeback-yes" type="button">Yes</button><button class="btn btn-ghost" id="ol-takeback-no" type="button">No</button></div>
+      </div>
 
       <div class="btn-row" id="ol-live-controls" style="display:none;">
         <button class="btn btn-ghost" id="ol-draw">Offer draw</button>
@@ -11856,6 +12078,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // separate, explicit checkNowPlaying() call at the very end of the
   // script (once everything really is ready) covers the boot case.
   let lichessResumeReady = false;
+  // Challenges (the CHALLENGES block, after Play Online) is set up: showView and applyLookPrefs wait for it
+  let chReady = false;
 
   // Deep-linking: one table covers both directions. On load, a `#slug` in
   // the address bar clicks the real card button (not showView directly) so
@@ -11932,6 +12156,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
                              {param:'showRatings', type:'toggle', row:'online-ratings-row'},
                              {param:'time', param2:'increment', type:'timeinc', row:'online-time-row', timeInput:'online-time-custom', incInput:'online-inc-custom'} ] },
     play:         { view:'hub',              card:'card-play',        startBtn:null, fields:[] },     // the Play page (#play)
+    challenges:   { view:'challenges',       card:'card-challenges',  startBtn:null, fields:[] },     // games with friends (#challenges)
     // Game History's filters ride in the link (lazy: their code runs later)
     history:      { view:'history',          card:'card-history',     startBtn:null, fields:[],
                     getParams:()=> ghViewParams(), applyParams:p=> ghApplyViewParams(p) },
@@ -12090,6 +12315,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // just ended while it was showing. See lichessResumeReady's own
     // comment above for why this can't just run unconditionally.
     if(name==='menu' && lichessResumeReady) checkNowPlaying();
+    // Challenges: the list is looked at again on home, Play and Challenges; the banner follows the screen
+    if(chReady) chOnView(name);
   }
   showView('menu');
   document.querySelectorAll('[data-nav]').forEach(btn=>{
@@ -13591,6 +13818,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       root.style.removeProperty('--pw-stroke');
     }
     try{ paintThemeLogo(); }catch(e){}      // a canvas the browser won't read leaves the neon logo
+    if(chReady) pdRestyle();                // home's option names take the new skin's face
   }
   applyLookPrefs();
 
@@ -20777,6 +21005,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     input.value = '';
     refreshTokenStatus();
     spTokenChanged();
+    startFriendsWidget();                   // the new token's friends
+    if(chReady) chTokenChanged();
   });
   document.getElementById('lichess-token-clear').addEventListener('click', ()=>{
     setLichessToken('');
@@ -20785,7 +21015,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     spTokenChanged();
     friendsUsernames = [];
     friendsAuthOk = false;
+    friendsPerfs = {}; friendsStatus = [];
     renderFriendsWidget([]);
+    if(chReady) chTokenChanged();
   });
 
   /* ---- Friends online: /api/rel/following (needs follow:read) crossed
@@ -20794,30 +21026,70 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   let friendsUsernames = [];
   let friendsAuthOk = null;
   let friendsTimer = null;
+  // Challenges reads these too: each friend's name and ratings by speed ({rating, prov}), and the last status poll
+  let friendsPerfs = {};
+  let friendsStatus = [];
+  let friendsLoading = null, friendsLoadedAt = 0;
+  // the token the list was read with (another account's list is never used), and a minute's wait after a 429
+  let friendsFor = '', friendsBackoffUntil = 0, friendsStatusBackoffUntil = 0;
+  // a request that never answers is given up (Lichess under load, Wi-Fi switching, waking from sleep): the friends'
+  // loads here and Challenges' requests
+  const LI_WAIT_MS = 15000;
+  function liSignal(ms){ const c = new AbortController(); setTimeout(()=>{ try{ c.abort(); }catch(e){} }, ms); return c.signal; }
 
-  async function loadFollowingList(){
+  // one load at a time per token (the widget and Challenges both ask; a token saved mid-load starts its own)
+  function loadFollowingList(){
     const token = getLichessToken();
-    if(!token){ friendsAuthOk = false; friendsUsernames = []; return; }
+    if(!friendsLoading || friendsLoading.token!==token){
+      const p = loadFollowingNow(token).finally(()=>{ if(friendsLoading && friendsLoading.p===p) friendsLoading = null; });
+      friendsLoading = { token, p };
+    }
+    return friendsLoading.p;
+  }
+  // the list is this token's (Challenges keeps a friend's challenge only by it)
+  function friendsReady(){ return friendsAuthOk===true && !!friendsFor && friendsFor===getLichessToken(); }
+  // A list Lichess turns down (401/403: the token, or no follow:read) is cleared; a passing failure (a 5xx, a 429, a
+  // network error, a timeout) leaves the last list standing, so friends' challenges don't vanish for one look
+  async function loadFollowingNow(token){
+    const drop = ()=>{ friendsAuthOk = false; friendsUsernames = []; friendsPerfs = {}; friendsFor = ''; };
+    if(!token){ drop(); return; }
+    if(friendsFor && friendsFor!==token){ friendsAuthOk = null; friendsUsernames = []; friendsPerfs = {}; friendsFor = ''; }    // another account's
+    if(Date.now() < friendsBackoffUntil) return;
     try{
       const res = await fetch('https://lichess.org/api/rel/following', {
-        headers:{ 'Authorization':'Bearer '+token }
+        headers:{ 'Authorization':'Bearer '+token }, signal:liSignal(LI_WAIT_MS)
       });
-      if(!res.ok){ friendsAuthOk = false; friendsUsernames = []; return; }
-      friendsAuthOk = true;
+      if(getLichessToken()!==token) return;          // the token changed meanwhile: the old account's list
+      if(res.status===401 || res.status===403){ drop(); return; }
+      if(res.status===429){ friendsBackoffUntil = Date.now() + 60000; return; }
+      if(!res.ok) return;
       const text = await res.text();
-      friendsUsernames = text.trim().split('\n').filter(Boolean).map(line=>{
-        try{ return JSON.parse(line).id; }catch(e){ return null; }
-      }).filter(Boolean);
-    }catch(e){ friendsAuthOk = false; friendsUsernames = []; }
+      if(getLichessToken()!==token) return;
+      const rows = text.trim().split('\n').filter(Boolean).map(line=>{
+        try{ return JSON.parse(line); }catch(e){ return null; }
+      }).filter(u=> u && u.id);
+      friendsAuthOk = true; friendsFor = token;
+      friendsLoadedAt = Date.now();
+      friendsUsernames = rows.map(u=> u.id);
+      friendsPerfs = {};
+      rows.forEach(u=>{
+        const perfs = {};
+        for(const k in (u.perfs || {})){ const p = u.perfs[k]; if(p && p.rating) perfs[k] = { rating:p.rating, prov:!!p.prov }; }
+        friendsPerfs[String(u.id).toLowerCase()] = { name:u.username || u.id, perfs };
+      });
+    }catch(e){}
   }
 
   async function pollFriendsStatus(){
     if(friendsAuthOk!==true || !friendsUsernames.length){ renderFriendsWidget([]); return; }
+    if(Date.now() < friendsStatusBackoffUntil) return;
     try{
       const ids = friendsUsernames.slice(0,100).join(',');
-      const res = await fetch('https://lichess.org/api/users/status?ids='+encodeURIComponent(ids));
+      const res = await fetch('https://lichess.org/api/users/status?ids='+encodeURIComponent(ids), { signal:liSignal(LI_WAIT_MS) });
+      if(res.status===429){ friendsStatusBackoffUntil = Date.now() + 60000; return; }
       if(!res.ok) return;
       const list = await res.json();
+      friendsStatus = Array.isArray(list) ? list : [];
       renderFriendsWidget(list.filter(u=>u.online));
     }catch(e){}
   }
@@ -20993,6 +21265,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const panel = document.getElementById('friends-panel');
     const isOpen = widget.classList.toggle('open');
     panel.style.display = isOpen ? 'block' : 'none';
+    if(chReady) chBannerSoon();         // a friend's challenge banner moves off the list (or waits)
   });
 
   // Draggable like the Spotify widget, per the user's own request after the
@@ -24412,6 +24685,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     showView('setup-online');
   });
   document.getElementById('ol-again').addEventListener('click', ()=> olPlayAgain());
+  // the opponent asks to take back a move (Lichess's own takeback setting still applies): Yes or No
+  function olTakebackShow(st){
+    const box = document.getElementById('ol-takeback');
+    if(!roundOl || !st){ box.hidden = true; return; }
+    const asks = roundOl.color==='white' ? st.btakeback : st.wtakeback, over = st.status && st.status!=='created' && st.status!=='started';
+    box.hidden = !(asks && !over);
+    if(!box.hidden) document.getElementById('ol-takeback-text').textContent = (roundOl.color==='white' ? roundOl.blackName : roundOl.whiteName)+' asks to take back a move';
+  }
+  ['yes', 'no'].forEach(a=> document.getElementById('ol-takeback-'+a).addEventListener('click', ()=>{
+    if(!roundOl || roundOl.phase!=='live') return;
+    document.getElementById('ol-takeback').hidden = true;
+    olPostAction('/takeback/'+a).catch(()=>{});
+  }));
 
   function olSetPhaseSeeking(){
     document.getElementById('ol-seek-controls').style.display='flex';
@@ -24423,6 +24709,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     document.getElementById('ol-movelist-wrap').style.display='none';
     document.getElementById('ol-result-banner').style.display='none';
     document.getElementById('ol-error-banner').style.display='none';
+    document.getElementById('ol-takeback').hidden = true;
     clearTimeout(olOpenT); olOpeningShow(null);      // a new game: no opening yet
     document.getElementById('ol-hud-mode-text').textContent='SEEKING';
     document.getElementById('ol-side-dot').className='side-dot w';
@@ -24642,6 +24929,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
     }
     olAgainLabel();
+    if(chReady) chBannerSoon();           // a friend's challenge held during the game shows now
     clearTimeout(olEndTimer);
     const R = roundOl;
     olEndTimer = setTimeout(()=>{ if(roundOl===R && R.phase==='ended' && currentView==='play-online') olEndOpen(); }, 1100);
@@ -24658,10 +24946,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return (frac[m] || String(Math.round(m*100)/100))+'+'+Math.round((Number(incMs)||0)/1000);
   }
   function olAgainLabel(){
-    const f = roundOl && roundOl.full, b = document.getElementById('ol-again');
-    const t = f && f.clock ? 'New game \u00b7 '+olTcText(f.clock.initial, f.clock.increment) : 'Find another game';
+    const f = roundOl && roundOl.full, b = document.getElementById('ol-again'), fr = olFriendOf(roundOl);
+    const t = fr ? 'Challenge '+fr.name+' again' : f && f.clock ? 'New game \u00b7 '+olTcText(f.clock.initial, f.clock.increment) : 'Find another game';
     b.textContent = t;
-    document.getElementById('ol-end-again').textContent = f && f.clock ? t : 'New game';
+    document.getElementById('ol-end-again').textContent = fr || (f && f.clock) ? t : 'New game';
   }
   function olEndOpen(){
     const R = roundOl;
@@ -24716,6 +25004,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   });
   function olEndClose(refocus){
     clearTimeout(olEndTimer);
+    // the result seen: a friend's challenge held through the game shows now (the banner waits for this box)
+    if(roundOl && roundOl.phase==='ended' && !roundOl.endDone){ roundOl.endDone = true; if(chReady) chBannerSoon(); }
     const ov = document.getElementById('ol-end');
     if(!ov.classList.contains('active')) return;
     ov.classList.remove('active');
@@ -24748,6 +25038,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olEndClose(false);
     if(!f || !f.clock){ showView('setup-online'); return; }
     const time = f.clock.initial/60000, increment = Math.round(f.clock.increment/1000);
+    // a friend game: the same terms to the same friend, waiting in Challenges' Sent (never a public seek)
+    const fr = olFriendOf(R);
+    if(fr){
+      const tm = R.challenge.terms;
+      olTeardown();
+      chAgain(fr, { limit:Math.round(f.clock.initial/1000), inc:increment, rated:!!f.rated, color:(tm && tm.color) || 'random' });
+      return;
+    }
     olTeardown();
     if(f.ai!=null) startBotChallenge({ level:f.ai, time, increment, color:settingsBot.color });
     else startOnlineSeek({ time, increment, rated:f.rated, color:settingsOnline.color });
@@ -24867,6 +25165,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olUpdateStatusText();
     olRenderMoveList();
     olOpeningSoon();
+    olTakebackShow(st);
 
     if(isOver) olFinishGame();
     else olStartClockTicker();
@@ -25208,6 +25507,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(full.white.aiLevel!=null || full.black.aiLevel!=null){
       roundOl.color = full.white.aiLevel!=null ? 'black' : 'white';
     }
+    // a friend game (olStartChallengeGame, or one picked up again): your color is the side with your own id
+    if(roundOl.challenge){
+      const me = spScopeCache.userId, w = String(full.white.id || '').toLowerCase(), bl = String(full.black.id || '').toLowerCase();
+      if(me && (w===me || bl===me)) roundOl.color = w===me ? 'white' : 'black';
+      else if(!roundOl.color) roundOl.color = 'white';
+    }
     roundOl.whiteName = full.white.aiLevel!=null ? ('AI level '+full.white.aiLevel) : (full.white.name || full.white.id || 'White');
     roundOl.blackName = full.black.aiLevel!=null ? ('AI level '+full.black.aiLevel) : (full.black.name || full.black.id || 'Black');
     roundOl.whiteRating = full.white.rating;
@@ -25221,6 +25526,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       black:{ id:full.black.id || '', name:full.black.name || '', rating:full.black.rating, title:full.black.title || null, ai:full.black.aiLevel } };
     olSetPhaseLive();
     olApplyState(full.state);
+    if(chReady && roundOl) chGameLive(roundOl.gameId);     // a challenge you sent and still wait on is canceled
     // Every game stream connection -- a brand-new game or reconnecting to
     // one already running -- sends this same gameFull event first, so
     // there's no other way to tell those two apart here. Skip the splash
@@ -25252,9 +25558,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
     });
     roundOl.gameStreamHandle = handle;
+    // a friend game that never opened here: back to Challenges with Lichess's words on its row
+    const failed = (msg)=> roundOl && roundOl.challenge && !roundOl.full && !roundOl.isResume && chReady ? (chStartFailed(roundOl.challenge, msg), true) : false;
+    handle.promise.then(()=>{ if(!olIsStale(gen)) failed('the game ended before it began'); }, ()=>{});
     handle.promise.catch(err=>{
       if(err && err.name==='AbortError') return;
       if(olIsStale(gen) || !roundOl) return;
+      if(failed((err && err.message) || '')) return;
       if(roundOl.phase!=='ended') olShowError('Lost the game connection.', err.message || 'Check lichess.org to see how the game stands.');
     });
   }
@@ -25264,6 +25574,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     roundOl.phase = 'connecting';
     roundOl.gameId = gameInfo.gameId;
     roundOl.color = gameInfo.color;
+    if(chReady) chClaimGame(roundOl);      // a challenge you sent, accepted: a friend game (never a seek's)
     if(roundOl.seekHandle) roundOl.seekHandle.abort();
     olOpenGameStream(gen);
   }
@@ -25326,6 +25637,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     roundOl = null;
     olSelected = null;
+    if(chReady) chBannerSoon();           // a challenge held during a seek or a game shows now
   }
   onLeavePlay(()=> olTeardown());
 
@@ -25345,7 +25657,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!res.ok) return;
       const data = await res.json();
       const games = (data && data.nowPlaying) || [];
-      nowPlayingGame = games.length ? games[0] : null;
+      nowPlayingGame = games.find(olPlayableHere) || null;     // a correspondence game or a variant is left to Lichess
     }catch(e){
       // Leave nowPlayingGame at whatever it last was -- a network hiccup
       // here shouldn't flip a real banner off, and there's nothing better
@@ -25353,6 +25665,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       return;
     }
     renderResumeBanner();
+  }
+  // a game this board can pick up again: standard chess with a clock
+  function olPlayableHere(g){
+    const v = g && g.variant ? (g.variant.key || g.variant) : 'standard';
+    return !!g && v==='standard' && !['correspondence', 'ultraBullet', 'unlimited'].includes(g.speed);
   }
   function renderResumeBanner(){
     const banner = document.getElementById('resume-game-banner');
@@ -25366,13 +25683,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       'vs. '+oppName+' \u00b7 '+color+(speed ? ' \u00b7 '+speed : '');
     banner.style.display = 'flex';
   }
-  function olResumeGame(gameId, color){
+  function olResumeGame(gameId, color, source){
     const gen = ++olGeneration;
     roundOl = { phase:'connecting', gameId, color, state:null,
       wtime:0, btime:0, winc:0, binc:0, status:'created', winner:null,
       wdraw:false, bdraw:false, lastMoveCount:0, whiteName:'White', blackName:'Black',
       clockTimer:null, eventStreamHandle:null, seekHandle:null, gameStreamHandle:null,
-      manualFlip:false, viewPly:null, isResume:true };
+      manualFlip:false, viewPly:null, isResume:true,
+      challenge: source==='friend' ? { id:gameId, name:'', terms:null, c:null } : null };     // a friend game: "Challenge again" after
     clearMarksObj(marksOl);
     showView('play-online');
     // Reuses the seeking phase's own DOM resets (clears the board, hides
@@ -25387,7 +25705,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     olOpenGameStream(gen);
   }
   document.getElementById('resume-game-btn').addEventListener('click', ()=>{
-    if(nowPlayingGame) olResumeGame(nowPlayingGame.gameId, nowPlayingGame.color);
+    if(nowPlayingGame) olResumeGame(nowPlayingGame.gameId, nowPlayingGame.color, nowPlayingGame.source);
   });
   lichessResumeReady = true;
 
@@ -25398,6 +25716,1034 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     startOnlineSeek();
   });
+
+  /* ================= CHALLENGES (2026-11-03) =================
+     Games with the friends you follow on Lichess: answer theirs (Accept, or Decline with a reason) or send one, and the
+     game is played on Play Online's board (olStartChallengeGame). No event stream: Lichess keeps one per token and a new
+     one closes the old, so a screen here would knock another device's Play Online seek off (old builds too). Instead
+     GET /api/challenge every 20 s on every screen while the page is visible (one request at a time, none while hidden,
+     a minute's wait after a 429), and a challenge you send is kept open by its own POST's keepAliveStream (liKeepAlive),
+     which also says how it ended. Friends only: a challenge from someone you don't follow is left out (not shown, not
+     counted, never declined: it stays on Lichess). Ratings and the challenge's terms only, never your repertoire, your
+     notes or your games against them (no prep: the user's rule, and Lichess's fair play). */
+  views['challenges'] = document.getElementById('view-challenges');
+  const CH_POLL_MS = 20000;
+  const CH_SCOPES = ['challenge:read', 'challenge:write', 'board:play', 'follow:read'];
+  const CH_SCOPE_WHY = { 'challenge:read':'see the challenges friends send you', 'challenge:write':'send, accept and decline challenges',
+    'board:play':'play the game on this board', 'follow:read':'list the friends you follow' };
+  // every permission Chess Arcade uses, so a new token never drops Saved Puzzles or the notes sync
+  const LI_ALL_SCOPES = ['puzzle:read', 'puzzle:write', 'board:play', 'challenge:read', 'challenge:write', 'bot:play', 'follow:read', 'study:read', 'study:write'];
+  const CH_TCS = ['1+0', '2+1', '3+0', '5+0', '5+3', '10+0', '15+10', '30+0'];     // Play Online's presets
+  const CH_SPEED = { ultraBullet:'UltraBullet', bullet:'Bullet', blitz:'Blitz', rapid:'Rapid', classical:'Classical' };
+  // Lichess sends the challenger its own words for each reason; the labels say the same in a few words
+  const CH_REASONS = [['generic', 'Not taking challenges now'], ['later', 'Not now, ask me later'], ['tooFast', 'Too fast for me'],
+    ['tooSlow', 'Too slow for me'], ['timeControl', 'Not this time control']];
+  const CH_PREFS_KEY = 'wavyChessPrepChallengePrefs', CH_SEEN_KEY = 'wavyChessPrepChallengeSeen';
+  const CH_START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+  const chEsc = (s)=> String(s==null ? '' : s).replace(/[&<>"]/g, (c)=> ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c]);
+
+  // The token's permissions, one check for everything that needs them (Saved Puzzles' sync, Challenges): POST
+  // /api/token/test answers { scopes, userId, expires } for a token Lichess knows, null for one it doesn't. Checked again
+  // when a token is saved (spTokenChanged), when Challenges opens on a check older than 10 minutes, and after a 401 or
+  // 403. Your own id comes only from here, never from a challenge. Two asks at once share one request.
+  let spScopeCache = { token:'', scopes:null, userId:'', checkedAt:0, bad:false };
+  let liTokenAsk = null;
+  function liTokenDrop(){ spScopeCache = { token:'', scopes:null, userId:'', checkedAt:0, bad:false }; }
+  async function liTokenInfo(maxAge){
+    const token = getLichessToken();
+    if(!token) return null;
+    const c = spScopeCache;
+    if(c.token===token && c.checkedAt && (maxAge==null || Date.now() - c.checkedAt < maxAge)) return c;
+    if(liTokenAsk && liTokenAsk.token===token) return liTokenAsk.p;
+    const p = (async ()=>{
+      const res = await spApi('/api/token/test', { method:'POST', auth:false, headers:{ 'Content-Type':'text/plain' }, body:token });
+      if(!res.ok) throw new Error('token check '+res.status);
+      const data = await res.json(), info = data ? data[token] : null;
+      const out = { token, scopes:new Set(info && typeof info.scopes==='string' ? info.scopes.split(',').map(s=> s.trim()).filter(Boolean) : []),
+        userId: info && info.userId ? String(info.userId).toLowerCase() : '', checkedAt:Date.now(), bad:!info };
+      if(getLichessToken()===token) spScopeCache = out;
+      return out;
+    })();
+    liTokenAsk = { token, p };
+    try{ return await p; }finally{ if(liTokenAsk && liTokenAsk.p===p) liTokenAsk = null; }
+  }
+
+  // state: in/out as Lichess lists them (in: friends only); gone: the ones that left since the last look (faded for
+  // one refresh); notes: what happened to a challenge here (an accept Lichess turned down, a decline from them)
+  const CH = { in:[], out:[], gone:{}, notes:{}, at:0, busy:false, again:false, timer:0, backoffUntil:0, lastAsk:0,
+    state:'off',          // 'off' no token | 'wait' not checked yet | 'bad' Lichess no longer accepts it | 'scope' permissions missing | 'ok'
+    missing:[], sent:null, hi:'', hiT:0, menu:'', err:'', sending:false, accepting:'',
+    answered:{} };        // id -> when it was accepted, declined or canceled here (a look already on its way can't bring it back)
+  function chLoadPrefs(){
+    let p = {};
+    try{ p = JSON.parse(localStorage.getItem(CH_PREFS_KEY) || '{}') || {}; }catch(e){ p = {}; }
+    return { tc:CH_TCS.includes(p.tc) ? p.tc : '5+0', rated:p.rated===true, color:['random', 'white', 'black'].includes(p.color) ? p.color : 'random',
+      friend:typeof p.friend==='string' ? p.friend : '' };
+  }
+  const chPref = chLoadPrefs();
+  function chSavePrefs(){ try{ localStorage.setItem(CH_PREFS_KEY, JSON.stringify(chPref)); }catch(e){} }
+
+  // Lichess's speed for a clock: its estimate of a game's length, limit + 40 x increment (seconds)
+  function chSpeedOf(limit, inc){ const d = limit + 40 * inc; return d < 30 ? 'ultraBullet' : d < 180 ? 'bullet' : d < 480 ? 'blitz' : d < 1500 ? 'rapid' : 'classical'; }
+  function chTc(tc){ const p = String(tc).split('+').map(Number); return { limit:(p[0] || 0) * 60, inc:p[1] || 0 }; }
+  function chLive(c){ return c.status==='created' && !(c.challenger && c.challenger.online===false); }
+  function chCount(){ return CH.state==='ok' ? CH.in.filter(chLive).length : 0; }
+  function chName(u){ return u ? String(u.name || u.id || '') : ''; }
+  function olBusy(){ return !!(roundOl && roundOl.phase!=='ended'); }    // a seek, or a game starting or on
+  // the time control as Lichess shows it: "5+3", "3 days a move", "No clock"
+  function chTcText(c){
+    const t = c.timeControl || {};
+    if(t.type==='clock'){
+      if(t.show) return String(t.show);
+      const m = (Number(t.limit) || 0) / 60;
+      return ({ 0.25:'\u00bc', 0.5:'\u00bd', 0.75:'\u00be' }[m] || String(m))+'+'+(Number(t.increment) || 0);
+    }
+    if(t.type==='correspondence') return (t.daysPerTurn || 1)+(Number(t.daysPerTurn)===1 ? ' day' : ' days')+' a move';
+    return 'No clock';
+  }
+  // your color in a challenge a friend sent: the other side of theirs (finalColor), or random
+  function chYouPlay(c){
+    if(c.color==='random') return '';
+    const theirs = c.finalColor || c.color;
+    return theirs==='white' ? 'black' : theirs==='black' ? 'white' : '';
+  }
+  function chColorText(col){ return col==='white' ? 'You play White' : col==='black' ? 'You play Black' : 'Random color'; }
+  // a challenge this board plays: a clock, standard chess from the start, a minute or more
+  function chWhyNot(c){
+    const t = c.timeControl || {};
+    if(t.type!=='clock') return 'Chess Arcade plays games with a clock only.';
+    const v = c.variant ? (c.variant.key || c.variant) : 'standard';
+    if(v!=='standard' || (c.initialFen && c.initialFen!=='startpos' && String(c.initialFen).split(' ')[0]!==CH_START)) return 'Chess Arcade plays standard chess only.';
+    if(c.speed==='ultraBullet') return 'Chess Arcade plays games of a minute or more.';
+    return '';
+  }
+  // a sent challenge of yours this board plays (a clock, standard chess, to a player): the one you wait on. A
+  // correspondence or open challenge made on lichess.org is left to Lichess: not listed, never canceled, never blocks Send
+  function chMine(c){ return !!(c && c.destUser && c.destUser.id && !chWhyNot(c)); }
+  // the terms of a challenge again, as Send takes them ({limit, inc, rated, color: yours})
+  function chTermsOf(c, received){
+    const t = c.timeControl || {};
+    return { limit:Number(t.limit) || 0, inc:Number(t.increment) || 0, rated:!!c.rated, color: received ? (chYouPlay(c) || 'random') : (c.color || 'random') };
+  }
+
+  // ---- reading the list ----
+  function chTokenState(info){
+    if(!getLichessToken()) return 'off';
+    if(!info) return 'wait';
+    if(info.bad) return 'bad';
+    CH.missing = CH_SCOPES.filter(s=> !info.scopes.has(s));
+    return CH.missing.length ? 'scope' : 'ok';
+  }
+  function chSchedule(){
+    clearTimeout(CH.timer);
+    if(document.hidden || !getLichessToken()) return;
+    CH.timer = setTimeout(()=> chRefresh(), Math.max(CH_POLL_MS, CH.backoffUntil - Date.now()));
+  }
+  // one request at a time (a call while one runs is queued once); open: Challenges just came on screen (the token
+  // check once it's older than 10 minutes, the friends you follow and who's online, now)
+  async function chRefresh(open){
+    if(CH.busy){ CH.again = open ? 'open' : (CH.again || true); return; }
+    if(document.hidden || Date.now() < CH.backoffUntil){ chSchedule(); return; }
+    const token = getLichessToken();
+    if(!token){ CH.state = 'off'; CH.in = []; CH.out = []; chDraw(); return; }
+    CH.busy = true; CH.lastAsk = Date.now();
+    try{
+      let info = null;
+      try{ info = await liTokenInfo(open ? 600000 : null); }
+      catch(e){ info = spScopeCache.token===token && spScopeCache.checkedAt ? spScopeCache : null; if(e && e.status===429) CH.backoffUntil = Date.now() + 60000; }
+      if(getLichessToken()!==token) return;
+      CH.state = chTokenState(info);
+      if(CH.state!=='ok'){ CH.in = []; CH.out = []; return; }
+      if(open || !friendsReady() || Date.now() - friendsLoadedAt > 300000) await loadFollowingList();
+      if(open) await pollFriendsStatus();
+      if(document.hidden || getLichessToken()!==token) return;
+      const res = await fetch('https://lichess.org/api/challenge', { headers:{ Authorization:'Bearer '+token }, cache:'no-store', signal:liSignal(LI_WAIT_MS) });
+      if(res.status===429){ CH.backoffUntil = Date.now() + 60000; return; }
+      if(res.status===401 || res.status===403){ liTokenDrop(); return; }    // the token is checked again on the next look
+      if(!res.ok) return;
+      const data = await res.json();
+      if(getLichessToken()===token) chTake(data);
+    }catch(e){}
+    finally{
+      CH.busy = false;
+      chDraw();
+      const again = CH.again; CH.again = false;
+      if(again) chRefresh(again==='open'); else chSchedule();
+    }
+  }
+  function chTake(data){
+    for(const id in CH.answered) if(Date.now() - CH.answered[id] > 60000) delete CH.answered[id];
+    const answered = (c)=> !!CH.answered[c.id];
+    // friends only: the list you follow, or while Lichess can't give it, the friends already on the rows
+    const lc = (x)=> String(x || '').toLowerCase();
+    const friends = new Set(friendsReady() ? friendsUsernames.map(lc) : CH.in.map(c=> lc(c.challenger && c.challenger.id)));
+    const was = CH.in, ins = (data && Array.isArray(data.in) ? data.in : [])
+      .filter(c=> c && c.id && c.challenger && friends.has(lc(c.challenger.id)) && (c.status==='created' || c.status==='offline') && !answered(c));
+    const now = new Set(ins.map(c=> c.id)), gone = {};
+    // gone since the last look (canceled, expired, accepted somewhere else): faded until the next refresh
+    was.forEach(c=>{ if(!now.has(c.id) && !CH.notes[c.id] && !answered(c)) gone[c.id] = c; });
+    CH.gone = gone;
+    CH.in = ins;
+    CH.out = (data && Array.isArray(data.out) ? data.out : []).filter(c=> c && c.id && c.status==='created' && chMine(c) && !answered(c));
+    CH.at = Date.now();
+    for(const id in CH.notes) if(Date.now() - CH.notes[id].at > 120000) delete CH.notes[id];
+  }
+
+  // ---- the doors: home's 00 card and the Play page's tile ----
+  function chDrawDoors(){
+    const n = chCount();
+    const warn = CH.state==='off' ? 'Connect Lichess' : (CH.state==='scope' || CH.state==='bad') ? 'Needs a new token' : '';
+    const hint = document.getElementById('home-challenges-hint'), head = document.getElementById('card-challenges-head');
+    const html = warn ? chEsc(warn) : n ? '<span class="pd-count">'+n+'</span> to answer' : 'Challenge a friend';
+    if(hint && hint._ch!==html){ hint._ch = html; hint.innerHTML = html; hint.classList.toggle('warn', !!warn); }
+    const btn = document.getElementById('home-challenges');
+    if(btn) btn.setAttribute('aria-label', 'Challenges, '+(warn || (n ? n+' to answer' : 'challenge a friend')));
+    if(head){
+      const h = warn ? chEsc(warn) : n ? '<span class="pd-count">'+n+'</span> to answer' : '';
+      if(head._ch!==h){ head._ch = h; head.innerHTML = h; head.hidden = !h; head.classList.toggle('warn', !!warn); }
+    }
+    const desc = document.getElementById('card-challenges-desc');
+    if(desc){
+      const k = CH.missing.length;
+      desc.textContent = CH.state==='off' ? 'Games with friends on Lichess. Connect Lichess in Settings first.'
+        : CH.state==='scope' ? 'Games with friends on Lichess. Your token needs '+(k===1 ? 'one more permission' : k+' more permissions')+' first.'
+        : CH.state==='bad' ? 'Games with friends on Lichess. Lichess no longer accepts your token.'
+        : 'Games with friends on Lichess: answer theirs, or send one.';
+    }
+  }
+  function chDraw(){
+    chDrawDoors();
+    if(currentView==='challenges') chRenderView();
+    chBannerCheck();
+  }
+
+  // ---- the Challenges screen ----
+  function chWho(u, perf, online){
+    const r = u && u.rating ? '<span class="ch-rating">'+chEsc(perf ? perf+' ' : '')+u.rating+(u.provisional ? '?' : '')+'</span>' : '';
+    const dot = online==null ? '' : '<span class="ch-dot'+(online ? '' : ' off')+'" role="img" aria-label="'+(online ? 'Online' : 'Offline')+'"></span>';
+    return '<div class="ch-who">'+dot+'<span class="ch-name">'+chEsc(chName(u))+'</span>'+r+'</div>';
+  }
+  // the time control, rated or casual, your color; the variant only when no rating names it ("Chess960 1648")
+  function chMeta(c, u, colorText){
+    const clock = (c.timeControl || {}).type==='clock', v = c.variant || {};
+    const named = u && u.rating && c.perf && c.perf.name===v.name;
+    return '<div class="ch-meta-clip"><div class="ch-meta"><span'+(clock ? ' class="ch-tc"' : '')+'>'+chEsc(chTcText(c))+'</span><span>'+(c.rated ? 'Rated' : 'Casual')+'</span>'
+      +'<span>'+chEsc(colorText)+'</span>'+(v.key && v.key!=='standard' && !named ? '<span>'+chEsc(v.name || v.key)+'</span>' : '')+'</div></div>';
+  }
+  function chMenu(c){
+    if(CH.menu!==c.id) return '';
+    const v = c.variant ? (c.variant.key || 'standard') : 'standard';
+    const items = CH_REASONS.concat([c.rated ? ['casual', 'Send it casual instead'] : ['rated', 'Send it rated instead']]).concat(v!=='standard' ? [['standard', 'Standard chess only']] : []);
+    const id = chEsc(c.id);
+    return '<div class="ch-menu" role="menu" aria-label="Decline and tell them" data-for="'+id+'"><div class="ch-menu-head" aria-hidden="true">Decline and tell them</div>'
+      + items.map(([k, t])=> '<button type="button" role="menuitem" tabindex="-1" data-act="reason" data-id="'+id+'" data-v="'+k+'" data-k="reason-'+id+'-'+k+'">'+t+'</button>').join('')+'</div>';
+  }
+  function chInRow(c){
+    const u = c.challenger || {}, name = chName(u), id = chEsc(c.id), note = CH.notes[c.id];
+    const cls = 'ch-row'+(CH.hi===c.id ? ' ch-hi' : '');
+    const head = chWho(u, c.perf && c.perf.name, u.online==null ? null : !!u.online) + chMeta(c, u, chColorText(chYouPlay(c)));
+    const decl = '<button class="btn btn-ghost ch-decline" type="button" data-act="decline" data-id="'+id+'" data-k="decline-'+id+'" aria-haspopup="menu" aria-expanded="'+(CH.menu===c.id)+'">Decline<span class="ch-caret" aria-hidden="true">&#9660;</span></button>';
+    const open = '<button class="btn btn-ghost" type="button" data-act="open" data-id="'+id+'" data-k="open-'+id+'">Open on Lichess</button>';
+    if(CH.gone[c.id]) return '<div class="'+cls+' gone" data-row="'+id+'">'+head+'<div class="ch-note"><b>'+chEsc(name)+' canceled it.</b></div></div>';
+    if(note && note.kind==='failed') return '<div class="'+cls+'" data-row="'+id+'">'+head+'<div class="ch-err" role="alert">Lichess didn&rsquo;t start it here: '+chEsc(note.text)+'</div><div class="ch-acts">'+open+(CH.in.some(x=> x.id===c.id) ? decl : '')+'</div>'+chMenu(c)+'</div>';
+    if(!chLive(c)) return '<div class="'+cls+' gone" data-row="'+id+'">'+head+'<div class="ch-note"><b>'+chEsc(name)+' went offline,</b> so it can&rsquo;t start now.</div><div class="ch-acts">'+decl+'</div>'+chMenu(c)+'</div>';
+    const why = chWhyNot(c), err = note && note.kind==='err' ? '<div class="ch-err" role="alert">'+chEsc(note.text)+'</div>' : '';
+    if(why) return '<div class="'+cls+'" data-row="'+id+'">'+head+'<div class="ch-note"><b>Can&rsquo;t be played here.</b> '+chEsc(why)+' You can play it on lichess.org.</div>'+err+'<div class="ch-acts">'+open+decl+'</div>'+chMenu(c)+'</div>';
+    const off = olBusy() || !!CH.accepting || Date.now() < CH.backoffUntil;
+    return '<div class="'+cls+'" data-row="'+id+'">'+head+err+'<div class="ch-acts"><button class="btn btn-primary" type="button" data-act="accept" data-id="'+id+'" data-k="accept-'+id+'"'+(off ? ' disabled' : '')+'>'
+      +(CH.accepting===c.id ? 'Accepting&hellip;' : 'Accept')+'</button>'+decl+'</div>'+chMenu(c)+'</div>';
+  }
+  // the incoming rows: the list, then the ones that just left, then any whose start failed here
+  function chInList(){
+    const out = CH.in.slice(), ids = new Set(out.map(c=> c.id));
+    Object.values(CH.gone).forEach(c=>{ if(!ids.has(c.id)){ ids.add(c.id); out.push(c); } });
+    Object.values(CH.notes).forEach(n=>{ if(n.kind==='failed' && n.c && n.c.direction!=='out' && !ids.has(n.c.id)){ ids.add(n.c.id); out.push(n.c); } });
+    return out;
+  }
+  // a challenge being sent has no Lichess record yet: drawn from its terms
+  function chSentC(s){
+    return s.c || { id:s.id || '', direction:'out', destUser:{ id:s.user.id, name:s.user.name }, rated:s.terms.rated, color:s.terms.color,
+      timeControl:{ type:'clock', limit:s.terms.limit, increment:s.terms.inc } };
+  }
+  function chOutRow(c, kept){
+    const u = c.destUser || {}, name = chName(u), id = chEsc(c.id || ''), note = CH.notes[c.id];
+    const head = chWho(u, c.perf && c.perf.name, u.online==null ? null : !!u.online) + chMeta(c, u, chColorText(c.color==='random' ? '' : c.color));
+    if(note && note.kind==='declined')
+      return '<div class="ch-row gone" data-row="'+id+'">'+head+'<div class="ch-note"><b>'+chEsc(name)+' declined.</b>'+(note.text ? ' &ldquo;'+chEsc(note.text)+'&rdquo;' : '')+'</div></div>';
+    if(note && note.kind==='failed')
+      return '<div class="ch-row" data-row="'+id+'">'+head+'<div class="ch-err" role="alert">Lichess didn&rsquo;t start it here: '+chEsc(note.text)+'</div><div class="ch-acts"><button class="btn btn-ghost" type="button" data-act="open" data-id="'+id+'" data-k="open-'+id+'">Open on Lichess</button></div></div>';
+    const answerable = CH.in.some(x=> chLive(x) && !chWhyNot(x));
+    const wait = !c.id ? 'Sending it to '+name+'\u2026'
+      : (kept ? 'Waiting for '+name+'. Stays open while Chess Arcade is open on this device.' : 'Waiting for '+name+'.') + (answerable ? ' Accepting a challenge above cancels it.' : '');
+    return '<div class="ch-row" data-row="'+id+'">'+head+'<div class="ch-note">'+chEsc(wait)+'</div>'
+      +'<div class="ch-acts"><button class="btn btn-ghost" type="button" data-act="cancel" data-id="'+id+'" data-k="cancel-'+id+'">Cancel</button></div></div>';
+  }
+  function chOutRows(){
+    const rows = [], ids = new Set();
+    if(CH.sent){ ids.add(CH.sent.id); rows.push(chOutRow(chSentC(CH.sent), true)); }
+    CH.out.forEach(c=>{ if(!ids.has(c.id)){ ids.add(c.id); rows.push(chOutRow(c, false)); } });
+    Object.values(CH.notes).forEach(n=>{ if((n.kind==='declined' || (n.kind==='failed' && n.c && n.c.direction==='out')) && n.c && !ids.has(n.c.id)){ ids.add(n.c.id); rows.push(chOutRow(n.c, false)); } });
+    return rows.join('');
+  }
+  // the friends you follow, alphabetical, with who's online and playing (the friends pill's own poll)
+  function chFriends(){
+    const st = new Map((friendsStatus || []).map(u=> [String(u.id).toLowerCase(), u]));
+    return friendsUsernames.map(id=>{
+      const k = String(id).toLowerCase(), p = friendsPerfs[k] || {}, s = st.get(k) || {};
+      return { id:k, name:String(s.name || p.name || id), perfs:p.perfs || {}, online:!!s.online, playing:!!s.playing };
+    }).sort((a, b)=>{ const x = a.name.toLowerCase(), y = b.name.toLowerCase(); return x < y ? -1 : x > y ? 1 : 0; });
+  }
+  function chPending(){ return CH.sent ? CH.sent.user : (CH.out[0] ? CH.out[0].destUser : null); }
+  function chSendBox(){
+    const t = chTc(chPref.tc), sp = chSpeedOf(t.limit, t.inc), spName = CH_SPEED[sp];
+    const fr = chFriends(), on = fr.filter(f=> f.online), off = fr.filter(f=> !f.online);
+    const inBy = new Map(CH.in.filter(chLive).map(c=> [String(c.challenger.id).toLowerCase(), c]));
+    const outTo = new Set(CH.out.map(c=> String((c.destUser || {}).id || '').toLowerCase()));
+    if(CH.sent) outTo.add(CH.sent.user.id);
+    const sel = on.find(f=> f.id===chPref.friend && !inBy.has(f.id) && !outTo.has(f.id)) || null;
+    const row = (f)=>{
+      const pr = f.perfs[sp], r = pr && pr.rating ? '<span class="ch-rating">'+spName+' '+pr.rating+(pr.prov ? '?' : '')+'</span>' : '';
+      const sub = (extra)=> '<span class="ch-fr-sub">'+[r, extra].filter(Boolean).join(' &middot; ')+'</span>';
+      const c = inBy.get(f.id), k = chEsc(f.id);
+      if(c) return '<button class="ch-friend" type="button" data-act="jump" data-id="'+chEsc(c.id)+'" data-k="fr-'+k+'"><span class="ch-radio none" aria-hidden="true"></span>'
+        +'<span class="ch-fr-main"><span class="ch-name">'+chEsc(f.name)+'</span>'+sub('<b>Challenged you</b>')+'</span><span class="ch-fr-go">See it</span></button>';
+      if(outTo.has(f.id)) return '<div class="ch-friend" aria-disabled="true"><span class="ch-radio none" aria-hidden="true"></span>'
+        +'<span class="ch-fr-main"><span class="ch-name">'+chEsc(f.name)+'</span>'+sub('Challenge sent')+'</span></div>';
+      return '<button class="ch-friend'+(sel===f ? ' sel' : '')+'" type="button" aria-pressed="'+(sel===f)+'" data-act="friend" data-id="'+k+'" data-k="fr-'+k+'"><span class="ch-radio" aria-hidden="true"></span>'
+        +'<span class="ch-fr-main"><span class="ch-name">'+chEsc(f.name)+'</span>'+sub(f.playing ? 'Playing a game' : '')+'</span></button>';
+    };
+    const OFF_MAX = 24;
+    const offLine = off.length ? '<div class="ch-offline">Offline now: '+off.slice(0, OFF_MAX).map(f=> chEsc(f.name)).join(', ')+(off.length > OFF_MAX ? ' and '+(off.length - OFF_MAX)+' more' : '')+'</div>' : '';
+    const tg = (act, vals, cur, label)=> '<div class="toggle-row" role="group" aria-label="'+label+'">'+vals.map(([v, txt])=>
+      '<button class="toggle'+(v===cur ? ' active' : '')+'" type="button" aria-pressed="'+(v===cur)+'" data-act="'+act+'" data-v="'+v+'" data-k="'+act+'-'+v+'">'+txt+'</button>').join('')+'</div>';
+    const pending = chPending(), slow = Date.now() < CH.backoffUntil;
+    const dis = !sel || !!pending || CH.sending || olBusy() || slow;
+    const notes = [];
+    if(pending) notes.push('One challenge at a time. Cancel the one to '+chEsc(chName(pending))+' to send another.');
+    else if(slow) notes.push('Lichess asked to slow down. Try again in a minute.');
+    else if(!fr.length) notes.push(friendsReady() ? 'You don&rsquo;t follow anyone on Lichess yet. Follow your friends there to challenge them here.'
+      : 'Couldn&rsquo;t load your friends from Lichess. Trying again in a moment.');
+    else if(!on.length) notes.push('No one you follow is online right now.');
+    else if(!sel) notes.push('Pick an online friend above.');
+    return '<div class="panel ch-box" id="ch-send"><div class="ch-box-head"><h2 class="ch-box-title">Challenge a friend</h2></div>'
+      +'<div class="field"><div class="field-label">Friend</div><div class="ch-friends">'+on.map(row).join('')+'</div>'+offLine+'</div>'
+      +'<div class="field"><div class="field-label">Time control</div>'+tg('tc', CH_TCS.map(x=> [x, x]), chPref.tc, 'Time control')+'</div>'
+      +'<div class="field"><div class="field-label">Rated</div>'+tg('rated', [['casual', 'Casual'], ['rated', 'Rated']], chPref.rated ? 'rated' : 'casual', 'Rated')+'</div>'
+      +'<div class="field"><div class="field-label">Play as</div>'+tg('color', [['random', 'Random'], ['white', 'White'], ['black', 'Black']], chPref.color, 'Play as')+'</div>'
+      +'<div class="ch-send-row"><button class="btn btn-primary" type="button" data-act="send" data-k="send"'+(dis ? ' disabled' : '')+'>'
+      +(CH.sending ? 'Sending&hellip;' : sel ? 'Send challenge to '+chEsc(sel.name) : 'Send challenge')+'</button>'
+      +notes.map(x=> '<div class="ch-note">'+x+'</div>').join('')+(CH.err ? '<div class="ch-err" role="alert">'+chEsc(CH.err)+'</div>' : '')+'</div></div>';
+  }
+  // Lichess fills its new-token form from ?scopes[]=...&description= (lila, app/controllers/OAuthToken.scala, create)
+  function chNewTokenUrl(){ return 'https://lichess.org/account/oauth/token/create?'+LI_ALL_SCOPES.map(s=> 'scopes[]='+encodeURIComponent(s)).join('&')+'&description=Chess+Arcade'; }
+  function chTokenBox(){
+    const btns = '<div class="btn-row"><button class="btn btn-primary" type="button" data-act="newtoken" data-k="newtoken">Make a new token on Lichess</button>'
+      +'<button class="btn btn-ghost" type="button" data-act="settings" data-k="settings">Open Settings</button></div>';
+    const box = (title, body)=> '<div class="panel ch-box" id="ch-token"><div class="ch-box-head"><h2 class="ch-box-title">'+title+'</h2></div>'+body+'</div>';
+    const made = 'it opens Lichess with every permission Chess Arcade uses already checked.';
+    if(CH.state==='off') return box('Connect Lichess first', '<div class="ch-fix">Challenges are sent and played with your Lichess account. Make a token with the button below: '+made+' Then paste it in Settings.</div>'+btns);
+    if(CH.state==='bad') return box('Lichess no longer accepts your token', '<div class="ch-fix">It may have been deleted on Lichess, or it ran out. Make a new one with the button below: '+made+' Then paste it in Settings in place of the old one.</div>'+btns);
+    if(CH.state==='scope'){
+      const m = CH.missing;
+      return box('Your Lichess token needs '+(m.length===1 ? 'one more permission' : m.length+' more permissions'),
+        '<ul class="ch-scopes">'+m.map(s=> '<li><b>'+chEsc(s)+'</b> to '+chEsc(CH_SCOPE_WHY[s] || '')+'</li>').join('')+'</ul>'
+        +'<div class="ch-fix">Make a new token with the button below: '+made+' Then paste the new token in Settings in place of the old one.</div>'+btns);
+    }
+    return box('Checking your Lichess token&hellip;', '<div class="ch-fix">One moment.</div>');
+  }
+  function chViewHtml(){
+    if(CH.state!=='ok') return chTokenBox();
+    const n = chCount(), ins = chInList().map(chInRow).join(''), outs = chOutRows();
+    return '<div class="ch-cols"><div class="ch-col">'
+      +'<div class="panel ch-box" id="ch-in"><div class="ch-box-head"><h2 class="ch-box-title">Incoming</h2>'+(n ? '<span class="pd-count">'+n+'</span>' : '')+'</div>'
+      +(ins || '<div class="ch-empty">Nothing waiting. A challenge a friend sends shows up here.</div>')+'</div>'
+      +'<div class="panel ch-box" id="ch-out"><div class="ch-box-head"><h2 class="ch-box-title">Sent</h2></div>'+(outs || '<div class="ch-empty">Nothing sent.</div>')+'</div>'
+      +'</div>'+chSendBox()+'</div>';
+  }
+  // drawn only when something changed; the focus stays on the same control across a redraw
+  function chRenderView(force){
+    const body = document.getElementById('ch-body');
+    if(!body || currentView!=='challenges') return;
+    const html = chViewHtml();
+    if(!force && body._chHtml===html) return;
+    const a = document.activeElement, key = a && body.contains(a) ? a.getAttribute('data-k') : null;
+    body.innerHTML = html; body._chHtml = html;
+    if(key){ const b = body.querySelector('[data-k="'+CSS.escape(key)+'"]'); if(b && !b.disabled) b.focus({ preventScroll:true }); }
+    chPlaceMenu();
+  }
+  // the reason menu hangs from its Decline button
+  function chPlaceMenu(){
+    const m = document.querySelector('#ch-body .ch-menu');
+    if(!m) return;
+    const row = m.parentElement, b = row.querySelector('.ch-decline');
+    if(!b) return;
+    m.style.left = Math.max(4, Math.min(b.offsetLeft, row.clientWidth - m.offsetWidth - 4))+'px';
+    m.style.top = (b.offsetTop + b.offsetHeight + 6)+'px';
+  }
+  function chShown(){
+    chRenderView(true);
+    chRefresh(true);
+  }
+  // See it: Challenges with that row in the middle of the screen, lit for a moment
+  function chJump(id, focus){
+    clearTimeout(CH.hiT);
+    CH.hi = id;
+    chRenderView();
+    requestAnimationFrame(()=>{
+      const row = document.querySelector('#ch-body [data-row="'+CSS.escape(id)+'"]');
+      if(!row) return;
+      row.scrollIntoView({ block:'center' });
+      const b = focus && row.querySelector('.ch-acts button:not([disabled])');      // Accept, else Open on Lichess or Decline
+      if(b) b.focus({ preventScroll:true });
+    });
+    CH.hiT = setTimeout(()=>{ CH.hi = ''; chRenderView(); }, 1800);
+  }
+  function chOpen(id, focus){
+    if(currentView!=='challenges') showView('challenges');
+    if(id) chJump(id, focus);
+  }
+
+  // ---- answering ----
+  // token: the one a sent challenge went out with (a token change cancels it with the old one), else today's
+  async function chPost(path, form, token){
+    const tok = token || getLichessToken(), now = tok===getLichessToken();
+    const body = form ? new URLSearchParams(form) : undefined;
+    const headers = { Authorization:'Bearer '+tok };
+    if(body) headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    const res = await fetch('https://lichess.org'+path, { method:'POST', headers, body, cache:'no-store', signal:liSignal(LI_WAIT_MS) });
+    if(now && (res.status===401 || res.status===403)) liTokenDrop();
+    if(now && res.status===429) CH.backoffUntil = Date.now() + 60000;
+    return res;
+  }
+  function chFirstText(v){
+    if(typeof v==='string') return v;
+    if(Array.isArray(v)){ for(const x of v){ const t = chFirstText(x); if(t) return t; } return ''; }
+    if(v && typeof v==='object'){ for(const k in v){ const t = chFirstText(v[k]); if(t) return t; } }
+    return '';
+  }
+  async function chErrText(res){
+    let t = '';
+    try{ const j = await res.json(); t = chFirstText(j && (j.error!=null ? j.error : j)); }catch(e){}
+    return (t || 'error '+res.status).slice(0, 200);
+  }
+  // your own waiting challenges are canceled first (one game at a time): before an accept, or another game going live
+  async function chCancelMine(except){
+    const ids = new Set(CH.out.map(c=> c.id));
+    const s = CH.sent;
+    if(s){
+      if(s.id) ids.delete(s.id);
+      if(except && s.id===except){ s.closing = true; CH.sent = null; }      // the game that went live is this one
+      else await chDropSent(s);
+    }
+    ids.delete(except || '');
+    for(const id of ids){ if(id){ CH.answered[id] = Date.now(); try{ await chPost('/api/challenge/'+encodeURIComponent(id)+'/cancel'); }catch(e){} } }
+    CH.out = CH.out.filter(c=> c.id===except);
+  }
+  // A sent challenge given up here is canceled on Lichess too: dropping its kept-alive connection alone leaves it open
+  // for 20 s, long enough for the friend to accept a game no one is watching. One still being sent is canceled as soon
+  // as its id arrives (chSentLine), or let go after a while if it never does. s.token: the token it went out with.
+  async function chDropSent(s){
+    if(!s) return;
+    s.closing = true;
+    if(CH.sent===s) CH.sent = null;
+    if(!s.id){ clearTimeout(s.dropT); s.dropT = setTimeout(()=>{ if(!s.id) liKeepAlive.close(); }, LI_WAIT_MS); return; }
+    clearTimeout(s.dropT);
+    liKeepAlive.close();
+    CH.answered[s.id] = Date.now();
+    try{ await chPost('/api/challenge/'+encodeURIComponent(s.id)+'/cancel', null, s.token); }catch(e){}
+  }
+  async function chAccept(id, from){
+    const c = CH.in.find(x=> x.id===id);
+    if(!c || CH.accepting || olBusy() || chWhyNot(c) || !chLive(c)) return;
+    CH.accepting = id; delete CH.notes[id]; chDraw();
+    let started = false;
+    try{
+      await chCancelMine();
+      let res = null, msg = '';
+      try{ res = await chPost('/api/challenge/'+encodeURIComponent(id)+'/accept'); }catch(e){ msg = 'Chess Arcade couldn\u2019t reach Lichess.'; }
+      if(res && res.ok){
+        CH.answered[id] = Date.now();
+        CH.in = CH.in.filter(x=> x.id!==id);
+        CH.accepting = '';
+        started = true;
+        olStartChallengeGame(id, { name:chName(c.challenger), color:chYouPlay(c) || null, terms:chTermsOf(c, true), c });
+        return;
+      }
+      if(res && res.status===404){ CH.in = CH.in.filter(x=> x.id!==id); CH.gone[id] = c; }    // canceled before it got there
+      // Lichess turned it down (a 4xx): its words, and Open on Lichess
+      else if(res && res.status >= 400 && res.status < 500 && res.status!==429){ msg = await chErrText(res); CH.notes[id] = { kind:'failed', text:msg, c, at:Date.now() }; }
+      // no answer (a 5xx, a 429, the network, a timeout): it's still open on Lichess, so Accept stays
+      else CH.notes[id] = { kind:'err', c, at:Date.now(), text: !res ? 'Not accepted: '+msg+' Try again.'
+        : res.status===429 ? 'Not accepted: Lichess asked to slow down. Try again in a minute.' : 'Not accepted: Lichess didn\u2019t answer. Try again.' };
+    }finally{
+      CH.accepting = '';
+      chDraw();
+      if(!started && from==='banner') chOpen(id);
+    }
+  }
+  async function chDecline(id, reason){
+    CH.menu = '';
+    const c = CH.in.find(x=> x.id===id);
+    chDraw();
+    let res = null;
+    try{ res = await chPost('/api/challenge/'+encodeURIComponent(id)+'/decline', reason ? { reason } : null); }catch(e){}
+    if(res && (res.ok || res.status===404)){ CH.answered[id] = Date.now(); CH.in = CH.in.filter(x=> x.id!==id); delete CH.gone[id]; delete CH.notes[id]; }
+    else if(c) CH.notes[id] = { kind:'err', text:'Not declined: '+(res ? await chErrText(res) : 'Chess Arcade couldn\u2019t reach Lichess.'), c, at:Date.now() };
+    chDraw();
+    const f = document.querySelector('#ch-body [data-act="send"]') || document.querySelector('#ch-body .back-link');
+    if(f && document.activeElement===document.body) f.focus({ preventScroll:true });
+  }
+  async function chCancel(id){
+    const s = CH.sent;
+    if(s && (s.id===id || !s.id)){
+      const p = chDropSent(s);
+      chDraw();
+      await p;
+    } else if(id){
+      CH.answered[id] = Date.now();
+      try{ await chPost('/api/challenge/'+encodeURIComponent(id)+'/cancel'); }catch(e){}
+    }
+    CH.out = CH.out.filter(c=> c.id!==id);
+    chDraw();
+    chRefresh();
+  }
+  // another game went live (a seek, the AI, the other device): a challenge you sent and still wait on is canceled
+  function chGameLive(gameId){
+    if((CH.sent && CH.sent.id!==gameId) || CH.out.some(c=> c.id!==gameId)) chCancelMine(gameId).then(chDraw);
+  }
+
+  // ---- sending: the held response of a sent challenge (POST /api/challenge/{user} with keepAliveStream) ----
+  // Lichess keeps the challenge open while the response is held, and ends it with {"done":"accepted"|"declined"|
+  // "canceled"}. A module of its own, not roundOl and not an onLeavePlay hook: it lives across every screen until it ends.
+  const liKeepAlive = (()=>{
+    let ctrl = null, gen = 0;
+    return {
+      // resolves once the response is over: { status, res (not ok), dropped, aborted }
+      async open(url, opts, onLine){
+        this.close();
+        const g = ++gen, c = new AbortController();
+        ctrl = c;
+        let res;
+        try{ res = await fetch(url, Object.assign({}, opts, { signal:c.signal })); }
+        catch(e){ if(ctrl===c) ctrl = null; return { status:0, aborted:g!==gen || (e && e.name==='AbortError') }; }
+        if(!res.ok){ if(ctrl===c) ctrl = null; return { status:res.status, res }; }
+        const reader = res.body.getReader(), dec = new TextDecoder();
+        let buf = '';
+        const take = (line)=>{ line = line.trim(); if(!line) return; let o = null; try{ o = JSON.parse(line); }catch(e){} if(o && g===gen) onLine(o); };
+        try{
+          for(;;){
+            const { done, value } = await reader.read();
+            if(done) break;
+            buf += dec.decode(value, { stream:true });
+            let i;
+            while((i = buf.indexOf('\n')) >= 0){ const line = buf.slice(0, i); buf = buf.slice(i + 1); take(line); }
+          }
+          take(buf);
+          return { status:200, aborted:g!==gen };
+        }catch(e){ return { status:200, dropped:true, aborted:g!==gen || (e && e.name==='AbortError') }; }
+        finally{ if(ctrl===c) ctrl = null; }
+      },
+      close(){ gen++; if(ctrl){ try{ ctrl.abort(); }catch(e){} ctrl = null; } },
+      get held(){ return !!ctrl; }
+    };
+  })();
+  function chCanSend(){ return CH.state==='ok' && !chPending() && !CH.sending && !olBusy() && Date.now() >= CH.backoffUntil; }
+  // user {id, name}; terms {limit (s), inc (s), rated, color: yours}
+  async function chSend(user, terms){
+    if(!chCanSend() || !user || !user.id) return;
+    CH.err = ''; CH.sending = true;
+    for(const id in CH.notes) if(CH.notes[id].kind==='declined') delete CH.notes[id];
+    const s = { id:'', user:{ id:String(user.id).toLowerCase(), name:user.name || user.id }, terms, c:null, closing:false, done:'', token:getLichessToken() };
+    CH.sent = s;
+    chDraw();
+    const body = new URLSearchParams();
+    body.set('clock.limit', String(terms.limit)); body.set('clock.increment', String(terms.inc));
+    body.set('rated', String(!!terms.rated)); body.set('color', terms.color || 'random'); body.set('keepAliveStream', 'true');
+    const r = await liKeepAlive.open('https://lichess.org/api/challenge/'+encodeURIComponent(s.user.id), { method:'POST', cache:'no-store',
+      headers:{ Authorization:'Bearer '+s.token, 'Content-Type':'application/x-www-form-urlencoded' }, body }, (o)=> chSentLine(s, o));
+    CH.sending = false;
+    if(CH.sent===s && !s.closing){
+      if(r.res){
+        CH.sent = null;
+        if(r.status===429){ CH.backoffUntil = Date.now() + 60000; CH.err = 'Not sent. Lichess asked to slow down: try again in a minute.'; }
+        else if(r.status===401 || r.status===403){ liTokenDrop(); CH.err = 'Not sent. Lichess turned your token down: check it in Settings.'; }
+        else CH.err = 'Not sent. Lichess said: \u201c'+await chErrText(r.res)+'\u201d';
+      } else if(r.status===0 && !r.aborted){ CH.sent = null; CH.err = 'Not sent: Chess Arcade couldn\u2019t reach Lichess.'; }
+      else if(!s.done) CH.sent = null;        // the connection dropped: the challenge goes with it, and so does the row
+    }
+    chDraw();
+    if(!s.done || s.done==='canceled') chRefresh();
+  }
+  function chSentLine(s, o){
+    if(s.closing){        // given up here before its id came: canceled on Lichess now
+      const c = o.challenge && o.challenge.id ? o.challenge : (o.id ? o : null);
+      if(c && !s.id && !o.done){ s.id = c.id; chDropSent(s); }
+      return;
+    }
+    if(CH.sent!==s) return;
+    if(o.done){
+      s.done = String(o.done);
+      CH.sent = null; CH.sending = false;
+      if(s.done==='accepted' && s.id){
+        olStartChallengeGame(s.id, { name:s.user.name, color:s.terms.color!=='random' ? s.terms.color : null, terms:s.terms, c:chSentC(s) });
+      } else if(s.done==='declined' && s.id){
+        CH.notes[s.id] = { kind:'declined', text:'', c:chSentC(s), at:Date.now() };
+        chDeclineWhy(s.id);
+      }
+      chDraw();
+      return;
+    }
+    const c = o.challenge && o.challenge.id ? o.challenge : (o.id ? o : null);
+    if(c && !s.id){ s.id = c.id; s.c = Object.assign({ direction:'out' }, c); CH.sending = false; chDraw(); }
+  }
+  // the reason they gave, in Lichess's words
+  async function chDeclineWhy(id){
+    try{
+      const res = await fetch('https://lichess.org/api/challenge/'+encodeURIComponent(id)+'/show', { headers:{ Authorization:'Bearer '+getLichessToken() }, cache:'no-store' });
+      if(!res.ok) return;
+      const c = await res.json(), n = CH.notes[id];
+      if(n && c && c.declineReason){ n.text = String(c.declineReason).slice(0, 160); chDraw(); }
+    }catch(e){}
+  }
+  // a friend game that just ended: the same terms to the same friend (never a public seek), waiting in Sent
+  function chAgain(friend, terms){
+    if(currentView!=='challenges') showView('challenges');
+    if(chCanSend()) chSend(friend, terms);
+    else chRenderView(true);
+  }
+
+  // ---- a friend game on Play Online's board ----
+  // The game id is the challenge id. The screen changes first (the leave hooks stop a drill's clock, close the review and
+  // its engine), then roundOl is built as a new game (the VS splash, not "RECONNECTING") and the game's own stream opens.
+  // Your color comes from the game (gameFull's white/black id against your own id, olOnGameFull). No event stream: a
+  // seek's eventStreamHandle is never touched.
+  function olStartChallengeGame(id, o){
+    o = o || {};
+    if(chBn && chBn.id===id) chBannerHide(); else chBannerHold();    // another friend's banner waits for the game's end
+    olEndClose(false);
+    olTeardown();
+    showView('play-online');
+    const gen = ++olGeneration;
+    roundOl = { phase:'connecting', gameId:id, color:o.color || null, state:null,
+      wtime:0, btime:0, winc:0, binc:0, status:'created', winner:null,
+      wdraw:false, bdraw:false, lastMoveCount:0, whiteName:'White', blackName:'Black',
+      clockTimer:null, eventStreamHandle:null, seekHandle:null, gameStreamHandle:null,
+      manualFlip:false, viewPly:null, isResume:false, challenge:{ id, name:o.name || '', terms:o.terms || null, c:o.c || null } };
+    clearMarksObj(marksOl);
+    olSetPhaseSeeking();
+    document.getElementById('ol-seek-controls').style.display = 'none';
+    document.getElementById('ol-hud-mode-text').textContent = 'STARTING';
+    const w = 'Starting your game'+(o.name ? ' with '+o.name : '')+'\u2026';
+    document.getElementById('ol-hud-round').textContent = w;
+    document.getElementById('ol-prompt-hint').textContent = w;
+    olStatusEl.textContent = w;
+    olOpenGameStream(gen);
+  }
+  // A game whose id is a challenge you sent (Lichess gives the game the challenge's id) is that friend game, even when it
+  // arrives through a seek's event stream and the keepAlive's {"done":"accepted"} never came (its connection dropped):
+  // "Challenge <name> again" after it, never a public seek
+  function chClaimGame(R){
+    const id = R && R.gameId, s = CH.sent;
+    if(!id) return;
+    let c = null, terms = null, name = '';
+    if(s && s.id===id){ c = chSentC(s); terms = s.terms; name = s.user.name; s.closing = true; CH.sent = null; CH.sending = false; liKeepAlive.close(); }
+    else { c = CH.out.find(x=> x.id===id) || null; if(c){ terms = chTermsOf(c, false); name = chName(c.destUser); } }
+    if(!c) return;
+    CH.answered[id] = Date.now();
+    CH.out = CH.out.filter(x=> x.id!==id);
+    R.challenge = { id, name, terms, c };
+    chDraw();
+  }
+  // the game's stream wouldn't open: back to Challenges, the reason on its row, with Open on Lichess
+  function chStartFailed(ch, msg){
+    const c = ch.c || { id:ch.id, direction:'in', challenger:{ id:ch.name, name:ch.name }, timeControl:{ type:'clock' } };
+    CH.notes[ch.id] = { kind:'failed', text:msg || 'the game didn\u2019t open', c, at:Date.now() };
+    chOpen(ch.id);
+  }
+  // the friend on the other side of a game that came from a challenge
+  function olFriendOf(R){
+    if(!R || !R.challenge || !R.full) return null;
+    const s = R.full[R.color==='white' ? 'black' : 'white'];
+    return s && s.id && s.ai==null ? { id:String(s.id).toLowerCase(), name:s.name || s.id } : null;
+  }
+
+  // ---- the banner: a friend's new challenge on any other screen ----
+  // Once per challenge (CH_SEEN_KEY keeps the ids across a reload). Never during a live game or a seek, under an
+  // overlay or on a hidden page: held, and shown again once that's over if the challenge is still open (seen is kept
+  // apart from on screen). Never with Challenges on screen (the row is right there), never over the board, the move
+  // controls, the corner buttons or the friends pill (chBannerSpot, checked again whenever the screen under it changes;
+  // held while no spot is clear), and it never takes the focus or a key (Escape only from inside it; Space and Enter on
+  // its buttons stop there). A screen reader hears it from #ch-bn-say.
+  let chSeen = (()=>{ try{ return new Set(JSON.parse(localStorage.getItem(CH_SEEN_KEY) || '[]')); }catch(e){ return new Set(); } })();
+  function chSeenAdd(id){
+    if(chSeen.has(id)) return;
+    chSeen.add(id);
+    try{ localStorage.setItem(CH_SEEN_KEY, JSON.stringify([...chSeen].slice(-60))); }catch(e){}
+  }
+  let chBn = null;          // { id, c, shown } the challenge on the banner: on screen, or held (a game, an overlay, no clear spot)
+  const chBnEl = document.getElementById('ch-banner'), chBnSayEl = document.getElementById('ch-bn-say');
+  let chBnFrom = null;      // where the focus came into the banner from (it goes back there when the banner goes)
+  function chBnFocusBack(){
+    if(!chBnEl || !chBnEl.contains(document.activeElement)) return;
+    const f = chBnFrom;
+    if(f && f.isConnected && f.getClientRects().length) f.focus({ preventScroll:true });
+    else document.activeElement.blur();          // it came from nowhere (a tap): nowhere it goes, never onto a key's target
+  }
+  // dropped: Later, Escape, See it, Accept, or the challenge gone or on its row in Challenges
+  function chBannerHide(){
+    chBnFocusBack();
+    chBn = null; chBnFrom = null;
+    if(chBnEl){ chBnEl.hidden = true; chBnEl._spot = null; chBnEl.classList.remove('ch-bn-in'); }
+    if(chBnSayEl){ clearTimeout(chBnSayT); chBnSayEl.textContent = ''; }
+    chBnWatch();
+  }
+  // held: off the screen for now, back once nothing blocks it
+  function chBannerHold(){
+    if(chBnEl && !chBnEl.hidden){ chBnFocusBack(); chBnEl.hidden = true; }
+    chBnWatch();
+  }
+  function chBannerBlocked(){
+    return CH.state!=='ok' || currentView==='challenges' || olBusy() || document.hidden
+      || (currentView==='play-online' && !!roundOl && roundOl.phase==='ended' && !roundOl.endDone)    // the result box, still to come or open
+      || !!document.querySelector('.modal-overlay.active, .next-overlay.active, .vs-overlay.active');
+  }
+  let chBnLast = 0;
+  function chBannerCheck(){
+    if(!chBnEl) return;
+    chBnLast = performance.now();
+    if(currentView==='challenges' && CH.state==='ok') CH.in.forEach(c=> chSeenAdd(c.id));     // seen on their rows
+    // canceled, expired, accepted elsewhere; on its row in Challenges; no token to answer it with: dropped
+    if(chBn && (currentView==='challenges' || CH.state!=='ok' || !CH.in.some(c=> c.id===chBn.id && chLive(c)))) chBannerHide();
+    if(chBannerBlocked()){ chBannerHold(); return; }
+    if(!chBn){
+      const c = CH.in.find(x=> chLive(x) && !chSeen.has(x.id));
+      if(!c){ chBnEl.hidden = true; return; }
+      chBn = { id:c.id, c, shown:false };
+      chBannerFill(c);
+    }
+    chBannerPlace();
+    chBnWatch();
+  }
+  // the terms as the banner shows them: "5+3 Rated, you play Black"
+  function chBnTerms(c){
+    const col = chYouPlay(c), why = chWhyNot(c);
+    const v = c.variant && c.variant.key && c.variant.key!=='standard' ? (c.variant.name || c.variant.key)+' ' : '';
+    return v+chTcText(c)+' '+(c.rated ? 'Rated' : 'Casual')+', '+(col ? 'you play '+(col==='white' ? 'White' : 'Black') : 'random color')+(why ? '. '+why : '');
+  }
+  function chBannerFill(c){
+    const u = c.challenger || {}, why = chWhyNot(c);
+    const who = document.getElementById('ch-bn-who'), terms = document.getElementById('ch-bn-terms');
+    who.innerHTML = chEsc(chName(u))+' challenges you '+(u.rating ? '<span class="ch-rating">'+chEsc(c.perf && c.perf.name ? c.perf.name+' ' : '')+u.rating+(u.provisional ? '?' : '')+'</span>' : '');
+    terms.textContent = chBnTerms(c);
+    document.getElementById('ch-bn-accept').hidden = !!why;
+  }
+  // said once, when it first shows: emptied, then filled a moment later (a live region is read on a change)
+  let chBnSayT = 0;
+  function chBnSay(c){
+    if(!chBnSayEl) return;
+    clearTimeout(chBnSayT);
+    chBnSayEl.textContent = '';
+    const t = chName(c.challenger)+' challenges you: '+chBnTerms(c)+(/\.$/.test(chBnTerms(c)) ? '' : '.');
+    chBnSayT = setTimeout(()=>{ chBnSayEl.textContent = t; }, 120);
+  }
+  // While a banner waits it is looked at again. On screen: whenever the screen or the friends' list under it changes (a
+  // tray filling in, a tab switching, the list opening), at once and then at most every 200 ms, so it moves off (or is
+  // held) before it sits on anything. Held: once a second (an overlay or a game's result box closing, a spot clearing).
+  // An overlay opening or closing (Settings, a game's result box, the VS splash) is looked at at once too. Nothing while
+  // the page is hidden.
+  let chBnMo = null, chBnRo = null, chBnOn = null, chBnTick = 0, chBnObsT = 0, chBnOvMo = null, chBnOvOn = false;
+  function chBnObserved(){
+    if(chBnObsT) return;
+    const wait = chBnLast + 200 - performance.now();
+    if(wait <= 0) chBannerSoon();
+    else chBnObsT = setTimeout(()=>{ chBnObsT = 0; chBannerSoon(); }, wait);
+  }
+  function chBnWatch(){
+    const on = chBn && !chBnEl.hidden ? (views[currentView] || null) : null;
+    if(on!==chBnOn){
+      if(chBnMo) chBnMo.disconnect();
+      if(chBnRo) chBnRo.disconnect();
+      chBnOn = on;
+      if(on){
+        if(!chBnMo) chBnMo = new MutationObserver(chBnObserved);
+        if(!chBnRo && typeof ResizeObserver==='function') chBnRo = new ResizeObserver(chBnObserved);
+        const opt = { subtree:true, childList:true, attributes:true, attributeFilter:['class', 'hidden', 'style', 'open', 'aria-selected', 'aria-expanded'] };
+        chBnMo.observe(on, opt);
+        const fw = document.getElementById('friends-widget');
+        if(fw) chBnMo.observe(fw, opt);
+        if(chBnRo) chBnRo.observe(on);
+      }
+    }
+    if(!!chBn!==chBnOvOn){
+      chBnOvOn = !!chBn;
+      if(!chBnOvMo) chBnOvMo = new MutationObserver(chBannerSoon);
+      chBnOvMo.disconnect();
+      if(chBnOvOn) document.querySelectorAll('.modal-overlay, .next-overlay, .vs-overlay').forEach(el=> chBnOvMo.observe(el, { attributes:true, attributeFilter:['class'] }));
+    }
+    clearTimeout(chBnTick);
+    if(chBn && chBnEl.hidden && !document.hidden) chBnTick = setTimeout(chBannerCheck, 1000);
+  }
+  // What the banner must never cover: the corner buttons, the friends pill (its list too, open), the other fixed widgets
+  // and the logo; the screen's board (with its coordinates); and on a play screen (a drill, the review, Play Online) its
+  // clock bar and every control on it, whole groups of them (a tray, a row of toggles, the tabs). A control scrolled
+  // inside a box counts only where it shows. tier (chBannerSpot tries each in turn, the first with a clear spot wins):
+  //   0  the board's whole frame and the moves of a move list kept clear too
+  //   1  the frame's empty edge allowed, 8px off the squares and the coordinates (a drill whose frame fills the width)
+  //   2  the moves too (the review on an upright iPad or a phone, where nothing else is clear: never the board, the
+  //      buttons under it or the tabs)
+  const CH_KEEP_PLAY = 'button, input, select, textarea, a[href], [role="button"], [role="tab"], [role="switch"], [role="group"], [role="tablist"], [role="toolbar"], '
+    + '.toggle, [contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex="-1"]), .timer-track';
+  function chKeepClear(tier){
+    tier = tier || 0;
+    const out = [], vw = document.documentElement.clientWidth, vh = window.innerHeight, clips = new Map();
+    // the scrolling box a control sits in, if any (its parent's, looked up once per parent)
+    const clipOf = (el)=>{
+      const p = el.parentElement;
+      if(!p) return null;
+      if(clips.has(p)) return clips.get(p);
+      let c = null;
+      for(let e = p, i = 0; e && e!==document.body && e!==document.documentElement && i < 8; e = e.parentElement, i++){
+        if((e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1) && getComputedStyle(e).overflow!=='visible'){
+          const r = e.getBoundingClientRect(); c = { l:r.left, t:r.top, r:r.right, b:r.bottom }; break;
+        }
+      }
+      clips.set(p, c);
+      return c;
+    };
+    const add = (el, pad, clip)=>{
+      if(!el) return;
+      const k = clip ? clipOf(el) : null;
+      for(const r of el.getClientRects()){
+        if(!r.width || !r.height) continue;
+        const l = k ? Math.max(r.left, k.l) : r.left, t = k ? Math.max(r.top, k.t) : r.top, rr = k ? Math.min(r.right, k.r) : r.right, b = k ? Math.min(r.bottom, k.b) : r.bottom;
+        if(rr > l && b > t && rr > 0 && b > 0 && l < vw && t < vh) out.push({ l:l - pad, t:t - pad, r:rr + pad, b:b + pad });
+      }
+    };
+    ['home-fab', 'settings-fab', 'friends-widget', 'spotify-widget', 'lichess-activity-widget', 'plaque-logo-wrap', 'pull-refresh-indicator'].forEach(id=> add(document.getElementById(id), 8));
+    const v = views[currentView];
+    if(v){
+      v.querySelectorAll('.board, .board-col').forEach(el=> add(el, 8));
+      if(tier < 1) v.querySelectorAll('.board-frame').forEach(el=> add(el, 4));
+      if(currentView.indexOf('play')===0){
+        v.querySelectorAll(CH_KEEP_PLAY).forEach(el=> add(el, 4, true));
+        if(tier < 2) v.querySelectorAll('.mv-san:not(:empty)').forEach(el=> add(el, 2, true));
+      }
+    }
+    return out;
+  }
+  // the banner's shape for a spot: stacked (360 wide, or as wide as a desktop's side gutter), one row (a band too low
+  // for the stack), or slim (260 wide, beside a board)
+  function chBannerShape(mode){
+    const el = chBnEl, vw = document.documentElement.clientWidth, gutter = wrapEl.getBoundingClientRect().left - 32;
+    el.classList.toggle('ch-bn-row', mode==='row');
+    el.style.width = (mode==='row' ? Math.min(680, vw - 32) : mode==='slim' ? 260 : gutter >= 280 ? Math.min(360, Math.floor(gutter)) : Math.min(360, vw - 32))+'px';
+    return { w:el.offsetWidth, h:el.offsetHeight };
+  }
+  function chSpotClear(keep, l, t, w, h){
+    const vw = document.documentElement.clientWidth, vh = window.innerHeight, m = 12;
+    return l >= m && t >= m && l + w <= vw - m && t + h <= vh - m && !keep.some(k=> k.l < l + w && l < k.r && k.t < t + h && t < k.b);
+  }
+  // the last spot while it stays clear (in its own tier); else the lowest clear one (the corners first, then across),
+  // in the first tier and shape that has one; none: held until one clears (a scroll, a resize, another screen, the
+  // screen changing under it)
+  function chBannerSpot(){
+    const el = chBnEl, vw = document.documentElement.clientWidth, vh = window.innerHeight, keeps = [];
+    const keepOf = (tier)=> keeps[tier] || (keeps[tier] = chKeepClear(tier));
+    if(el._spot){
+      const [mode, l, t, tier] = el._spot, z = chBannerShape(mode);
+      if(chSpotClear(keepOf(tier), l, t, z.w, z.h)) return { left:l, top:t };
+    }
+    for(const tier of [0, 1, 2]){
+      const keep = keepOf(tier);
+      for(const mode of vw >= 560 ? ['stack', 'row', 'slim'] : ['stack']){
+        const { w, h } = chBannerShape(mode);
+        for(let t = vh - 16 - h; t >= 12; t -= 4){
+          const band = keep.filter(k=> k.t < t + h && t < k.b);
+          const free = (l)=> l >= 12 && l + w <= vw - 12 && !band.some(k=> k.l < l + w && l < k.r);
+          const xs = [16, vw - 16 - w, Math.round((vw - w) / 2)].concat(band.map(k=> Math.ceil(k.r)));
+          let l = xs.find(free);
+          if(l==null) for(let x = 12; x + w <= vw - 12; x += 12) if(free(x)){ l = x; break; }
+          if(l!=null){ el._spot = [mode, l, t, tier]; return { left:l, top:t }; }
+        }
+      }
+    }
+    el._spot = null;
+    chBannerShape('stack');
+    return null;
+  }
+  function chBannerPlace(){
+    const el = chBnEl;
+    if(!chBn) return;
+    const was = el.hidden;
+    if(was){ el.style.visibility = 'hidden'; el.hidden = false; }
+    const spot = chBannerSpot();
+    el.style.visibility = '';
+    if(!spot){ if(!was) chBnFocusBack(); el.hidden = true; return; }      // held: nowhere clear right now
+    el.style.left = spot.left+'px'; el.style.top = spot.top+'px';
+    if(!chBn.shown){ chBn.shown = true; chSeenAdd(chBn.id); el.classList.remove('ch-bn-in'); void el.offsetWidth; el.classList.add('ch-bn-in'); chBnSay(chBn.c); }
+  }
+  let chBnRaf = 0;
+  function chBannerSoon(){ if(chBnRaf) return; chBnRaf = requestAnimationFrame(()=>{ chBnRaf = 0; chBannerCheck(); }); }
+  if(chBnEl){
+    document.getElementById('ch-bn-accept').addEventListener('click', ()=>{ if(chBn) chAccept(chBn.id, 'banner'); });
+    document.getElementById('ch-bn-see').addEventListener('click', ()=>{ if(!chBn) return; const id = chBn.id; chBannerHide(); chOpen(id, true); });
+    document.getElementById('ch-bn-later').addEventListener('click', ()=>{ chBannerHide(); chBannerSoon(); });    // stays in Challenges and the count
+    chBnEl.addEventListener('keydown', (e)=>{
+      if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); chBannerHide(); chBannerSoon(); }
+      else if(e.key===' ' || e.key==='Enter') e.stopPropagation();       // its own buttons only, never a drill's key (Ghosts' Space)
+    });
+    chBnEl.addEventListener('focusin', (e)=>{ const f = e.relatedTarget; if(f && !chBnEl.contains(f)) chBnFrom = f; });
+  }
+  // a scroll moves the screen under it: off at once if its spot stops being clear, a new spot once the scroll settles
+  let chBnScrollT = 0, chBnScrollRaf = 0;
+  window.addEventListener('scroll', ()=>{
+    if(!chBn) return;
+    if(!chBnScrollRaf) chBnScrollRaf = requestAnimationFrame(()=>{
+      chBnScrollRaf = 0;
+      const el = chBnEl;
+      if(!el.hidden && el._spot && !chSpotClear(chKeepClear(el._spot[3]), el._spot[1], el._spot[2], el.offsetWidth, el.offsetHeight)) chBannerHold();
+    });
+    clearTimeout(chBnScrollT); chBnScrollT = setTimeout(chBannerSoon, 150);
+  }, { passive:true });
+  window.addEventListener('resize', ()=>{ if(chBn) chBannerSoon(); });
+
+  // ---- the screen's controls ----
+  const chViewEl = document.getElementById('view-challenges');
+  chViewEl.addEventListener('click', (e)=>{
+    const b = e.target.closest('[data-act]');
+    if(!b || !chViewEl.contains(b) || b.disabled || b.getAttribute('aria-disabled')==='true') return;
+    const act = b.dataset.act, id = b.dataset.id || '', v = b.dataset.v;
+    if(act!=='decline' && act!=='reason' && CH.menu){ CH.menu = ''; chRenderView(); }
+    if(act==='accept') chAccept(id, 'row');
+    else if(act==='decline'){
+      CH.menu = CH.menu===id ? '' : id;
+      chRenderView();
+      const first = document.querySelector('#ch-body .ch-menu [role="menuitem"]');
+      if(first) first.focus({ preventScroll:true });
+    }
+    else if(act==='reason') chDecline(id, v);
+    else if(act==='open'){ const c = CH.in.find(x=> x.id===id) || (CH.notes[id] && CH.notes[id].c) || {}; window.open(c.url || ('https://lichess.org/'+encodeURIComponent(id)), '_blank', 'noopener'); }
+    else if(act==='cancel') chCancel(id);
+    else if(act==='jump') chJump(id);
+    else if(act==='friend'){ chPref.friend = id; chSavePrefs(); CH.err = ''; chRenderView(); }
+    else if(act==='tc'){ chPref.tc = v; chSavePrefs(); chRenderView(); }
+    else if(act==='rated'){ chPref.rated = v==='rated'; chSavePrefs(); chRenderView(); }
+    else if(act==='color'){ chPref.color = v; chSavePrefs(); chRenderView(); }
+    else if(act==='send'){
+      const f = chFriends().find(x=> x.id===chPref.friend && x.online);
+      if(f){ const t = chTc(chPref.tc); chSend({ id:f.id, name:f.name }, { limit:t.limit, inc:t.inc, rated:chPref.rated, color:chPref.color }); }
+    }
+    else if(act==='newtoken') window.open(chNewTokenUrl(), '_blank', 'noopener');
+    else if(act==='settings') document.getElementById('settings-fab').click();
+  });
+  // the reason menu: arrows move (its items are out of the Tab order, as a menu's are), Escape closes it (back on its
+  // Decline button), a Tab or a click elsewhere closes it
+  chViewEl.addEventListener('keydown', (e)=>{
+    if(!CH.menu) return;
+    const items = [...document.querySelectorAll('#ch-body .ch-menu [role="menuitem"]')];
+    const i = items.indexOf(document.activeElement);
+    if(e.key==='Escape'){
+      e.preventDefault(); e.stopPropagation();
+      const id = CH.menu; CH.menu = ''; chRenderView();
+      const b = document.querySelector('#ch-body [data-k="decline-'+CSS.escape(id)+'"]'); if(b) b.focus({ preventScroll:true });
+    } else if((e.key==='ArrowDown' || e.key==='ArrowUp') && items.length){
+      e.preventDefault();
+      items[(i + (e.key==='ArrowDown' ? 1 : -1) + items.length) % items.length].focus({ preventScroll:true });
+    }
+  });
+  // the focus moving out of it (a Tab) closes it: redrawn after the move, so the control it went to keeps the focus
+  chViewEl.addEventListener('focusout', (e)=>{
+    if(!CH.menu || !e.relatedTarget) return;
+    setTimeout(()=>{
+      const a = document.activeElement;
+      if(!CH.menu || (a && a.closest && (a.closest('#ch-body .ch-menu') || a.closest('#ch-body .ch-decline')))) return;
+      CH.menu = ''; chRenderView();
+    }, 0);
+  });
+  document.addEventListener('pointerdown', (e)=>{
+    if(!CH.menu || currentView!=='challenges') return;
+    if(e.target.closest && (e.target.closest('#ch-body .ch-menu') || e.target.closest('#ch-body .ch-decline'))) return;
+    CH.menu = ''; chRenderView();
+  }, true);
+  window.addEventListener('resize', ()=>{ if(CH.menu) chPlaceMenu(); });
+
+  // ---- the doors ----
+  document.getElementById('card-challenges').addEventListener('click', ()=> showView('challenges'));
+  // home's options: the same handlers as the Play page's tiles
+  document.querySelectorAll('#pd-opts [data-door]').forEach(b=> b.addEventListener('click', ()=> document.getElementById(b.dataset.door).click()));
+  // the logo is a door to the Play page too (click, Enter, Space)
+  const chLogo = document.getElementById('plaque-logo-wrap');
+  chLogo.addEventListener('click', ()=> showView('hub'));
+  chLogo.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); showView('hub'); } });
+
+  // ---- home's option names: the skin's display face at one size (see the CSS) ----
+  // read off a drill name (its arrow, sign or glow stay with the drill names); the largest size that fits every tile on
+  // one line, down to 72% of the skin's own (12px at least); a face that still doesn't fit sets all five on two lines
+  let pdFitDirty = true, pdFitRaf = 0;
+  function pdFace(){
+    const dn = document.querySelector('#card-kiss .drill-name'), card = document.getElementById('card-kiss');
+    if(!dn || !card) return;
+    const s = getComputedStyle(dn), cs = getComputedStyle(card), st = document.documentElement.style;
+    const dfs = parseFloat(s.fontSize) || 20, uptown = document.documentElement.getAttribute('data-skin')==='uptown';
+    const base = uptown ? 17 : Math.min(20, Math.round(dfs * .86));
+    st.setProperty('--pd-ff', s.fontFamily);
+    st.setProperty('--pd-tt', s.textTransform);
+    st.setProperty('--pd-ls', s.letterSpacing==='normal' ? '0' : s.letterSpacing);
+    st.setProperty('--pd-fv', s.fontVariant || 'normal');
+    st.setProperty('--pd-opt-fs-base', base+'px');
+    st.setProperty('--pd-box-fs', Math.min(21, Math.round(dfs * .92))+'px');
+    st.setProperty('--pd-r', Math.round((parseFloat(cs.borderTopLeftRadius) || 0) * .7)+'px');
+    st.setProperty('--pd-bw', cs.borderTopWidth);
+    pdFitDirty = true;
+  }
+  function pdFit(){
+    const opts = document.getElementById('pd-opts'), st = document.documentElement.style;
+    if(!opts || !opts.offsetParent){ pdFitDirty = true; return null; }
+    pdFitDirty = false;
+    const base = parseFloat(st.getPropertyValue('--pd-opt-fs-base')) || 17, floor = Math.max(12, Math.round(base * .72));
+    const names = [...opts.querySelectorAll('.pd-opt-name')];
+    const over = ()=> names.some(n=> n.scrollWidth > n.clientWidth + .5);
+    opts.classList.remove('two-line');
+    let fs = base;
+    st.setProperty('--pd-opt-fs', fs+'px');
+    while(over() && fs > floor){ fs--; st.setProperty('--pd-opt-fs', fs+'px'); }
+    if(over()){
+      opts.classList.add('two-line'); fs = base; st.setProperty('--pd-opt-fs', fs+'px');
+      while(over() && fs > 10){ fs--; st.setProperty('--pd-opt-fs', fs+'px'); }      // a single word wider than the tile
+    }
+    return { fs, base, twoLine:opts.classList.contains('two-line') };
+  }
+  function pdFitSoon(){ if(pdFitRaf) return; pdFitRaf = requestAnimationFrame(()=>{ pdFitRaf = 0; if(currentView==='menu') pdFit(); else pdFitDirty = true; }); }
+  function pdRestyle(){ pdFace(); pdFitSoon(); }       // a skin change (applyLookPrefs)
+  window.addEventListener('resize', ()=>{ pdFitDirty = true; pdFitSoon(); });
+  try{ document.fonts.addEventListener('loadingdone', ()=>{ pdFace(); pdFitSoon(); }); }catch(e){}
+
+  // showView: a screen came on
+  function chOnView(name){
+    if(name==='challenges') chShown();
+    else if((name==='menu' || name==='hub') && Date.now() - CH.lastAsk > 2000) chRefresh();
+    if(name==='menu' && pdFitDirty) pdFitSoon();
+    if(chBnEl) chBnEl._spot = null;          // each screen gets its own best spot
+    chBannerSoon();
+  }
+  // a token saved or disconnected in Settings
+  function chTokenChanged(){
+    chDropSent(CH.sent);            // canceled on Lichess with the token it went out with
+    Object.assign(CH, { sent:null, in:[], out:[], gone:{}, notes:{}, answered:{}, err:'', backoffUntil:0, menu:'', missing:[], state:getLichessToken() ? 'wait' : 'off' });
+    chBannerHide();
+    chDraw();
+    chRefresh(currentView==='challenges');
+  }
+  // back on screen: a look at once, unless one was just made (a quick run of tab or app switches is not a run of requests)
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden){ clearTimeout(CH.timer); clearTimeout(chBnTick); return; }
+    chBannerSoon();
+    if(Date.now() - CH.lastAsk > 5000) chRefresh(); else chSchedule();
+  });
+  chReady = true;
+  CH.state = getLichessToken() ? 'wait' : 'off';
+  pdFace();
+  chDrawDoors();
 
   /* ================= GAME HISTORY ================= */
   // Chess.com-style browsable game list, built on Lichess's own game-export
@@ -39735,7 +41081,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     for(let i=ids.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
     spPlayQueue(ids, 0, spQueueLabel()+' \u00b7 shuffled');
   });
-  document.getElementById('saved-sync-now').addEventListener('click', ()=>{ spScopeCache.ok = null; spSync(); });
+  document.getElementById('saved-sync-now').addEventListener('click', ()=>{ liTokenDrop(); spSync(); });
 
   /* ---- Sync with private Lichess studies ----
      One request at a time (Lichess asks API clients to). Each sync: send
@@ -39747,13 +41093,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      standard PGN tags. */
   let spSyncTimer = 0, spSyncRunning = false, spSyncAgain = false;
   let spSyncState = { status:'idle', detail:'' };
-  let spScopeCache = { token:'', ok:null };
   function spScheduleSync(ms){
     clearTimeout(spSyncTimer);
     spSyncTimer = setTimeout(()=> spSync(), Math.max(ms==null ? 2000 : ms, spBackoffUntil - Date.now()));
   }
   function spTokenChanged(){
-    spScopeCache = { token:'', ok:null };
+    liTokenDrop();
     GH_STATE.username = null;
     // Loaded games stay while the new token's account is checked (the same
     // account keeps them all); another account's are cleared then, by
@@ -39813,18 +41158,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // A personal token's scopes are fixed when it's made, so check them once:
   // without study access, saving stays on this device and says why.
   async function spStudyAccess(){
-    const token = getLichessToken();
-    if(!token) return 'off';
-    if(spScopeCache.token===token && spScopeCache.ok!=null) return spScopeCache.ok ? 'ok' : 'scope';
-    const res = await spApi('/api/token/test', { method:'POST', auth:false, headers:{ 'Content-Type':'text/plain' }, body:token });
-    if(!res.ok) throw new Error('token check '+res.status);
-    const data = await res.json();
-    const info = data && data[token];
-    if(!info) throw new Error('Lichess doesn\u2019t recognise that token');
-    const scopes = typeof info.scopes==='string' ? info.scopes.split(',') : [];
-    const ok = scopes.includes('study:read') && scopes.includes('study:write');
-    spScopeCache = { token, ok };
-    return ok ? 'ok' : 'scope';
+    if(!getLichessToken()) return 'off';
+    const info = await liTokenInfo();       // the one check Challenges shares (liTokenInfo, the CHALLENGES block)
+    if(!info) return 'off';
+    if(info.bad) throw new Error('Lichess doesn\u2019t recognize that token');
+    return info.scopes.has('study:read') && info.scopes.has('study:write') ? 'ok' : 'scope';
   }
   function spParseStudyName(name){
     if(typeof name!=='string' || name.indexOf(SP_STUDY_PREFIX)!==0) return null;
@@ -45611,6 +46949,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   openDeepLink(initialHash);
   window.addEventListener('hashchange', ()=> openDeepLink(decodeURIComponent(location.hash.slice(1))));
+  // Challenges: home's option names fitted, then the first look a moment after boot (every 20 s from there, chRefresh)
+  if(chReady){ pdFit(); setTimeout(()=> chRefresh(currentView==='challenges'), 1500); }
 
   // Covers the one case the menu-check inside showView() structurally
   // can't: the very first, boot-time call to showView('menu') runs long
