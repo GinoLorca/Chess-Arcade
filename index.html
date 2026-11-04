@@ -5726,6 +5726,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hr-counts th, .hr-counts td{ padding:3px 4px; border-bottom:1px solid var(--line); }
   .hr-counts thead th{ font-weight:700; text-align:center; }
   .hr-counts tbody tr:last-child > *{ border-bottom:0; }
+  .hr-counts .hr-gr > *{ border-top:1px solid var(--line); border-bottom:0; padding-top:7px; }
+  .hr-gr-n{ font-weight:800; font-size:14px; font-variant-numeric:tabular-nums; }
+  .hr-counts .hr-gr-note td{ border-bottom:0; padding:1px 4px 0; font-size:11.5px; line-height:1.35; color:var(--ink-soft); }
   .hr-th0{ width:46%; }
   .hr-col{ white-space:nowrap; }
   .hr-col .hv-chip{ display:inline-block; vertical-align:-1px; margin-right:5px; }
@@ -41285,6 +41288,26 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const acpl = lossSum / n;
     return Math.max(0, Math.min(100, 103.1668 * Math.exp(-0.04354 * acpl) - 3.1669));
   }
+  // Game rating (2026-11-04, the user: chess.com's Game Rating in the review). chess.com publishes no formula, so this is an
+  // estimate of ours: 3100 x e^(-ACPL/100) (a rule of thumb from the Lichess forum) on that player's average centipawn loss,
+  // scores held to +/-1000 with no allowance (so not hrAccuracy's loss), rounded to 50. Under 10 scored moves, or with more
+  // than 10% of the moves unscored, no number: { rating, acpl, n } or null.
+  const HR_GR_MIN = 10;
+  function hrGameRating(S, R, c){
+    if(!R || R.partial || !Array.isArray(R.ev) || R.ev.length!==S.main.length + 1) return null;
+    const side = c==='white' ? 'w' : 'b', clip = (x)=> Math.max(-1000, Math.min(1000, x));
+    let loss = 0, n = 0, all = 0;
+    S.main.forEach((m, i)=>{
+      if(hrMoverOf(S, i)!==c) return;
+      all++;
+      if(!R.ev[i] || !R.ev[i+1]) return;
+      loss += Math.max(0, clip(hrMoverScore(R.ev[i], side)) - clip(hrMoverScore(R.ev[i+1], side)));
+      n++;
+    });
+    if(n < HR_GR_MIN || n < 0.9 * all) return null;
+    const acpl = loss / n;
+    return { rating:Math.max(100, Math.round(3100 * Math.exp(-acpl / 100) / 50) * 50), acpl, n };
+  }
   // A White's-side score read from the mover's side; a mate is a flat 1000 (RL moverScore).
   function hrMoverScore(score, mover){
     if(!score) return 0;
@@ -42261,7 +42284,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       });
       tbody.appendChild(tr);
     });
-    t.append(thead, tbody);
+    // the Game rating row, and what it is
+    const tfoot = hvEl('tfoot'), gr = hvEl('tr', 'hr-gr'), gth = hvEl('th', 'hr-cls', 'Game rating'), nr = hvEl('tr', 'hr-gr-note'), nt = hvEl('td', '', 'An estimate from the average centipawn loss in this review. One game can be off by about 400. Not chess.com\u2019s number.');
+    gth.scope = 'row';
+    gr.appendChild(gth);
+    order.forEach(c=>{
+      const g = hrGameRating(S, R, c), td = hvEl('td', 'hr-num hr-gr-n', g ? String(g.rating) : '\u2014');
+      if(g){
+        td.title = 'Average loss '+Math.round(g.acpl)+' centipawns over '+g.n+' moves';
+        td.setAttribute('aria-label', ghOppName(P[c] || {})+': game rating about '+g.rating+', from an average loss of '+Math.round(g.acpl)+' centipawns over '+g.n+' moves');
+      } else td.setAttribute('aria-label', ghOppName(P[c] || {})+': no game rating, too few moves');
+      gr.appendChild(td);
+    });
+    nt.colSpan = 3;
+    nr.appendChild(nt);
+    tfoot.append(gr, nr);
+    t.append(thead, tbody, tfoot);
   }
   // That player's next move of that kind after the shown one, cycling.
   function hrJump(color, id){
