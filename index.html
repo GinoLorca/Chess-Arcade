@@ -5814,6 +5814,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 28px rgba(0,0,0,.3);
   }
   .modal-overlay > .nb-menu{ z-index:3; }
+  /* word links (nbWl*): the toolbar's chain, dimmed with nothing to link, inverted in a link; the prompt, under dialogs, by the
+     words or (one column, or Notes behind another tab) at the foot of the screen; the words being linked stay marked */
+  .nb-btn-wl[aria-disabled="true"]{ opacity:.4; cursor:default; }
+  .nb-btn-wl[aria-disabled="true"]:hover{ background:none; }
+  .nb-btn-wl.is-on, .nb-btn-wl.is-on:hover{ background:var(--ink); color:var(--surface); }
+  ::highlight(nb-wl-pick){ background-color:color-mix(in srgb, var(--focus) 30%, transparent); }
+  .nb-wlp{
+    position:fixed; z-index:45; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; width:max-content; max-width:min(340px, calc(100vw - 16px)); padding:8px 10px; box-sizing:border-box;
+    background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 28px rgba(0,0,0,.3); color:var(--ink); font-size:13px; line-height:1.35;
+  }
+  .nb-wlp.nb-wlp-dock{ top:auto; left:auto; right:8px; bottom:calc(8px + env(safe-area-inset-bottom, 0px)); }
+  @media (max-width:899.98px){ .nb-wlp.nb-wlp-dock{ left:8px; width:auto; max-width:none; } }
+  .nb-wlp-t{ flex:1 1 auto; min-width:0; max-width:100%; }
+  .nb-wlp-l{ font-weight:700; overflow-wrap:anywhere; }
+  .nb-wlp-h{ font-size:12px; color:var(--ink-soft); }
+  .nb-wlp-h:empty{ display:none; }
+  .nb-wlp-acts{ flex:0 0 auto; display:flex; gap:6px; margin-left:auto; }
+  .nb-wlp-acts .btn{ padding:6px 10px; font-size:13px; }
+  .nb-wlp-acts .btn[aria-disabled="true"]{ opacity:.45; cursor:default; }
+  .nb-wlp-acts .btn[hidden]{ display:none; }
+  :root[data-skin="uptown"] .nb-wlp-acts .btn-primary{ padding-top:8px; padding-bottom:5px; background-position:0 2px; }
+  @media (pointer:coarse){ .nb-wlp-acts .btn{ min-height:44px; } }
   .nb-mi{
     position:relative; display:flex; align-items:center; gap:8px; min-height:32px; margin:0; padding:4px 12px 4px 28px; box-sizing:border-box;
     background:none; border:0; border-radius:5px; font:inherit; font-size:14px; line-height:1.25; color:var(--ink); text-align:left; cursor:pointer;
@@ -5944,7 +5966,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      scrolling box (the 3-line clamp only suits plain text), diagrams small */
   .gn-conflict-text.nb-ro{ display:block; -webkit-line-clamp:unset; max-height:180px; overflow:auto; white-space:pre-wrap; }
   .gn-conflict-text .nb-dg{ width:110px; margin:4px 0; }
-  :root[data-skin="bauhaus"] :is(.nb-btn, .nb-wrap > .nb-bar, .nb-dg-x, .nb-toast, .nb-menu, .nb-mi:not(.nb-sw)){ border-radius:0; }
+  :root[data-skin="bauhaus"] :is(.nb-btn, .nb-wrap > .nb-bar, .nb-dg-x, .nb-toast, .nb-menu, .nb-wlp, .nb-mi:not(.nb-sw)){ border-radius:0; }
   /* ===== end of rich notes ===== */
   .hotkey-grid{ display:flex; flex-direction:column; gap:10px; }
   .hotkey-item{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; }
@@ -37969,6 +37991,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvComCard();          // before the scroll: the card's coming or going changes the pane's height
     hvTacCard();
     hvKeepInView();
+    if(document.querySelector('#hv-note a.nb-wl')) hvMvSoon();       // a side line came or went: the word links to it (hvWlDraw)
   }
   // The current move stays in view inside its pane; the page never scrolls.
   function hvKeepInView(){
@@ -45028,6 +45051,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
          {L} {N} a text color (the arrow colors' letters) and {/} back to
          the note's own (inside a line). Written only when a note uses one
          of these; a first line that's a diagram is written '\[diagram'.
+         Since 2026-11-04 also a word link: {>28} a main-line move (its
+         ply), {>25.a7a6.d5c7} a side line (the ply it leaves the game
+         from and its moves), up to {>} (always written): words as a link
+         to a move, a state of the line as a color is, so marks and colors
+         may change inside it. The move isn't checked here (hvWlNode): gone,
+         the words read as plain text. An old build sees text it doesn't
+         escape, as with colors; one that knows v2 but not word links (2026-11-02
+         to 11-04) writes a note whose only v2 feature is a link as v1, or
+         plain, with the tokens as they were. So an open and a close on one
+         line read as a word link in any note (only those: colors stay text
+         there, a plain note's other lines stay verbatim), and this build
+         never writes such text unescaped, even a plain note's (v2 then).
      Old builds read v2 as v1 with the second U+2063 starting its first
      line: they show the new markup as text and write it back unchanged
      ('{' is no escape of theirs; the doubled marker keeps it rich), so an
@@ -45053,7 +45088,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      no formatting stores exactly what the old textarea did.
      Note text never goes into innerHTML, an attribute, CSS or a URL: the
      DOM is built from text nodes, b/i/u elements and color spans (a class
-     per letter, nb-c-R); a diagram is drawn only from values that passed
+     per letter, nb-c-R), and a word link's <a> (data-l holds only what
+     NB_WL_REF lets through); a diagram is drawn only from values that passed
      their regexes, colors only from the code map below and the CSS. Both
      note fields (#hv-note in the review, #gn-text in the
      pop-up) are contenteditable divs with a textarea-like shim (value,
@@ -45075,7 +45111,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var NB_TCODES = ['G', 'R', 'B', 'Y', 'O', 'P', 'K', 'L', 'N'];
   var NB_TNAMES = { G:'Green', R:'Red', B:'Blue', Y:'Yellow', O:'Orange', P:'Purple', K:'Pink', L:'Light blue', N:'Brown' };
   var NB_TC_RE = /^[GRBYOPKLN]$/;
-  var NB_ESC1 = /[\\*_\[\u2063]/g, NB_ESC2 = /[\\*_\[\u2063]|\{(?=[GRBYOPKLN\/]\})/g;     // v1's escapes (as before 2026-11-02, and a U+2063: never a marker); v2's add a '{' that would read as a color
+  var NB_ESC1 = /[\\*_\[\u2063]/g, NB_ESC2 = /[\\*_\[\u2063]|\{(?=[GRBYOPKLN\/]\})|\{(?=>(?:(?:0|[1-9]\d{0,3})(?:\.[a-h][1-8][a-h][1-8][qrbn]?){0,60})?\})/g;     // v1's escapes (as before 2026-11-02, and a U+2063: never a marker); v2's add a '{' that would read as a color or a word link
+  // a word link's move: a main-line ply, or a side line's base ply and its moves (hvNodeRef's two kinds, as text); its token
+  var NB_WL_REF = /^(?:0|[1-9]\d{0,3})(?:\.[a-h][1-8][a-h][1-8][qrbn]?){0,60}$/;
+  var NB_WL_TOK = /^\{>((?:0|[1-9]\d{0,3})(?:\.[a-h][1-8][a-h][1-8][qrbn]?){0,60})?\}/;
+  var NB_WL_PAIR = /\{>(?:0|[1-9]\d{0,3})(?:\.[a-h][1-8][a-h][1-8][qrbn]?){0,60}\}[^\n]+?\{>\}/;      // an open and a close: words linked, whatever the note's version (above)
   var nbDgData = new WeakMap();      // diagram island element -> its diagram
   var nbHrEls = new WeakSet();       // divider line islands
   var NB_EDS = [];
@@ -45083,17 +45123,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
 
   // ---- the model: { rich, blocks:[ {t:'p'|'h'|'li'|'ol', lv?, runs:[{text,b,i,u,c?}]} | {t:'dg', dg} | {t:'hr'} ] } ----
   // lv: a heading's level 2-4 (none: Heading 1, as every heading before 2026-11-02); c: a text color's letter
-  // (none: the note's own color). The two islands (a diagram, a divider line) hold no text and count as one unit.
-  function nbRun(text, b, i, u, c){
+  // (none: the note's own color); l: a word link's move (a ref, NB_WL_REF). The two islands (a diagram, a divider line) hold no text and count as one unit.
+  function nbRun(text, b, i, u, c, l){
     const r = { text:String(text), b:!!b, i:!!i, u:!!u };
     if(c && NB_TC_RE.test(c)) r.c = c;
+    if(l && NB_WL_REF.test(l)) r.l = l;
     return r;
   }
   function nbPush(runs, r){
     if(!r || !r.text) return runs;
     const l = runs[runs.length-1];
-    if(l && l.b===!!r.b && l.i===!!r.i && l.u===!!r.u && (l.c || '')===(r.c || '')) l.text += r.text;
-    else runs.push(nbRun(r.text, r.b, r.i, r.u, r.c));
+    if(l && l.b===!!r.b && l.i===!!r.i && l.u===!!r.u && (l.c || '')===(r.c || '') && (l.l || '')===(r.l || '')) l.text += r.text;
+    else runs.push(nbRun(r.text, r.b, r.i, r.u, r.c, r.l));
     return runs;
   }
   function nbIsl(b){ return !!b && (b.t==='dg' || b.t==='hr'); }
@@ -45113,7 +45154,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     let p = 0;
     for(const r of runs){
       const L = r.text.length, s = Math.max(a, p), e = Math.min(b, p+L);
-      if(e > s) nbPush(out, nbRun(r.text.slice(s-p, e-p), r.b, r.i, r.u, r.c));
+      if(e > s) nbPush(out, nbRun(r.text.slice(s-p, e-p), r.b, r.i, r.u, r.c, r.l));
       p += L;
     }
     return out;
@@ -45122,7 +45163,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function nbCopyBlock(b){
     if(b.t==='dg') return { t:'dg', dg:b.dg };
     if(b.t==='hr') return { t:'hr' };
-    return nbWithRuns(b, b.runs.map(r=> nbRun(r.text, r.b, r.i, r.u, r.c)));
+    return nbWithRuns(b, b.runs.map(r=> nbRun(r.text, r.b, r.i, r.u, r.c, r.l)));
   }
   function nbBlockLen(b){ return nbIsl(b) ? 1 : nbRunsLen(b.runs); }
   function nbCmp(p, q){ return (p.k - q.k) || (p.o - q.o); }
@@ -45211,10 +45252,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // v2: a color token, {R} from here on, {/} back to the note's own (any other '{' is text);
   // lit: only those (an old build's plain lines: no escapes, no marks)
+  // v2: true, or 'l' for word links only (nbParse: tokens an old build kept in a v1 or plain note)
   function nbParseInline(s, v2, lit){
     const runs = [];
-    let b = false, i = false, u = false, col = null, buf = '';
-    const flush = ()=>{ if(buf){ nbPush(runs, nbRun(buf, b, i, u, col)); buf = ''; } };
+    let b = false, i = false, u = false, col = null, lk = null, buf = '';
+    const flush = ()=>{ if(buf){ nbPush(runs, nbRun(buf, b, i, u, col, lk)); buf = ''; } };
     for(let k=0; k<s.length; k++){
       const c = s.charAt(k);
       if(!lit){
@@ -45223,8 +45265,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(c==='_' && s.charAt(k+1)==='_'){ flush(); u = !u; k++; continue; }
         if(c==='*'){ flush(); i = !i; continue; }
       }
-      if(v2 && c==='{' && s.charAt(k+2)==='}' && (s.charAt(k+1)==='/' || NB_TC_RE.test(s.charAt(k+1)))){
+      if(v2===true && c==='{' && s.charAt(k+2)==='}' && (s.charAt(k+1)==='/' || NB_TC_RE.test(s.charAt(k+1)))){
         flush(); col = s.charAt(k+1)==='/' ? null : s.charAt(k+1); k += 2; continue;
+      }
+      if(v2 && c==='{' && s.charAt(k+1)==='>'){
+        const m = NB_WL_TOK.exec(s.slice(k, k+370));
+        if(m){ flush(); lk = m[1] || null; k += m[0].length-1; continue; }
       }
       buf += c;
     }
@@ -45241,26 +45287,29 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // only where the color changes ({R}**red bold**{/} plain); none at the end,
   // as the line's end resets it. Its runs are merged first, so a '{' ending
   // one run's text is always followed by a mark or a token, never read as one.
+  // A word link's token goes there too, before the color's; its {>} is written
+  // at the line's end as well, so what an old build adds after the link stays out.
   function nbSerInline(runs, v2){
-    let out = '', b = false, i = false, u = false, col = '';
-    const to = (nb, ni, nu, nc)=>{
+    let out = '', b = false, i = false, u = false, col = '', lk = '';
+    const to = (nb, ni, nu, nc, nl)=>{
       let g = '';
       if(i && !ni) g += '*';
       if(b && !nb) g += '**';
       if(u && !nu) g += '__';
+      if(v2 && nl!==lk) g += '{>'+nl+'}';
       if(v2 && nc!==col && nc!=null) g += '{'+(nc || '/')+'}';
       if(nu && !u) g += '__';
       if(nb && !b) g += '**';
       if(ni && !i) g += '*';
-      b = nb; i = ni; u = nu; if(nc!=null) col = nc;
+      b = nb; i = ni; u = nu; lk = nl; if(nc!=null) col = nc;
       return g;
     };
     const R = v2 ? nbConcat(runs, []) : runs;
-    for(const r of R) if(r.text) out += to(!!r.b, !!r.i, !!r.u, r.c || '') + nbEsc(r.text, v2);
-    return out + to(false, false, false, null);
+    for(const r of R) if(r.text) out += to(!!r.b, !!r.i, !!r.u, r.c || '', r.l || '') + nbEsc(r.text, v2);
+    return out + to(false, false, false, null, '');
   }
-  // A note's version: v2 when it uses Heading 2-4, a divider line or a color, else v1.
-  function nbIsV2(B){ return B.some(b=> b.t==='hr' || nbLv(b) > 1 || (!nbIsl(b) && b.runs.some(r=> r.c))); }
+  // A note's version: v2 when it uses Heading 2-4, a divider line, a color or a word link, else v1.
+  function nbIsV2(B){ return B.some(b=> b.t==='hr' || nbLv(b) > 1 || (!nbIsl(b) && b.runs.some(r=> r.c || r.l))); }
   // A bare U+2063 in a line: one not escaped (n, the markers: 1 or 2), or any (plain text, n 0).
   function nbBareMark(l, n){
     for(let k=0; k<l.length; k++){
@@ -45273,7 +45322,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function nbParse(text){
     const s = String(text==null ? '' : text);
     const plain = ()=> ({ rich:false, blocks: s ? s.split('\n').map(l=> ({ t:'p', runs: l ? [nbRun(l)] : [] })) : [] });
-    if(s.indexOf(NB_MARK) < 0) return plain();
+    const wl = NB_WL_PAIR.test(s);
+    if(s.indexOf(NB_MARK) < 0 && !wl) return plain();
     const n = s.charAt(0)!==NB_MARK ? 0 : s.charAt(1)===NB_MARK ? 2 : 1, ls = s.slice(n).split('\n');
     // a v2 marker an old build moved into the text (see above): v2 again, the bare U+2063s gone, when
     // that reads something of v2's (else the text as before: a U+2063 pasted into an old textarea)
@@ -45281,11 +45331,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const B = nbParseLines(ls, n, true);
       if(nbIsV2(B)) return { rich:true, blocks:B };
     }
-    return n ? { rich:true, blocks:nbParseLines(ls, n, false) } : plain();
+    if(!n && wl) return { rich:true, blocks:ls.map(l=> ({ t:'p', runs:nbParseInline(l, 'l', true) })) };     // written plain by an old build (above)
+    return n ? { rich:true, blocks:nbParseLines(ls, n, false, wl) } : plain();
   }
-  // The lines after the markers (n): v1, v2 (two markers, or a moved one), or (moved, n 0) plain text.
-  function nbParseLines(ls, n, moved){
-    const v2 = n===2 || moved;
+  // The lines after the markers (n): v1, v2 (two markers, or a moved one), or (moved, n 0) plain text. wl: v1 with word links (nbParse).
+  function nbParseLines(ls, n, moved, wl){
+    const v2 = n===2 || moved, inl = v2 || (wl ? 'l' : false);
     let dgs = 0, m;
     const dgOf = (l)=>{ const dg = dgs < NB_MAX_DG ? nbParseDiagram(l) : null; if(dg) dgs++; return dg; };
     return ls.map((L, k)=>{
@@ -45313,21 +45364,20 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       if(v2 && l==='---') return { t:'hr' };
       if(v2 && (m = /^(#{1,4}) /.exec(l))) return nbWithRuns({ t:'h', lv:m[1].length }, nbParseInline(l.slice(m[0].length), true));
-      if(!v2 && l.slice(0, 2)==='# ') return { t:'h', runs:nbParseInline(l.slice(2)) };
-      if(l.slice(0, 2)==='- ') return { t:'li', runs:nbParseInline(l.slice(2), v2) };
-      if((m = /^\d{1,3}\. /.exec(l))) return { t:'ol', runs:nbParseInline(l.slice(m[0].length), v2) };
-      return { t:'p', runs:nbParseInline(l, v2) };
+      if(!v2 && l.slice(0, 2)==='# ') return { t:'h', runs:nbParseInline(l.slice(2), inl) };
+      if(l.slice(0, 2)==='- ') return { t:'li', runs:nbParseInline(l.slice(2), inl) };
+      if((m = /^\d{1,3}\. /.exec(l))) return { t:'ol', runs:nbParseInline(l.slice(m[0].length), inl) };
+      return { t:'p', runs:nbParseInline(l, inl) };
     });
   }
   function nbSerialize(doc){
     const B = (doc && doc.blocks) || [];
-    if(B.every(b=> b.t==='p' && b.runs.every(r=> !r.b && !r.i && !r.u && !r.c))){
+    if(B.every(b=> b.t==='p' && b.runs.every(r=> !r.b && !r.i && !r.u && !r.c && !r.l))){
       const s = B.map(b=> nbRunsText(b.runs)).join('\n');
-      if(s.indexOf(NB_MARK) < 0 || !nbParse(s).rich) return s;          // plain: the lines verbatim, as a textarea would (rich, escaped, when a U+2063 in them would read as a moved marker)
+      if(!NB_WL_PAIR.test(s) && (s.indexOf(NB_MARK) < 0 || !nbParse(s).rich)) return s;          // plain: the lines verbatim, as a textarea would (rich, escaped, when a U+2063 in them would read as a moved marker, or the text as a word link)
     }
-    const v2 = nbIsV2(B);
-    let n = 0;
-    const lines = B.map((b, k)=>{
+    let v2 = nbIsV2(B), n = 0;
+    const write = ()=>{ n = 0; return B.map((b, k)=>{
       if(b.t==='dg'){ n = 0; return (v2 && !k ? '\\' : '')+nbSerDiagram(b.dg); }
       if(b.t==='hr'){ n = 0; return '---'; }
       const inl = nbSerInline(b.runs, v2);
@@ -45341,11 +45391,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(m) return m[1]+'\\'+inl.slice(m[1].length);
       if(v2 && !k && inl.slice(0, 9)==='\\[diagram') return '\\[\\'+inl.slice(2);     // text, not v2's first-line diagram
       return inl;
-    });
+    }).join('\n'); };
     // only empty lines (a heading or bullet with nothing in it, as select-all
     // and Delete leaves): no note, the '' a textarea would give
     if(B.every(b=> !nbIsl(b) && !nbRunsLen(b.runs))) return '';
-    return NB_MARK + (v2 ? NB_MARK : '') + lines.join('\n');
+    let body = write();
+    if(!v2 && NB_WL_PAIR.test(body)){ v2 = true; body = write(); }       // text that would read as a word link in v1: v2 escapes it
+    return NB_MARK + (v2 ? NB_MARK : '') + body;
   }
   // Nothing to read: blank text, or only blank lines of any kind (divider
   // lines too: a line under nothing isn't a note). Saved as '' (a deleted
@@ -45360,7 +45412,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // The readable plain text (the Lichess study copy, copy and paste).
   function nbPlain(text){
     const s = String(text==null ? '' : text);
-    if(s.indexOf(NB_MARK) < 0) return s;
+    if(s.indexOf(NB_MARK) < 0 && !NB_WL_PAIR.test(s)) return s;
     let n = 0;
     return nbParse(s).blocks.map(b=>{
       if(b.t==='dg'){ n = 0; return '['+nbDgTitle(b.dg)+': '+b.dg.fen+']'; }
@@ -45374,7 +45426,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // The Game History row's one plain line.
   function nbFirstLine(text){
     const s = String(text==null ? '' : text);
-    if(s.indexOf(NB_MARK) < 0){ const l = s.split('\n').find(x=> x.trim()); return l ? l.trim() : ''; }
+    if(s.indexOf(NB_MARK) < 0 && !NB_WL_PAIR.test(s)){ const l = s.split('\n').find(x=> x.trim()); return l ? l.trim() : ''; }
     let dg = false;
     for(const b of nbParse(s).blocks){
       if(b.t==='hr') continue;
@@ -45474,6 +45526,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(r.i){ const e = document.createElement('i'); e.appendChild(n); n = e; }
     if(r.b){ const e = document.createElement('b'); e.appendChild(n); n = e; }
     if(r.u){ const e = document.createElement('u'); e.appendChild(n); n = e; }
+    if(r.l){ const e = document.createElement('a'); e.className = 'nb-wl'; e.setAttribute('data-l', r.l); e.appendChild(n); n = e; }     // a word link: no href, no look of its own (hvWlDraw)
     if(r.c && NB_TC_RE.test(r.c)){ const e = document.createElement('span'); e.className = 'nb-c-'+r.c; e.appendChild(n); n = e; }     // outermost: its underline takes the color
     return n;
   }
@@ -45527,9 +45580,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // colors is that color again (a red word deleted and typed over stays red, as bold does).
   function nbMarksOf(el, m, paste){
     const tag = el.tagName.toUpperCase();
-    let b = m.b, i = m.i, u = m.u, c = m.c || null;
-    if(paste){ const x = el.getAttribute('data-nb-c'); if(x && NB_TC_RE.test(x)) c = x; }
+    let b = m.b, i = m.i, u = m.u, c = m.c || null, l = m.l || null;
+    if(paste){ const x = el.getAttribute('data-nb-c'); if(x && NB_TC_RE.test(x)) c = x; const y = nbWlPasted(el.getAttribute('data-nb-l')); if(y) l = y; }
     else {
+      if(tag==='A'){ const x = el.getAttribute('data-l'); if(x && NB_WL_REF.test(x)) l = x; }
       const x = tag==='SPAN' ? /^nb-c-([GRBYOPKLN])$/.exec(el.getAttribute('class') || '') : null;
       if(x) c = x[1];
       else {
@@ -45550,7 +45604,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const td = st.textDecorationLine || st.textDecoration;
       if(td) u = td.indexOf('underline') >= 0;
     }
-    return { b, i, u, c };
+    return { b, i, u, c, l };
   }
   // A block's type: 'p', 'li', 'ol', or 'h' / 'h2' / 'h3' / 'h4' (a heading and its level; nbFromDom's start() makes the block).
   // Pasted, <h1> to <h4> keep their level (our own copy writes them so), <h5> and <h6> are a Heading 4.
@@ -45601,7 +45655,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(pre && s.indexOf('\n') >= 0){
           s.split('\n').forEach((part, i)=>{
             if(i){ if(!cur) start(t || 'p', true); cur = null; }
-            if(part){ if(!cur) start(t || 'p'); nbPush(cur.runs, nbRun(part, m.b, m.i, m.u, m.c)); }
+            if(part){ if(!cur) start(t || 'p'); nbPush(cur.runs, nbRun(part, m.b, m.i, m.u, m.c, m.l)); }
           });
           return;
         }
@@ -45614,7 +45668,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       if(!s) return;
       if(!cur) start(t || 'p');
-      nbPush(cur.runs, nbRun(s, m.b, m.i, m.u, m.c));
+      nbPush(cur.runs, nbRun(s, m.b, m.i, m.u, m.c, m.l));
     };
     const walk = (node, m, t, pre)=>{
       let idx = 0;
@@ -45643,12 +45697,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           cur = null;
           continue;
         }
-        if(paste && (tag==='TD' || tag==='TH') && cur && nbRunsLen(cur.runs)) nbPush(cur.runs, nbRun(' ', m.b, m.i, m.u, m.c));
+        if(paste && (tag==='TD' || tag==='TH') && cur && nbRunsLen(cur.runs)) nbPush(cur.runs, nbRun(' ', m.b, m.i, m.u, m.c, m.l));
         walk(c, nbMarksOf(c, m, paste), t, pre);
       }
       if(pts.length) point(node, idx);
     };
-    walk(root, { b:false, i:false, u:false, c:null }, null, false);
+    walk(root, { b:false, i:false, u:false, c:null, l:null }, null, false);
     if(pend.length){
       if(!blocks.length) start('p');
       const e = nbEndPos(blocks);
@@ -45662,7 +45716,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     blocks.forEach(b=>{
       if(nbIsl(b)){ out.push(b); return; }
       let runs = b.runs.slice();
-      if(runs.length){ runs[0] = nbRun(runs[0].text.replace(/^ +/, ''), runs[0].b, runs[0].i, runs[0].u, runs[0].c); const L = runs.length-1; runs[L] = nbRun(runs[L].text.replace(/ +$/, ''), runs[L].b, runs[L].i, runs[L].u, runs[L].c); runs = runs.filter(r=> r.text); }
+      if(runs.length){ runs[0] = nbRun(runs[0].text.replace(/^ +/, ''), runs[0].b, runs[0].i, runs[0].u, runs[0].c, runs[0].l); const L = runs.length-1; runs[L] = nbRun(runs[L].text.replace(/ +$/, ''), runs[L].b, runs[L].i, runs[L].u, runs[L].c, runs[L].l); runs = runs.filter(r=> r.text); }
       if(!runs.length && !b.br) return;          // an empty HTML block isn't a line
       const txt = nbRunsText(runs);
       if(b.t==='p' && txt.slice(0, 8)==='[diagram' && runs.every(r=> !r.b && !r.i && !r.u && !r.c)){
@@ -45683,11 +45737,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const m = marks || {};
     return String(txt).replace(/\r\n?/g, '\n').replace(/\u2063/g, '').split('\n').map(l=>{
       const dg = paste && l.slice(0, 8)==='[diagram' ? nbParseDiagram(l) : null;
-      return dg ? { t:'dg', dg } : { t:'p', runs: l ? [nbRun(l, m.b, m.i, m.u, m.c)] : [] };
+      return dg ? { t:'dg', dg } : { t:'p', runs: l ? [nbRun(l, m.b, m.i, m.u, m.c, m.l)] : [] };
     });
   }
   // Is the editor's DOM what nbRenderBlocks would draw (blocks of text,
-  // b/i/u and one color span deep, our islands)? Only a non-canonical DOM
+  // b/i/u, a word link's <a> and one color span deep, our islands)? Only a non-canonical DOM
   // is redrawn.
   function nbInlineOk(n, tags){
     for(let c = n.firstChild; c; c = c.nextSibling){
@@ -45695,6 +45749,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(c.nodeType!==1) return false;
       const tg = c.tagName;
       if(tg==='SPAN'){ if(c.attributes.length!==1 || !/^nb-c-[GRBYOPKLN]$/.test(c.getAttribute('class') || '')) return false; }
+      else if(tg==='A'){ if(c.attributes.length!==2 || c.getAttribute('class')!=='nb-wl' || !NB_WL_REF.test(c.getAttribute('data-l') || '')) return false; }
       else if((tg!=='B' && tg!=='I' && tg!=='U') || c.attributes.length) return false;
       if(tags.indexOf(tg) >= 0 || !c.firstChild) return false;
       if(!nbInlineOk(c, tags.concat(tg))) return false;
@@ -45861,7 +45916,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!b || nbIsl(b)) continue;
       const [a, z] = nbRangeIn(B, k, s, e);
       if(z <= a) continue;
-      const mid = nbSlice(b.runs, a, z).map(r=> nbRun(r.text, r.b, r.i, r.u, c));
+      const mid = nbSlice(b.runs, a, z).map(r=> nbRun(r.text, r.b, r.i, r.u, c, r.l));
       b.runs = nbConcat(nbConcat(nbSlice(b.runs, 0, a), mid), nbSlice(b.runs, z, Infinity));
     }
   }
@@ -45872,15 +45927,18 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!b || nbIsl(b)) continue;
       const [a, z] = nbRangeIn(B, k, s, e);
       if(z <= a) continue;
-      const mid = nbSlice(b.runs, a, z).map(r=>{ const x = nbRun(r.text, r.b, r.i, r.u, r.c); x[mk] = on; return x; });
+      const mid = nbSlice(b.runs, a, z).map(r=>{ const x = nbRun(r.text, r.b, r.i, r.u, r.c, r.l); x[mk] = on; return x; });
       b.runs = nbConcat(nbConcat(nbSlice(b.runs, 0, a), mid), nbSlice(b.runs, z, Infinity));
     }
   }
+  // (l, a word link, only with it on both sides: what's typed at a link's edge stays out of it)
   function nbMarksAt(B, p){
     const b = B[p.k];
-    if(!b || nbIsl(b)) return { b:false, i:false, u:false, c:null };
+    if(!b || nbIsl(b)) return { b:false, i:false, u:false, c:null, l:null };
     const r = p.o > 0 ? nbSlice(b.runs, p.o-1, p.o)[0] : nbSlice(b.runs, 0, 1)[0];
-    return r ? { b:r.b, i:r.i, u:r.u, c:r.c || null } : { b:false, i:false, u:false, c:null };
+    if(!r) return { b:false, i:false, u:false, c:null, l:null };
+    const nx = p.o > 0 && r.l ? nbSlice(b.runs, p.o, p.o+1)[0] : null;
+    return { b:r.b, i:r.i, u:r.u, c:r.c || null, l: nx && nx.l===r.l ? r.l : null };
   }
   function nbSliceBlocks(B, s, e){
     const out = [];
@@ -45992,6 +46050,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ed.msgT = setTimeout(()=>{ ed.msg = ''; nbRenderCount(ed); }, 4000);
   }
   function nbAfter(ed, text, fire){
+    if(nbWl && nbWl.ed===ed) nbWlClose(false);       // the note changed under the words it was to link
     ed.len = text.length;
     const f0 = ed.el.firstElementChild, b0 = f0 ? f0.getAttribute('data-b') || 'p' : 'p';
     ed.el.classList.toggle('nb-empty', text==='' && ed.el.childNodes.length<=1 && (b0==='p' || b0==='h'));
@@ -46053,7 +46112,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else if(!a){ if(ed.lastSel){ a = ed.lastSel.a; f = ed.lastSel.f; } else a = f = nbEndPos(B); }
     a = nbClampPos(B, a); f = nbClampPos(B, f);
     const fwd = nbCmp(a, f) <= 0, s = fwd ? a : f, e = fwd ? f : a;
-    nbSnap(ed);
+    if(!o.join) nbSnap(ed);        // o.join, o.soon: typing that goes on (nbTypeText in a link): one undo step, as the browser's own typing
     const pos = fn(B, s, e);
     if(pos===false) return false;
     const text = nbSerialize({ blocks:B });
@@ -46064,7 +46123,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else nbSetSel(ed, nbClampPos(BB, pos), nbClampPos(BB, pos));
     ed.good = { text, sel:ed.lastSel };
     nbAfter(ed, text, true);
-    nbSnap(ed);
+    if(o.soon) nbSnapSoon(ed); else nbSnap(ed);
     return true;
   }
   function nbInsertFrag(ed, frag, plainLines, o){
@@ -46089,9 +46148,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function nbTypeText(ed, data){
     const r = nbRead(ed);
     const p = r.a ? (nbCmp(r.a, r.f) <= 0 ? r.a : r.f) : null;
+    if(ed.pending && ed.pending.tail && (!p || nbCmp(ed.pending.at, r.a) || nbCmp(r.a, r.f))) ed.pending = null;      // the caret moved this very frame
     const marks = ed.pending || (p ? nbMarksAt(r.blocks.length ? r.blocks : [{ t:'p', runs:[] }], nbClampPos(r.blocks, p)) : null);
+    const inL = marks && marks.l, more = ed.pending && ed.pending.tail;
     ed.pending = null;
-    return nbInsertFrag(ed, nbFromPlain(data, false, marks), true);
+    const ok = nbInsertFrag(ed, nbFromPlain(data, false, marks), true, inL ? { join:!!more, soon:true } : undefined);
+    if(ok && inL) nbWlTail(ed, inL);
+    return ok;
   }
   // Enter; on a line of its own '---' (typed, at its end) makes a divider line and a new line under it (Cmd+Z: the text again)
   function nbEnter(ed){
@@ -46138,7 +46201,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!a || nbCmp(a, f)===0){
       // no selection: the next characters typed get the mark
       const cur = ed.pending || nbMarksAt(B, a || nbEndPos(B));
-      ed.pending = { b:cur.b, i:cur.i, u:cur.u, c:cur.c || null, at:a || nbEndPos(B) };
+      ed.pending = { b:cur.b, i:cur.i, u:cur.u, c:cur.c || null, l:cur.l || null, at:a || nbEndPos(B) };
       ed.pending[mk] = !cur[mk];
       nbBarState(ed);
       return true;
@@ -46162,7 +46225,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!nbCmp(a, f)){
       if(sel) nbSetSel(ed, a, a);
       const cur = ed.pending || nbMarksAt(B, a);
-      ed.pending = { b:cur.b, i:cur.i, u:cur.u, c:c || null, at:a };
+      ed.pending = { b:cur.b, i:cur.i, u:cur.u, c:c || null, l:cur.l || null, at:a };
       nbBarState(ed);
       return true;
     }
@@ -46264,6 +46327,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function nbBarState(ed, r){
     if(!ed.bar) return;
+    r = r || nbRead(ed);
     const st = nbSelState(ed, r);
     ed.bar.querySelectorAll('.nb-btn[aria-pressed]').forEach(btn=>{
       const c = btn.dataset.cmd;
@@ -46276,6 +46340,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const name = (b, v)=>{ if(b.getAttribute('aria-label')!==v) b.setAttribute('aria-label', v); };
     if(hs){ hs.setAttribute('data-lv', String(st.lv)); hs.classList.toggle('is-on', st.lv > 0); name(hs, 'Text style: '+(st.lv ? 'Heading '+st.lv : 'Normal text')); }
     if(tc){ tc.setAttribute('data-c', st.c || ''); name(tc, 'Text color: '+(st.c===undefined ? 'Mixed' : (st.c ? NB_TNAMES[st.c] : 'Default'))); }
+    // Link to a move: words selected, or in a link (inverted, as a heading is); else it says what it needs
+    const wl = ed.bar.querySelector('.nb-btn-wl');
+    if(wl){
+      const w = nbWlState(ed, r), t = w ? 'Link to a move ('+(NB_MAC ? 'Cmd' : 'Ctrl')+'+K)' : NB_WL_HINT;
+      wl.setAttribute('aria-disabled', w ? 'false' : 'true');
+      wl.classList.toggle('is-on', !!(w && w.l && r.a));
+      if(wl.title!==t) wl.title = t;
+    }
   }
   var NB_ICONS = {
     b:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5h5.6a3.7 3.7 0 0 1 0 7.4H7zM7 11.9h6.6a3.8 3.8 0 0 1 0 7.6H7z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>',
@@ -46287,6 +46359,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     tc:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 16L12 4l5.5 12M8.5 11.7h7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><rect class="nb-tc-bar" x="4" y="18.3" width="16" height="3.6" rx="1"/></svg>',
     hr:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14M5 18.5h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".45"/><path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
     dg:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 3.5h4.25v4.25H3.5zM12 3.5h4.25v4.25H12zM7.75 7.75H12V12H7.75zM16.25 7.75h4.25V12h-4.25zM3.5 12h4.25v4.25H3.5zM12 12h4.25v4.25H12zM7.75 16.25H12v4.25H7.75zM16.25 16.25h4.25v4.25h-4.25z" fill="currentColor"/></svg>',
+    wl:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4.4 4.4 0 0 0 6.3 0l3-3A4.4 4.4 0 0 0 13 4.7l-1.2 1.2M14 10a4.4 4.4 0 0 0-6.3 0l-3 3a4.4 4.4 0 0 0 6.3 6.3l1.2-1.2" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     x:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 5.5h11M10 5.5v13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M15 14.5l5 5M20 14.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     caret:'<svg class="nb-caret" viewBox="0 0 8 24" aria-hidden="true"><path d="M1.2 10.6l2.8 2.8 2.8-2.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
   };
@@ -46299,7 +46372,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const tools = [['b', 'Bold', mod+'+B', 1], ['i', 'Italic', mod+'+I', 1], ['u', 'Underline', mod+'+U', 1], '|',
       ['hs', 'Text style', mod+'+'+alt+'+1 to 4, normal text '+mod+'+'+alt+'+0', 'menu'], ['li', 'Bulleted list', mod+'+Shift+8', 1], ['ol', 'Numbered list', mod+'+Shift+7', 1], '|',
       ['tc', 'Text color', '', 'menu'], ['hr', 'Divider line', '', 0], '|'];
-    if(review) tools.push(['dg', 'Add this position as a diagram', '', 0], '|');
+    if(review) tools.push(['wl', 'Link to a move', mod+'+K', 0], ['dg', 'Add this position as a diagram', '', 0], '|');
     tools.push(['x', 'Clear formatting', '', 0]);
     tools.forEach(t=>{
       if(t==='|'){ const s = nbEl('span', 'nb-sep'); s.setAttribute('aria-hidden', 'true'); bar.appendChild(s); return; }
@@ -46325,6 +46398,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(c==='li' || c==='ol') nbBlockCmd(ed, c);
       else if(c==='hs' || c==='tc') nbMenuToggle(ed, b, c, e.detail===0 ? 'checked' : null);      // detail 0: Enter or Space on it
       else if(c==='hr') nbHrCmd(ed);
+      else if(c==='wl') nbWlToggle(ed);
       else if(c==='x') nbClearFmt(ed);
       else if(c==='dg') nbInsertDiagram(typeof hvNode==='function' ? hvNode() : null);
     });
@@ -46462,6 +46536,246 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(m.kind==='hs') nbHeadCmd(m.ed, Number(it.dataset.v), m.sel);
     else nbColorCmd(m.ed, it.dataset.v || null, m.sel);
   }
+  // ---- word links: words in the review's note as a link to a move (2026-11-04, the user: "almost like
+  // linking ... click on that title, and the move ... would go to 14...Kd7"). Select the words, then the
+  // toolbar's chain or Cmd/Ctrl+K: a small prompt names the move on the board. The board is the choice, so
+  // a click in the move list or a step of the board changes it; the prompt stays through those (it has the
+  // focus, the board's keys still work) and goes with Link, Cancel, Escape, or an edit of the note. In a
+  // link (a caret in it too): Change, Remove, for the whole of it. A run holds the ref (r.l), never the words.
+  // The look, and which refs still lead somewhere, are hvWlDraw's and hvWlNode's. ----
+  var nbWl = null;       // { ed, el, lab, hint, go, rm, s, e, l, ref, range, notes, back } (back: the note's own selection, for a Cancel)
+  var NB_WL_HINT = 'Select words to link them to a move';
+  function nbWlGame(){
+    const g = typeof HV_STATE!=='undefined' && HV_STATE && HV_STATE.game, id = g && g.id ? String(g.id) : '';
+    return /^[\w-]{1,24}$/.test(id) ? id : '';
+  }
+  // a pasted data-nb-l: its ref when copied from this game's note, else nothing (the words, no link)
+  function nbWlPasted(x){
+    const m = x ? /^([\w-]{1,24})\|(.{1,370})$/.exec(x) : null;
+    return m && m[1]===nbWlGame() && NB_WL_REF.test(m[2]) ? m[2] : null;
+  }
+  // The link a selection is in (all of it in one link; a caret: the link it touches), with the whole of
+  // that link, over the line breaks too (a link made over two lines is one link): { l, s, e }, or null.
+  function nbWlAt(B, s, e){
+    let l = null;
+    if(!nbCmp(s, e)){
+      const b = B[s.k];
+      if(!b || nbIsl(b)) return null;
+      const L = nbSlice(b.runs, s.o-1, s.o)[0], R = nbSlice(b.runs, s.o, s.o+1)[0];
+      l = (L && L.l) || (R && R.l) || null;
+      if(!l) return null;
+    } else {
+      for(let k=s.k; k<=e.k; k++){
+        if(!B[k] || nbIsl(B[k])) continue;
+        const [a, z] = nbRangeIn(B, k, s, e);
+        for(const r of nbSlice(B[k].runs, a, z)){ if(!r.l || (l && r.l!==l)) return null; l = r.l; }
+      }
+      if(!l) return null;
+    }
+    const inL = (b, o)=>{ const r = b && !nbIsl(b) ? nbSlice(b.runs, o, o+1)[0] : null; return !!r && r.l===l; };
+    const text = (k)=> !!B[k] && !nbIsl(B[k]);
+    let ka = s.k, a = s.o, kz = e.k, z = e.o, j;
+    for(;;){
+      while(a > 0 && inL(B[ka], a-1)) a--;
+      if(a > 0) break;
+      for(j = ka-1; text(j) && !nbBlockLen(B[j]); j--);    // empty lines don't end it
+      if(!text(j) || !inL(B[j], nbBlockLen(B[j])-1)) break;
+      ka = j; a = nbBlockLen(B[j]);
+    }
+    for(;;){
+      while(inL(B[kz], z)) z++;
+      if(!text(kz) || z < nbBlockLen(B[kz])) break;
+      for(j = kz+1; text(j) && !nbBlockLen(B[j]); j++);
+      if(!inL(B[j], 0)) break;
+      kz = j; z = 0;
+    }
+    return { l, s:{ k:ka, o:a }, e:{ k:kz, o:z } };
+  }
+  // What the chain button can link now (the live selection, or the one the note had before it lost
+  // the focus): { s, e, l } (l: the link it's in), or null with no words in it.
+  function nbWlState(ed, r){
+    r = r || nbRead(ed);
+    const L = r.a ? { a:r.a, f:r.f } : ed.lastSel;
+    if(!L || !r.blocks.length) return null;
+    const B = r.blocks, a = nbClampPos(B, L.a), f = nbClampPos(B, L.f), fwd = nbCmp(a, f) <= 0, s = fwd ? a : f, e = nbLineEnd(B, s, fwd ? f : a);
+    const at = nbWlAt(B, s, e);
+    if(at) return at;
+    if(!nbCmp(s, e)) return null;
+    for(let k=s.k; k<=e.k; k++){
+      if(!B[k] || nbIsl(B[k])) continue;
+      const [x, z] = nbRangeIn(B, k, s, e);
+      if(z > x) return { l:null, s, e };
+    }
+    return null;
+  }
+  function nbWlRange(B, s, e, l){
+    for(let k=s.k; k<=e.k; k++){
+      const b = B[k];
+      if(!b || nbIsl(b)) continue;
+      const [a, z] = nbRangeIn(B, k, s, e);
+      if(z <= a) continue;
+      const mid = nbSlice(b.runs, a, z).map(r=> nbRun(r.text, r.b, r.i, r.u, r.c, l));
+      b.runs = nbConcat(nbConcat(nbSlice(b.runs, 0, a), mid), nbSlice(b.runs, z, Infinity));
+    }
+  }
+  // A caret at a link's edge: the browser would type inside it (from just after it too), the model (nbTypeText) doesn't.
+  // A selection with link words in it: the browser's first key would go inside, its next ones outside.
+  function nbWlEdge(ed){
+    if(!ed.el.querySelector('a.nb-wl')) return false;
+    const r = nbRead(ed), c = r.a ? nbCmp(r.a, r.f) : 0;
+    if(c) return nbSliceBlocks(r.blocks, c < 0 ? r.a : r.f, c < 0 ? r.f : r.a).some(b=> b.runs && b.runs.some(x=> x.l));
+    const b = r.a ? r.blocks[r.a.k] : null;
+    if(!b || nbIsl(b)) return false;
+    const L = nbSlice(b.runs, r.a.o-1, r.a.o)[0], R = nbSlice(b.runs, r.a.o, r.a.o+1)[0];
+    return ((L && L.l) || '')!==((R && R.l) || '');
+  }
+  // A key at a link's end that was its last word being retyped ("King" to "Queen") or backed over (a typo): the next
+  // key goes on in the link, until the caret moves (ed.pending's own rule). A caret put there stays outside it (nbMarksAt).
+  function nbWlTail(ed, l){
+    const r = nbRead(ed), b = r.a && !nbCmp(r.a, r.f) ? r.blocks[r.a.k] : null;
+    if(!b || nbIsl(b)) return;
+    const L = nbSlice(b.runs, r.a.o-1, r.a.o)[0], R = nbSlice(b.runs, r.a.o, r.a.o+1)[0];
+    if(L && L.l===l && !(R && R.l===l)) ed.pending = { b:L.b, i:L.i, u:L.u, c:L.c || null, l, at:r.a, tail:true };
+  }
+  // the link what's typed or pasted now would land inside, or null
+  function nbWlInside(ed){
+    if(!ed.el.querySelector('a.nb-wl')) return null;
+    const r = nbRead(ed);
+    return r.a ? nbMarksAt(r.blocks, nbCmp(r.a, r.f) < 0 ? r.a : r.f).l : null;
+  }
+  // before a Backspace: the link whose end it's about to eat, or null
+  function nbWlTailDel(ed){
+    if(!ed.el.querySelector('a.nb-wl')) return null;
+    const r = nbRead(ed);
+    if(!r.a) return null;
+    const P = nbCmp(r.a, r.f) < 0 ? r.f : r.a, b = r.blocks[P.k];
+    if(!b || nbIsl(b)) return null;
+    const L = nbSlice(b.runs, P.o-1, P.o)[0], R = nbSlice(b.runs, P.o, P.o+1)[0];
+    return L && L.l && !(R && R.l===L.l) ? L.l : null;
+  }
+  function nbWlToggle(ed){
+    if(nbWl && nbWl.ed===ed){ nbWlClose(true); return true; }
+    const r = nbRead(ed), st = nbWlState(ed, r);
+    if(!st){ nbSay(ed, NB_WL_HINT); return false; }
+    nbMenuClose(false);
+    const el = nbEl('div', 'nb-wlp');
+    el.id = 'nb-wl';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-label', 'Link to a move');
+    const t = nbEl('div', 'nb-wlp-t'), lab = nbEl('div', 'nb-wlp-l'), hint = nbEl('div', 'nb-wlp-h'), acts = nbEl('div', 'nb-wlp-acts');
+    lab.setAttribute('aria-live', 'polite');
+    t.appendChild(lab); t.appendChild(hint);
+    const btn = (cls, text, fn)=>{ const b = nbEl('button', 'btn '+cls, text); b.type = 'button'; b.addEventListener('click', fn); acts.appendChild(b); return b; };
+    const go = btn('btn-primary nb-wlp-go', 'Link', ()=>{ if(nbWl && nbWl.ref) nbWlSet(nbWl.ref); });
+    const rm = btn('btn-ghost nb-wlp-rm', 'Remove', ()=>{ nbWlSet(null); });
+    btn('btn-ghost nb-wlp-x', 'Cancel', ()=>{ nbWlClose(true); });
+    el.appendChild(t); el.appendChild(acts);
+    document.body.appendChild(el);
+    nbWl = { ed, el, lab, hint, go, rm, s:st.s, e:st.e, l:st.l, ref:'', range:null, notes:hvPaneShown('notes'), back:r.a ? { a:r.a, f:r.f } : ed.lastSel };
+    nbWlMark(nbWl);
+    nbWlShow();
+    nbWlPlace(nbWl);
+    try{ go.focus({ preventScroll:true }); }catch(e){}
+    return true;
+  }
+  // the words being linked stay marked: the focus and the clicks are elsewhere now
+  function nbWlMark(m){
+    m.range = null;
+    try{
+      const A = nbDomPt(m.ed.el, m.s), F = nbDomPt(m.ed.el, m.e), r = document.createRange();
+      r.setStart(A.node, A.off); r.setEnd(F.node, F.off);
+      m.range = r;
+      if(window.CSS && CSS.highlights && typeof Highlight==='function') CSS.highlights.set('nb-wl-pick', new Highlight(r));
+    }catch(e){}
+  }
+  // The prompt's words and buttons: the move on the board against the link it's in.
+  function nbWlShow(){
+    const m = nbWl;
+    if(!m) return;
+    const n = hvNode(), ref = hvWlRef(n), name = ref ? hvNodeLabel(n) : '', old = m.l ? hvWlNode(m.l) : null;
+    const was = m.l ? (old ? 'Linked to '+hvNodeLabel(old) : 'Its move is gone') : '';
+    m.ref = ref && ref!==m.l ? ref : '';
+    m.lab.textContent = !m.l ? (ref ? 'Link to '+name : 'Pick a move to link to') : (m.ref ? was+'. Change to '+name : was);
+    m.hint.textContent = !ref && !m.l ? '' : (m.l ? 'Pick a move to change it' : 'Or pick another move');
+    m.go.textContent = m.l ? 'Change' : 'Link';
+    m.go.setAttribute('aria-disabled', m.ref ? 'false' : 'true');
+    m.rm.hidden = !m.l;
+  }
+  // By the words (under them, or over them with no room); at the foot of the screen in one column, where
+  // it leaves the note and the moves free, and while Notes is behind another tab (the words aren't there).
+  function nbWlPlace(m){
+    const el = m.el, r = m.range ? m.range.getBoundingClientRect() : null, dock = hvMqPhone.matches || !r || !r.width || !hvPaneShown('notes');
+    el.classList.toggle('nb-wlp-dock', dock);
+    el.style.left = el.style.top = el.style.maxWidth = '';
+    if(dock) return;
+    const n = m.ed.el.getBoundingClientRect(), inN = (y)=> Math.max(n.top, Math.min(y, n.bottom));      // words scrolled out of the note: its edge
+    el.style.maxWidth = Math.max(240, Math.floor(n.width))+'px';         // inside the note's own column
+    const w = el.offsetWidth, h = el.offsetHeight, y0 = inN(r.top), y1 = inN(r.bottom), up = y1 + 6 + h > innerHeight - 8 && y0 - 6 - h >= 8;
+    el.style.left = Math.max(8, Math.min(r.left, n.right - w, innerWidth - w - 8))+'px';
+    el.style.top = Math.max(8, Math.min(up ? y0 - 6 - h : y1 + 6, innerHeight - 8 - h))+'px';
+  }
+  // back: Notes in view again and (not on a touch screen, whose keyboard would come up) the focus and the note's selection as it was
+  function nbWlClose(back){
+    const m = nbWl;
+    if(!m) return;
+    nbWl = null;
+    m.el.remove();
+    try{ CSS.highlights.delete('nb-wl-pick'); }catch(e){}
+    if(!back || !m.ed.el.isConnected) return;
+    if(HV_STATE && m.notes && !hvPaneShown('notes')) hvSetTab('notes', { save:true });
+    if(!(window.matchMedia && matchMedia('(pointer:coarse)').matches)){ nbFocus(m.ed); nbSetSel(m.ed, m.back.a, m.back.f); }
+  }
+  // l: a ref, or null to take the link away. The words and their looks stay; the caret goes after them.
+  function nbWlSet(l){
+    const m = nbWl;
+    if(!m) return false;
+    nbWlClose(true);
+    return nbApply(m.ed, (B, s, e)=>{ nbWlRange(B, s, e, l); return e; }, { sel:{ a:m.s, f:m.e } });
+  }
+  // a new selection of words while it's open: those words
+  function nbWlFollow(ed, r){
+    const m = nbWl;
+    if(!m || m.ed!==ed) return;
+    m.back = { a:r.a, f:r.f };
+    if(!nbCmp(r.a, r.f)) return;
+    const st = nbWlState(ed, r);
+    if(!st || (!nbCmp(st.s, m.s) && !nbCmp(st.e, m.e))) return;
+    m.s = st.s; m.e = st.e; m.l = st.l;
+    nbWlMark(m);
+    nbWlShow();
+    nbWlPlace(m);
+  }
+  // Escape, and the same key again (before the board's keys; a dialog, a menu or a box opened over it keeps its own
+  // Escape). Enter with the words chosen in the note, the focus still there: links them, never types over them.
+  document.addEventListener('keydown', (e)=>{
+    const m = nbWl;
+    if(!m || e.isComposing || document.querySelector('.modal-overlay.active')) return;
+    const k = e.key && e.key.length===1 ? e.key.toLowerCase() : e.key, T = e.target;
+    if(k==='Escape' && (hvMenu || nbMenu)) return;
+    if(k==='Escape' && T && T.closest){
+      const box = T.closest('input, textarea, [contenteditable="true"]');
+      if(box && box!==m.ed.el && !m.el.contains(box)) return;
+    }
+    if(k==='Enter' && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey && T===m.ed.el){
+      const r = nbRead(m.ed), st = r.a && nbCmp(r.a, r.f) ? nbWlState(m.ed, r) : null;
+      if(st && !nbCmp(st.s, m.s) && !nbCmp(st.e, m.e)){ e.preventDefault(); e.stopImmediatePropagation(); if(m.ref) nbWlSet(m.ref); }
+      return;
+    }
+    if(k==='Escape' || (k==='k' && !e.altKey && !e.shiftKey && (NB_MAC ? e.metaKey : e.ctrlKey))){ e.preventDefault(); e.stopImmediatePropagation(); nbWlClose(true); }
+  }, true);
+  window.addEventListener('resize', ()=>{ if(nbWl) nbWlPlace(nbWl); });
+  document.addEventListener('scroll', ()=>{ if(nbWl) nbWlPlace(nbWl); }, true);
+  hvOnPane(()=>{ if(nbWl) nbWlPlace(nbWl); });
+  hvOnGame(()=> nbWlClose(false));
+  onLeavePlay(()=> nbWlClose(false));
+  // the board moved: that's the choice now, and the keys stay with the prompt
+  hvOnNode(()=>{
+    const m = nbWl;
+    if(!m) return;
+    nbWlShow();
+    const a = document.activeElement;
+    if(a!==m.ed.el && !m.el.contains(a)){ try{ m.go.focus({ preventScroll:true }); }catch(e){} }
+  });
   // the menu's keys, before anything else hears them (the pop-up's Escape, the board's arrows)
   document.addEventListener('keydown', (e)=>{
     const m = nbMenu;
@@ -46538,6 +46852,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(ed.composing || e.isComposing) return;
       const it = e.inputType || '';
       if(it==='insertCompositionText') return;
+      ed.wlDel = null;
       if(it==='historyUndo'){ e.preventDefault(); nbUndo(ed); return; }
       if(it==='historyRedo'){ e.preventDefault(); nbRedo(ed); return; }
       if(it==='formatBold' || it==='formatItalic' || it==='formatUnderline'){ e.preventDefault(); nbMark(ed, it==='formatBold' ? 'b' : (it==='formatItalic' ? 'i' : 'u')); return; }
@@ -46552,7 +46867,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(data==null) return;
         if(data===' ' && nbQuickHead(ed)){ e.preventDefault(); return; }
         const q = nbQuick(ed);
-        if(/[\n\r\u2063]/.test(data) || ed.pending || !q || q.cross || ed.len + 2*data.length + 4 > NB_MAX){ e.preventDefault(); nbTypeText(ed, data); }
+        if(/[\n\r\u2063]/.test(data) || ed.pending || !q || q.cross || ed.len + 2*data.length + 4 > NB_MAX || nbWlEdge(ed)){ e.preventDefault(); nbTypeText(ed, data); }
         return;
       }
       if(/^delete/.test(it)){
@@ -46560,7 +46875,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(!q) return;
         const back = /Backward/.test(it);
         if(!q.collapsed && q.cross){ e.preventDefault(); nbDel(ed, back ? -1 : 1); return; }
-        if(q.collapsed && (q.cross || (back && q.atStart) || (!back && q.atEnd))){ e.preventDefault(); nbDel(ed, back ? -1 : 1); }
+        if(q.collapsed && (q.cross || (back && q.atStart) || (!back && q.atEnd))){ e.preventDefault(); nbDel(ed, back ? -1 : 1); return; }
+        if(back) ed.wlDel = nbWlTailDel(ed);
       }
     });
     el.addEventListener('keydown', (e)=>{
@@ -46571,6 +46887,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(mod && !e.altKey){
         const lk = k && k.length===1 ? k.toLowerCase() : k;
         if(!e.shiftKey && (lk==='b' || lk==='i' || lk==='u')){ e.preventDefault(); nbMark(ed, lk); return; }
+        if(!e.shiftKey && lk==='k' && ed.ctx==='review'){ e.preventDefault(); nbWlToggle(ed); return; }
         if(e.shiftKey && (e.code==='Digit8' || k==='*' || k==='8')){ e.preventDefault(); nbBlockCmd(ed, 'li'); return; }
         if(e.shiftKey && (e.code==='Digit7' || k==='&' || k==='7')){ e.preventDefault(); nbBlockCmd(ed, 'ol'); return; }
         if(lk==='z'){ e.preventDefault(); if(e.shiftKey) nbRedo(ed); else nbUndo(ed); return; }
@@ -46596,6 +46913,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(t.length > NB_MAX && ed.good){ nbRestore(ed, ed.good); nbSay(ed, NB_LIMIT_MSG); return; }
       ed.good = { text:t, sel:ed.lastSel };
       ed.pending = null;
+      if(ed.wlDel){ const l = ed.wlDel; ed.wlDel = null; nbWlTail(ed, l); }
       nbAfter(ed, t, false);
       nbSnapSoon(ed);
     });
@@ -46612,8 +46930,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       try{ html = dt.getData('text/html') || ''; txt = dt.getData('text/plain') || ''; }catch(x){}
       let frag = null, plain = false;
       if(html){ try{ frag = nbFromHtml(html); }catch(x){ frag = null; } }
+      if(ed.ctx!=='review' && frag) frag.forEach(b=>{ if(b.runs) b.runs.forEach(r=>{ delete r.l; }); });     // a word link is a move of this game: the words, elsewhere
       if((!frag || !frag.length) && txt){ frag = nbFromPlain(txt, true); plain = true; }
       if(!frag || !frag.length) return;            // a picture or a file: notes don't take them
+      const inL = nbWlInside(ed);
+      if(inL) frag.forEach(b=>{ if(b.runs) b.runs.forEach(r=>{ if(!r.l) r.l = inL; }); });     // inside a link, as typing there
       ed.pending = null;
       nbInsertFrag(ed, frag, plain);
     });
@@ -46627,7 +46948,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!nbCmp(s, z)) return;
       const frag = nbSliceBlocks(B, s, z);
       e.preventDefault();
-      try{ e.clipboardData.setData('text/plain', nbFragPlain(frag)); e.clipboardData.setData('text/html', nbFragHtml(frag)); }catch(x){}
+      try{ e.clipboardData.setData('text/plain', nbFragPlain(frag)); e.clipboardData.setData('text/html', nbFragHtml(frag, ed.ctx==='review')); }catch(x){}
       if(cut) nbDel(ed, 0);
     };
     el.addEventListener('copy', (e)=> copy(e, false));
@@ -46670,6 +46991,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         if(r.a){
           ed.lastSel = { a:r.a, f:r.f };
           if(ed.pending && (nbCmp(ed.pending.at, r.a) || nbCmp(r.a, r.f))) ed.pending = null;
+          nbWlFollow(ed, r);
         }
         nbBarState(ed, r);
       });
@@ -46687,14 +47009,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }).join('\n');
   }
   // A heading as <h1>-<h4> by its level, a divider as <hr>, a color as data-nb-c (what our paste
-  // reads back; other apps get the text without it)
-  function nbFragHtml(frag){
+  // reads back; other apps get the text without it), and from the review's note a word link as
+  // data-nb-l, with its game: pasted into that game's note it stays a link (nbWlPasted)
+  function nbFragHtml(frag, review){
     const esc = (s)=> String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const gid = review ? nbWlGame() : '';
     const inl = (runs)=> runs.map(r=>{
       let h = esc(r.text);
       if(r.i) h = '<i>'+h+'</i>';
       if(r.b) h = '<b>'+h+'</b>';
       if(r.u) h = '<u>'+h+'</u>';
+      if(r.l && gid) h = '<a data-nb-l="'+gid+'|'+r.l+'">'+h+'</a>';      // both checked: a game's id, NB_WL_REF
       if(r.c && NB_TC_RE.test(r.c)) h = '<span data-nb-c="'+r.c+'">'+h+'</span>';
       return h;
     }).join('');
@@ -47373,7 +47698,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      for the game's moves, hv-mv-alt for the others), found again whenever the text
      changes (typed, loaded, synced, a line added from the menu). Text you colored keeps
      its color as a link (an alternative you made yellow stays yellow): those pieces are
-     in hv-mv-own / hv-mv-alt-own, only underlined. ---- */
+     in hv-mv-own / hv-mv-alt-own, only underlined. A word link (nbWl*, any words you linked to
+     a move) is drawn the same way and comes first; a move written inside one is that link. ---- */
   var HV_MV_EDS = ['hv-note', 'hv-opx-fam', 'hv-opx-var'];
   var hvMvLinks = [], hvMvTimer = 0;
   var HV_MV_SAN = /^(?:O-O-O|O-O|0-0-0|0-0|[KQRBN][a-h]?[1-8]?x?[a-h][1-8](?:=?[QRBN])?|[a-h](?:x[a-h])?[1-8](?:=?[QRBN])?)[+#]?[!?]{0,2}/;
@@ -47485,10 +47811,45 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     return null;
   }
+  // A word link's move, only if it's there now: nothing is made (hvNodeFromRef would play a line back),
+  // so the words of a side line you deleted are plain text again, and a link again if you play it again.
+  function hvWlNode(l){
+    const S = HV_STATE, p = String(l || '').split('.'), bp = Number(p[0]);
+    if(!S || !NB_WL_REF.test(l || '') || bp > S.main.length) return null;
+    let n = bp===0 ? S.root : S.main[bp-1];
+    for(let k=1; n && k<p.length; k++) n = n.children.find(c=> c.uci===p[k]) || null;
+    return n && n.parent ? n : null;
+  }
+  // A move's ref as a word link stores it ('' for the start, or a side line longer than a ref's 60 moves).
+  function hvWlRef(n){
+    const r = n && n.parent ? hvNodeRef(n) : null;
+    if(!r) return '';
+    const s = r.ply!=null ? String(r.ply) : r.line.join('.');
+    return NB_WL_REF.test(s) ? s : '';
+  }
+  // Is this text in a word link that leads somewhere? (A move written there isn't a link of its own.)
+  function hvWlOver(node){
+    const p = node.parentElement, w = p && p.closest('a.nb-wl');
+    return !!w && !!hvWlNode(w.getAttribute('data-l'));
+  }
+  // The note's word links: only an underline in the text's own color, solid for the game's moves, dotted for a side line.
+  function hvWlDraw(own, altOwn){
+    const ed = document.getElementById('hv-note');
+    if(!ed || !ed.isConnected) return;
+    ed.querySelectorAll('a.nb-wl').forEach(a=>{
+      const ref = a.getAttribute('data-l'), n = hvWlNode(ref);
+      if(!n) return;
+      const r = document.createRange();
+      r.selectNodeContents(a);
+      hvMvLinks.push({ ed, range:r, ref, played:!!n.main });
+      (n.main ? own : altOwn).push(r);
+    });
+  }
   function hvMvRefresh(){
     clearTimeout(hvMvTimer);
     hvMvLinks = [];
     const S = HV_STATE, play = [], alt = [], playOwn = [], altOwn = [];
+    if(S && !S.game._puzzle && !S.game._practice && hvViewActive()) hvWlDraw(playOwn, altOwn);
     if(S && S.std && !S.game._puzzle && !S.game._practice && hvViewActive()){
       HV_MV_EDS.forEach(id=>{
         const ed = document.getElementById(id);
@@ -47504,7 +47865,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
             path.forEach((x, i)=>{
               if(i < (path.skip || 0)) return;         // the line it continues: linked where it's written
               const a = hvMvPoint(map, x.tk.ns), z = hvMvPoint(map, x.tk.e);
-              if(!a || !z) return;
+              if(!a || !z || hvWlOver(a[0])) return;
               const r = document.createRange();
               try{ r.setStart(a[0], a[1]); r.setEnd(z[0], z[1]); }catch(e){ return; }
               const played = path.slice(0, i+1).every(y=> y.main);
@@ -47537,9 +47898,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // didn't play it), then the board steps onto it from the position before
   function hvMvGo(l){
     if(!HV_STATE) return false;
-    let n = l.path[0].from;
-    if(n.stand) return false;
-    for(let k = 0; k <= l.i; k++){ n = hvPlay(n, l.path[k].move); if(!n) return false; }
+    let n = l.ref ? hvWlNode(l.ref) : l.path[0].from;
+    if(!n || n.stand) return false;
+    if(!l.ref) for(let k = 0; k <= l.i; k++){ n = hvPlay(n, l.path[k].move); if(!n) return false; }
     if(HV_STATE.cur!==n.parent) hvGoNode(n.parent);
     hvGoNode(n, { sound:true });
     hvRevealBoard();
