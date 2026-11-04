@@ -7329,7 +7329,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .tt-flags li .tt-fk{ flex:0 0 auto; min-width:92px; font:700 10.5px/1.6 "JetBrains Mono",monospace; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
   .tt-flags li .tx-ic{ width:20px; height:20px; vertical-align:-5px; margin-right:5px; }
   .tt-t{ display:flex; flex-direction:column; margin-top:4px; }
-  .tt-r{ display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,1fr) 120px; gap:14px; align-items:center; padding:7px 0; border-top:1px solid var(--line); }
+  .tt-r{ display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr) minmax(0,1fr) minmax(0,1.4fr) 112px; gap:14px; align-items:center; padding:7px 0; border-top:1px solid var(--line); }
   .tt-r[hidden]{ display:none; }
   .tt-r.tt-hd{ border-top:0; padding:0 0 3px; font:700 10.5px/1.2 "JetBrains Mono",monospace; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
   .tt-c0{ min-width:0; }
@@ -7345,6 +7345,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .tt-tr.is-few{ background:none; border:1px solid color-mix(in srgb, var(--ink-soft) 45%, transparent); }
   .tt-tr.is-few .g{ background:none; border-right:1.5px solid var(--good); box-sizing:border-box; }
   .tt-none{ color:var(--ink-soft); font-size:12.5px; }
+  .tt-phl{ display:flex; flex-wrap:wrap; gap:3px 10px; }
+  .tt-phn{ border:0; background:none; padding:0; color:var(--ink); font:inherit; font-size:12.5px; line-height:1.3; white-space:nowrap; text-decoration:underline; text-decoration-color:color-mix(in srgb, var(--ink-soft) 50%, transparent); text-underline-offset:2px; cursor:pointer; }
+  @media (hover:hover){ .tt-phn:hover{ text-decoration-color:currentColor; } }
   .tt-pr{ font-size:12.5px; justify-self:start; }
   .tt-pr small{ display:inline-block; margin-left:6px; padding:1px 5px; border-radius:4px; background:var(--surface-2); color:color-mix(in srgb, var(--ink-soft) 40%, var(--ink)); font:600 10px/1.4 "JetBrains Mono",monospace; letter-spacing:.04em; text-transform:uppercase; }
   .tt-phs{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; }
@@ -7377,10 +7380,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .tt-halves{ grid-template-columns:minmax(0,1fr); }
     .tt-half + .tt-half{ padding:12px 0 0; border-left:0; border-top:1px solid var(--line); }
     .tt-ring{ width:68px; height:68px; }
-    .tt-r{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"n p" "a b"; row-gap:6px; column-gap:12px; padding:9px 0; align-items:start; }
+    .tt-r{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"n p" "a b" "h h"; row-gap:6px; column-gap:12px; padding:9px 0; align-items:start; }
     .tt-r > .tt-c0, .tt-r > .tt-pr{ align-self:center; }
     .tt-r.tt-hd{ display:none; }
-    .tt-r > .tt-c0{ grid-area:n; } .tt-r > .tt-pr{ grid-area:p; justify-self:end; } .tt-r > .tt-a{ grid-area:a; } .tt-r > .tt-c{ grid-area:b; }
+    .tt-r > .tt-c0{ grid-area:n; } .tt-r > .tt-pr{ grid-area:p; justify-self:end; } .tt-r > .tt-a{ grid-area:a; } .tt-r > .tt-c{ grid-area:b; } .tt-r > .tt-phc{ grid-area:h; }
     .tt-b .tt-lab{ display:block; font:700 10px/1.3 "JetBrains Mono",monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); }
     .tt-phs{ grid-template-columns:minmax(0,1fr); gap:6px; }
     .tt-p{ display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:10px; padding:8px 10px; }
@@ -7389,7 +7392,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     .tt-flags li .tt-fk{ min-width:0; width:100%; }
   }
   @media (min-width:641px){ .tt-b .tt-lab{ display:none; } }
-  @media (pointer:coarse){ .tt-nm{ min-height:44px; } .tt-p{ min-height:44px; } .tt-t .tt-b .tt-n{ display:inline-block; padding:15px 0; margin:-15px 0; } .tt .ct-l{ min-height:44px; display:inline-flex; align-items:center; } }
+  @media (pointer:coarse){ .tt-nm{ min-height:44px; } .tt-p{ min-height:44px; } .tt-t .tt-b .tt-n{ display:inline-block; padding:15px 0; margin:-15px 0; } .tt-phl{ gap:0 14px; } .tt-phn{ min-height:44px; } .tt .ct-l{ min-height:44px; display:inline-flex; align-items:center; } }
 </style>
 
 <button class="home-fab" id="home-fab" data-nav="menu" title="All drills" aria-label="All drills">&#8962;</button>
@@ -34663,6 +34666,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         played:y.filter(x=> x.kind==='played').length, had:y.length, allowed:t.length };
     });
     md.phN = md.M.filter(x=> x.ph!=null).length;
+    // each tactic's chances per phase (the By tactic table; a chance under each of its names, as there)
+    const byK = new Map(md.rows.map(r=>{ r.ph = [0, 0, 0]; return [r.key, r]; }));
+    md.M.forEach(x=>{ if(x.ph!=null) x.c.keys.forEach(k=>{ const r = byK.get(k); if(r) r.ph[x.ph]++; }); });
     if(TT_RP.size > Math.max(400, 2*md.G.length)) TT_RP.forEach((r, id)=>{ if(!md.byId.has(id)) TT_RP.delete(id); });
     return md;
   }
@@ -34814,7 +34820,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     T.setAttribute('aria-labelledby', 'tt-by-h');
     const hd = ttEl('div', 'tt-r tt-hd');
     hd.setAttribute('role', 'row');
-    ['Tactic', 'You had it', 'You allowed it', 'Practice'].forEach(t=>{ const c = ttEl('span', '', t); c.setAttribute('role', 'columnheader'); hd.appendChild(c); });
+    ['Tactic', 'You had it', 'You allowed it', 'Phase', 'Practice'].forEach(t=>{ const c = ttEl('span', '', t); c.setAttribute('role', 'columnheader'); hd.appendChild(c); });
     T.appendChild(hd);
     const lim = ttPhone() && !TT.rows ? TT_ROWS_PHONE : 1e9;
     md.rows.forEach((r, i)=>{
@@ -34862,6 +34868,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         c.appendChild(t);
       } else c.appendChild(ttEl('span', 'tt-none', '\u2013'));
       row.appendChild(c);
+      // where this tactic came up (the user, 2026-11-04): only the phases it has; each count opens those moments
+      const q = ttEl('div', 'tt-b tt-phc'), ql = ttEl('div', 'tt-phl');
+      q.setAttribute('role', 'cell');
+      q.appendChild(ttEl('span', 'tt-lab', 'Phase'));
+      (r.ph || []).forEach((n, i)=>{
+        if(!n) return;
+        const b = ttBtn('tt-phn', CT_PHASES[i]+' '+n, 'keyph', 'keyph|'+r.key+'|'+i);
+        b.dataset.key = r.key; b.dataset.ph = String(i);
+        b.setAttribute('aria-label', tacName(r.key)+' in the '+CT_PHASES[i].toLowerCase()+': see its '+ghoN(n, 'moment'));
+        ql.appendChild(b);
+      });
+      q.appendChild(ql.childNodes.length ? ql : ttEl('span', 'tt-none', '\u2013'));
+      row.appendChild(q);
       const p = ttEl('span', 'tt-pr');
       p.setAttribute('role', 'cell');
       if((r.had - r.played) + r.allowed >= 2){
@@ -35083,6 +35102,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(a==='had') ttSetMoments({ key:t.dataset.key, kind:t.dataset.kind || 'had' }, true);
       else if(a==='allowed') ttSetMoments({ key:t.dataset.key, kind:'allowed' }, true);
       else if(a==='ph') ttSetMoments({ ph:Number(t.dataset.ph) }, true);
+      else if(a==='keyph') ttSetMoments({ key:t.dataset.key, ph:Number(t.dataset.ph) }, true);
       else if(a==='practice') ttPractice(t.dataset.key);
       else if(a==='chip') ttSetMoments({ kind:t.dataset.kind, key:TT.m.key, ph:TT.m.ph }, false, TT.note);
       else if(a==='unkind' || a==='unkey' || a==='unph'){
