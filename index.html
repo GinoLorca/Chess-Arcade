@@ -28056,8 +28056,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // a move as you'd write it ("12. Rf1", "12...Rf1"); off 1 in a game from a set position where Black moved first
   function ghClampLabel(p, san, off){ const a = p + (off || 0), n = Math.ceil(a/2); return n+(a % 2 ? '. ' : '...')+(san || '\u2026'); }
   // "12. Rf1", "12.Rf1" or "12...Rf1" (+ or # as you like) against the game's moves: { ok, ply, label } for a move
-  // of yours, else { ok:false, why }. Black's moves are written 12...; no other numbering is read (2026-11-02, the
-  // user's choice): a move of yours written as the other side's says how. Q: { toks, me, off (hvMkNode's: 1 when
+  // of the game, else { ok:false, why }. Black's moves are written 12...; no other numbering is read (2026-11-02, the
+  // user's choice): a move written as the other side's says how. Q: { toks, me, off (hvMkNode's: 1 when
   // Black moved first), can (the plies the review can show: a Chess960 castle ends its replay) }. Until done (Enter,
   // Save, leaving the field) a move still being typed has no reason: only text that can't become the move does.
   function ghClampParse(text, Q, done){
@@ -28071,16 +28071,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const strip = (t)=> String(t || '').replace(/[+#]+$/, '');
     const san = strip(m[3]).replace(/^[0O](-[0O]?)*$/, t=> t.replace(/0/g, 'O'));
     const no = Number(m[1]), black = m[2]==='...', ply = 2*no - (black ? 0 : 1) - off, o = black ? ply - 1 : ply + 1;
-    const mine = (p)=> ((p + off) % 2===1 ? 'white' : 'black')===me;
     const tok = (p)=> no >= 1 && p >= 1 && p <= toks.length ? strip(toks[p-1]) : '';
     if(tok(ply)===san){
-      if(!mine(ply)) return { ok:false, why:'That was your opponent\u2019s move.' };
       if(ply > can) return { ok:false, why:can ? 'The review can\u2019t show this game past '+ghClampLabel(can, toks[can-1], off)+'.' : 'The review can\u2019t show this game\u2019s moves.' };
       return { ok:true, ply, why:'', label:ghClampLabel(ply, toks[ply-1], off) };
     }
-    if(mine(o) && tok(o)===san) return { ok:false, why:'Your moves as '+(me==='white' ? 'White' : 'Black')+' are written '+ghClampLabel(o, toks[o-1], off)+'.' };
+    if(tok(o)===san) return { ok:false, why:'That move is written '+ghClampLabel(o, toks[o-1], off)+'.' };
     if(!done && san && [ply, o].some(p=> tok(p).startsWith(san))) return { ok:false, why:'' };       // still being typed
-    return { ok:false, why:'Not one of your moves in this game.' };
+    return { ok:false, why:'That move isn\u2019t in this game.' };
   }
   // Your marks changed from a row's box: the game's analysis record is written at once (and synced like any edit),
   // its other fields as they were. The review open on this game: its tree and the record together. A tree kept
@@ -28116,7 +28114,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return 'ok';
   }
   // A letter's box: the moves of this game marked with it, in game order (the move as you'd write it, your note,
-  // Go to move, an x), and Mark a move (a move of yours, checked against the game as you type, and a note). One
+  // Go to move, an x), and Mark a move (a move of the game, checked against it as you type, and a note). One
   // box at a time (it is the page's hvMenu); Escape, the x, Cancel or a click outside closes it.
   function ghClampOpen(btn, g, ch){
     const K = CLAMP_BY[ch];
@@ -34085,7 +34083,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const out = md.any && ghActiveCount() > (GH_FILTERS.ck ? 1 : 0), tab = !md.any && md.other;
       empty.appendChild(ghEl('h3', 'ct-h', out ? 'No marked games match the Filters' : tab ? 'No marked games in this tab' : 'No CLAMP marks yet'));
       empty.appendChild(ghEl('p', 'ct-sub', out ? 'Your games with CLAMP letters are outside the Filters you set.' : tab ? 'Your games with CLAMP letters are in the other site\u2019s games: see them in All.'
-        : 'Mark a move of yours with its letter: tap a letter under a game\u2019s opening in Games, or right-click your move in a review (press and hold on a phone) and use the CLAMP row. Your pattern shows here.'));
+        : 'Mark a move with its letter: tap a letter under a game\u2019s opening in Games, or right-click a move in a review (press and hold on a phone) and use the CLAMP row. Your pattern shows here.'));
       const b = ghEl('button', 'btn btn-ghost ct-empty-b', out ? 'Clear filters' : tab ? 'Show All' : 'Go to Games');
       b.type = 'button'; b.dataset.act = out ? 'clear' : tab ? 'all' : 'to-games'; b.dataset.fid = 'empty';
       empty.appendChild(b);
@@ -34309,7 +34307,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     box.textContent = '';
     const head = ghEl('div', 'ct-mom-h'), ht = ghEl('div', ''), h = ghEl('h3', 'ct-h', 'Moments');
     h.id = 'ct-mom-h';
-    ht.append(h, ghEl('p', 'ct-sub', 'Every move you marked, newest first: the position before it, your move drawn in its letter\u2019s color. A card opens the review at that move.'));
+    ht.append(h, ghEl('p', 'ct-sub', 'Every move you marked, newest first: the position before it, the move drawn in its letter\u2019s color. A card opens the review at that move.'));
     head.appendChild(ht);
     const chips = ghEl('div', 'ct-chips');
     chips.setAttribute('role', 'group');
@@ -38124,7 +38122,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     if(com) hvBadgeRow(el, node, opener);      // a game's move, main line or side line: your badge on it
     if(com && !node.main) hvHlRow(el, root, opener);        // a side line: its highlight (2026-11-04)
-    if(com && hvClampMine(node)) hvClampRow(el, node);      // a move of yours in the game: its CLAMP letters
+    if(com && hvClampOk(node)) hvClampRow(el, node);        // a move of the game, either side's: its CLAMP letters
     if(com && hvTacOk(node)) hvTacRow(el, node);            // any move of the game: a tactic it allowed (2026-11-03)
     if(!node.main) add('Go to this line', ()=>{ hvGoNode(node); hvRevealBoard(); }, 'hv-pop-go');
     if(com){
@@ -38268,8 +38266,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvSay(id ? hvNodeLabel(node)+': '+HR_BY_ID[id].label+' (your badge)' : hvNodeLabel(node)+': your badge taken off');
     hvAnnSave();                 // kept at once, like a comment
   }
-  // A side line's highlight (2026-11-04, the user: alternate moves "stand out a little more along with" their comments):
-  // the move menu's row on any move of the line, kept on the line's first move as h:[[ref, code]] in the game's record.
+  // A side line's highlight (2026-11-04, the user: alternate moves "stand out a little more along with" their comments; "the
+  // main moves have a floating panel, the alternates have highlights"): the move menu's row on any move of the line, kept on
+  // the line's first move as h:[[ref, code]] in the game's record.
   const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }];
   function hvHlClass(n){ return n && HV_HL.some(h=> h.c===n.hl) ? ' hv-hl hv-hl-'+n.hl : ''; }
   function hvHlRow(el, root, opener){
@@ -38320,14 +38319,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvSay(h ? hvNodeLabel(root)+': line highlighted '+h.name.toLowerCase() : hvNodeLabel(root)+': highlight taken off');
     hvAnnSave();                 // kept at once, like a badge
   }
-  // ---- CLAMP on a move of yours (2026-11-02): the move menu's CLAMP row, under the badges, on a main-line move
-  // you made in a game (never a puzzle's, a played-out position's, a side line's or your opponent's). A move can
+  // ---- CLAMP on a move (2026-11-02; any move of the game since 2026-11-04, the user: 21. e7 made a passed pawn only once it
+  // was played): the move menu's CLAMP row, under the badges, on a main-line move of your own game, either side's
+  // (never a puzzle's, a played-out position's or a side line's). A move can
   // have several letters: each disc is a checkbox, a click puts it on or takes it off and the menu stays open. ----
-  function hvClampMine(node){
+  function hvClampOk(node){
     const S = HV_STATE;
-    return !!(S && S.me && node && node.main && node.parent && S.nodes.has(node.id) && hvAnnId()
-      && ((node.ply + (node.off || 0)) % 2===1 ? 'white' : 'black')===S.me);
+    return !!(S && S.me && node && node.main && node.parent && S.nodes.has(node.id) && hvAnnId());
   }
+  function hvMoveMine(node){ const S = HV_STATE; return !!S && ((node.ply + (node.off || 0)) % 2===1 ? 'white' : 'black')===S.me; }
   // A tree's marks as a record's k, and a record's k onto a tree's main line (exactly those). Marks past where the
   // tree's replay ends (a Chess960 castle, a set-up game opened from its summary without its start) are kept with
   // the tree as they came (clampPast), so opening the game never takes them out of the record.
@@ -38453,7 +38453,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // a letter on or off a move of yours, kept at once; false when the record has no room for it (nothing changes)
   function hvClampToggle(node, ch){
     const K = CLAMP_BY[ch];
-    if(!K || !hvClampMine(node)) return false;
+    if(!K || !hvClampOk(node)) return false;
     const c = node.clamp || {}, on = ch in c, before = hvAnnText(false).length;
     const off = ()=>{ delete c[ch]; if(!Object.keys(c).length) delete node.clamp; };
     if(on){ off(); hvClampSqOff(node, ch); }          // a letter taken off takes its squares with it
@@ -38528,7 +38528,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // taken back). true, or what stopped it (no room: the record or CLAMP_SQ_MAX squares)
   function hvSqToggle(n, ch, s, B){
     const K = CLAMP_BY[ch];
-    if(!K || !hvClampMine(n)) return '';
+    if(!K || !hvClampOk(n)) return '';
     const on = hvSqHas(n, ch, s), had = !!n.clamp && ch in n.clamp, before = hvAnnText(false).length;
     const letterOff = ()=>{ delete n.clamp[ch]; if(!Object.keys(n.clamp).length) delete n.clamp; };
     if(on){
@@ -38559,8 +38559,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     el.id = 'hv-sq-pop';
     el.setAttribute('role', 'dialog');
     let first = null;
-    if(!hvClampMine(n)){
-      const t = !S.me || !hvAnnId() ? 'CLAMP marks go on moves in your own games.' : 'Step to one of your moves to mark a square.';
+    if(!hvClampOk(n)){
+      const t = !S.me || !hvAnnId() ? 'CLAMP marks go on moves in your own games.' : 'Step to a move of the game to mark a square.';
       el.classList.add('is-line');
       el.setAttribute('aria-label', 'CLAMP');
       el.appendChild(hvEl('div', 'hv-sq-line', t));
@@ -38755,7 +38755,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvSqAskStart(node, kb, back){
     hvSqAskEnd();
     const S = HV_STATE;
-    if(!S || !hvClampMine(node)) return;
+    if(!S || !hvClampOk(node)) return;
     if(S.cur!==node) hvGoNode(node);
     hvRevealBoard();
     hvSqAsk = { node, back:back || null };
@@ -39942,7 +39942,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       fI.appendChild(ir);
     }
     // 5. a chance your own move allowed: one optional CLAMP letter, offered from its name (never set by itself)
-    const L = hvClampMine(node) ? (c.keys.map(k=> TAC_CLAMP_OF[k]).find(Boolean) || '') : '';
+    const L = hvClampOk(node) && hvMoveMine(node) ? (c.keys.map(k=> TAC_CLAMP_OF[k]).find(Boolean) || '') : '';
     X.clampL = L;
     if(L){
       const K = CLAMP_BY[L], f5 = field('CLAMP', phone ? '' : 'your move', phone ? 'is-row' : ''), cc = hvEl('div', 'tx-chips'), has = !!(node.clamp && L in node.clamp);
