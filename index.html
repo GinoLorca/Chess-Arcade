@@ -5275,6 +5275,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     background:none; color:var(--ink-soft); cursor:pointer; font-size:15px; line-height:20px; text-align:center;
   }
   .hv-var-menu:hover{ background:var(--surface-2); color:var(--ink); }
+  /* a side line you highlighted (2026-11-04), its moves and comments: fluorescent, with dark text in every skin */
+  .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; }
+  .hv-movelist .hv-var.hv-hl > .hv-var-line{ background:var(--hl); border-radius:4px; padding:1px 6px; color:#141517; }
+  .hv-movelist .hv-nest.hv-hl{ background:var(--hl); border-radius:3px; padding:1px 3px; color:#141517; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .hv-movelist .hv-hl :is(.mv-san, .hv-var-num, .hv-com-inline, .hv-com-mv){ color:#141517; }
+  .hv-movelist .hv-hl .hv-com-mv{ text-decoration-color:currentColor; }
+  .hv-movelist .hv-hl .mv-san:not(:empty):hover{ background:rgba(20,21,23,.16); }
+  :root #view-play-history .hv-movelist .hv-hl .mv-san.mv-viewed{ background:#141517; color:#fff; box-shadow:none; }
   .hv-result-row{
     grid-column:1 / -1; margin-top:8px; padding-top:8px; border-top:1px solid var(--line);
     font-size:12.5px; color:var(--ink-soft); text-align:center;
@@ -5560,12 +5568,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-bdg-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
   .hv-bdg-name{ min-width:0; padding-right:10px; font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .hv-bdg-grid{ display:grid; grid-template-columns:repeat(5, 36px); justify-content:center; gap:2px; padding:2px 6px 4px; }
-  .hv-bdg-pick, .hv-clamp-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
-  .hv-bdg-pick:hover, .hv-clamp-pick:hover{ background:var(--surface-2); }
-  .hv-bdg-pick:focus-visible, .hv-clamp-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
+  .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
+  .hv-bdg-pick:hover, .hv-clamp-pick:hover, .hv-hl-pick:hover{ background:var(--surface-2); }
+  .hv-bdg-pick:focus-visible, .hv-clamp-pick:focus-visible, .hv-hl-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
+  .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(3, 36px); }
+  .hv-hl-sw{ display:block; width:26px; height:26px; border-radius:50%; background:var(--hl); box-shadow:inset 0 0 0 1px rgba(20,21,23,.4); }
+  .hv-hl-pick.is-on .hv-hl-sw{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .hv-bdg-pick .hv-badge{ width:28px; height:28px; margin:0; font-size:13px; vertical-align:0; }
   .hv-bdg-pick.is-on .hv-badge{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
-  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-pick, .hv-clamp-pick{ width:44px; height:44px; } }
+  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(3, 44px); } .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ width:44px; height:44px; } }
   /* the CLAMP row under it on a move of yours (2026-11-02): five checkboxes, every disc in its color, the ones on
      ringed like a picked badge; a refusal (the record full) under them, never widening the menu */
   .hv-clamp-pick .clamp-d{ width:28px; height:28px; font-size:13px; }
@@ -37957,7 +37968,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       }
       if(i>0) nodes[i-1].children.slice(1).forEach(sib=>{
         sp();
-        const nest = hvEl('span', 'hv-nest');
+        const nest = hvEl('span', 'hv-nest'+hvHlClass(sib));
         nest.appendChild(document.createTextNode('('));
         hvInlineLine(nest, sib);
         nest.appendChild(document.createTextNode(')'));
@@ -37966,7 +37977,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
   }
   function hvVarRow(branch){
-    const row = hvEl('div', 'hv-var');
+    const row = hvEl('div', 'hv-var'+hvHlClass(branch));
     const btn = hvEl('button', 'hv-var-menu', '\u22ee');
     btn.type = 'button';
     btn.dataset.node = branch.id;
@@ -38112,6 +38123,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       el.appendChild(b);
     };
     if(com) hvBadgeRow(el, node, opener);      // a game's move, main line or side line: your badge on it
+    if(com && !node.main) hvHlRow(el, root, opener);        // a side line: its highlight (2026-11-04)
     if(com && hvClampMine(node)) hvClampRow(el, node);      // a move of yours in the game: its CLAMP letters
     if(com && hvTacOk(node)) hvTacRow(el, node);            // any move of the game: a tactic it allowed (2026-11-03)
     if(!node.main) add('Go to this line', ()=>{ hvGoNode(node); hvRevealBoard(); }, 'hv-pop-go');
@@ -38168,7 +38180,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvMenu = { el, node, opener, outside };
     setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
     el.addEventListener('keydown', (e)=>{
-      const items = [...el.querySelectorAll('.hv-pop-item')], picks = [...el.querySelectorAll('.hv-bdg-pick, .hv-clamp-pick')];
+      const items = [...el.querySelectorAll('.hv-pop-item')], picks = [...el.querySelectorAll('.hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick')];
       const a = document.activeElement, i = items.indexOf(a), p = picks.indexOf(a);
       // the badge grid (HV_BDG_COLS a row) and the CLAMP row come before the items: Left/Right along its own
       // grid, Up/Down a row at a time and on into the items (in the same column coming back: the checked
@@ -38255,6 +38267,58 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     hvSay(id ? hvNodeLabel(node)+': '+HR_BY_ID[id].label+' (your badge)' : hvNodeLabel(node)+': your badge taken off');
     hvAnnSave();                 // kept at once, like a comment
+  }
+  // A side line's highlight (2026-11-04, the user: alternate moves "stand out a little more along with" their comments):
+  // the move menu's row on any move of the line, kept on the line's first move as h:[[ref, code]] in the game's record.
+  const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }];
+  function hvHlClass(n){ return n && HV_HL.some(h=> h.c===n.hl) ? ' hv-hl hv-hl-'+n.hl : ''; }
+  function hvHlRow(el, root, opener){
+    const wrap = hvEl('div', 'hv-bdg hv-hl-row'), head = hvEl('div', 'hv-bdg-head'), name = hvEl('span', 'hv-bdg-name'), grid = hvEl('div', 'hv-bdg-grid hv-hl-grid');
+    wrap.setAttribute('role', 'group');
+    wrap.setAttribute('aria-label', 'Highlight this line');
+    head.appendChild(hvEl('span', 'hv-pop-head', 'Highlight'));
+    const cur = HV_HL.find(h=> h.c===root.hl), rest = cur ? cur.name : '';
+    name.setAttribute('aria-hidden', 'true');
+    name.textContent = rest;
+    head.appendChild(name);
+    wrap.appendChild(head);
+    HV_HL.forEach(h=>{
+      const on = !!cur && cur.c===h.c, btn = hvEl('button', 'hv-hl-pick'+(on ? ' is-on' : ''));
+      btn.type = 'button';
+      btn.dataset.hl = h.c;
+      btn.setAttribute('role', 'menuitemradio');
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+      btn.setAttribute('aria-label', h.name);
+      btn.title = on ? h.name+': tap to take it off' : h.name;
+      btn.appendChild(hvEl('span', 'hv-hl-sw hv-hl-'+h.c));
+      const say = ()=>{ name.textContent = h.name; };
+      btn.addEventListener('pointerenter', say);
+      btn.addEventListener('focus', say);
+      btn.addEventListener('pointerleave', ()=>{ name.textContent = rest; });
+      btn.addEventListener('blur', ()=>{ name.textContent = rest; });
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        hvMenuClose();
+        hvHlSet(root, on ? '' : h.c, opener);
+      });
+      grid.appendChild(btn);
+    });
+    wrap.appendChild(grid);
+    el.appendChild(wrap);
+    el.appendChild(hvEl('div', 'hv-pop-sep'));
+  }
+  function hvHlSet(root, code, opener){
+    const S = HV_STATE;
+    if(!S || !root || root.main || !S.nodes.has(root.id) || !hvAnnId()) return;
+    const h = HV_HL.find(x=> x.c===code);
+    if(h) root.hl = h.c; else delete root.hl;
+    hvRenderMoveList();
+    if(opener && opener.classList && opener.classList.contains('hv-var-menu')){
+      const nb = document.querySelector('#hv-movelist .hv-var-menu[data-node="'+opener.dataset.node+'"]');
+      if(nb) try{ nb.focus({ preventScroll:true }); }catch(e){}
+    }
+    hvSay(h ? hvNodeLabel(root)+': line highlighted '+h.name.toLowerCase() : hvNodeLabel(root)+': highlight taken off');
+    hvAnnSave();                 // kept at once, like a badge
   }
   // ---- CLAMP on a move of yours (2026-11-02): the move menu's CLAMP row, under the badges, on a main-line move
   // you made in a game (never a puzzle's, a played-out position's, a side line's or your opponent's). A move can
@@ -44120,7 +44184,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // field a newer build added (gnAnExtra), kept as it came: this build never drops what it doesn't know. t (the
   // tactics, 2026-11-03) is last, so builds v106-v113 (which keep it as a field they don't know, after theirs) write
   // the same text as this one and the sync sees no difference.
-  const GN_AN_KNOWN = ['v', 'l', 'c', 'm', 'b', 'k', 'q', 't'];
+  const GN_AN_KNOWN = ['v', 'l', 'c', 'm', 'b', 'k', 'q', 't', 'h'];
   function gnAnExtra(A){
     const x = {};
     if(A && typeof A==='object' && !Array.isArray(A)) Object.keys(A).forEach(f=>{ if(GN_AN_KNOWN.indexOf(f) < 0 && f!=='__proto__') x[f] = A[f]; });
@@ -44285,7 +44349,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ M = JSON.parse(mine); I = inc ? JSON.parse(inc) : { v:1, l:[], c:[], m:[] }; }catch(e){ return ''; }
     if(!M || typeof M!=='object' || !I || typeof I!=='object' || Array.isArray(I)) return '';
     let kept = false;
-    ['b', 'k', 'q', 't'].forEach(f=>{ if(Array.isArray(M[f]) && M[f].length && !(f in I)){ I[f] = M[f]; kept = true; } });      // t: the tactics (2026-11-03), the same rule
+    ['b', 'k', 'q', 't', 'h'].forEach(f=>{ if(Array.isArray(M[f]) && M[f].length && !(f in I)){ I[f] = M[f]; kept = true; } });      // t: the tactics (2026-11-03), h: side lines' highlights (2026-11-04), the same rule
     if(!kept) return '';
     const t = JSON.stringify(gnAnCanon(I));
     return t.length <= GN_MAX ? t : '';
@@ -47970,10 +48034,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // they're all off), and q their squares, [[ply, letter, square]] (q:[] the same). A field this build
   // doesn't know (a newer build's) is kept from the record as it came.
   function hvAnnText(noMarks){
-    const S = HV_STATE, lines = [], com = [], mk = [], bd = [], kd = hvClampListOf(S), qd = hvClampSqOf(S), td = gnTacRows(hvTacListOf(S), !!hvTacRoot(S).tacNone);
+    const S = HV_STATE, lines = [], com = [], mk = [], bd = [], hl = [], kd = hvClampListOf(S), qd = hvClampSqOf(S), td = gnTacRows(hvTacListOf(S), !!hvTacRoot(S).tacNone);
     let P = null;
     try{ P = S.annText ? JSON.parse(S.annText) : null; }catch(e){ P = null; }
-    const hadB = !!P && Array.isArray(P.b), hadK = !!P && Array.isArray(P.k), hadQ = !!P && Array.isArray(P.q), hadT = !!P && Array.isArray(P.t), extra = gnAnExtra(P);
+    const hadB = !!P && Array.isArray(P.b), hadK = !!P && Array.isArray(P.k), hadQ = !!P && Array.isArray(P.q), hadT = !!P && Array.isArray(P.t), hadH = !!P && Array.isArray(P.h), extra = gnAnExtra(P);
     const prof = annoProfile();
     const marks = (n)=>{
       const m = n.marks;
@@ -47986,15 +48050,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     (function walk(n){
       if(n.comment) com.push([hvAnnRef(n), n.comment]);
       if(n.parent && hvOwnBadge(n)) bd.push([hvAnnRef(n), hvOwnBadge(n).code]);
+      if(n.parent && !n.main && hvHlClass(n)) hl.push([hvAnnRef(n), n.hl]);
       marks(n);
       n.children.forEach(c=>{ if(!c.main && !c.children.length) lines.push(hvNodeRef(c).line); walk(c); });
     })(S.root);
-    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !qd.length && !hadQ && !td.length && !hadT && !Object.keys(extra).length) return '';
+    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !qd.length && !hadQ && !td.length && !hadT && !hl.length && !hadH && !Object.keys(extra).length) return '';
     const A = { v:1, l:lines, c:com, m:mk };
     if(bd.length || hadB) A.b = bd;
     if(kd.length || hadK) A.k = kd;
     if(qd.length || hadQ) A.q = qd;
     if(td.length || hadT) A.t = td;          // your tactics (2026-11-03), t:[] once they're all off
+    if(hl.length || hadH) A.h = hl;          // side lines' highlights (2026-11-04), h:[] once they're all off
     return JSON.stringify(Object.assign(A, extra));
   }
   // A record onto the tree: its side lines, comments, marks, badges and CLAMP marks. mine: this device's
@@ -48024,6 +48090,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       (Array.isArray(A.b) ? A.b : []).forEach(x=>{
         const n = Array.isArray(x) ? hvAnnNode(x[0]) : null, B = n && n.parent && typeof x[1]==='string' && x[1].length===1 ? HR_BY_CODE[x[1]] : null;
         if(B && (lost || !(mine && n.badge))) n.badge = B.id;
+      });
+      (Array.isArray(A.h) ? A.h : []).forEach(x=>{
+        const n = Array.isArray(x) ? hvAnnNode(x[0]) : null;
+        if(n && n.parent && !n.main && HV_HL.some(h=> h.c===x[1]) && (lost || !(mine && n.hl))) n.hl = x[1];
       });
       const S = HV_STATE, past = (S.tree || S).clampPast || ((S.tree || S).clampPast = []);
       gnClampList(A).forEach(x=>{
