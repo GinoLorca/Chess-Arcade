@@ -5275,11 +5275,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     background:none; color:var(--ink-soft); cursor:pointer; font-size:15px; line-height:20px; text-align:center;
   }
   .hv-var-menu:hover{ background:var(--surface-2); color:var(--ink); }
-  /* a side line you highlighted (2026-11-04), its moves and comments: fluorescent, with dark text in every skin */
+  /* a side line you highlighted (2026-11-04), its moves and comments. A real highlighter pen, the user's words: "straight
+     rectangles that are not aligned", more faded, soft at the edge. One stroke per line of text, drawn by hvHlDraw */
   .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; }
-  .hv-movelist .hv-var.hv-hl > .hv-var-line{ background:var(--hl); border-radius:4px; padding:1px 6px; color:#141517; }
-  .hv-movelist .hv-nest.hv-hl{ background:var(--hl); border-radius:3px; padding:1px 3px; color:#141517; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
-  .hv-movelist .hv-hl :is(.mv-san, .hv-var-num, .hv-com-inline, .hv-com-mv){ color:#141517; }
+  /* 65% see-through. The text over it: the skin's own, pushed to pure black or pure white, so it clears 4.5:1 on every skin, dark ones too */
+  .hv-movelist{ --hl-a:.35; --hl-tx:var(--ink); }
+  @supports (color:hsl(from red h s l)){ .hv-movelist{ --hl-tx:hsl(from var(--ink) 0 0 clamp(0, (l - 50)*100 + 50, 100)); } }
+  .hv-movelist .hv-var-line{ position:relative; z-index:0; }
+  .hv-movelist .hv-hl-ink, .hv-movelist .hv-nest.hv-hl{ padding:2px 6px; color:var(--hl-tx); -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .hv-movelist .hv-nest.hv-hl{ padding:2px 4px; }
+  .hv-hl-st{ position:absolute; z-index:-1; background:var(--hl); opacity:var(--hl-a); filter:blur(.6px); border-radius:1.5px; pointer-events:none; }
+  .hv-movelist .hv-hl :is(.mv-san, .hv-var-num, .hv-com-inline, .hv-com-mv){ color:var(--hl-tx); }
   .hv-movelist .hv-hl .hv-com-mv{ text-decoration-color:currentColor; }
   .hv-movelist .hv-hl .mv-san:not(:empty):hover{ background:rgba(20,21,23,.16); }
   :root #view-play-history .hv-movelist .hv-hl .mv-san.mv-viewed{ background:#141517; color:#fff; box-shadow:none; }
@@ -5572,7 +5578,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-bdg-pick:hover, .hv-clamp-pick:hover, .hv-hl-pick:hover{ background:var(--surface-2); }
   .hv-bdg-pick:focus-visible, .hv-clamp-pick:focus-visible, .hv-hl-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
   .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(3, 36px); }
-  .hv-hl-sw{ display:block; width:26px; height:26px; border-radius:50%; background:var(--hl); box-shadow:inset 0 0 0 1px rgba(20,21,23,.4); }
+  .hv-hl-sw{ display:block; width:26px; height:26px; border-radius:50%; background:color-mix(in srgb, var(--hl) 35%, transparent); box-shadow:inset 0 0 0 1px rgba(20,21,23,.4); }
   .hv-hl-pick.is-on .hv-hl-sw{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .hv-bdg-pick .hv-badge{ width:28px; height:28px; margin:0; font-size:13px; vertical-align:0; }
   .hv-bdg-pick.is-on .hv-badge{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
@@ -37991,7 +37997,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     btn.setAttribute('aria-haspopup', 'menu');
     row.appendChild(btn);
     const line = hvEl('span', 'hv-var-line');
-    hvInlineLine(line, branch);
+    // highlighted: the ink is an inline span, so each wrapped line gets its own stroke of the pen
+    hvInlineLine(hvHlClass(branch) ? line.appendChild(hvEl('span', 'hv-hl-ink')) : line, branch);
     row.appendChild(line);
     return row;
   }
@@ -38025,6 +38032,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     frag.appendChild(hvEl('div', 'hv-result-row', bits.join(' \u00b7 ')));
     el.textContent = '';
     el.appendChild(frag);
+    hvHlDraw();
     hvComCard();          // before the scroll: the card's coming or going changes the pane's height
     hvTacCard();
     hvKeepInView();
@@ -38279,6 +38287,34 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // the line's first move as h:[[ref, code]] in the game's record.
   const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }];
   function hvHlClass(n){ return n && HV_HL.some(h=> h.c===n.hl) ? ' hv-hl hv-hl-'+n.hl : ''; }
+  // The pen (the user, 2026-11-04): people go straight to the side, and going fast they drift low, then correct high. So one
+  // straight stroke per line of text: a little high or low by turns, a little off level, ending a little early or late, never
+  // past the pane's edge. Seeded by the line's own text, so its strokes are the same every time the list is drawn.
+  function hvHlDraw(){
+    const list = document.getElementById('hv-movelist');
+    if(!list) return;
+    list.querySelectorAll('.hv-hl-st').forEach(s=> s.remove());
+    list.querySelectorAll('.hv-hl-ink, .hv-nest.hv-hl').forEach(el=>{
+      const host = el.closest('.hv-var-line'), box = host.getBoundingClientRect(), code = /\bhv-hl-([ygb])\b/.exec(el.closest('.hv-hl').className);
+      if(!code) return;
+      let h = 7;
+      for(let i = 0; i < el.textContent.length; i++) h = (h*31 + el.textContent.charCodeAt(i)) >>> 0;
+      const rnd = ()=>{ h = (Math.imul(h, 1664525) + 1013904223) >>> 0; return h/4294967296; };
+      const first = rnd() < .5 ? -1 : 1;
+      [...el.getClientRects()].forEach((r, i)=>{
+        if(r.width < 1) return;
+        const high = (i % 2 ? -first : first)*(.6 + rnd()*1.4), rise = (rnd() - .5)*3, ht = r.height - 1 + rnd()*1.5;
+        const x0 = Math.max(-2, r.left - box.left + rnd()*5 - 3), x1 = Math.min(box.width, r.right - box.left + rnd()*6 - 2), wd = x1 - x0;
+        const s = hvEl('span', 'hv-hl-st hv-hl-'+code[1]);
+        s.style.cssText = 'left:'+x0.toFixed(1)+'px;top:'+(r.top - box.top + high + (r.height - ht)/2).toFixed(1)+'px;width:'+wd.toFixed(1)+'px;height:'+ht.toFixed(1)+'px;transform:rotate('+Math.atan2(rise, wd).toFixed(4)+'rad)';
+        host.appendChild(s);
+      });
+    });
+  }
+  // the strokes follow the text: a tab shown, a narrower window, another skin's letters
+  if(typeof ResizeObserver==='function') new ResizeObserver(hvHlDraw).observe(document.getElementById('hv-movelist'));
+  new MutationObserver(hvHlDraw).observe(document.documentElement, { attributes:true, attributeFilter:['data-skin'] });
+  if(document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', hvHlDraw);
   function hvHlRow(el, root, opener){
     const wrap = hvEl('div', 'hv-bdg hv-hl-row'), head = hvEl('div', 'hv-bdg-head'), name = hvEl('span', 'hv-bdg-name'), grid = hvEl('div', 'hv-bdg-grid hv-hl-grid');
     wrap.setAttribute('role', 'group');
