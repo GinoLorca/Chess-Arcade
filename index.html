@@ -3670,6 +3670,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gh-lc[hidden]{ display:none; }
   .gh-lc-k{ font-family:"JetBrains Mono",monospace; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
   .gh-lc-title{ margin:0; font-size:17px; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
+  .gh-lc-rec[hidden]{ display:none; }
+  .gh-lc-rec{ display:flex; flex-direction:column; gap:3px; margin:2px 0 4px; }
+  .gh-lc-rec .gho-card-res{ max-width:560px; margin-top:0; }
+  .gh-lc-rec .gho-card-pct{ font-size:15px; font-weight:800; }
+  .gh-lc-rec-d{ font-size:12.5px; line-height:1.4; color:var(--ink-soft); }
   .gh-lc-moves{ font-family:"JetBrains Mono",monospace; font-size:15px; line-height:1.5; color:var(--ink-soft); overflow-wrap:anywhere; }
   .gh-lc-moves .gh-lc-split{ color:var(--ink); font-weight:800; text-decoration:underline; text-underline-offset:3px; }
   .gh-lc-idea-l{ margin-top:4px; font-size:12px; font-weight:700; color:var(--ink-soft); }
@@ -8146,6 +8151,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     <section class="panel gh-lc" id="gh-lc" aria-labelledby="gh-lc-title" hidden>
       <div class="gh-lc-k">Your line in Repertoire Lab</div>
       <h3 class="gh-lc-title" id="gh-lc-title"></h3>
+      <div class="gh-lc-rec" id="gh-lc-rec" hidden></div>
       <div class="gh-lc-moves" id="gh-lc-moves"></div>
       <label class="gh-lc-idea-l" for="gh-lc-idea">The idea</label>
       <input class="text-input gh-lc-idea" id="gh-lc-idea" type="text" maxlength="200" autocomplete="off" placeholder="What this line is for, in a sentence">
@@ -28593,7 +28599,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // with the opening's job as a filter: how many of the games it would list aren't scored yet (the footer says)
     GH_OJ_WAIT = 0;
     if(GH_FILTERS.oj && ojReady()){ const fo = Object.assign({}, GH_FILTERS, { oj:'' }); base.forEach(g=>{ const r = ojOf(g); if(r && r.k==='wait' && ghMatch(g, u, fo)) GH_OJ_WAIT++; }); }
-    ghLineCard(rows);
+    ghLineCard(rows, base, u);
     const total = base.length, plural = total===1 ? '' : 's';
     const cnt = document.getElementById('gh-count'), nc = document.createElement('div');
     nc.textContent = !total && !active && ghTabBusy() ? ''
@@ -31082,7 +31088,37 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     return -1;
   }
-  function ghLineCard(rows){
+  // The line's record on its card (the user, 2026-11-06: the score shows on Openings but not once you click in). The same numbers as its
+  // Openings card: the games the filters keep, whatever the Result filter says (the list narrows, the record stays), and your usual
+  // score for the color. Worked out once per filter set: this reads every game of that color.
+  var GH_LC_REC = null;
+  function ghLcRecord(base, u, color){
+    const f = Object.assign({}, GH_FILTERS, { opening:'', oq:'', result:'', ck:'' });
+    const key = JSON.stringify(f)+'|'+base.length+'|'+GH_UI.site+'|'+color;
+    if(GH_LC_REC && GH_LC_REC.key===key && GH_LC_REC.rp===RP) return GH_LC_REC;
+    GHO_MIX = ghMixed();
+    const fs = Object.assign({}, f, { rep:'' });
+    const side = ghoEntries(base.filter(g=> rpCounted(g) && ghMatch(g, u, fs)), u, true).filter(e=> e.color===color);
+    const mine = side.filter(e=> ghMatch(e.g, u, f));
+    GH_LC_REC = { key, rp:RP, m:ghoMetrics(mine), sideN:side.length, usual:side.length ? ghoMetrics(side).score : null };
+    return GH_LC_REC;
+  }
+  function ghLcRecordDraw(rec, color){
+    const box = document.getElementById('gh-lc-rec'), m = rec && rec.m;
+    box.textContent = '';
+    box.hidden = !m || !m.n;
+    if(box.hidden) return;
+    const word = color==='white' ? 'White' : 'Black', res = ghEl('div', 'gho-card-res'), w = ghEl('span', 'gho-card-barw');
+    w.appendChild(ghoBar(m));
+    if(rec.usual!=null){ const tk = ghEl('span', 'gho-tick'); tk.style.left = rec.usual+'%'; w.appendChild(tk); }
+    res.appendChild(w);
+    res.appendChild(ghEl('span', 'gho-card-pct', ghoPct(m.score)));
+    box.appendChild(res);
+    const bits = [ghoN(m.n, 'game')+(m.n < GHO_MIN ? ' (small sample)' : ''), 'W '+m.W+' \u00b7 D '+m.D+' \u00b7 L '+m.L, Math.round(100*m.n/Math.max(1, rec.sideN))+'% of your games as '+word];
+    if(rec.usual!=null) bits.push('The mark: your usual '+ghoPct(rec.usual)+' as '+word);
+    box.appendChild(ghEl('div', 'gh-lc-rec-d', bits.join(' \u00b7 ')));
+  }
+  function ghLineCard(rows, base, u){
     const box = document.getElementById('gh-lc');
     const rep = GH_FILTERS.rep || '', m = /^([cl])\.([^.]+)\.([^.]+)(?:\.([^.]+))?$/.exec(rep);
     const off = ()=>{ box.hidden = true; if(GH_LC && GH_LC.F){ clearTimeout(GH_LC.F.timer); gnFieldSave(GH_LC.F); if(getLichessToken() && gnHasPending()) gnScheduleSync(800); } GH_LC = null; };
@@ -31102,6 +31138,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const key = rep+'|'+(line ? line.id : '');
     const title = m[1]==='l' ? rpChapterPath(o, c)+' \u203a '+L.short : rpChapterPath(o, c);
     document.getElementById('gh-lc-title').textContent = title;
+    ghLcRecordDraw(base ? ghLcRecord(base, u, o.color) : null, o.color);
     const mv = document.getElementById('gh-lc-moves');
     mv.textContent = '';
     if(!moves.length) mv.textContent = 'No moves in this chapter yet.';
