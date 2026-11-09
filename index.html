@@ -5327,6 +5327,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-lr-h{ font-size:15px; font-weight:800; }
   .hv-lr-text > .hv-lr-h.hv-lr-gap{ margin-top:16px; }
   .hv-lr-k{ font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--ink-soft); }
+  .hv-lr-li{ padding-left:14px; text-indent:-14px; }
+  .hv-lr-li::before{ content:'\2022'; display:inline-block; width:14px; text-indent:0; color:var(--ink-soft); }
+  /* three columns: the notes card has a height of its own, so the review scrolls inside it and its buttons stay in view */
+  .hv-notes-card #hv-pane-notes.is-lr > .hv-lr{ flex:1 1 auto; min-height:0; }
+  .hv-notes-card #hv-pane-notes.is-lr .hv-lr-text{ flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding-right:6px; }
+  .hv-notes-card #hv-pane-notes.is-lr .hv-lr-in{ flex:1 1 auto; }
+  .hv-lr-acts{ flex:none; }
   .hv-lr-row{ display:grid; grid-template-columns:repeat(auto-fit, minmax(70px, 1fr)); gap:2px 12px; padding:3px 0; border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums; }
   .hv-lr-acts{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 16px; }
   .hv-lr-del{ color:var(--bad); }
@@ -48433,22 +48440,52 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return String(t || '').replace(/\r\n?/g, '\n').replace(/[\u00a0\u2007\u202f]/g, ' ').replace(/[\u200b\u2060\ufeff]/g, '')
       .replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   }
+  // A line's inline marks, as ChatGPT's copy button writes them (Markdown): **bold** and __bold__ kept bold, *italic*
+  // italic, `code` and [text](link) as their text, \* and the like as the character. Text nodes only, never HTML.
+  var HV_LR_INL = /\\([\\`*_{}\[\]()#+\-.!|>~])|\*\*(.+?)\*\*|__(.+?)__|`([^`]+)`|\[([^\]]+)\]\([^)\s]*\)|(^|[^\w*])\*(?!\s)([^*]+?)\*(?!\w)/g;
+  function hvLrInline(el, s){
+    const re = new RegExp(HV_LR_INL.source, 'g'), add = (t)=> el.appendChild(document.createTextNode(t));
+    let at = 0, m;
+    while((m = re.exec(s))){
+      if(m.index > at) add(s.slice(at, m.index));
+      if(m[1]) add(m[1]);
+      else if(m[2] || m[3]){ const b = document.createElement('strong'); b.textContent = (m[2] || m[3]).replace(/\\(.)/g, '$1'); el.appendChild(b); }
+      else if(m[4]) add(m[4]);
+      else if(m[5]) add(m[5]);
+      else { if(m[6]) add(m[6]); const i = document.createElement('em'); i.textContent = m[7]; el.appendChild(i); }
+      at = re.lastIndex;
+    }
+    if(at < s.length) add(s.slice(at));
+    return el;
+  }
+  // His reply as blocks: plain text as ChatGPT's page shows it, or the Markdown its copy button gives. The first line his
+  // title; "#" lines and "1. Opening ..." lines headings; a line in capitals a label; a table's rows ("|" or tabs); "-"
+  // bullets; the rest paragraphs. Rules, code fences and pictures are left out.
   function hvLrBlocks(box, text){
     box.textContent = '';
     let first = true, gap = false;
+    const cellsRow = (cells)=>{
+      // its cells with a space between, so a move in one isn't run into the next
+      const el = hvEl('div', 'hv-lr-row');
+      cells.forEach((c, i)=>{ if(i) el.appendChild(document.createTextNode(' ')); el.appendChild(hvLrInline(hvEl('span', 'hv-lr-cell'), c.trim())); });
+      return el;
+    };
     text.split('\n').forEach(raw=>{
-      const line = raw.trim();
-      if(!line){ gap = true; return; }
+      let line = raw.trim().replace(/^>\s?/, '');
+      if(!line || /^(```|~~~)/.test(line) || /^([-*_])(\s*\1){2,}$/.test(line) || /^!\[[^\]]*\]\([^)]*\)$/.test(line)){ gap = true; return; }
       let el;
-      if(first) el = hvEl('div', 'hv-lr-title', line);
-      else if(raw.indexOf('\t')>=0){
-        // a row of a table: its cells with a space between, so a move in one isn't run into the next
-        el = hvEl('div', 'hv-lr-row');
-        raw.split('\t').forEach((c, i)=>{ if(i) el.appendChild(document.createTextNode(' ')); el.appendChild(hvEl('span', 'hv-lr-cell', c.trim())); });
+      const hm = /^(#{1,6})\s+(.*)$/.exec(line);
+      if(hm) line = hm[2].replace(/\s#+$/, '');
+      if(/^\|.*\|$/.test(line) || (/\|/.test(line) && /^\|/.test(line))){
+        if(/^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?$/.test(line)) return;      // the line under a table's head
+        el = cellsRow(line.replace(/^\|/, '').replace(/\|$/, '').split('|'));
       }
-      else if(/^\d{1,2}\.\s+[A-Z][a-z]/.test(line) && !HV_MV_SAN.test(line.replace(/^\d{1,2}\.\s+/, ''))) el = hvEl('h4', 'hv-lr-h', line);
-      else if(line.length > 3 && /[A-Z]/.test(line) && !/[a-z]/.test(line)) el = hvEl('div', 'hv-lr-k', line);
-      else el = hvEl('p', 'hv-lr-p', line);
+      else if(raw.indexOf('\t')>=0) el = cellsRow(raw.split('\t'));
+      else if(first) el = hvLrInline(hvEl('div', 'hv-lr-title'), line);
+      else if(hm || (/^\d{1,2}\.\s+[A-Z][a-z]/.test(line) && !HV_MV_SAN.test(line.replace(/^\d{1,2}\.\s+/, '')))) el = hvLrInline(hvEl('h4', 'hv-lr-h'), line);
+      else if(/^[-*+]\s+/.test(line)) el = hvLrInline(hvEl('p', 'hv-lr-p hv-lr-li'), line.replace(/^[-*+]\s+/, ''));
+      else if(line.length > 3 && /[A-Z]/.test(line) && !/[a-z]/.test(line) && !/[*_`]/.test(line)) el = hvEl('div', 'hv-lr-k', line);
+      else el = hvLrInline(hvEl('p', 'hv-lr-p'), line);
       if(gap && !first) el.classList.add('hv-lr-gap');
       gap = false; first = false;
       box.appendChild(el);
