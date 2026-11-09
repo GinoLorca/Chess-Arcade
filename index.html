@@ -4216,6 +4216,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gho-gap-more{ align-self:flex-start; margin-top:4px; font:inherit; font-size:12.5px; color:var(--ink); background:none; border:0; padding:4px 0; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
   .gho-gap-none{ font-size:12.5px; color:var(--ink-soft); padding:6px 0 2px; border-top:1px solid var(--line); }
   @media (max-width:760px){ .gho-gaps{ grid-template-columns:minmax(0,1fr); } }
+  /* who you met: under a row's numbers, and By opponent (2026-11-09) */
+  .gho-who{ font-size:12px; line-height:1.35; color:var(--ink-soft); overflow-wrap:anywhere; }
+  .gho-opps{ display:flex; flex-direction:column; gap:2px; padding:11px 13px 8px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
+  .gho-opp{ display:flex; flex-direction:column; gap:4px; padding:7px 0; border-top:1px solid var(--line); }
+  .gho-opp-go{ display:flex; flex-direction:column; gap:1px; text-align:left; font:inherit; color:var(--ink); background:none; border:0; padding:0; cursor:pointer; }
+  .gho-opp-go:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; border-radius:3px; }
+  .gho-opp-t{ font-size:13.5px; line-height:1.3; }
+  .gho-opp-t::before{ content:"\25B8"; display:inline-block; width:1.1em; color:var(--ink-soft); transition:transform .15s ease; }
+  .gho-opp.is-open .gho-opp-t::before{ transform:rotate(90deg); }
+  .gho-opp-r{ font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink-soft); }
+  .gho-opp-what{ font-size:12.5px; line-height:1.35; overflow-wrap:anywhere; padding-left:1.1em; }
+  .gho-opp-go .gho-gap-d{ padding-left:1.1em; }
+  .gho-opp-games{ list-style:none; margin:2px 0 0 1.1em; padding:0; display:flex; flex-direction:column; gap:2px; }
+  .gho-opp-g{ display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 12px; font-size:12.5px; line-height:1.35; padding:4px 0; border-top:1px dashed var(--line); }
+  .gho-opp-gt{ flex:1 1 240px; min-width:0; overflow-wrap:anywhere; }
   /* where your games end up (step 2, 2026-10-31): per color, how many games reach an endgame and which kinds */
   .gho-ends{ display:flex; flex-direction:column; gap:6px; padding:11px 13px 10px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
   .gho-ends[hidden]{ display:none; }
@@ -8312,6 +8327,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <section class="gho-gap-col" aria-labelledby="gho-gap-opp-h"><h3 class="gho-gap-h" id="gho-gap-opp-h">Not in your lines</h3><p class="gho-gap-sub">Your opponents&rsquo; moves that your Repertoire Lab lines don&rsquo;t answer</p><ul class="gho-gap-list" id="gho-gap-opp"></ul></section>
         <section class="gho-gap-col" aria-labelledby="gho-gap-you-h"><h3 class="gho-gap-h" id="gho-gap-you-h">Forgot your line</h3><p class="gho-gap-sub">Where you played something other than your prepared move</p><ul class="gho-gap-list" id="gho-gap-you"></ul></section>
       </div>
+      <!-- By opponent (gho-opps): who you met, what was played against your repertoire, how it went -->
+      <section class="gho-opps" id="gho-opps" aria-labelledby="gho-opps-h" hidden>
+        <h3 class="gho-gap-h" id="gho-opps-h">By opponent</h3>
+        <p class="gho-gap-sub">Who you played, what was played against your repertoire, and how it went. Open one for their games.</p>
+        <ul class="gho-gap-list" id="gho-opps-list"></ul>
+      </section>
       <!-- Did the opening do its job? (oj*): each color's games by the score where they left the opening -->
       <section class="gho-ends gho-oj" id="gho-oj" aria-labelledby="gho-oj-h" hidden>
         <h3 class="gho-gap-h" id="gho-oj-h">Did the opening do its job?</h3>
@@ -27460,6 +27481,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ghOppName(p){
     return (p && p.user && p.user.name) || (p && p.aiLevel!=null ? 'Lichess AI level '+p.aiLevel : 'Anonymous');
   }
+  // Who you played, by name (2026-11-09, the user: "names identified to openings ... so we can attribute certain
+  // openings and certain patterns to certain people"): a game's opponent ('' when the game doesn't say), and the
+  // opponents of a list of games ("Samuel Htun", "Samuel Htun ×2 and Leo Park", "Ann Lee, Bo Kim and 3 more").
+  // Still in your words: "you" is whoever's games these are.
+  function ghoOppOf(g){
+    const n = g ? ghOppName(ghPlayers(g, ghMe()).opp) : '';
+    return n==='Anonymous' || /^(opponent|\?)$/i.test(n.trim()) ? '' : n.trim();
+  }
+  function ghoWho(list, max){
+    max = max || 2;
+    const m = new Map();
+    (list || []).forEach(e=>{ const n = ghoOppOf(e.g); if(!n) return; const k = n.toLowerCase(), x = m.get(k) || { n, k:0, at:0 }; x.k++; x.at = Math.max(x.at, e.at || 0); m.set(k, x); });
+    const a = Array.from(m.values()).sort((p, q)=> q.k - p.k || q.at - p.at || p.n.localeCompare(q.n));
+    if(!a.length) return '';
+    const nm = (x)=> x.k > 1 ? x.n+' \u00d7'+x.k : x.n;
+    if(a.length <= max) return a.length===2 ? nm(a[0])+' and '+nm(a[1]) : nm(a[0]);
+    return a.slice(0, max).map(nm).join(', ')+' and '+(a.length - max)+' more';
+  }
   function ghGameResult(g, username){
     const me = ghMyColor(g, username);
     return !g.winner ? 'draw' : (g.winner===me ? 'win' : 'loss');
@@ -30476,13 +30515,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const sp = (y)=> ({ rep:'s.'+y.s.spot+'.'+ghoSpotScope(y.s.where, y.color) });
       const opp = pick(s=> s.who==='opp' && s.where.kind==='chapter');
       if(opp) cards.push({ k:'Opponents surprise you', t:rpMoveText(opp.s.atPly, opp.s.played)+' in '+opp.s.where.c.short,
-        d:ghoN(opp.s.list.length, 'game')+sc(opp)+' \u00b7 '+ghoSpotDetail(opp.s), f:sp(opp), y:opp });
+        d:ghoN(opp.s.list.length, 'game')+sc(opp)+(ghoWho(opp.s.list) ? ' \u00b7 by '+ghoWho(opp.s.list) : '')+' \u00b7 '+ghoSpotDetail(opp.s), f:sp(opp), y:opp });
       const you = pick(s=> s.who==='you' && s.where.kind==='chapter');
       if(you) cards.push({ k:'You leave your prep', t:rpMoveText(you.s.atPly, you.s.played)+' instead of '+rpMovesList(you.s.atPly, you.s.expected),
-        d:you.s.where.c.short+' \u00b7 '+ghoN(you.s.list.length, 'game')+sc(you), f:sp(you), y:you });
+        d:you.s.where.c.short+' \u00b7 '+ghoN(you.s.list.length, 'game')+sc(you)+(ghoWho(you.s.list) ? ' \u00b7 vs '+ghoWho(you.s.list) : ''), f:sp(you), y:you });
       const gap = pick(s=> s.who==='opp' && (s.where.kind==='trunk' || s.where.kind==='outside'));
       if(gap) cards.push({ k:'Biggest gap', t:rpMoveText(gap.s.atPly, gap.s.played)+(gap.s.where.kind==='trunk' ? ' against your '+gap.s.where.o.name : ' when you have '+sideWord(gap.color)),
-        d:ghoN(gap.s.list.length, 'game')+' \u00b7 no line for it'+sc(gap), f:sp(gap), y:gap });
+        d:ghoN(gap.s.list.length, 'game')+' \u00b7 no line for it'+sc(gap)+(ghoWho(gap.s.list) ? ' \u00b7 by '+ghoWho(gap.s.list) : ''), f:sp(gap), y:gap });
     }
     // how the losses go: one card for the line where it's clearest (3+ losses of the kind, 30%+ of its losses)
     const ql = !GH_FILTERS.len && rows.filter(x=> x.n.m.Lq >= 3 && x.n.m.Lq >= 0.3*x.n.m.L).sort((a, b)=> b.n.m.Lq - a.n.m.Lq || b.n.m.Lq/b.n.m.L - a.n.m.Lq/a.n.m.L || gOrd(a) - gOrd(b))[0];
@@ -32115,6 +32154,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(m.acc!=null) mid.push('Acc. '+m.acc);
       if(m.last) mid.push(ghoAgo(m.last));
       nc.appendChild(ghEl('div', 'gho-mid', mid.join(' \u00b7 ')));
+      const who = ghoWho(n.list, 3);          // who you met in it (2026-11-09)
+      if(who) nc.appendChild(ghEl('div', 'gho-who', 'vs '+who));
     }
     row.appendChild(nc);
     if(!m.n){ row.appendChild(ghEl('div', 'gho-c gho-c-empty', '')); return row; }
@@ -32403,6 +32444,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       ghoDrawBrief(loading ? null : model);
       ghoDrawInsights(loading ? { ins:[] } : model);
       ghoDrawGaps(loading || !model.rep ? null : model);
+      ghoDrawOpps(loading ? null : model);
       ghoDrawOj(loading ? null : model);
       ghoDrawEnds(loading ? null : model);
     }
@@ -32694,7 +32736,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       acts.push({ t:at!=null ? 'Review from '+rpMoveText(at, L.played) : 'Review', go:()=> ghOpenGame(last.g, at!=null ? { at:{ ply:at + 1 } } : undefined) });
       const l = rpLineFor(last.r);
       if(l) acts.push({ t:'Learn', line:l, mode:'learn' });
-      F.push({ tag:last===newest ? 'Latest game' : 'Latest in your openings', text:[t.name+(t.sub || '')+'. ', [t.depth, t.left].filter(Boolean).join(' ')], acts });
+      const vs = ghoOppOf(last.g), named = vs && (t.left || '').indexOf(vs)>=0;
+      F.push({ tag:last===newest ? 'Latest game' : 'Latest in your openings', text:[(vs && !named ? 'vs '+vs+': ' : '')+t.name+(t.sub || '')+'. ', [t.depth, t.left].filter(Boolean).join(' ')], acts });
     }
     const cf = ctBriefFact(W, week);            // a CLAMP letter again (2026-11-02)
     if(cf) F.push(cf);
@@ -32713,7 +32756,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const acts = [{ t:GT, go:games('s.'+u.L.spot+'.'+scope(u)) }];
         if(u.r.kind==='chapter'){ const c = RP.chs.get(u.r.chapterId); acts.push({ t:'Repertoire Lab', href:'https://repertoirelabs.com/chapter/'+encodeURIComponent(c.openingId)+'/'+encodeURIComponent(c.id) }); }
         acts.push({ t:'Play it out', go:()=> pxFromSpot(u.L, u.list, u.color, where(u), 'fact|Unprepared|Play it out') });
-        F.push({ tag:'Unprepared', cls:'is-bad', text:[[rpMoveText(u.L.atPly, u.L.played)], ' '+where(u)+', '+when(u.list.length)+'. You scored '+ghoPts(ghoMetrics(u.list))+'. '
+        const uw = ghoWho(u.list);
+        F.push({ tag:'Unprepared', cls:'is-bad', text:[[rpMoveText(u.L.atPly, u.L.played)], ' '+where(u)+', '+when(u.list.length)+(uw ? ', played by '+uw : '')+'. You scored '+ghoPts(ghoMetrics(u.list))+'. '
           +((u.L.expected || []).length ? 'You prepared '+rpMovesList(u.L.atPly, u.L.expected)+'.' : 'Your lines have no answer to it.')], acts });
       }
       const f = spots('you')[0];
@@ -32721,7 +32765,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         const acts = [{ t:GT, go:games('s.'+f.L.spot+'.'+scope(f)) }], l = rpLineFor(f.r);
         if(l){ acts.push({ t:'Learn', line:l, mode:'learn' }); acts.push({ t:'Practice', line:l, mode:'practice' }); }
         acts.push({ t:'Play it out', go:()=> pxFromSpot(f.L, f.list, f.color, where(f), 'fact|Forgot your line|Play it out') });
-        F.push({ tag:'Forgot your line', cls:'is-you', text:[[rpMoveText(f.L.atPly, f.L.played)], ' instead of '+rpMovesList(f.L.atPly, f.L.expected || [])+' '+where(f)+', '+when(f.list.length)+'.'], acts });
+        const fw = ghoWho(f.list);
+        F.push({ tag:'Forgot your line', cls:'is-you', text:[[rpMoveText(f.L.atPly, f.L.played)], ' instead of '+rpMovesList(f.L.atPly, f.L.expected || [])+' '+where(f)+', '+when(f.list.length)+(fw ? ', against '+fw : '')+'.'], acts });
       }
       // chapters met in these games
       const ch = new Map();
@@ -33032,7 +33077,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         t.appendChild(document.createTextNode(ghoGapWhere(y)));
         b.appendChild(t);
         const met = s.list.length===1 ? 'once' : s.list.length+' times';
-        b.appendChild(ghEl('span', 'gho-gap-d', (key==='opp' ? 'Met '+met : 'Played '+met)+' \u00b7 you scored '+ghoPts(s.m)
+        const who = ghoWho(s.list, 3);
+        b.appendChild(ghEl('span', 'gho-gap-d', (key==='opp' ? 'Met '+met+(who ? ', played by '+who : '') : 'Played '+met+(who ? ' against '+who : ''))+' \u00b7 you scored '+ghoPts(s.m)
           + (key==='opp' ? ' \u00b7 '+(s.expected.length ? 'you prepared '+rpMovesList(s.atPly, s.expected) : 'no line for it') : '')));
         b.title = 'Show '+(s.list.length===1 ? 'this game' : 'these '+s.list.length+' games')+', each on the move';
         li.appendChild(b);
@@ -33069,6 +33115,106 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     };
     draw('opp', L.opp); draw('you', L.you);
   }
+  /* ---- By opponent (2026-11-09, the user: "so we can attribute certain openings and certain patterns to certain
+     people"): each opponent in these games (with these filters), most games first: how many, how you scored, what was
+     played against your repertoire (the chapter the game reached, the opening before the chapters split, or the move
+     that took it out of your lines; Lichess's opening name without a repertoire) and, opened, each game with where it
+     left your prep and by whom, to review. */
+  var GHO_OPPS_N = 8, GHO_OPPS_SHOW = 8, GHO_OPPS_OPEN = new Set(), GHO_OPPS_LAST = [];
+  function ghoGameWhat(e){
+    const r = e.r;
+    if(r && RP){
+      if(r.kind==='chapter'){ const c = RP.chs.get(r.chapterId), o = c && RP.ops.get(c.openingId); if(o && c) return rpChapterPath(o, c); }
+      if(r.kind==='trunk'){ const o = RP.ops.get(r.openingId); if(o) return o.name; }
+      const L = r.left;
+      if(L && (L.who==='opp' || L.who==='you') && L.played) return rpMoveText(L.atPly, L.played)+', outside your repertoire';
+      return 'Outside your repertoire';
+    }
+    return ghFamily(e.g) || 'Opening not named';
+  }
+  function ghoGameLeft(e){
+    const r = e.r, L = r && r.left;
+    if(!L || !L.played || !(r.kind==='chapter' || r.kind==='trunk')) return '';
+    if(L.who==='opp') return 'they left your prep with '+rpMoveText(L.atPly, L.played);
+    if(L.who==='you') return 'you left your prep with '+rpMoveText(L.atPly, L.played);
+    return '';
+  }
+  function ghoOpps(model){
+    const E = ['white', 'black'].filter(c=> !model.sides[c].hidden).reduce((a, c)=> a.concat(model.sides[c].list || []), []);
+    const m = new Map();
+    E.forEach(e=>{
+      const n = ghoOppOf(e.g);
+      if(!n) return;
+      const k = n.toLowerCase();
+      let o = m.get(k);
+      if(!o){ o = { k, name:n, list:[], rating:null, rAt:-1 }; m.set(k, o); }
+      o.list.push(e);
+      if(e.opp!=null && e.at > o.rAt){ o.rating = e.opp; o.rAt = e.at; }
+    });
+    return Array.from(m.values()).map(o=>{
+      o.list.sort((a, b)=> b.at - a.at);
+      o.m = ghoMetrics(o.list); o.last = o.list[0].at;
+      const what = new Map();
+      o.list.forEach(e=>{ const w = ghoGameWhat(e); what.set(w, (what.get(w) || 0) + 1); });
+      o.what = Array.from(what.entries()).sort((a, b)=> b[1] - a[1] || a[0].localeCompare(b[0]));
+      return o;
+    }).sort((a, b)=> b.list.length - a.list.length || b.last - a.last || a.name.localeCompare(b.name));
+  }
+  function ghoDrawOpps(model){
+    const box = document.getElementById('gho-opps');
+    if(!box) return;
+    const O = model ? ghoOpps(model) : [];
+    GHO_OPPS_LAST = O;
+    box.hidden = !O.length;
+    if(box.hidden) return;
+    const ul = document.getElementById('gho-opps-list');
+    ul.textContent = '';
+    const shown = O.slice(0, Math.max(GHO_OPPS_N, GHO_OPPS_SHOW));
+    shown.forEach(o=>{
+      const open = GHO_OPPS_OPEN.has(o.k), li = ghEl('li', 'gho-opp'+(open ? ' is-open' : '')), b = ghEl('button', 'gho-opp-go');
+      b.type = 'button'; b.dataset.opp = o.k; b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const t = ghEl('span', 'gho-opp-t');
+      t.appendChild(ghEl('b', '', o.name));
+      if(o.rating!=null) t.appendChild(ghEl('span', 'gho-opp-r', ' '+o.rating));
+      b.appendChild(t);
+      b.appendChild(ghEl('span', 'gho-gap-d', ghoN(o.list.length, 'game')+' \u00b7 you scored '+ghoPts(o.m)+' \u00b7 last '+ghFormatDate(o.last)));
+      b.appendChild(ghEl('span', 'gho-opp-what', o.what.slice(0, 3).map(w=> w[0]+(w[1] > 1 ? ' \u00d7'+w[1] : '')).join(' \u00b7 ')+(o.what.length > 3 ? ' \u00b7 \u2026' : '')));
+      li.appendChild(b);
+      if(open){
+        const gl = ghEl('ul', 'gho-opp-games');
+        o.list.forEach((e, i)=>{
+          const gi = ghEl('li', 'gho-opp-g');
+          const res = e.res==='win' ? 'you won' : e.res==='loss' ? 'you lost' : 'drawn';
+          gi.appendChild(ghEl('span', 'gho-opp-gt', [ghFormatDate(e.at), 'you had '+(e.color==='white' ? 'White' : 'Black'), res, ghoGameWhat(e), ghoGameLeft(e)].filter(Boolean).join(' \u00b7 ')));
+          const rv = ghEl('button', 'gho-gap-l gho-gap-more', 'Review');
+          rv.type = 'button'; rv.dataset.oppk = o.k; rv.dataset.oppi = String(i);
+          rv.title = 'Open this game';
+          gi.appendChild(rv);
+          gl.appendChild(gi);
+        });
+        li.appendChild(gl);
+      }
+      ul.appendChild(li);
+    });
+    if(O.length > GHO_OPPS_N){
+      const li = ghEl('li', 'gho-gap-mores');
+      if(shown.length < O.length){ const n = Math.min(GHO_OPPS_N, O.length - shown.length), m = ghEl('button', 'gho-gap-more', 'Show '+n+' more'); m.type = 'button'; m.dataset.oppmore = 'more'; li.appendChild(m); }
+      if(shown.length > GHO_OPPS_N){ const f = ghEl('button', 'gho-gap-more', 'Show fewer'); f.type = 'button'; f.dataset.oppmore = 'fewer'; li.appendChild(f); }
+      ul.appendChild(li);
+    }
+  }
+  (function(){
+    const box = document.getElementById('gho-opps');
+    if(!box) return;
+    box.addEventListener('click', e=>{
+      const go = e.target.closest('.gho-opp-go');
+      if(go){ const k = go.dataset.opp; if(GHO_OPPS_OPEN.has(k)) GHO_OPPS_OPEN.delete(k); else GHO_OPPS_OPEN.add(k); ghoDrawOpps(GHO_LAST); const again = box.querySelector('.gho-opp-go[data-opp="'+CSS.escape(k)+'"]'); if(again) again.focus({ preventScroll:true }); return; }
+      const rv = e.target.closest('[data-oppk]');
+      if(rv){ const o = GHO_OPPS_LAST.find(x=> x.k===rv.dataset.oppk), en = o && o.list[Number(rv.dataset.oppi)]; if(en) ghOpenGame(en.g); return; }
+      const mr = e.target.closest('[data-oppmore]');
+      if(mr){ GHO_OPPS_SHOW = mr.dataset.oppmore==='more' ? Math.max(GHO_OPPS_N, GHO_OPPS_SHOW) + GHO_OPPS_N : GHO_OPPS_N; ghoDrawOpps(GHO_LAST); }
+    });
+  })();
   /* ---- Where your games end up (step 2, 2026-10-31): each game's endgame, from its moves. It begins where the phase bar
      puts it (hpfDivide: 6 or fewer pieces, or 8 or fewer once the queens are off). From there every kind of endgame
      the game goes through counts (the user's choice): a kind that lasts past the reply, or the last position, so a
@@ -42849,7 +42995,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const ex = L.expected || [], side = r.color==='white' ? 'White' : 'Black';
     const t = { name:'', sub:'', title:'', line:'', depth:'', left:'', also:'', go:'', show:false, games:null };
     const youText = ()=> 'You played '+played+'. '+(ex.length > 1 ? 'Your lines have ' : 'Your line has ')+rpMovesList(L.atPly, ex)+'.';
-    const oppText = ()=> 'Your opponent\u2019s '+played+' isn\u2019t in your repertoire.'+(ex.length ? ' You prepared '+rpMovesList(L.atPly, ex)+'.' : '');
+    const opp = ghoOppOf(S.game), oppS = opp ? opp+'\u2019s' : 'Your opponent\u2019s';      // by name, when the game says (2026-11-09)
+    const oppText = ()=> oppS+' '+played+' isn\u2019t in your repertoire.'+(ex.length ? ' You prepared '+rpMovesList(L.atPly, ex)+'.' : '');
     if(r.kind==='chapter' || r.kind==='trunk'){
       const K = rpLookup(r) || {};
       if(r.kind==='chapter'){
@@ -42877,7 +43024,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     } else {
       t.name = 'Not in your repertoire';
       if(L.who==='you') t.left = L.atPly===0 ? 'You played '+played+'. Your '+side+' repertoire starts '+rpMovesList(0, ex)+'.' : youText();
-      else if(L.who==='opp') t.left = L.atPly===0 ? 'Your opponent\u2019s '+played+' isn\u2019t covered by your '+side+' openings.' : oppText();
+      else if(L.who==='opp') t.left = L.atPly===0 ? oppS+' '+played+' isn\u2019t covered by your '+side+' openings.' : oppText();
     }
     if((L.who==='you' || L.who==='opp') && played && S.main[L.atPly]) t.go = 'Go to '+played;
     t.show = L.who==='you';
