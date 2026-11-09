@@ -7706,6 +7706,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="toggle active" data-val="default">Default</button>
         <button class="toggle" data-val="sequential">Sequential</button>
         <button class="toggle" data-val="strategic">Strategic</button>
+        <button class="toggle" data-val="gamereview">Game Review</button>
       </div>
       <div class="field-hint" id="anno-profile-hint">The color of the arrows and highlights you draw on a board.</div>
     </div>
@@ -11867,22 +11868,35 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     {key:'c', color:'#e8b339'}
   ];
   const DEFAULT_PEN_COLOR = '#2ecc71';
-  const heldPenKeys = new Set();
+  // The Game Review profile's pen keys (the user, 2026-11-08): hold a color's first letter while you draw. Z, F and C
+  // still work as in Default. Colors from ANNO_SEQ_COLORS.
+  const ANNO_REVIEW_KEYS = [
+    {key:'r', color:'#e5534b', name:'red'}, {key:'o', color:'#f97316', name:'orange'}, {key:'y', color:'#e8b339', name:'yellow'},
+    {key:'g', color:'#2ecc71', name:'green'}, {key:'b', color:'#3b9cff', name:'blue'}, {key:'p', color:'#8b5cf6', name:'purple'}
+  ];
+  function penKeysNow(){ return annoProfile()==='gamereview' ? ANNO_REVIEW_KEYS.concat(PEN_KEYS.filter(p=> p.key!=='r')) : PEN_KEYS; }
+  // Every letter held right now, and the ones a mark was drawn with since they went down (a key that is also a
+  // shortcut, the review's B, does its other job on release only when nothing was drawn with it).
+  const heldPenKeys = new Set(), penKeysUsed = new Set();
   document.addEventListener('keydown', (e)=>{
-    const k = e.key.toLowerCase();
-    if(PEN_KEYS.some(p=>p.key===k)) heldPenKeys.add(k);
+    const k = String(e.key || '').toLowerCase();
+    if(k.length!==1 || k<'a' || k>'z') return;
+    if(!heldPenKeys.has(k)) penKeysUsed.delete(k);
+    heldPenKeys.add(k);
   });
-  document.addEventListener('keyup', (e)=>{ heldPenKeys.delete(e.key.toLowerCase()); });
+  document.addEventListener('keyup', (e)=>{ heldPenKeys.delete(String(e.key || '').toLowerCase()); });
   window.addEventListener('blur', ()=> heldPenKeys.clear());
+  function penKeyWasUsed(k){ return penKeysUsed.has(k); }
   function currentPenColor(){
-    for(const p of PEN_KEYS){ if(heldPenKeys.has(p.key)) return p.color; }
+    for(const p of penKeysNow()){ if(heldPenKeys.has(p.key)) return p.color; }
     return DEFAULT_PEN_COLOR;
   }
-  // The held pen key's color, or null when no pen key is held.
-  function heldPenColor(){
-    for(const p of PEN_KEYS){ if(heldPenKeys.has(p.key)) return p.color; }
+  // The held pen key ({key, color}), or null when no pen key is held.
+  function heldPenKey(){
+    for(const p of penKeysNow()){ if(heldPenKeys.has(p.key)) return p; }
     return null;
   }
+  function heldPenColor(){ const p = heldPenKey(); return p ? p.color : null; }
 
   /* ---- arrow color profiles ----
      A profile decides the color of the marks the USER draws without a pen
@@ -11927,12 +11941,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const ANNO_PROFILES = {
     default:    { label:'Default' },
     sequential: { label:'Sequential' },
-    strategic:  { label:'Strategic' }
+    strategic:  { label:'Strategic' },
+    gamereview: { label:'Game Review' }
   };
   // Click order of the label in each board's hint row. A fourth profile is planned
   // but not designed yet: it gets an entry here and in ANNO_PROFILES when it
   // is built. Until then any other stored id behaves exactly like Default.
-  const ANNO_PROFILE_ORDER = ['default','sequential','strategic'];
+  const ANNO_PROFILE_ORDER = ['default','sequential','strategic','gamereview'];
+  // The profiles that work out a mark's color for you (Game Review is Default with more pen keys)
+  function annoDerived(){ const p = annoProfile(); return p==='sequential' || p==='strategic'; }
   // The two darkest colors get a light halo instead of the usual dark one,
   // or they sink into dark squares (Hustler, Outer Space, Game Boy, Felt).
   const ANNO_LIGHT_HALO = ['#8b5a2b','#1a1a1a'];
@@ -12110,12 +12127,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(id==='sequential') return head+' '+ANNO_SEQ_COLORS.slice(0,4).map(annoDot).join('')+'&#8230;';
     if(id==='strategic') return head+' '+annoDot(ANNO_STRATEGIC.w)+'W '+annoDot(ANNO_STRATEGIC.b)+'B '
       +annoDot(ANNO_STRATEGIC.wx)+annoDot(ANNO_STRATEGIC.bx)+'x';
+    if(id==='gamereview') return head+' '+ANNO_REVIEW_KEYS.map(p=> annoDot(p.color)).join('');
     return head;
   }
   function annoLabelTitle(id){
     if(id==='sequential') return 'Arrow colors follow the order you draw them on this position: '
       +ANNO_SEQ_NAMES.map((n,i)=> (i+1)+' '+n).join(', ')+', then green again. A highlight takes the color of the arrow before it. Click for Strategic.';
-    if(id==='strategic') return 'Arrow colors follow the side: W = White green, B = Black blue, x = a capture, White red, Black yellow. A highlight takes the color of the arrow before it. Click for Default.';
+    if(id==='strategic') return 'Arrow colors follow the side: W = White green, B = Black blue, x = a capture, White red, Black yellow. A highlight takes the color of the arrow before it. Click for Game Review.';
+    if(id==='gamereview') return 'Hold a color\'s first letter while you draw: '+ANNO_REVIEW_KEYS.map(p=> p.key.toUpperCase()+' '+p.name).join(', ')+'. No letter: green. Click for Default.';
     return 'Arrows use the pen color (hold Z, R, F or C to pick one). Click for Sequential: colors in the order you draw.';
   }
   // A strip of dots that must not break across lines.
@@ -12127,6 +12146,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(id==='strategic') return 'Colors follow the side that moves: <span class="anno-dots">White '+annoDot(ANNO_STRATEGIC.w)+'</span>, <span class="anno-dots">Black '+annoDot(ANNO_STRATEGIC.b)
       +'</span>, <span class="anno-dots">a White capture '+annoDot(ANNO_STRATEGIC.wx)+'</span>, <span class="anno-dots">a Black capture '+annoDot(ANNO_STRATEGIC.bx)
       +'</span>. A piece keeps its side all along the line you draw, and two arrows from one square are two ideas for the same piece. A highlight takes the color of the arrow before it.'+tail;
+    if(id==='gamereview') return 'Hold a color&#8217;s first letter while you draw an arrow or highlight a square: '
+      +ANNO_REVIEW_KEYS.map(p=> '<span class="anno-dots">'+annoDot(p.color)+' '+p.key.toUpperCase()+' '+p.name+'</span>').join(', ')
+      +'. No letter: green. Z, F and C still pick green, blue and yellow. On the review board B tapped on its own still plays the engine&#8217;s best move. Sneaky Checks keeps its own colors: there they are the answer.';
     // Where the label is: its tips line sits above some boards and below
     // others; Sneaky Checks has none, Game History only with a profile on.
     return 'The pen color: green, or hold Z, R, F or C while you draw for green, red, blue or yellow. You can also switch by clicking &#8220;Arrows&#8221; in the tips line above or below most boards.';
@@ -12402,7 +12424,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // `marks` - a right button's release, or a held finger's lift.
     function applyMark(marks, fromIdx, toIdx){
       const forced = (typeof forceColor==='function' ? forceColor() : forceColor);
-      const held = forced ? null : heldPenColor();
+      const hk = forced ? null : heldPenKey(), held = hk ? hk.color : null;
+      if(hk) penKeysUsed.add(hk.key);
       const color = forced || held || DEFAULT_PEN_COLOR;   // the same color as ever
       // A forced color is the drill's, so it is stored plain like the
       // app's own marks and no profile touches it. Anything else is a user
@@ -12411,7 +12434,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // Redrawing a mark removes it when it is the same mark. In Default
       // that means the same color, as always; with a profile on, a keyless
       // mark only matches a keyless one (its shown color is derived).
-      const prof = user && !marks.noProfile && annoProfile()!=='default';
+      const prof = user && !marks.noProfile && annoDerived();
       const sameAs = (exColor, exAuto)=> (prof && typeof exAuto==='boolean')
         ? (exAuto===auto && exColor===color) : exColor===color;
       if(toIdx===fromIdx){
@@ -41449,6 +41472,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvSay('Engine');
     return true;
   }
+  // In the Game Review arrow profile B is also the blue pen: the best move waits for B's release, and comes only when
+  // nothing was drawn while it was held.
+  var hvBWait = false;
+  document.addEventListener('keyup', (e)=>{
+    if(!hvBWait || String(e.key || '').toLowerCase()!=='b') return;
+    hvBWait = false;
+    if(!penKeyWasUsed('b') && HV_STATE && hvViewActive() && !pxPlaying()) hvPlayBest();
+  });
+  window.addEventListener('blur', ()=>{ hvBWait = false; });
   document.addEventListener('keydown', (e)=>{
     if(!HV_STATE || !hvViewActive()) return;
     if(document.querySelector('.modal-overlay.active')) return;   // Settings or a dialog has the keys
@@ -41482,7 +41514,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     else if(k==='e' || k==='E'){ e.preventDefault(); if(!e.repeat && !hvEKeyTab()) hvToggleHide(); }
     // B plays the best move (2026-11-02: it was Space, which is now held for Space + right-click, a square's CLAMP
     // box: hvSpace). Held down, it plays one.
-    else if(k==='b' || k==='B'){ e.preventDefault(); if(!e.repeat) hvPlayBest(); }
+    else if(k==='b' || k==='B'){ e.preventDefault(); if(!e.repeat){ if(annoProfile()==='gamereview') hvBWait = true; else hvPlayBest(); } }
     // T marks a tactic on the move on the board, or edits the one there (2026-11-03)
     else if(k==='t' || k==='T'){ e.preventDefault(); if(!e.repeat) hvTacKey(); }
     else if(k==='Escape'){ e.preventDefault(); if(HV_STATE.game._practice) pxBack(); else if(HV_STATE.game._puzzle) pzaReturn(); else showView('history'); }
