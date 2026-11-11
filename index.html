@@ -25153,6 +25153,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(oppEl._olHtml!==oppHtml){ oppEl.innerHTML = oppHtml; oppEl._olHtml = oppHtml; }
   }
 
+  // The move that led to ply p of the game shown, as its from and to squares (the two chess.com and Lichess light up, the
+  // user 2026-11-10): read off the positions before and after, so your move as you make it, theirs, a takeback and an older
+  // move you step back to all show their own. Castling: the king's two squares; en passant and promotion just work.
+  function olLastMove(p){
+    const P = roundOl && roundOl.plyStates;
+    if(!P || p < 1 || !P[p] || !P[p-1]) return null;
+    const a = P[p-1].board, b = P[p].board, me = P[p-1].turn, from = [], to = [];
+    for(let i = 0; i < 64; i++){
+      const x = a[i], y = b[i], had = !!x && x.color===me, has = !!y && y.color===me;
+      if(had && !(has && y.type===x.type)) from.push(i);
+      if(has && !(had && x.type===y.type)) to.push(i);
+    }
+    if(!from.length || !to.length) return null;
+    const king = (list, B)=> list.find(i=> B[i] && B[i].type==='k');
+    return { from: from.length > 1 ? (king(from, a) ?? from[0]) : from[0], to: to.length > 1 ? (king(to, b) ?? to[0]) : to[0] };
+  }
   function renderBoardOl(){
     if(!roundOl || !roundOl.state) return;
     olBoardEl.innerHTML='';
@@ -25166,12 +25182,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const targets = (live && activeFrom!=null && roundOl.phase==='live' && roundOl.myTurn)
       ? new Set(pzLegalMovesFrom(roundOl.state, activeFrom).map(m=>m.to))
       : null;
+    const lm = olLastMove(olEffectivePly());
     ranks.forEach(r=>{
       files.forEach(c=>{
         const idx = rcIdx(r,c);
         const sq = document.createElement('div');
         sq.className = 'sq ' + (((r+c)%2===0)?'dark':'light');
         sq.dataset.idx = idx;
+        if(lm && (idx===lm.from || idx===lm.to)) sq.classList.add('last-move');
         const piece = viewState.board[idx];
         if(piece){
           const wrap=document.createElement('span');
