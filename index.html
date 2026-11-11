@@ -5303,7 +5303,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      theme turns cream and a colored one (Drive-Thru's yellow, Game Boy's green) keeps its color */
   :root{ --pw-rim-white:var(--pw-white-fill,#f4ecd6); }
   @supports (color:rgb(from red r g b)){ :root{ --pw-rim-white:rgb(from var(--pw-white-fill,#fff) calc(r*.957) calc(g*.925) calc(b*.839)); } }
-  .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; } .hv-hl-p{ --hl:#c06bff; }
+  .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; } .hv-hl-p{ --hl:#c06bff; } .hv-hl-w{ --hl:#ffffff; }
   /* 65% see-through. The text over it: the skin's own, pushed to pure black or pure white, so it clears 4.5:1 on every skin, dark ones too */
   .hv-movelist{ --hl-a:.35; --hl-tx:var(--ink); }
   @supports (color:hsl(from red h s l)){ .hv-movelist{ --hl-tx:hsl(from var(--ink) 0 0 clamp(0, (l - 50)*100 + 50, 100)); } }
@@ -5345,6 +5345,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-hl-st{ position:absolute; z-index:-1; opacity:var(--hl-a); filter:blur(.45px); pointer-events:none; background:var(--hl);
     background:linear-gradient(90deg, color-mix(in srgb, var(--hl) 60%, transparent), transparent 10px, transparent calc(100% - 10px), color-mix(in srgb, var(--hl) 60%, transparent)),
       linear-gradient(180deg, color-mix(in srgb, var(--hl) 88%, transparent), color-mix(in srgb, var(--hl) 42%, transparent) 50%, color-mix(in srgb, var(--hl) 88%, transparent)); }
+  /* white (2026-11-11): on a pale page white ink alone barely shows, so its stroke keeps a faint edge in the page's own ink (on a dark
+     page that ink is light and the edge melts into the white) */
+  .hv-hl-st.hv-hl-w{ box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 55%, transparent); }
   .hv-movelist .hv-hl :is(.mv-san, .hv-var-num, .hv-com-inline, .hv-com-mv){ color:var(--hl-tx); }
   .hv-movelist .hv-hl .hv-com-mv{ text-decoration-color:currentColor; }
   .hv-movelist .hv-hl .mv-san:not(:empty):hover{ background:rgba(20,21,23,.16); }
@@ -5637,12 +5640,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
   .hv-bdg-pick:hover, .hv-clamp-pick:hover, .hv-hl-pick:hover{ background:var(--surface-2); }
   .hv-bdg-pick:focus-visible, .hv-clamp-pick:focus-visible, .hv-hl-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
-  .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(4, 36px); }
+  .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(5, 36px); }
   .hv-hl-sw{ display:block; width:26px; height:26px; border-radius:50%; background:color-mix(in srgb, var(--hl) 35%, transparent); box-shadow:inset 0 0 0 1px rgba(20,21,23,.4); }
   .hv-hl-pick.is-on .hv-hl-sw{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .hv-bdg-pick .hv-badge{ width:28px; height:28px; margin:0; font-size:13px; vertical-align:0; }
   .hv-bdg-pick.is-on .hv-badge{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
-  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(4, 44px); } .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ width:44px; height:44px; } }
+  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(5, 44px); } .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ width:44px; height:44px; } }
   /* the CLAMP row under it on a move of yours (2026-11-02): five checkboxes, every disc in its color, the ones on
      ringed like a picked badge; a refusal (the record full) under them, never widening the menu */
   .hv-clamp-pick .clamp-d{ width:28px; height:28px; font-size:13px; }
@@ -38595,7 +38598,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // A side line's highlight (2026-11-04, the user: alternate moves "stand out a little more along with" their comments; "the
   // main moves have a floating panel, the alternates have highlights"): the move menu's row on any move of the line, kept on
   // the line's first move as h:[[ref, code]] in the game's record.
-  const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }, { c:'p', name:'Purple' }];      // purple (2026-11-10): lines you worried about
+  const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }, { c:'p', name:'Purple' }, { c:'w', name:'White' }];      // purple (2026-11-10): lines you worried about; white 2026-11-11
   function hvHlClass(n){ return n && HV_HL.some(h=> h.c===n.hl) ? ' hv-hl hv-hl-'+n.hl : ''; }
   // The pen (the user, 2026-11-04): people go straight to the side, and going fast they drift low, then correct high. So one
   // straight stroke per line of text: a little high or low by turns, a little off level, ending a little early or late, never
@@ -38605,8 +38608,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!list) return;
     list.querySelectorAll('.hv-hl-st').forEach(s=> s.remove());
     list.querySelectorAll('.hv-hl-ink, .hv-nest.hv-hl').forEach(el=>{
-      const host = el.closest('.hv-var-line'), box = host.getBoundingClientRect(), code = /\bhv-hl-([ygbp])\b/.exec(el.closest('.hv-hl').className);
-      if(!code) return;
+      const host = el.closest('.hv-var-line'), box = host.getBoundingClientRect(), code = /\bhv-hl-([a-z])\b/.exec(el.closest('.hv-hl').className);
+      if(!code || !HV_HL.some(x=> x.c===code[1])) return;      // any color HV_HL lists (purple's strokes were once missing from a list kept here)
       let h = 7;
       for(let i = 0; i < el.textContent.length; i++) h = (h*31 + el.textContent.charCodeAt(i)) >>> 0;
       const rnd = ()=>{ h = (Math.imul(h, 1664525) + 1013904223) >>> 0; return h/4294967296; };
