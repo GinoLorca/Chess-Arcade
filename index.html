@@ -5303,7 +5303,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      theme turns cream and a colored one (Drive-Thru's yellow, Game Boy's green) keeps its color */
   :root{ --pw-rim-white:var(--pw-white-fill,#f4ecd6); }
   @supports (color:rgb(from red r g b)){ :root{ --pw-rim-white:rgb(from var(--pw-white-fill,#fff) calc(r*.957) calc(g*.925) calc(b*.839)); } }
-  .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; }
+  .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; } .hv-hl-p{ --hl:#c06bff; }
   /* 65% see-through. The text over it: the skin's own, pushed to pure black or pure white, so it clears 4.5:1 on every skin, dark ones too */
   .hv-movelist{ --hl-a:.35; --hl-tx:var(--ink); }
   @supports (color:hsl(from red h s l)){ .hv-movelist{ --hl-tx:hsl(from var(--ink) 0 0 clamp(0, (l - 50)*100 + 50, 100)); } }
@@ -5340,7 +5340,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (pointer:coarse){ .hv-lr-acts .btn-link, .hv-lr-tab{ min-height:44px; } }
   .hv-movelist .hv-hl-ink, .hv-movelist .hv-nest.hv-hl{ padding:2px 6px; color:var(--hl-tx); -webkit-box-decoration-break:clone; box-decoration-break:clone; }
   .hv-movelist .hv-nest.hv-hl{ padding:2px 4px; }
-  .hv-hl-st{ position:absolute; z-index:-1; background:var(--hl); opacity:var(--hl-a); filter:blur(.6px); border-radius:1.5px; pointer-events:none; }
+  /* (2026-11-10, the user: "it still looks very boxy"): a chisel tip's slanted ends (clip-path, set per stroke), more ink where the
+     pen lands and lifts, a lighter streak down the middle, so the ground shows through like a real highlighter's */
+  .hv-hl-st{ position:absolute; z-index:-1; opacity:var(--hl-a); filter:blur(.45px); pointer-events:none; background:var(--hl);
+    background:linear-gradient(90deg, color-mix(in srgb, var(--hl) 60%, transparent), transparent 10px, transparent calc(100% - 10px), color-mix(in srgb, var(--hl) 60%, transparent)),
+      linear-gradient(180deg, color-mix(in srgb, var(--hl) 88%, transparent), color-mix(in srgb, var(--hl) 42%, transparent) 50%, color-mix(in srgb, var(--hl) 88%, transparent)); }
   .hv-movelist .hv-hl :is(.mv-san, .hv-var-num, .hv-com-inline, .hv-com-mv){ color:var(--hl-tx); }
   .hv-movelist .hv-hl .hv-com-mv{ text-decoration-color:currentColor; }
   .hv-movelist .hv-hl .mv-san:not(:empty):hover{ background:rgba(20,21,23,.16); }
@@ -5633,12 +5637,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
   .hv-bdg-pick:hover, .hv-clamp-pick:hover, .hv-hl-pick:hover{ background:var(--surface-2); }
   .hv-bdg-pick:focus-visible, .hv-clamp-pick:focus-visible, .hv-hl-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
-  .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(3, 36px); }
+  .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(4, 36px); }
   .hv-hl-sw{ display:block; width:26px; height:26px; border-radius:50%; background:color-mix(in srgb, var(--hl) 35%, transparent); box-shadow:inset 0 0 0 1px rgba(20,21,23,.4); }
   .hv-hl-pick.is-on .hv-hl-sw{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .hv-bdg-pick .hv-badge{ width:28px; height:28px; margin:0; font-size:13px; vertical-align:0; }
   .hv-bdg-pick.is-on .hv-badge{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
-  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(3, 44px); } .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ width:44px; height:44px; } }
+  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(4, 44px); } .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ width:44px; height:44px; } }
   /* the CLAMP row under it on a move of yours (2026-11-02): five checkboxes, every disc in its color, the ones on
      ringed like a picked badge; a refusal (the record full) under them, never widening the menu */
   .hv-clamp-pick .clamp-d{ width:28px; height:28px; font-size:13px; }
@@ -6107,6 +6111,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .anno-profile:hover{ color:var(--ink); }
   .anno-profile:not(.is-default) .anno-profile-name{ color:var(--ink); }
   .pen-dot.pen-dot-ring{ box-shadow:0 0 0 1px var(--ink-soft); }
+  .pen-dot.pen-dot-white{ box-shadow:0 0 0 1px var(--ink-soft); }
   .anno-dots{ white-space:nowrap; }
   .anno-profile-off{ display:none; }
   .anno-hint.collapsed > .anno-profile{ display:none; }
@@ -11914,7 +11919,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // still work as in Default. Colors from ANNO_SEQ_COLORS.
   const ANNO_REVIEW_KEYS = [
     {key:'r', color:'#e5534b', name:'red'}, {key:'o', color:'#f97316', name:'orange'}, {key:'y', color:'#e8b339', name:'yellow'},
-    {key:'g', color:'#2ecc71', name:'green'}, {key:'b', color:'#3b9cff', name:'blue'}, {key:'p', color:'#8b5cf6', name:'purple'}
+    {key:'g', color:'#2ecc71', name:'green'}, {key:'b', color:'#3b9cff', name:'blue'}, {key:'p', color:'#8b5cf6', name:'purple'},
+    {key:'w', color:'#ffffff', name:'white'}        // transparent white (2026-11-10; the user asked for T, which is the review's tactic key)
   ];
   function penKeysNow(){ return annoProfile()==='gamereview' ? ANNO_REVIEW_KEYS.concat(PEN_KEYS.filter(p=> p.key!=='r')) : PEN_KEYS; }
   // Every letter held right now, and the ones a mark was drawn with since they went down (a key that is also a
@@ -11946,7 +11952,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
        default    -- the free pen above, exactly as it always was. Stored
                      colors are drawn as stored; nothing is derived.
        sequential -- arrows take ANNO_SEQ_COLORS in the order they were
-                     drawn on the position, the 11th starting over at green.
+                     drawn on the position, the 12th starting over at green (transparent white,
+                     the last, from 2026-11-10).
        strategic  -- by side and captures: White green, Black blue, a White
                      capture red, a Black capture yellow.
      In both, a highlight takes the color of the step you are on: the arrow
@@ -11976,9 +11983,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      Kept self-contained -- constants plus one pure resolver -- so it can be
      copied to Repertoire Lab and the planners as is. */
   const ANNO_SEQ_COLORS = ['#2ecc71','#e8b339','#3b9cff','#e5534b','#f97316',
-                           '#8b5cf6','#f472b6','#7dd3fc','#8b5a2b','#1a1a1a'];
+                           '#8b5cf6','#f472b6','#7dd3fc','#8b5a2b','#1a1a1a','#ffffff'];
   const ANNO_SEQ_NAMES  = ['green','yellow','blue','red','orange',
-                           'purple','pink','light blue','brown','black'];
+                           'purple','pink','light blue','brown','black','white'];
   const ANNO_STRATEGIC  = { w:'#2ecc71', b:'#3b9cff', wx:'#e5534b', bx:'#e8b339' };
   const ANNO_PROFILES = {
     default:    { label:'Default' },
@@ -12158,7 +12165,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     setAnnoProfile(ANNO_PROFILE_ORDER[(i+1) % ANNO_PROFILE_ORDER.length]);
   }
   function annoDot(color){
-    return '<span class="pen-dot'+(ANNO_LIGHT_HALO.indexOf(color)>=0 ? ' pen-dot-ring' : '')+'" style="background:'+color+';"></span>';
+    return '<span class="pen-dot'+(ANNO_LIGHT_HALO.indexOf(color)>=0 ? ' pen-dot-ring' : '')+(color==='#ffffff' ? ' pen-dot-white' : '')+'" style="background:'+color+';"></span>';
   }
   // One profile's text in a board's label. Every label holds all three, on
   // top of each other in one grid cell with only the active one visible,
@@ -12190,7 +12197,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       +'</span>. A piece keeps its side all along the line you draw, and two arrows from one square are two ideas for the same piece. A highlight takes the color of the arrow before it.'+tail;
     if(id==='gamereview') return 'Hold a color&#8217;s first letter while you draw an arrow or highlight a square: '
       +ANNO_REVIEW_KEYS.map(p=> '<span class="anno-dots">'+annoDot(p.color)+' '+p.key.toUpperCase()+' '+p.name+'</span>').join(', ')
-      +'. No letter: green. Z, F and C still pick green, blue and yellow. On the review board B tapped on its own still plays the engine&#8217;s best move. Sneaky Checks keeps its own colors: there they are the answer.';
+      +'. White is see-through. No letter: green. Z, F and C still pick green, blue and yellow. On the review board B tapped on its own still plays the engine&#8217;s best move. Sneaky Checks keeps its own colors: there they are the answer.';
     // Where the label is: its tips line sits above some boards and below
     // others; Sneaky Checks has none, Game History only with a profile on.
     return 'The pen color: green, or hold Z, R, F or C while you draw for green, red, blue or yellow. You can also switch by clicking &#8220;Arrows&#8221; in the tips line above or below most boards.';
@@ -12391,13 +12398,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       line.setAttribute('d', pathD);
       line.setAttribute('fill','none');
       line.setAttribute('stroke', color);
-      line.setAttribute('stroke-opacity', '.88');
+      const op = color==='#ffffff' ? '.55' : '.88';          // transparent white is see-through
+      line.setAttribute('stroke-opacity', op);
       line.setAttribute('stroke-width', shaft);
       line.setAttribute('stroke-linecap','butt');
       const tri = document.createElementNS(ARROW_SVG_NS,'polygon');
       tri.setAttribute('points', triPoints);
       tri.setAttribute('fill', color);
-      tri.setAttribute('fill-opacity', '.88');
+      tri.setAttribute('fill-opacity', op);
       g.appendChild(outline); g.appendChild(outlineTri); g.appendChild(line); g.appendChild(tri);
       svgEl.appendChild(g);
     });
@@ -38569,7 +38577,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // A side line's highlight (2026-11-04, the user: alternate moves "stand out a little more along with" their comments; "the
   // main moves have a floating panel, the alternates have highlights"): the move menu's row on any move of the line, kept on
   // the line's first move as h:[[ref, code]] in the game's record.
-  const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }];
+  const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }, { c:'p', name:'Purple' }];      // purple (2026-11-10): lines you worried about
   function hvHlClass(n){ return n && HV_HL.some(h=> h.c===n.hl) ? ' hv-hl hv-hl-'+n.hl : ''; }
   // The pen (the user, 2026-11-04): people go straight to the side, and going fast they drift low, then correct high. So one
   // straight stroke per line of text: a little high or low by turns, a little off level, ending a little early or late, never
@@ -38579,7 +38587,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!list) return;
     list.querySelectorAll('.hv-hl-st').forEach(s=> s.remove());
     list.querySelectorAll('.hv-hl-ink, .hv-nest.hv-hl').forEach(el=>{
-      const host = el.closest('.hv-var-line'), box = host.getBoundingClientRect(), code = /\bhv-hl-([ygb])\b/.exec(el.closest('.hv-hl').className);
+      const host = el.closest('.hv-var-line'), box = host.getBoundingClientRect(), code = /\bhv-hl-([ygbp])\b/.exec(el.closest('.hv-hl').className);
       if(!code) return;
       let h = 7;
       for(let i = 0; i < el.textContent.length; i++) h = (h*31 + el.textContent.charCodeAt(i)) >>> 0;
@@ -38588,9 +38596,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       [...el.getClientRects()].forEach((r, i)=>{
         if(r.width < 1) return;
         const high = (i % 2 ? -first : first)*(.6 + rnd()*1.4), rise = (rnd() - .5)*3, ht = r.height - 1 + rnd()*1.5;
-        const x0 = Math.max(-2, r.left - box.left + rnd()*5 - 3), x1 = Math.min(box.width, r.right - box.left + rnd()*6 - 2), wd = x1 - x0;
+        const x0 = Math.max(-3, r.left - box.left + rnd()*6 - 4), x1 = Math.min(box.width, r.right - box.left + rnd()*6 + 1), wd = x1 - x0;
+        // the chisel tip: both ends slanted the same way, a little differently each time; the top and bottom edges not quite level
+        const a = 2 + rnd()*4, c = 2 + rnd()*4, t1 = rnd()*1.4, t2 = rnd()*1.4;
         const s = hvEl('span', 'hv-hl-st hv-hl-'+code[1]);
-        s.style.cssText = 'left:'+x0.toFixed(1)+'px;top:'+(r.top - box.top + high + (r.height - ht)/2).toFixed(1)+'px;width:'+wd.toFixed(1)+'px;height:'+ht.toFixed(1)+'px;transform:rotate('+Math.atan2(rise, wd).toFixed(4)+'rad)';
+        s.style.cssText = 'left:'+x0.toFixed(1)+'px;top:'+(r.top - box.top + high + (r.height - ht)/2).toFixed(1)+'px;width:'+wd.toFixed(1)+'px;height:'+ht.toFixed(1)+'px;transform:rotate('+Math.atan2(rise, wd).toFixed(4)+'rad)'
+          +';clip-path:polygon('+a.toFixed(1)+'px 0, 100% '+t1.toFixed(1)+'px, calc(100% - '+c.toFixed(1)+'px) 100%, 0 calc(100% - '+t2.toFixed(1)+'px))';
         host.appendChild(s);
       });
     });
@@ -45591,10 +45602,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   var NB_MARK = '\u2063', NB_MAX = 10000, NB_MAX_DG = 20;
   var NB_LIMIT_MSG = 'That\u2019s the 10,000-character limit for a note.';
   // diagram color codes -> app constants (ANNO_SEQ_COLORS; G/R/Y/B are Lichess's %cal letters)
-  var NB_CODES = { G:'#2ecc71', Y:'#e8b339', B:'#3b9cff', R:'#e5534b', O:'#f97316', P:'#8b5cf6', K:'#f472b6', L:'#7dd3fc', N:'#8b5a2b', X:'#1a1a1a' };
+  var NB_CODES = { G:'#2ecc71', Y:'#e8b339', B:'#3b9cff', R:'#e5534b', O:'#f97316', P:'#8b5cf6', K:'#f472b6', L:'#7dd3fc', N:'#8b5a2b', X:'#1a1a1a', W:'#ffffff' };
   var NB_LABEL_RE = /^[A-Za-z0-9.+#=\- ]{0,40}$/;
   var NB_FEN_RE = /^[1-8pnbrqkPNBRQK]{1,8}(\/[1-8pnbrqkPNBRQK]{1,8}){7} [wb] (-|(?=[KQkq])K?Q?k?q?) (-|[a-h][36]) \d{1,3} \d{1,4}$/;
-  var NB_ARROW_RE = /^[GYBROPKLNX][a-h][1-8][a-h][1-8]$/, NB_SQ_RE = /^[GYBROPKLNX][a-h][1-8]$/;
+  var NB_ARROW_RE = /^[GYBROPKLNXW][a-h][1-8][a-h][1-8]$/, NB_SQ_RE = /^[GYBROPKLNXW][a-h][1-8]$/;
   var NB_UCI_RE = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
   var NB_EXTRA_RE = /^[a-z][a-z0-9-]{0,19}( [A-Za-z0-9 .,:;+#=\/-]{1,200})?$/;   // fields a later version may add: kept verbatim
   var NB_KNOWN = ['fen', 'arrows', 'squares', 'ply', 'line', 'flip'];
