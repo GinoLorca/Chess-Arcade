@@ -3730,6 +3730,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .gh-clamp-l:focus-visible .clamp-d{ outline:2px solid var(--focus); outline-offset:2px; }
   .gh-clamp-l.is-open .clamp-d{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .clamp-d.is-wait{ outline:1.5px dashed var(--cw, currentColor); outline-offset:1.5px; }      /* moves only in a waiting other version */
+  .clamp-d.is-theirs{ border-color:var(--cw); background:var(--surface); color:color-mix(in srgb, var(--cw) 60%, var(--ink)); }      /* their CLAMP slip (2026-11-12) */
   @media (pointer:coarse){ .gh-clamp{ margin:-6px -7px -4px; } .gh-clamp-l{ width:32px; height:32px; } }      /* the discs sit evenly between the ECO and the time line; the targets stop short of it */
   /* a letter's box: the moves marked with it (Go to move, x), and Mark a move */
   .gh-clamp-pop{
@@ -3889,6 +3890,31 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      view's; each letter's own color (CLAMP_K) for its discs, bars, counts and arrows. The grid and the table scroll
      sideways inside their cards on a narrow screen (their letters stay at the left), never the page. ---- */
   .ct{ display:flex; flex-direction:column; gap:14px; }
+  /* Mine | Theirs (2026-11-12) over the cards; theirs drawn as rings (.clamp-d.is-theirs), punished / missed in the bars
+     (solid, striped, pale: not said) and on the Moments cards */
+  .ct-side{ display:inline-flex; align-self:flex-start; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--surface); }
+  .ct-sideb{ font:inherit; font-size:13px; font-weight:600; line-height:1; padding:8px 16px; border:0; background:none; color:var(--ink-soft); cursor:pointer; }
+  .ct-sideb[aria-pressed="true"]{ background:var(--ink); color:var(--surface); }
+  .ct-sideb:focus-visible{ outline:2px solid var(--focus); outline-offset:-3px; }
+  @media (pointer:coarse){ .ct-sideb{ min-height:44px; padding:8px 20px; } }
+  .ct-fig.is-theirs{ background:var(--surface); box-shadow:inset 0 0 0 5px var(--cw); color:color-mix(in srgb, var(--cw) 60%, var(--ink)); }
+  .ct-bar.ct-obar{ grid-template-columns:18px 92px minmax(0,1fr) auto; }      /* (.ct-bar comes later: both classes, so this wins) */
+  .ct-bar.ct-obar b{ white-space:nowrap; }
+  .ct-obar .ct-tr{ display:flex; }
+  .ct-obar .ct-tr i{ flex:0 0 auto; border-radius:0; }
+  .ct-obar .ct-tr i.is-p{ background:var(--cw); }
+  .ct-obar .ct-tr i.is-m{ background:repeating-linear-gradient(135deg, var(--cw) 0 3px, transparent 3px 6px); }
+  .ct-obar .ct-tr i.is-n{ background:color-mix(in srgb, var(--cw) 30%, transparent); }
+  .ct-okey{ display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:6px; font-size:12px; color:var(--ink-soft); }
+  .ct-okey i{ display:inline-block; width:16px; height:8px; margin-right:5px; border-radius:4px; vertical-align:0; }
+  .ct-okey i.is-p{ background:var(--ink-soft); }
+  .ct-okey i.is-m{ background:repeating-linear-gradient(135deg, var(--ink-soft) 0 3px, transparent 3px 6px); }
+  .ct-okey i.is-n{ background:color-mix(in srgb, var(--ink-soft) 30%, transparent); }
+  .ct-chip.is-out{ padding-left:10px; }
+  .ct-mout{ padding:3px 6px; border-radius:5px; font:600 10px/1 "JetBrains Mono",monospace; letter-spacing:.04em; text-transform:uppercase; }
+  .ct-mout.is-p{ background:var(--good-soft); color:color-mix(in srgb, var(--good) 55%, var(--ink)); }
+  .ct-mout.is-m{ background:var(--bad-soft); color:color-mix(in srgb, var(--bad) 55%, var(--ink)); }
+  .ct-mout.is-n{ background:var(--surface-2); color:var(--ink-soft); }
   .ct[hidden], .ct-card[hidden], .ct-src[hidden]{ display:none; }
   .ct-card{ min-width:0; display:flex; flex-direction:column; gap:10px; padding:14px 16px; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); }
   :root[data-skin="bauhaus"] .ct-card{ border-radius:0; border-width:2px; }
@@ -5303,7 +5329,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      theme turns cream and a colored one (Drive-Thru's yellow, Game Boy's green) keeps its color */
   :root{ --pw-rim-white:var(--pw-white-fill,#f4ecd6); }
   @supports (color:rgb(from red r g b)){ :root{ --pw-rim-white:rgb(from var(--pw-white-fill,#fff) calc(r*.957) calc(g*.925) calc(b*.839)); } }
-  .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; } .hv-hl-p{ --hl:#c06bff; } .hv-hl-w{ --hl:#ffffff; }
+  .hv-hl-y{ --hl:#fff44f; } .hv-hl-g{ --hl:#57ff3a; } .hv-hl-b{ --hl:#5cdcff; } .hv-hl-p{ --hl:#c06bff; } .hv-hl-w{ --hl:#ffffff; } .hv-hl-r{ --hl:#ff3b3b; }
   /* 65% see-through. The text over it: the skin's own, pushed to pure black or pure white, so it clears 4.5:1 on every skin, dark ones too */
   .hv-movelist{ --hl-a:.35; --hl-tx:var(--ink); }
   @supports (color:hsl(from red h s l)){ .hv-movelist{ --hl-tx:hsl(from var(--ink) 0 0 clamp(0, (l - 50)*100 + 50, 100)); } }
@@ -5366,6 +5392,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     border-radius:50%; font:800 8px/1 "JetBrains Mono",monospace; color:#fff;
   }
   .hv-badge.hv-own + .hv-clamp-m{ margin-left:5px; }        /* clear of your badge's ring */
+  .hv-clamp-m.is-theirs{ background:var(--surface); box-shadow:inset 0 0 0 1.5px var(--cw); color:color-mix(in srgb, var(--cw) 60%, var(--ink)); }
   .hv-pop{
     position:absolute; z-index:20; min-width:200px; display:flex; flex-direction:column; padding:4px;
     background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 28px rgba(0,0,0,.3);
@@ -5640,17 +5667,36 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ display:flex; align-items:center; justify-content:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:none; cursor:pointer; }
   .hv-bdg-pick:hover, .hv-clamp-pick:hover, .hv-hl-pick:hover{ background:var(--surface-2); }
   .hv-bdg-pick:focus-visible, .hv-clamp-pick:focus-visible, .hv-hl-pick:focus-visible{ outline:2px solid var(--focus); outline-offset:-1px; }
-  .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(5, 36px); }
+  .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(6, 36px); }
   .hv-hl-sw{ display:block; width:26px; height:26px; border-radius:50%; background:color-mix(in srgb, var(--hl) 35%, transparent); box-shadow:inset 0 0 0 1px rgba(20,21,23,.4); }
   .hv-hl-pick.is-on .hv-hl-sw{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .hv-bdg-pick .hv-badge{ width:28px; height:28px; margin:0; font-size:13px; vertical-align:0; }
   .hv-bdg-pick.is-on .hv-badge{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
-  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(5, 44px); } .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ width:44px; height:44px; } }
+  @media (pointer:coarse){ .hv-bdg-grid{ grid-template-columns:repeat(5, 44px); gap:0; } .hv-bdg-grid.hv-hl-grid{ grid-template-columns:repeat(6, 44px); } .hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick{ width:44px; height:44px; } }
   /* the CLAMP row under it on a move of yours (2026-11-02): five checkboxes, every disc in its color, the ones on
      ringed like a picked badge; a refusal (the record full) under them, never widening the menu */
   .hv-clamp-pick .clamp-d{ width:28px; height:28px; font-size:13px; }
   .hv-clamp-pick.is-on .clamp-d{ box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
   .hv-clamp-msg{ width:0; min-width:100%; box-sizing:border-box; padding:0 10px 4px; font-size:12px; line-height:1.35; color:var(--bad); }
+  /* whose slip (2026-11-12): Mine | Theirs in the row's head; theirs as rings (.clamp-d.is-theirs); a letter the other side
+     has on the move faded; punished or missed under the name line, never widening the menu */
+  .hv-clamp-whorow{ display:flex; align-items:center; justify-content:space-between; gap:8px; width:0; min-width:100%; box-sizing:border-box; padding:2px 10px 4px; }
+  .hv-clamp-whol{ font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+  .hv-clamp-who{ display:inline-flex; flex:0 0 auto; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+  .hv-clamp-whob{ font:inherit; font-size:11.5px; font-weight:600; line-height:1; padding:4px 9px; border:0; background:none; color:var(--ink-soft); cursor:pointer; }
+  .hv-clamp-whob.is-on{ background:var(--ink); color:var(--surface); }
+  .hv-clamp-whob:focus-visible, .hv-clamp-outb:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; }
+  .hv-clamp-pick.is-other .clamp-d{ opacity:.38; }
+  .hv-clamp-pick .clamp-d.is-theirs{ box-shadow:inset 0 0 0 2px var(--cw); }
+  .hv-clamp-pick.is-on .clamp-d.is-theirs{ background:color-mix(in srgb, var(--cw) 22%, var(--surface)); box-shadow:inset 0 0 0 2px var(--cw), 0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
+  .hv-clamp-out{ width:0; min-width:100%; box-sizing:border-box; padding:4px 10px 6px; }
+  .hv-clamp-out[hidden], .hv-clamp-outbs[hidden]{ display:none; }
+  .hv-clamp-outq{ font-size:12px; line-height:1.35; color:var(--ink-soft); }
+  .hv-clamp-outbs{ display:flex; gap:6px; margin-top:6px; }
+  .hv-clamp-outb{ flex:1 1 0; font:inherit; font-size:12px; font-weight:600; padding:5px 8px; border:1px solid var(--line); border-radius:999px; background:none; color:var(--ink); cursor:pointer; }
+  .hv-clamp-outb.is-on{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  @media (pointer:coarse){ .hv-clamp-whob{ min-height:40px; padding:0 14px; } .hv-clamp-outb{ min-height:40px; } }
+  .hv-sq-ckd.is-theirs{ background:rgba(20,21,23,.82); box-shadow:inset 0 0 0 calc(var(--sq) * .045) var(--cw), 0 0 0 1.5px rgba(255,255,255,.9), 0 1px 3px rgba(0,0,0,.4); }
   /* the move on the board's CLAMP letters (hvClampSqDraw): in the bottom-left corner of the squares they're about (the
      badge has the top-right), side by side; three or more on one square smaller, three a row going up. White on the
      letter's color with the badge's white ring: they read on every skin's squares */
@@ -8393,6 +8439,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
          Your pattern, your last 24 marked games letter by letter, where the marked moves happen, and every marked move as a
          board. Built in the script (ctRender); nothing here is guessed by the engine. -->
     <section class="ct" id="ct" role="tabpanel" aria-labelledby="gh-site-all" hidden>
+      <div class="ct-side" id="ct-side" role="group" aria-label="Whose slips"><button type="button" class="ct-sideb" data-side="mine" aria-pressed="true">Mine</button><button type="button" class="ct-sideb" data-side="theirs" aria-pressed="false">Theirs</button></div>
       <div class="ct-card ct-empty" id="ct-empty" hidden></div>
       <section class="ct-card ct-pat" id="ct-pat" aria-labelledby="ct-pat-k" hidden></section>
       <section class="ct-card" id="ct-grid" aria-labelledby="ct-grid-h" hidden></section>
@@ -28258,9 +28305,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const gid = String(g.id), id = 'an-'+gid;
     if(!gnIsAn(id)) return 'same';
     if(HV_STATE && hvAnnId()===id){
-      const S = HV_STATE, old = hvClampListOf(S), oldQ = hvClampSqOf(S), before = hvAnnText(false).length;
-      hvClampOnto(S, gnClampList({ k:mutate(old.map(x=> x.slice())) }));      // a mark taken off takes its squares
-      if(!hvAnnFits(before)){ hvClampOnto(S, old, oldQ); return 'full'; }
+      const S = HV_STATE, old = hvClampListOf(S), oldQ = hvClampSqOf(S), oldO = hvClampOListOf(S), before = hvAnnText(false).length;
+      hvClampOnto(S, gnClampList({ k:mutate(old.map(x=> x.slice())) }));      // a mark taken off takes its squares (theirs stay, but where yours now are)
+      if(!hvAnnFits(before)){ hvClampOnto(S, old, oldQ, oldO); return 'full'; }
       hvAnnSave();
       return 'ok';
     }
@@ -28270,16 +28317,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!A || typeof A!=='object' || Array.isArray(A)) A = { v:1, l:[], c:[], m:[] };
     const k = gnClampList({ k:mutate(gnClampList(A)) });
     const out = { v:1, l:'l' in A ? A.l : [], c:'c' in A ? A.c : [], m:'m' in A ? A.m : [] };
-    if('b' in A) out.b = A.b;
+    GN_AN_KNOWN.forEach(f=>{ if(!(f in out) && f in A) out[f] = A[f]; });       // badges, tactics, highlights ... as they are
     out.k = k;
     if('q' in A) out.q = gnClampSqList(A, k);          // the squares of the marks kept
-    if('t' in A) out.t = A.t;                          // the tactics, as they are (2026-11-03)
-    const t = JSON.stringify(Object.assign(out, gnAnExtra(A)));
+    if('o' in A) out.o = gnClampOList(Object.assign({}, A, { k })).map(gnClampORow);      // theirs, but where yours now are
+    const t = JSON.stringify(gnAnCanon(Object.assign(out, gnAnExtra(A))));          // the fields in the order the review writes them
     if(t===cur) return 'same';
     if(t.length > GN_MAX) return 'full';
     gnSetNote(id, t, g);
     const tree = HV_TREES.get(gid);
-    if(tree) hvClampOnto(tree, k, out.q || []);
+    if(tree) hvClampOnto(tree, k, out.q || [], gnClampOList(out));
     return 'ok';
   }
   // A letter's box: the moves of this game marked with it, in game order (the move as you'd write it, your note,
@@ -34213,11 +34260,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      nothing touches nothing (CT.sig, CT.msig); boards fill in as they come on screen. Nothing is guessed by the engine. ---- */
   const CT_DAYS = 30, CT_MIN = 5, CT_LAST = 12, CT_GRID = 24, CT_HALF = 12, CT_MOM_N = 16;
   const CT_PHASES = ['Opening', 'Middlegame', 'Endgame'];
-  var CT = { sig:'', msig:'', m:{ ch:'', b:null }, shown:CT_MOM_N, model:null, back:null, y:null, ps:null, psN:0, gx:null };     // gx: the grid's sideways scroll (null: never moved)
+  var CT = { sig:'', msig:'', m:{ ch:'', b:null, out:'' }, shown:CT_MOM_N, model:null, back:null, y:null, ps:null, psN:0, gx:null, side:ctSideLoad() };     // gx: the grid's sideways scroll (null: never moved)
   var CT_DRILL = null;          // filters a CLAMP drill-down set (a letter, losses, a date): put back on return, unless changed since
   var CT_RP = new Map();        // game id -> the review's replay of a marked game (ctReplay)
   var CT_IO = null, CT_MS = 0, CT_DFMT = null;
   function ctOn(){ return GH_UI.view==='clamp'; }
+  // Mine | Theirs (2026-11-12): the tab reads your marks (k) or the slips of theirs you marked (o), remembered on this device
+  // (read while CT itself is made, before any const below it exists: the key is written out)
+  function ctSideLoad(){ try{ return localStorage.getItem('wavyChessPrepClampSide')==='theirs' ? 'theirs' : 'mine'; }catch(e){ return 'mine'; } }
+  function ctT(){ return CT.side==='theirs'; }
+  // a game's marks for the side shown, as [ply, letter, note?]
+  function ctMarks(gid){ return ctT() ? gnClampOOf(gid).map(x=> x[2] ? [x[0], x[1], x[2]] : [x[0], x[1]]) : gnClampOf(gid); }
+  function ctSide(v){
+    v = v==='theirs' ? 'theirs' : 'mine';
+    if(CT.side===v) return;
+    CT.side = v;
+    try{ localStorage.setItem('wavyChessPrepClampSide', v); }catch(e){}
+    CT.m = { ch:'', b:null, out:'' };
+    CT.shown = CT_MOM_N;
+    CT.gx = null;
+    CT.sig = CT.msig = '';
+    ghRender();
+  }
   function ctHas(e, ch){ return e.k.some(x=> x[1]===ch); }
   // games per letter over entries L ({ k }): { C:n, L:n, A:n, M:n, P:n }
   function ctCount(L){
@@ -34250,7 +34314,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(s <= 0.5) return '1 game in '+Math.max(2, Math.round(1/s))+' has '+a+ch;
     return Math.min(9, Math.round(s*10))+' games in 10 have '+a+ch;
   }
-  function ctDisc(K){ const d = ghEl('span', 'clamp-d is-on', K.ch); d.style.background = K.color; d.setAttribute('aria-hidden', 'true'); return d; }
+  function ctDisc(K, t){
+    const d = ghEl('span', 'clamp-d is-on'+(t ? ' is-theirs' : ''), K.ch);
+    if(t) d.style.setProperty('--cw', K.color); else d.style.background = K.color;
+    d.setAttribute('aria-hidden', 'true');
+    return d;
+  }
   // a marked game as the review replays it (its moves through the review's resolver: a Chess960 castle or a bad move ends
   // it, as there), kept per game, moves and marks: how far it goes (can), the phases (hpfDivide, standard games only, as
   // the review's phase card), the Black-first offset of a set-up game (off) and, for the boards, the position before each
@@ -34258,7 +34327,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // up to there doesn't depend on the moves after it (the endgame's rule implies the middlegame's), so a marked move's
   // phase is the same as over the whole game, at a fraction of the work
   function ctReplay(g){
-    const id = String(g.id), mv = String(g.moves || '').trim(), K = gnClampOf(id), upTo = K.reduce((t, x)=> Math.max(t, x[0]), 0);
+    const id = String(g.id), mv = String(g.moves || '').trim(), K = gnClampOf(id).concat(gnClampOOf(id)), upTo = K.reduce((t, x)=> Math.max(t, x[0]), 0);
     const key = mv+'|'+(g.variant || '')+'|'+(g.initialFen || '')+'|'+(g._summary ? 1 : 0)+'|'+upTo+'|'+K.map(x=> x[0]).join(',');
     let r = CT_RP.get(id);
     if(r && r.key===key) return r;
@@ -34304,7 +34373,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     Object.keys(GN.notes).forEach(id=>{
       if(!gnIsAn(id)) return;
       const n = GN.notes[id], gid = id.slice(3);
-      if(!n || !n.g || ccIsId(gid) || have.has(gid) || GH_STATE.ids.has(gid) || !gnClampOf(gid).length) return;
+      if(!n || !n.g || ccIsId(gid) || have.has(gid) || GH_STATE.ids.has(gid) || !ctMarks(gid).length) return;
       const g = GH_STATE.extras.get(gid) || ghGameFromSummary(Object.assign({}, n, { id:gid }));
       if(!ghVsComputer(g)) out.push(g);
     });
@@ -34319,18 +34388,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // Not marked yet: your losses of the last 30 days (the Date filter's days when it is shorter) with no letters
     const df = f.date ? (f.date==='year' ? new Date(new Date(now).getFullYear(), 0, 1).getTime() : now - Number(f.date)*86400e3) : 0;
     const lossFrom = Math.max(from, df), lossDate = lossFrom===from ? '30' : f.date;
-    const G = [];
+    const G = [], T = ctT();
     let loss = 0;
     scope.forEach(g=>{
-      const k = gnClampOf(String(g.id)), at = Number(g.createdAt) || 0, res = ghGameResult(g, u);
-      if(k.length) G.push({ g, k, q:gnClampSqOf(String(g.id)), at, res, color:ghMyColor(g, u)==='white' ? 'white' : 'black' });
-      else if(res==='loss' && at >= lossFrom && ctHasMine(g, u)) loss++;
+      const id = String(g.id), k = ctMarks(id), at = Number(g.createdAt) || 0, res = ghGameResult(g, u);
+      // theirs: their squares from the entries, and punished or missed by move (o)
+      const O = T && k.length ? gnClampOOf(id) : null, o = {};
+      if(O) O.forEach(x=>{ if(x[3] && !o[x[0]]) o[x[0]] = x[3]; });
+      if(k.length) G.push({ g, k, q:O ? O.flatMap(x=> x[4].map(sq=> [x[0], x[1], sq])) : gnClampSqOf(id), o:O ? o : null, at, res, color:ghMyColor(g, u)==='white' ? 'white' : 'black' });
+      else if(!T && res==='loss' && at >= lossFrom && ctHasMine(g, u)) loss++;        // Not marked yet: your own side only
     });
     G.sort((a, b)=> b.at - a.at);
     // nothing marked here: are there marks outside the Filters, or in another site's tab? (the empty card says so)
     let any = G.length > 0, other = false;
-    if(!any) any = all.some(g=> gnClampOf(String(g.id)).length > 0);
-    if(!any && GH_UI.site!=='all') other = ghBaseList('all').some(g=> gnClampOf(String(g.id)).length > 0);
+    if(!any) any = all.some(g=> ctMarks(String(g.id)).length > 0);
+    if(!any && GH_UI.site!=='all') other = ghBaseList('all').some(g=> ctMarks(String(g.id)).length > 0);
     const byId = new Map(G.map(e=> [String(e.g.id), e]));
     // the pattern's window: the last 30 days with 5+ marked games, else your last 12; before it, the same kind of window
     const in30 = G.filter(e=> e.at >= from), days = in30.length >= CT_MIN;
@@ -34350,7 +34422,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const L = GG.filter(e=> ctHas(e, K.ch));
       return { K, n:L.length, score:ctPts(L), a:half ? half.a.filter(e=> ctHas(e, K.ch)).length : 0, b:half ? half.b.filter(e=> ctHas(e, K.ch)).length : 0 };
     });
-    return { scope, G, any, other, loading:!base.length && ghTabBusy(), byId, days, W, B, nW, nG, P, GG, half, rows, M:null, loss, lossDate,
+    return { T, scope, G, any, other, loading:!base.length && ghTabBusy(), byId, days, W, B, nW, nG, P, GG, half, rows, M:null, loss, lossDate,
       lossWhen: lossFrom===from ? 'in the last '+CT_DAYS+' days' : f.date==='7' ? 'in the last 7 days' : 'this year' };
   }
   // every marked move: its phase and clock only where the review replays it (standard games, as far as their moves go).
@@ -34358,12 +34430,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ctModelMoves(md){
     const M = [];
     md.G.forEach(e=>{
-      const r = e.r = ctReplay(e.g), mine = e.color==='white' ? 'w' : 'b';
+      const r = e.r = ctReplay(e.g), mine = e.color==='white' ? 'w' : 'b', clock = md.T ? (mine==='w' ? 'b' : 'w') : mine;      // theirs: their clock
       e.k.forEach(x=>{
         const p = x[0], ok = r.std && p <= r.can;
         let ck = null;
-        if(ok){ try{ ck = ghbClocks(e.g, p - 1, mine); }catch(err){ ck = null; } }
-        M.push({ e, p, ch:x[1], note:x[2] || '', ph: ok && r.d ? hpfPhaseOf(r.d, p - 1) : null, clk: ck ? { low:!!ck.trouble } : null });
+        if(ok){ try{ ck = ghbClocks(e.g, p - 1, clock); }catch(err){ ck = null; } }
+        M.push({ e, p, ch:x[1], note:x[2] || '', ph: ok && r.d ? hpfPhaseOf(r.d, p - 1) : null, clk: ck ? { low:!!ck.trouble } : null, out: e.o ? e.o[p] || '' : '' });
       });
     });
     M.sort((a, b)=> b.e.at - a.e.at || b.p - a.p || 'CLAMP'.indexOf(a.ch) - 'CLAMP'.indexOf(b.ch));
@@ -34376,14 +34448,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // what the cards are drawn from: the same games (loaded or not), marks (notes too), Filters, tab and hour draw nothing again
   function ctSig(md){
-    return [GH_UI.site, JSON.stringify(Object.assign({}, GH_FILTERS, { ck:'' })), Math.floor(ghoBriefNow()/36e5), md.scope.length, md.loss, md.any ? 1 : 0, md.other ? 1 : 0,
-      md.loading ? 1 : 0, md.G.map(e=> e.g.id+'@'+e.at+e.res+(e.g._summary ? 's' : '')+JSON.stringify(e.k)+(e.q.length ? JSON.stringify(e.q) : '')).join(';')].join('|');
+    return [GH_UI.site, CT.side, JSON.stringify(Object.assign({}, GH_FILTERS, { ck:'' })), Math.floor(ghoBriefNow()/36e5), md.scope.length, md.loss, md.any ? 1 : 0, md.other ? 1 : 0,
+      md.loading ? 1 : 0, md.G.map(e=> e.g.id+'@'+e.at+e.res+(e.g._summary ? 's' : '')+JSON.stringify(e.k)+(e.q.length ? JSON.stringify(e.q) : '')+(e.o ? JSON.stringify(e.o) : '')).join(';')].join('|');
   }
   function ctRender(base){
     const sec = document.getElementById('ct'), t0 = performance.now();
     const md = ctModel(base);
     const cnt = document.getElementById('gh-count');
-    const ct = md.loading ? '' : ghoN(md.G.length, 'marked game')+' of '+ghoN(md.scope.length, 'game')+' against people';
+    const ct = md.loading ? '' : (md.T ? ghoN(md.G.length, 'game')+' with their slips marked' : ghoN(md.G.length, 'marked game'))+' of '+ghoN(md.scope.length, 'game')+' against people';
+    document.querySelectorAll('#ct-side .ct-sideb').forEach(b=>{ const on = b.dataset.side===CT.side; if(b.getAttribute('aria-pressed')!==String(on)) b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     if(cnt.textContent!==ct) cnt.textContent = ct;
     const sig = ctSig(md);
     if(sig!==CT.sig || !CT.model){
@@ -34401,24 +34474,99 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const ids = ['ct-pat', 'ct-grid', 'ct-where'], empty = document.getElementById('ct-empty');
     const show = md.G.length > 0;
     ids.forEach(id=>{ document.getElementById(id).hidden = !show; });
-    document.getElementById('ct-src').hidden = !show;
+    const src = document.getElementById('ct-src');
+    src.hidden = !show;
+    src.textContent = md.T ? 'From the slips of theirs you marked by hand, punished or missed as you said it (filled in from your reply\u2019s badge when that was plain). The Filters above apply.'
+      : 'From the CLAMP letters you put on your games by hand. Nothing here is guessed by the engine. The Filters above apply.';
     empty.textContent = '';
     empty.hidden = show || md.loading;      // games still loading: the footer says so
     if(!show){
       if(empty.hidden) return;
       // nothing marked here: how to mark; or your marks are outside the Filters, or in another site's tab
       const out = md.any && ghActiveCount() > (GH_FILTERS.ck ? 1 : 0), tab = !md.any && md.other;
-      empty.appendChild(ghEl('h3', 'ct-h', out ? 'No marked games match the Filters' : tab ? 'No marked games in this tab' : 'No CLAMP marks yet'));
-      empty.appendChild(ghEl('p', 'ct-sub', out ? 'Your games with CLAMP letters are outside the Filters you set.' : tab ? 'Your games with CLAMP letters are in the other site\u2019s games: see them in All.'
-        : 'Mark a move with its letter: tap a letter under a game\u2019s opening in Games, or right-click a move in a review (press and hold on a phone) and use the CLAMP row. Your pattern shows here.'));
+      if(md.T){
+        empty.appendChild(ghEl('h3', 'ct-h', out ? 'No games with their slips match the Filters' : tab ? 'No games with their slips in this tab' : 'No slips of theirs marked yet'));
+        empty.appendChild(ghEl('p', 'ct-sub', out ? 'Your games with slips of theirs marked are outside the Filters you set.' : tab ? 'Your games with slips of theirs marked are in the other site\u2019s games: see them in All.'
+          : 'In a review, right-click one of their moves (press and hold on a phone), set the CLAMP row to Theirs and pick its letters. How often you punish their slips shows here.'));
+      } else {
+        empty.appendChild(ghEl('h3', 'ct-h', out ? 'No marked games match the Filters' : tab ? 'No marked games in this tab' : 'No CLAMP marks yet'));
+        empty.appendChild(ghEl('p', 'ct-sub', out ? 'Your games with CLAMP letters are outside the Filters you set.' : tab ? 'Your games with CLAMP letters are in the other site\u2019s games: see them in All.'
+          : 'Mark a move with its letter: tap a letter under a game\u2019s opening in Games, or right-click a move in a review (press and hold on a phone) and use the CLAMP row. Your pattern shows here.'));
+      }
       const b = ghEl('button', 'btn btn-ghost ct-empty-b', out ? 'Clear filters' : tab ? 'Show All' : 'Go to Games');
       b.type = 'button'; b.dataset.act = out ? 'clear' : tab ? 'all' : 'to-games'; b.dataset.fid = 'empty';
       empty.appendChild(b);
       return;
     }
-    ctDrawPat(md);
+    if(md.T) ctDrawPatO(md); else ctDrawPat(md);
     ctDrawGrid(md);
     ctDrawWhere(md);
+  }
+  // Theirs (2026-11-12, the user: the eval swung because "my opponent had the loose piece" and the better move wasn't played):
+  // how often you punished the slips of theirs you marked, over the pattern's window. A slip: one move of theirs you marked,
+  // its letters together (punished or missed is said once for the move). L: the model's moves, newest first
+  function ctSlips(L){
+    const by = new Map();
+    L.forEach(m=>{ const key = m.e.g.id+'|'+m.p; let x = by.get(key); if(!x){ x = { e:m.e, p:m.p, out:m.out, chs:[] }; by.set(key, x); } x.chs.push(m.ch); });
+    return [...by.values()];
+  }
+  function ctDrawPatO(md){
+    const box = document.getElementById('ct-pat'), ids = new Set(md.W.map(e=> String(e.g.id)));
+    box.textContent = '';
+    const S = ctSlips(md.M.filter(m=> ids.has(String(m.e.g.id)))), n = S.length, cnt = (L, o)=> L.filter(x=> x.out===o).length;
+    const np = cnt(S, 'p'), nm = cnt(S, 'm'), nn = n - np - nm;
+    const per = CLAMP_K.map(K=>{ const L = S.filter(x=> x.chs.indexOf(K.ch) >= 0); return { K, n:L.length, p:cnt(L, 'p'), m:cnt(L, 'm') }; });
+    // their most common letter; a tie: the one in their newest slip (then C L A M P)
+    const best = Math.max(...per.map(x=> x.n)), tied = per.filter(x=> x.n===best);
+    let top = tied[0];
+    if(tied.length > 1) for(const x of S){ const y = tied.find(z=> x.chs.indexOf(z.K.ch) >= 0); if(y){ top = y; break; } }
+    const K = top.K, head = ghEl('div', 'ct-head');
+    const h = ghEl('h3', 'ct-k', md.days ? 'Their slips \u00b7 last '+CT_DAYS+' days' : 'Their slips \u00b7 your last '+ghoN(md.W.length, 'game')+' with them');
+    h.id = 'ct-pat-k';
+    head.append(h, ghEl('span', 'ct-n', ghoN(n, 'slip')+' in '+ghoN(md.W.length, 'game')));
+    box.appendChild(head);
+    const two = ghEl('div', 'ct-two'), hero = ghEl('div', 'ct-hero'), fig = ghEl('div', 'ct-fig is-theirs', K.ch);
+    fig.style.setProperty('--cw', K.color);
+    fig.setAttribute('aria-hidden', 'true');
+    let vs = 'Their most common slip: '+K.what+' ('+top.n+'). '+(top.n===1 ? (top.p ? 'You punished it.' : top.m ? 'You missed it.' : 'Not said yet whether you punished it.') : 'You punished '+top.p+' of those '+top.n+'.');
+    if(nn) vs += ' '+(nn===1 ? '1 slip isn\u2019t' : nn+' slips aren\u2019t')+' said yet: punished or missed is in the review\u2019s move menu.';
+    vs += ' You scored '+ghoPct(ctPts(md.W))+' in these games.';
+    hero.append(fig, ghEl('div', 'ct-big', np+' of '+n), ghEl('div', 'ct-what', 'of their slips you punished'), ghEl('div', 'ct-vs', vs));
+    const acts = ghEl('div', 'ct-acts'), act = (t, out, fid, lab)=>{ const a = ghEl('button', 'ct-l', t); a.type = 'button'; a.dataset.act = 'momo'; a.dataset.out = out; a.dataset.fid = fid; a.setAttribute('aria-label', lab); acts.appendChild(a); };
+    if(nm) act('See the ones you missed', 'm', 'pat|missed', 'See the moments of the '+ghoN(nm, 'slip')+' of theirs you missed');
+    act('See them all', '', 'pat|all', 'See every slip of theirs you marked');
+    hero.appendChild(acts);
+    two.appendChild(hero);
+    // each letter: its slips across the window's width, punished (solid), missed (striped), not said (pale); a row opens them
+    const bars = ghEl('div', 'ct-bars');
+    bars.appendChild(ghEl('h4', 'ct-k', 'By letter \u00b7 punished of their slips'));
+    per.forEach(x=>{
+      const b = ghEl(x.n ? 'button' : 'div', 'ct-bar ct-obar'), tr = ghEl('span', 'ct-tr');
+      [['p', x.p], ['m', x.m], ['n', x.n - x.p - x.m]].forEach(([c, v])=>{ const i = ghEl('i', 'is-'+c); i.style.width = (n ? 100*v/n : 0).toFixed(1)+'%'; i.style.setProperty('--cw', x.K.color); tr.appendChild(i); });
+      b.append(ctDisc(x.K, true), ghEl('span', 'ct-bar-n', x.K.short), tr, ghEl('b', '', x.n ? x.p+' of '+x.n : '0'));
+      if(x.n){
+        b.type = 'button'; b.dataset.act = 'mom'; b.dataset.ch = x.K.ch; b.dataset.fid = 'bar|'+x.K.ch;
+        b.setAttribute('aria-label', x.K.name+': '+ghoN(x.n, 'slip')+' of theirs, you punished '+x.p+' and missed '+x.m+'. Show them');
+      }
+      bars.appendChild(b);
+    });
+    const key = ghEl('div', 'ct-okey');
+    key.setAttribute('aria-hidden', 'true');
+    [['p', 'punished'], ['m', 'missed']].concat(nn ? [['n', 'not said']] : []).forEach(([c, t])=>{ const k = ghEl('span', ''); k.append(ghEl('i', 'is-'+c), document.createTextNode(t)); key.appendChild(k); });
+    bars.appendChild(key);
+    two.appendChild(bars);
+    box.appendChild(two);
+    // both sides: your own marked moves over the same days (the same games when the window is your last ones with theirs)
+    const from = ghoBriefNow() - CT_DAYS*86400e3;
+    const mine = (md.days ? md.scope.filter(g=> (Number(g.createdAt) || 0) >= from) : md.W.map(e=> e.g)).map(g=> gnClampOf(String(g.id))).filter(k=> k.length);
+    const mm = mine.reduce((t, k)=> t + new Set(k.map(x=> x[0])).size, 0), mc = {};
+    mine.forEach(k=> k.forEach(x=>{ mc[x[1]] = (mc[x[1]] || 0) + 1; }));
+    const mtop = CLAMP_K.reduce((a, X)=> (mc[X.ch] || 0) > (mc[a.ch] || 0) ? X : a, CLAMP_K[0]);
+    let bt = 'You marked '+ghoN(mm, 'slip')+' of yours '+(md.days ? 'in the same '+CT_DAYS+' days' : 'in these games')+', '+ghoN(n, 'slip')+' of theirs.';
+    if(mm) bt += mtop.ch===K.ch ? ' '+K.short+' top both lists.' : ' Yours: mostly '+mtop.what+'. Theirs: mostly '+K.what+'.';
+    const both = ghEl('div', 'ct-todo ct-both');
+    both.append(ghEl('span', 'ct-k', 'Both sides'), ghEl('span', 'ct-todo-t', bt));
+    box.appendChild(both);
   }
   function ctDrawPat(md){
     const box = document.getElementById('ct-pat'), P = md.P, K = CLAMP_BY[P.ch];
@@ -34481,9 +34629,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function ctDrawGrid(md){
     const box = document.getElementById('ct-grid'), GG = md.GG.slice().reverse(), n = GG.length, u = ghMe(), H = md.half;
     box.textContent = '';
-    const h = ghEl('h3', 'ct-h', n===1 ? 'Your last marked game' : 'Your last '+n+' marked games');
+    const T = md.T, h = ghEl('h3', 'ct-h', T ? (n===1 ? 'Your last game with their slips' : 'Your last '+n+' games with their slips') : n===1 ? 'Your last marked game' : 'Your last '+n+' marked games');
     h.id = 'ct-grid-h';
-    box.append(h, ghEl('p', 'ct-sub', 'One column per game, oldest on the left. A filled letter: you marked that kind of mistake in the game. A column opens the game at its first marked move.'));
+    box.append(h, ghEl('p', 'ct-sub', T ? 'One column per game, oldest on the left. A ringed letter: you marked that kind of slip of theirs in the game. A column opens the game at its first marked move.'
+      : 'One column per game, oldest on the left. A filled letter: you marked that kind of mistake in the game. A column opens the game at its first marked move.'));
     const sc = ghEl('div', 'ct-scroll'), g = ghEl('div', 'ct-g');
     g.style.gridTemplateColumns = 'var(--ct-lw) repeat('+n+', minmax(var(--ct-cw), 1fr)) 46px'+(H ? ' 76px' : '')+' 52px';
     g.style.minWidth = 'calc(var(--ct-lw) + '+n+' * (var(--ct-cw) + 2px) + '+(H ? 174 : 98)+'px)';
@@ -34491,10 +34640,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const lab = ghEl('div', 'ct-gc ct-glab');
     lab.appendChild(ghEl('span', 'ct-gh'));
     CLAMP_K.forEach(K=>{
-      const b = ghEl('button', 'ct-gl');
-      b.type = 'button'; b.dataset.act = 'games'; b.dataset.ch = K.ch; b.dataset.fid = 'gl|'+K.ch;
-      b.append(ctDisc(K), ghEl('span', 'ct-gl-n', K.short));
-      b.setAttribute('aria-label', K.name+': show your games with it');
+      const b = ghEl(T ? 'span' : 'button', 'ct-gl');
+      if(!T){ b.type = 'button'; b.dataset.act = 'games'; b.dataset.ch = K.ch; b.dataset.fid = 'gl|'+K.ch; b.setAttribute('aria-label', K.name+': show your games with it'); }
+      b.append(ctDisc(K, T), ghEl('span', 'ct-gl-n', K.short));
       lab.appendChild(b);
     });
     lab.appendChild(ghEl('span', 'ct-gr ct-grl', 'Result'));
@@ -34504,7 +34652,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const b = ghEl('button', 'ct-gc ct-gcol'), go = e.k.find(x=> x[0] <= e.r.can), opp = ghOppName(ghPlayers(e.g, u).opp);
       b.type = 'button'; b.dataset.gid = String(e.g.id); b.dataset.fid = 'gc|'+e.g.id;
       b.appendChild(ghEl('span', 'ct-gh'));
-      CLAMP_K.forEach(K=>{ const c = ghEl('span', 'ct-gx'); c.appendChild(ctHas(e, K.ch) ? ctDisc(K) : ghEl('span', 'ct-ring')); b.appendChild(c); });
+      CLAMP_K.forEach(K=>{ const c = ghEl('span', 'ct-gx'); c.appendChild(ctHas(e, K.ch) ? ctDisc(K, T) : ghEl('span', 'ct-ring')); b.appendChild(c); });
       const r = ghEl('span', 'ct-gr'), ri = ghEl('i', 'is-'+e.res);
       r.appendChild(ri);
       b.appendChild(r);
@@ -34570,8 +34718,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const h = ghEl('h3', 'ct-h', 'Where they happen');
     h.id = 'ct-where-h';
     const off = M.length - md.phN;
-    box.append(h, ghEl('p', 'ct-sub', 'Your marked moves, counted. An outlined count is where a letter shows up most in its group. Phase: as the review\u2019s phase card divides the game.'
-      +(md.clkN ? ' Low on time: under 10% of your starting time left before the move ('+md.clkN+' of '+ghoN(M.length, 'move')+' had clocks).' : '')
+    box.append(h, ghEl('p', 'ct-sub', (md.T ? 'Their slips you marked, counted.' : 'Your marked moves, counted.')+' An outlined count is where a letter shows up most in its group. Phase: as the review\u2019s phase card divides the game.'
+      +(md.clkN ? ' Low on time: under 10% of '+(md.T ? 'their' : 'your')+' starting time left before the move ('+md.clkN+' of '+ghoN(M.length, 'move')+' had clocks).' : '')
       +(off ? ' '+(off===1 ? '1 move' : off+' moves')+' from Chess960, other variants or set-up games '+(off===1 ? 'isn\u2019t' : 'aren\u2019t')+' in Phase'+(md.clkN ? ' or Clock' : '')+'.' : '')));
     const groups = [['phase', 'Phase', ['0', '1', '2']], ['color', 'Color', ['white', 'black']], ['speed', 'Speed', md.sp]];
     if(md.clkN) groups.push(['clock', 'Clock', ['low']]);
@@ -34590,7 +34738,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const tr = ghEl('tr'), th = ghEl('th', 'ct-wr'), sp = ghEl('span', 'ct-wrn');
       tr.style.setProperty('--c', K.color);
       th.scope = 'row';
-      sp.append(ctDisc(K), document.createTextNode(K.short));
+      sp.append(ctDisc(K, md.T), document.createTextNode(K.short));
       th.appendChild(sp);
       tr.appendChild(th);
       const mine = M.filter(m=> m.ch===K.ch);
@@ -34622,11 +34770,12 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!md || !md.G.length){ box.hidden = true; box.textContent = ''; CT.msig = ''; return; }
     if(CT.ps!==PIECE_SVG){ CT.ps = PIECE_SVG; CT.psN++; }          // a new piece set: the boards drawn again
     // a letter (or one of Where's groups) with no moves left here (the Filters changed, its last mark went): back to All
-    if(CT.m.ch && !md.M.some(x=> x.ch===CT.m.ch)){ CT.m = { ch:'', b:null }; CT.shown = CT_MOM_N; }
-    else if(CT.m.b && !md.M.some(x=> x.ch===CT.m.ch && ctBucket(x, CT.m.b.g)===CT.m.b.v)){ CT.m = { ch:CT.m.ch, b:null }; CT.shown = CT_MOM_N; }
-    const m = CT.m, bk = m.b, L = md.M.filter(x=> (!m.ch || x.ch===m.ch) && (!bk || ctBucket(x, bk.g)===bk.v));
+    if(CT.m.ch && !md.M.some(x=> x.ch===CT.m.ch)){ CT.m = { ch:'', b:null, out:'' }; CT.shown = CT_MOM_N; }
+    else if(CT.m.b && !md.M.some(x=> x.ch===CT.m.ch && ctBucket(x, CT.m.b.g)===CT.m.b.v)){ CT.m = { ch:CT.m.ch, b:null, out:CT.m.out }; CT.shown = CT_MOM_N; }
+    if(CT.m.out && (!md.T || !md.M.some(x=> x.out===CT.m.out))){ CT.m = Object.assign({}, CT.m, { out:'' }); CT.shown = CT_MOM_N; }
+    const m = CT.m, bk = m.b, L = md.M.filter(x=> (!m.ch || x.ch===m.ch) && (!bk || ctBucket(x, bk.g)===bk.v) && (!m.out || x.out===m.out));
     const shown = L.slice(0, Math.max(CT_MOM_N, CT.shown));
-    const msig = CT.sig+'|'+m.ch+'|'+(bk ? bk.g+':'+bk.v : '')+'|'+shown.length+'|'+CT.psN;
+    const msig = CT.sig+'|'+m.ch+'|'+(bk ? bk.g+':'+bk.v : '')+'|'+m.out+'|'+shown.length+'|'+CT.psN;
     if(msig===CT.msig && box.firstChild){ box.hidden = false; return; }
     const fa = document.activeElement, fid = fa && box.contains(fa) && fa.dataset ? fa.dataset.fid || '' : '';
     CT.msig = msig;
@@ -34634,7 +34783,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     box.textContent = '';
     const head = ghEl('div', 'ct-mom-h'), ht = ghEl('div', ''), h = ghEl('h3', 'ct-h', 'Moments');
     h.id = 'ct-mom-h';
-    ht.append(h, ghEl('p', 'ct-sub', 'Every move you marked, newest first: the position before it, the move drawn in its letter\u2019s color. A card opens the review at that move.'));
+    ht.append(h, ghEl('p', 'ct-sub', md.T ? 'Every slip of theirs you marked, newest first: the position before their move, the move drawn in its letter\u2019s color, punished or missed as you said it. A card opens the review at that move.'
+      : 'Every move you marked, newest first: the position before it, the move drawn in its letter\u2019s color. A card opens the review at that move.'));
     head.appendChild(ht);
     const chips = ghEl('div', 'ct-chips');
     chips.setAttribute('role', 'group');
@@ -34642,13 +34792,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const chip = (ch, n)=>{
       const K = CLAMP_BY[ch], b = ghEl('button', 'ct-chip'+(K ? '' : ' is-all'));
       b.type = 'button'; b.dataset.act = 'chip'; b.dataset.ch = ch; b.dataset.fid = 'chip|'+(ch || 'all');
-      if(K) b.append(ctDisc(K), document.createTextNode(String(n))); else b.textContent = 'All '+n;
-      b.setAttribute('aria-pressed', (ch ? m.ch===ch : !m.ch && !bk) ? 'true' : 'false');
+      if(K) b.append(ctDisc(K, md.T), document.createTextNode(String(n))); else b.textContent = 'All '+n;
+      b.setAttribute('aria-pressed', (ch ? m.ch===ch : !m.ch && !bk && !m.out) ? 'true' : 'false');
       b.setAttribute('aria-label', K ? K.name+': '+(n===1 ? '1 move' : n+' moves') : 'All: '+(n===1 ? '1 move' : n+' moves'));
       chips.appendChild(b);
     };
     chip('', md.M.length);
     CLAMP_K.forEach(K=>{ const n = md.M.filter(x=> x.ch===K.ch).length; if(n) chip(K.ch, n); });
+    // theirs: punished / missed, on top of a letter (a second click takes it off)
+    if(md.T) [['p', 'Punished'], ['m', 'Missed']].forEach(([v, t])=>{
+      const n = md.M.filter(x=> x.out===v).length;
+      if(!n) return;
+      const b = ghEl('button', 'ct-chip is-out', t+' '+n);
+      b.type = 'button'; b.dataset.act = 'out'; b.dataset.out = v; b.dataset.fid = 'chip|o'+v;
+      b.setAttribute('aria-pressed', m.out===v ? 'true' : 'false');
+      b.setAttribute('aria-label', t+': '+(n===1 ? '1 move' : n+' moves'));
+      chips.appendChild(b);
+    });
     if(bk && CLAMP_BY[m.ch]){
       const t = CLAMP_BY[m.ch].short+' \u00b7 '+ctBucketName(bk.g, bk.v), b = ghEl('button', 'ct-chip is-b');
       b.type = 'button'; b.dataset.act = 'unb'; b.dataset.fid = 'chip|b';
@@ -34684,8 +34844,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     b.dataset.gid = String(g.id); b.dataset.ply = String(x.p); b.dataset.ck = x.ch; b.dataset.fid = 'm|'+g.id+'|'+x.p+'|'+x.ch;
     if(can) b.appendChild(ghEl('span', 'ct-mbd'));          // the board: filled as it comes on screen (ctMomFill)
     else b.append(ghEl('span', 'ph-sr', K.name+': '), ghEl('span', 'ct-moff', 'The review can\u2019t show this move'));     // past a Chess960 castle, say: no board, nothing to open
-    const mv = ghEl('span', 'ct-mmv');
-    mv.append(ctDisc(K), ghEl('span', 'ct-mlab', lab));
+    const mv = ghEl('span', 'ct-mmv'), T = !!e.o;
+    mv.append(ctDisc(K, T), ghEl('span', 'ct-mlab', lab));
+    if(T) mv.appendChild(ghEl('span', 'ct-mout is-'+(x.out || 'n'), x.out==='p' ? 'Punished' : x.out==='m' ? 'Missed' : 'Not said'));
     if(x.ph!=null) mv.appendChild(ghEl('span', 'ct-mph', CT_PHASES[x.ph]));
     b.appendChild(mv);
     if(x.note) b.appendChild(ghEl('span', 'ct-mnt', '\u201c'+x.note+'\u201d'));
@@ -34693,7 +34854,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     ft.append(ghEl('b', '', ctRes(e.res)), document.createTextNode(' vs '+opp+' \u00b7 '+ctDay(e.at)));
     b.appendChild(ft);
     const sqs = (e.q || []).filter(y=> y[0]===x.p && y[1]===x.ch).map(y=> y[2]);          // its squares: outlined on the board (ctMomFill)
-    if(can) b.setAttribute('aria-label', K.name+': '+lab+(sqs.length ? ' on '+sqs.join(', ') : '')+(x.ph!=null ? ', '+CT_PHASES[x.ph].toLowerCase() : '')+'. '+(x.note ? 'Your note: '+x.note+'. ' : '')
+    if(can) b.setAttribute('aria-label', (T ? 'Their slip, ' : '')+K.name+': '+lab+(sqs.length ? ' on '+sqs.join(', ') : '')+(x.ph!=null ? ', '+CT_PHASES[x.ph].toLowerCase() : '')+'. '
+      +(T ? (x.out==='p' ? 'You punished it. ' : x.out==='m' ? 'You missed it. ' : '') : '')+(x.note ? 'Your note: '+x.note+'. ' : '')
       +ctRes(e.res)+' against '+opp+', '+ctDay(e.at)+'. Open the review at this move');
     return b;
   }
@@ -34719,15 +34881,15 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     list.forEach(bd=>{ if(!bd.firstChild) CT_IO.observe(bd); });
   }
   // Moments for a letter (and one of the table's groups), drawn from the first again; go: scrolled to, the keyboard on its chip
-  function ctSetMoments(ch, b, go){
-    CT.m = { ch:CLAMP_BY[ch] ? ch : '', b:b && CLAMP_BY[ch] ? { g:String(b.g), v:String(b.v) } : null };
+  function ctSetMoments(ch, b, go, out){
+    CT.m = { ch:CLAMP_BY[ch] ? ch : '', b:b && CLAMP_BY[ch] ? { g:String(b.g), v:String(b.v) } : null, out:out==='p' || out==='m' ? out : '' };
     CT.shown = CT_MOM_N;
     ctDrawMoments();
     if(!go) return;
     const box = document.getElementById('ct-mom');
     if(!box || box.hidden) return;
     window.scrollTo({ top:Math.max(0, window.scrollY + box.getBoundingClientRect().top - 12) });
-    const el = box.querySelector(CT.m.b ? '.ct-chip.is-b' : '.ct-chip[aria-pressed="true"]');
+    const el = box.querySelector(CT.m.b ? '.ct-chip.is-b' : CT.m.out && !CT.m.ch ? '.ct-chip.is-out[aria-pressed="true"]' : '.ct-chip[aria-pressed="true"]');
     if(el) try{ el.focus({ preventScroll:true }); }catch(e){}
   }
   // from the brief's CLAMP fact: the tab, its Moments for that letter
@@ -34816,6 +34978,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     sec.addEventListener('click', (e)=>{
       const t = e.target.closest('button');
       if(!t || !sec.contains(t)) return;
+      if(t.classList.contains('ct-sideb')){ ctSide(t.dataset.side); return; }
       const md = CT.model, a = t.dataset.act;
       if(!md) return;
       if(t.classList.contains('ct-gcol') || t.classList.contains('ct-m')){
@@ -34828,8 +34991,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       else if(a==='games') ctGames(t.dataset.ch, !!t.dataset.win);
       else if(a==='todo') ctApply({ result:'loss', date:md.lossDate, ck:'none' });
       else if(a==='bucket') ctSetMoments(t.dataset.ch, { g:t.dataset.g, v:t.dataset.v }, true);
-      else if(a==='chip') ctSetMoments(t.dataset.ch || '', null, false);
-      else if(a==='unb'){ ctSetMoments(CT.m.ch, null, false); ctFocus(document.querySelector('#ct-mom .ct-chip[aria-pressed="true"]')); }
+      else if(a==='chip') ctSetMoments(t.dataset.ch || '', null, false, t.dataset.ch ? CT.m.out : '');
+      else if(a==='out') ctSetMoments(CT.m.ch, null, false, CT.m.out===t.dataset.out ? '' : t.dataset.out);
+      else if(a==='momo') ctSetMoments('', null, true, t.dataset.out);
+      else if(a==='unb'){ ctSetMoments(CT.m.ch, null, false, CT.m.out); ctFocus(document.querySelector('#ct-mom .ct-chip[aria-pressed="true"]')); }
       else if(a==='more'){
         // the keyboard on the first new card, scrolled to (the button has moved below them)
         const was = document.querySelectorAll('#ct-mom .ct-m').length;
@@ -38256,9 +38421,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(!c || typeof c!=='object' || Array.isArray(c)) return;
     CLAMP_K.forEach(K=>{
       if(!(K.ch in c)) return;
-      const s = hvEl('span', 'hv-clamp-m', K.ch);
-      s.style.background = K.color;
-      const tip = 'CLAMP: '+K.name+(c[K.ch] ? ' \u00b7 '+c[K.ch] : '');
+      const t = hvClampIsT(node, K.ch), s = hvEl('span', 'hv-clamp-m'+(t ? ' is-theirs' : ''), K.ch);
+      if(t) s.style.setProperty('--cw', K.color); else s.style.background = K.color;
+      const tip = (t ? 'Their CLAMP slip: ' : 'CLAMP: ')+K.name+(c[K.ch] ? ' \u00b7 '+c[K.ch] : '')+(t && node.clampR ? ' \u00b7 you '+(node.clampR==='p' ? 'punished' : 'missed')+' it' : '');
       s.setAttribute('aria-label', tip);
       s.title = tip;
       el.appendChild(s);
@@ -38507,23 +38672,29 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     hvMenu = { el, node, opener, outside };
     setTimeout(()=>{ if(hvMenu && hvMenu.el===el) document.addEventListener('pointerdown', outside, true); }, 0);
     el.addEventListener('keydown', (e)=>{
-      const items = [...el.querySelectorAll('.hv-pop-item')], picks = [...el.querySelectorAll('.hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick')];
+      const items = [...el.querySelectorAll('.hv-pop-item, .hv-clamp-whob, .hv-clamp-outb')].filter(x=> x.getClientRects().length), picks = [...el.querySelectorAll('.hv-bdg-pick, .hv-clamp-pick, .hv-hl-pick')];
       const a = document.activeElement, i = items.indexOf(a), p = picks.indexOf(a);
       // the badge grid (HV_BDG_COLS a row) and the CLAMP row come before the items: Left/Right along its own
       // grid, Up/Down a row at a time and on into the items (in the same column coming back: the checked
       // badge's, else the first)
-      if(p >= 0 && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
+      if((p >= 0 || (a && a.matches && a.matches('.hv-clamp-whob, .hv-clamp-outb'))) && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
         e.preventDefault(); e.stopPropagation();
         const own = [...a.parentNode.children], q = own.indexOf(a);
         own[(q + (e.key==='ArrowRight' ? 1 : -1) + own.length) % own.length].focus();
       } else if(e.key==='ArrowDown' || e.key==='ArrowUp'){
         e.preventDefault(); e.stopPropagation();
-        const rows = Math.ceil(picks.length / HV_BDG_COLS), n = rows + items.length;
-        const on = picks.findIndex(b=> b.getAttribute('aria-checked')==='true');
-        const col = p >= 0 ? p % HV_BDG_COLS : Math.max(0, on) % HV_BDG_COLS;
-        const at = p >= 0 ? Math.floor(p / HV_BDG_COLS) : (i >= 0 ? rows + i : (e.key==='ArrowDown' ? n - 1 : rows));
+        // the pick rows as they show, each grid by its own columns (the highlights are six a row since 2026-11-12)
+        const R = [];
+        [...new Set(picks.map(b=> b.parentNode))].forEach(g=>{
+          const kids = [...g.children].filter(x=> picks.indexOf(x) >= 0), w = Math.max(1, getComputedStyle(g).gridTemplateColumns.split(' ').filter(Boolean).length);
+          for(let j = 0; j < kids.length; j += w) R.push(kids.slice(j, j + w));
+        });
+        const rows = R.length, n = rows + items.length, pr = R.findIndex(r=> r.indexOf(a) >= 0);
+        const on = picks.find(b=> b.getAttribute('aria-checked')==='true'), onR = on ? R.find(r=> r.indexOf(on) >= 0) : null;
+        const col = pr >= 0 ? R[pr].indexOf(a) : onR ? onR.indexOf(on) : 0;
+        const at = pr >= 0 ? pr : (i >= 0 ? rows + i : (e.key==='ArrowDown' ? n - 1 : rows));
         const to = (at + (e.key==='ArrowDown' ? 1 : -1) + n) % n;
-        (to < rows ? picks[Math.min(to * HV_BDG_COLS + col, picks.length - 1)] : items[to - rows]).focus();
+        (to < rows ? R[to][Math.min(col, R[to].length - 1)] : items[to - rows]).focus();
       }
       else if(e.key==='Tab'){ hvMenuClose(); }
       else if((e.key==='t' || e.key==='T') && !e.ctrlKey && !e.metaKey && !e.altKey){          // the Tactic row's key: this menu's move
@@ -38598,7 +38769,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // A side line's highlight (2026-11-04, the user: alternate moves "stand out a little more along with" their comments; "the
   // main moves have a floating panel, the alternates have highlights"): the move menu's row on any move of the line, kept on
   // the line's first move as h:[[ref, code]] in the game's record.
-  const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }, { c:'p', name:'Purple' }, { c:'w', name:'White' }];      // purple (2026-11-10): lines you worried about; white 2026-11-11
+  const HV_HL = [{ c:'y', name:'Yellow' }, { c:'g', name:'Neon green' }, { c:'b', name:'Blue' }, { c:'p', name:'Purple' }, { c:'w', name:'White' }, { c:'r', name:'Red' }];      // purple (2026-11-10): lines you worried about; white 2026-11-11; red 2026-11-12 (a blunder that should have cost you)
   function hvHlClass(n){ return n && HV_HL.some(h=> h.c===n.hl) ? ' hv-hl hv-hl-'+n.hl : ''; }
   // The pen (the user, 2026-11-04): people go straight to the side, and going fast they drift low, then correct high. So one
   // straight stroke per line of text: a little high or low by turns, a little off level, ending a little early or late, never
@@ -38688,29 +38859,80 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     return !!(S && S.me && node && node.main && node.parent && S.nodes.has(node.id) && hvAnnId());
   }
   function hvMoveMine(node){ const S = HV_STATE; return !!S && ((node.ply + (node.off || 0)) % 2===1 ? 'white' : 'black')===S.me; }
+  // Their CLAMP slips (2026-11-12): a letter on a move is yours or theirs (node.clampT[letter], never both), its note, its
+  // squares as yours are (node.clamp, node.clampSq); punished or missed (node.clampR 'p' | 'm') is said once for the move
+  function hvClampIsT(n, ch){ return !!(n && n.clampT && n.clampT[ch]); }
+  function hvClampHasT(n){ return !!(n && n.clamp && n.clampT && Object.keys(n.clampT).some(ch=> ch in n.clamp)); }
+  function hvClampSetT(n, ch, t){
+    if(t) (n.clampT || (n.clampT = {}))[ch] = 1;
+    else if(n.clampT){ delete n.clampT[ch]; if(!Object.keys(n.clampT).length) delete n.clampT; }
+    if(!hvClampHasT(n)){ delete n.clampT; delete n.clampR; }
+  }
+  // whose letters a move's CLAMP row starts on: the owner of the letters it has (theirs only when all are), else
+  // whoever played it
+  function hvClampDefT(n){
+    const c = n && n.clamp ? Object.keys(n.clamp) : [];
+    return c.length ? c.every(ch=> hvClampIsT(n, ch)) : !!n && !hvMoveMine(n);
+  }
+  // your next move after a slip of theirs on n (the move that punished it, or didn't): null when the game ended first
+  function hvClampReply(n){
+    const S = HV_STATE;
+    if(!S || !n || !n.main) return null;
+    const r = S.main[n.ply - 1 + (hvMoveMine(n) ? 2 : 1)];
+    return r && r.move ? r : null;
+  }
+  // punished or missed, read off the badge on your reply (yours, else the engine's) when it says so plainly; '' else
+  function hvClampGuess(n){
+    const r = hvClampReply(n), b = r ? (hvOwnBadge(r) || hvBadgeFor(r)) : null;
+    if(!b) return '';
+    return ['brilliant', 'great', 'best', 'excellent'].indexOf(b.id) >= 0 ? 'p' : ['miss', 'mistake', 'blunder'].indexOf(b.id) >= 0 ? 'm' : '';
+  }
   // A tree's marks as a record's k, and a record's k onto a tree's main line (exactly those). Marks past where the
   // tree's replay ends (a Chess960 castle, a set-up game opened from its summary without its start) are kept with
   // the tree as they came (clampPast), so opening the game never takes them out of the record.
   function hvClampListOf(T){
     const k = [];
-    T.main.forEach(n=>{ if(n.clamp) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp) k.push(n.clamp[K.ch] ? [n.ply, K.ch, n.clamp[K.ch]] : [n.ply, K.ch]); }); });
+    T.main.forEach(n=>{ if(n.clamp) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp && !hvClampIsT(n, K.ch)) k.push(n.clamp[K.ch] ? [n.ply, K.ch, n.clamp[K.ch]] : [n.ply, K.ch]); }); });
     return k.concat((T.tree || T).clampPast || []);
   }
+  // A tree's slips of theirs as gnClampOList gives them (the record's o: gnClampORow); past the replay's end as they came
+  function hvClampOListOf(T){
+    const o = [];
+    T.main.forEach(n=>{ if(n.clamp && n.clampT) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp && n.clampT[K.ch]) o.push([n.ply, K.ch, n.clamp[K.ch] || '', n.clampR || '', ((n.clampSq && n.clampSq[K.ch]) || []).slice()]); }); });
+    return o.concat(((T.tree || T).clampOPast || []).map(x=> x.slice(0, 4).concat([x[4].slice()])));
+  }
+  // theirs onto a tree that has yours already (hvClampOnto): a letter yours on that move stays yours
+  function hvClampOPut(T, o){
+    const past = [];
+    o.forEach(x=>{
+      if(x[0] > T.main.length){ past.push(x.slice(0, 4).concat([x[4].slice()])); return; }
+      const n = T.main[x[0]-1];
+      if(!n || (n.clamp && x[1] in n.clamp)) return;
+      (n.clamp || (n.clamp = {}))[x[1]] = x[2] || '';
+      hvClampSetT(n, x[1], true);
+      if(x[3] && !n.clampR) n.clampR = x[3];
+      x[4].forEach(s=> hvClampSqAdd(T, x[0], x[1], s));
+    });
+    (T.tree || T).clampOPast = past;
+  }
   // q: the marks' squares (a record's q, gnClampSqList); left out, the tree's own stay with the letters kept
-  function hvClampOnto(T, k, q){
+  // o: theirs (gnClampOList's); left out, the tree's own (a letter now yours on that move goes)
+  function hvClampOnto(T, k, q, o){
     if(!q) q = hvClampSqOf(T);
-    T.main.forEach(n=>{ if(n.clamp) delete n.clamp; if(n.clampSq) delete n.clampSq; });
+    if(!o) o = hvClampOListOf(T);
+    T.main.forEach(n=>{ if(n.clamp) delete n.clamp; if(n.clampSq) delete n.clampSq; delete n.clampT; delete n.clampR; });
     k.forEach(x=>{ const n = T.main[x[0]-1]; if(n) (n.clamp || (n.clamp = {}))[x[1]] = x[2] || ''; });
     const past = k.filter(x=> x[0] > T.main.length).map(x=> x.slice());
     (T.tree || T).clampPast = past;
     (T.tree || T).clampSqPast = [];
     q.forEach(x=> hvClampSqAdd(T, x[0], x[1], x[2]));
+    hvClampOPut(T, o);
   }
   // The squares of a tree's marks (node.clampSq = { L:['h2'] } on a main-line move with that letter), as a record's q;
   // past the replay's end (clampSqPast) as they came, with their marks (clampPast).
   function hvClampSqOf(T){
     const q = [];
-    T.main.forEach(n=>{ if(n.clampSq && n.clamp) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp && n.clampSq[K.ch]) n.clampSq[K.ch].forEach(s=> q.push([n.ply, K.ch, s])); }); });
+    T.main.forEach(n=>{ if(n.clampSq && n.clamp) CLAMP_K.forEach(K=>{ if(K.ch in n.clamp && !hvClampIsT(n, K.ch) && n.clampSq[K.ch]) n.clampSq[K.ch].forEach(s=> q.push([n.ply, K.ch, s])); }); });
     return q.concat((T.tree || T).clampSqPast || []);
   }
   // a square onto a mark of the tree's (the letter on that move already): false when it has no room (CLAMP_SQ_MAX) or no mark
@@ -38750,30 +38972,44 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     wrap.setAttribute('role', 'group');
     wrap.setAttribute('aria-label', 'CLAMP');
     head.appendChild(hvEl('span', 'hv-pop-head', 'CLAMP'));
-    // the letter under the pointer or the keyboard's focus by name; else yours on this move (a disc a click
-    // left focused names nothing: the state shows once the pointer leaves it)
+    // the letter under the pointer or the keyboard's focus by name; else what this move has, yours and theirs (a disc a
+    // click left focused names nothing: the state shows once the pointer leaves it)
     name.setAttribute('aria-hidden', 'true');
-    const rest = ()=>{
-      const on = CLAMP_K.filter(K=> node.clamp && K.ch in node.clamp);
-      return !on.length ? '' : 'Yours: '+(on.length > 2 ? on.map(K=> K.ch).join(' ') : on.map(K=> K.short).join(', '));
-    };
-    name.textContent = rest();
     head.appendChild(name);
     wrap.appendChild(head);
+    // whose slip (2026-11-12, the user: "my opponent had the loose piece"): a letter on this move is yours or theirs. The
+    // switch (under the letters, where the arrow keys meet it) starts on the owner of the move's letters, else on whoever
+    // played the move; the letters are that side's (theirs as rings), and a click on a letter the other side has here moves it over
+    let theirs = hvClampDefT(node);
+    const who = hvEl('div', 'hv-clamp-who');
+    who.setAttribute('role', 'group');
+    who.setAttribute('aria-label', 'Whose slip');
+    const whoB = [[false, 'Mine'], [true, 'Theirs']].map(([t, label])=>{
+      const b = hvEl('button', 'hv-clamp-whob', label);
+      b.type = 'button';
+      b.setAttribute('role', 'menuitemradio');
+      b.title = t ? 'The other player\u2019s slip (the CLAMP tab counts how often you punish them)' : 'Your own slip';
+      b.addEventListener('click', (e)=>{ e.stopPropagation(); theirs = t; paint(true); });
+      who.appendChild(b);
+      return b;
+    });
+    const rest = ()=>{
+      const of = (t)=> CLAMP_K.filter(K=> node.clamp && K.ch in node.clamp && hvClampIsT(node, K.ch)===t);
+      const say = (L)=> L.length > 2 ? L.map(K=> K.ch).join(' ') : L.map(K=> K.short).join(', ');
+      const y = of(false), t = of(true);
+      return [y.length ? 'Yours: '+say(y) : '', t.length ? 'Theirs: '+say(t) : ''].filter(Boolean).join(' \u00b7 ');
+    };
     const grid = hvEl('div', 'hv-bdg-grid hv-clamp-grid'), msg = hvEl('div', 'hv-clamp-msg');
     msg.setAttribute('role', 'alert');
     msg.hidden = true;
-    CLAMP_K.forEach(K=>{
+    const picks = CLAMP_K.map(K=>{
       const btn = hvEl('button', 'hv-clamp-pick'), disc = hvEl('span', 'clamp-d is-on', K.ch);
       btn.type = 'button';
       btn.dataset.ck = K.ch;
       btn.setAttribute('role', 'menuitemcheckbox');
-      btn.setAttribute('aria-label', K.name);
       disc.setAttribute('aria-hidden', 'true');
-      disc.style.background = K.color;
+      disc.style.setProperty('--cw', K.color);
       btn.appendChild(disc);
-      const show = ()=>{ const on = !!node.clamp && K.ch in node.clamp; btn.classList.toggle('is-on', on); btn.setAttribute('aria-checked', on ? 'true' : 'false'); };
-      show();
       let pt = '';
       btn.addEventListener('pointerdown', (e)=>{ pt = e.pointerType; });
       btn.addEventListener('pointerenter', ()=>{ name.textContent = K.short; });
@@ -38782,17 +39018,56 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       btn.addEventListener('blur', ()=>{ name.textContent = rest(); });
       btn.addEventListener('click', (e)=>{       // (the lift of the menu's own press and hold never gets here: hvMenuOpen)
         e.stopPropagation();
-        const ok = hvClampToggle(node, K.ch);
-        show();
-        if(e.detail > 0 && pt && pt!=='mouse') name.textContent = rest();      // a tap: the pointer's gone, the heading says what's on now
+        const ok = hvClampToggle(node, K.ch, theirs);
+        paint();
+        if(e.detail > 0 && pt && pt!=='mouse') name.textContent = rest();      // a tap: the pointer's gone, the line says what's on now
         pt = '';
         msg.textContent = ok ? '' : GH_CLAMP_FULL;
         msg.hidden = ok;
       });
       grid.appendChild(btn);
+      return { K, btn, disc };
     });
     wrap.appendChild(grid);
+    const whoRow = hvEl('div', 'hv-clamp-whorow');
+    whoRow.append(hvEl('span', 'hv-clamp-whol', 'Whose slip'), who);
+    wrap.appendChild(whoRow);
+    // a slip of theirs: did your next move punish it? Said once for the move; pre-filled from the badge on your reply
+    // when it says so plainly (hvClampGuess), a click on the one picked takes it back to not said
+    const out = hvEl('div', 'hv-clamp-out'), outQ = hvEl('div', 'hv-clamp-outq'), outBs = hvEl('div', 'hv-clamp-outbs'), reply = hvClampReply(node);
+    const outB = [['p', 'Punished'], ['m', 'Missed']].map(([v, label])=>{
+      const b = hvEl('button', 'hv-clamp-outb', label);
+      b.type = 'button';
+      b.dataset.out = v;
+      b.setAttribute('role', 'menuitemradio');
+      b.addEventListener('click', (e)=>{ e.stopPropagation(); hvClampSetR(node, node.clampR===v ? '' : v); paint(); });
+      outBs.appendChild(b);
+      return b;
+    });
+    out.append(outQ, outBs);
+    wrap.appendChild(out);
     wrap.appendChild(msg);
+    function paint(say){
+      whoB.forEach((b, i)=>{ const on = (i===1)===theirs; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+      picks.forEach(({ K, btn, disc })=>{
+        const has = !!node.clamp && K.ch in node.clamp, t = hvClampIsT(node, K.ch), on = has && t===theirs;
+        disc.classList.toggle('is-theirs', theirs);
+        disc.style.background = theirs ? '' : K.color;
+        btn.classList.toggle('is-on', on);
+        btn.classList.toggle('is-other', has && !on);
+        btn.setAttribute('aria-checked', on ? 'true' : 'false');
+        btn.setAttribute('aria-label', K.name+(has && !on ? (t ? ', theirs on this move: a click makes it yours' : ', yours on this move: a click makes it theirs') : ''));
+      });
+      if(say) name.textContent = rest();
+      out.hidden = !(theirs && hvClampHasT(node));
+      if(!out.hidden){
+        const b = reply ? (hvOwnBadge(reply) || hvBadgeFor(reply)) : null;
+        outQ.textContent = reply ? 'Your reply '+hvNodeLabel(reply)+(b ? ' ('+b.short+')' : '')+': did you punish it?' : 'The game ended before your reply.';
+        outBs.hidden = !reply;
+        outB.forEach(b=>{ const on = node.clampR===b.dataset.out; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+      }
+    }
+    paint(true);
     // the squares the letters are about, on the board (a touch screen has no Space + right-click): the menu closes,
     // the board shows this move, and the next square tapped or clicked opens its box (hvSqAskStart). An item under the
     // discs (the arrow keys reach it), never the one the menu's keyboard starts on.
@@ -38810,19 +39085,45 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     el.appendChild(wrap);
     el.appendChild(hvEl('div', 'hv-pop-sep'));
   }
-  // a letter on or off a move of yours, kept at once; false when the record has no room for it (nothing changes)
-  function hvClampToggle(node, ch){
+  // a letter on or off a move (any move of the game), yours or theirs (2026-11-12), kept at once: off when that side has
+  // it, moved over (its note and squares with it) when the other side has it, else on; false when the record has no room
+  // for it (nothing changes). A first letter of theirs pre-fills punished or missed (hvClampGuess)
+  function hvClampToggle(node, ch, theirs){
     const K = CLAMP_BY[ch];
     if(!K || !hvClampOk(node)) return false;
-    const c = node.clamp || {}, on = ch in c, before = hvAnnText(false).length;
-    const off = ()=>{ delete c[ch]; if(!Object.keys(c).length) delete node.clamp; };
-    if(on){ off(); hvClampSqOff(node, ch); }          // a letter taken off takes its squares with it
-    else { node.clamp = c; c[ch] = ''; }
-    if(!on && !hvAnnFits(before)){ off(); hvSay(GH_CLAMP_FULL); return false; }
-    hvSay(hvNodeLabel(node)+': '+K.name+(on ? ' taken off' : ' (CLAMP)'));
+    theirs = !!theirs;
+    const c = node.clamp || {}, on = ch in c, off = on && hvClampIsT(node, ch)===theirs, before = hvAnnText(false).length;
+    const was = { clamp:node.clamp ? Object.assign({}, c) : null, clampSq:node.clampSq ? JSON.parse(JSON.stringify(node.clampSq)) : null,
+      clampT:node.clampT ? Object.assign({}, node.clampT) : null, clampR:node.clampR || null };
+    if(off){
+      delete c[ch];
+      if(!Object.keys(c).length) delete node.clamp;
+      hvClampSqOff(node, ch);          // a letter taken off takes its squares with it
+      hvClampSetT(node, ch, false);
+    } else {
+      node.clamp = c;
+      if(!on) c[ch] = '';
+      hvClampSetT(node, ch, theirs);
+      if(theirs && !node.clampR){ const g = hvClampGuess(node); if(g) node.clampR = g; }
+    }
+    if(!hvAnnFits(before)){
+      Object.keys(was).forEach(f=>{ if(was[f]) node[f] = was[f]; else delete node[f]; });
+      hvSay(GH_CLAMP_FULL);
+      return false;
+    }
+    hvSay(hvNodeLabel(node)+': '+K.name+(off ? ' taken off' : theirs ? ' (their CLAMP slip)' : ' (CLAMP)'));
     hvClampShown(node);
     hvAnnSave();
     return true;
+  }
+  // punished ('p'), missed ('m') or not said ('') for a move's slips of theirs, kept at once
+  function hvClampSetR(n, v){
+    if(!hvClampOk(n) || !hvClampHasT(n)) return;
+    if(v) n.clampR = v; else delete n.clampR;
+    const r = hvClampReply(n);
+    hvSay(hvNodeLabel(r || n)+': '+(v==='p' ? 'you punished it' : v==='m' ? 'you missed it' : 'not said'));
+    hvClampShown(n);
+    hvAnnSave();
   }
   // a move's letters changed: its cell in the list (redrawn in place, so a menu open over it stays put), the comment
   // card and, the move on the board, its discs there
@@ -38878,7 +39179,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!sq) return;
       const box = hvEl('span', 'hv-sq-ck'+(Ks.length > 2 ? ' is-many' : ''));
       box.setAttribute('aria-hidden', 'true');          // the move list's discs carry the names
-      Ks.forEach(K=>{ const d = hvEl('span', 'hv-sq-ckd', K.ch); d.style.background = K.color; box.appendChild(d); });
+      Ks.forEach(K=>{ const t = hvClampIsT(n, K.ch), d = hvEl('span', 'hv-sq-ckd'+(t ? ' is-theirs' : ''), K.ch); if(t) d.style.setProperty('--cw', K.color); else d.style.background = K.color; box.appendChild(d); });
       sq.appendChild(box);
     });
   }
@@ -38886,17 +39187,21 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // A letter on or off a square of a move of yours, kept at once. On: the letter goes on the move too when it isn't.
   // Off: the letter stays on the move, unless this box (B.added) put it on and that was its last square (a pick
   // taken back). true, or what stopped it (no room: the record or CLAMP_SQ_MAX squares)
-  function hvSqToggle(n, ch, s, B){
+  // theirs: a letter it puts on the move goes on as theirs (the box's Mine | Theirs; left out, the side the move's CLAMP row starts on)
+  function hvSqToggle(n, ch, s, B, theirs){
     const K = CLAMP_BY[ch];
     if(!K || !hvClampOk(n)) return '';
-    const on = hvSqHas(n, ch, s), had = !!n.clamp && ch in n.clamp, before = hvAnnText(false).length;
-    const letterOff = ()=>{ delete n.clamp[ch]; if(!Object.keys(n.clamp).length) delete n.clamp; };
+    const on = hvSqHas(n, ch, s), had = !!n.clamp && ch in n.clamp, before = hvAnnText(false).length, defT = theirs==null ? hvClampDefT(n) : !!theirs;
+    const letterOff = ()=>{ delete n.clamp[ch]; hvClampSetT(n, ch, false); if(!Object.keys(n.clamp).length) delete n.clamp; };
     if(on){
       hvClampSqOff(n, ch, s);
       if(B && B.added.has(ch) && !(n.clampSq && n.clampSq[ch])){ letterOff(); B.added.delete(ch); }
     } else {
       if(n.clampSq && n.clampSq[ch] && n.clampSq[ch].length >= CLAMP_SQ_MAX){ hvSay(HV_SQ_FULL); return HV_SQ_FULL; }
-      if(!had) (n.clamp || (n.clamp = {}))[ch] = '';
+      if(!had){
+        (n.clamp || (n.clamp = {}))[ch] = '';
+        if(defT){ hvClampSetT(n, ch, true); if(!n.clampR){ const g = hvClampGuess(n); if(g) n.clampR = g; } }
+      }
       hvClampSqAdd(HV_STATE, n.ply, ch, s);
       if(!hvAnnFits(before)){ hvClampSqOff(n, ch, s); if(!had) letterOff(); hvSay(GH_CLAMP_FULL); return GH_CLAMP_FULL; }
       if(!had && B) B.added.add(ch);
@@ -38945,6 +39250,23 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       msg.setAttribute('role', 'alert');
       msg.hidden = true;
       const B = { added:new Set() };
+      // whose slip a letter it puts on the move is (2026-11-12): the box's own Mine | Theirs, under the letters as in the
+      // move menu, starting where the move's CLAMP row would; a letter the move has already shows as whoever's it is
+      let theirs = hvClampDefT(n);
+      const who = hvEl('div', 'hv-clamp-who'), whoRow = hvEl('div', 'hv-clamp-whorow');
+      who.setAttribute('role', 'group');
+      who.setAttribute('aria-label', 'Whose slip');
+      const whoB = [[false, 'Mine'], [true, 'Theirs']].map(([t, label])=>{
+        const b = hvEl('button', 'hv-clamp-whob', label);
+        b.type = 'button';
+        b.setAttribute('role', 'radio');
+        b.addEventListener('click', (e)=>{ e.stopPropagation(); theirs = t; paintWho(); });
+        who.appendChild(b);
+        return b;
+      });
+      whoRow.append(hvEl('span', 'hv-clamp-whol', 'Whose slip'), who);
+      const shows = [];
+      const paintWho = ()=>{ whoB.forEach((b, i)=>{ const on = (i===1)===theirs; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); }); shows.forEach(f=> f()); };
       // under the discs: the letter under the pointer or the keyboard's focus by name; else those on this square
       const rest = ()=>{ const on = CLAMP_K.filter(K=> hvSqHas(n, K.ch, s)); return on.length ? on.map(K=> K.short).join(', ') : ''; };
       CLAMP_K.forEach(K=>{
@@ -38954,9 +39276,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         btn.setAttribute('role', 'checkbox');
         btn.setAttribute('aria-label', K.name);
         disc.setAttribute('aria-hidden', 'true');
-        disc.style.background = K.color;
+        disc.style.setProperty('--cw', K.color);
         btn.appendChild(disc);
-        const show = ()=>{ const on = hvSqHas(n, K.ch, s); btn.classList.toggle('is-on', on); btn.setAttribute('aria-checked', on ? 'true' : 'false'); };
+        // the letter as the move has it, yours or theirs (a ring); one it hasn't: the side the move's CLAMP row starts on
+        const show = ()=>{
+          const on = hvSqHas(n, K.ch, s), t = n.clamp && K.ch in n.clamp ? hvClampIsT(n, K.ch) : theirs;
+          disc.classList.toggle('is-theirs', t);
+          disc.style.background = t ? '' : K.color;
+          btn.classList.toggle('is-on', on);
+          btn.setAttribute('aria-checked', on ? 'true' : 'false');
+          btn.setAttribute('aria-label', K.name+(t ? ' (theirs)' : ''));
+        };
         show();
         let pt = '';
         btn.addEventListener('pointerdown', (e)=>{ pt = e.pointerType; });
@@ -38966,7 +39296,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         btn.addEventListener('blur', ()=>{ name.textContent = rest(); });
         btn.addEventListener('click', (e)=>{
           e.stopPropagation();
-          const r = hvSqToggle(n, K.ch, s, B);
+          const r = hvSqToggle(n, K.ch, s, B, theirs);
           show();
           if(e.detail > 0 && pt && pt!=='mouse') name.textContent = rest();      // a tap: the pointer's gone
           pt = '';
@@ -38974,19 +39304,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
           msg.hidden = r===true;
         });
         grid.appendChild(btn);
+        shows.push(show);
       });
       name.textContent = rest();
-      el.append(grid, name, msg);
+      el.append(grid, name, whoRow, msg);
+      paintWho();
       first = grid.querySelector('.hv-clamp-pick.is-on') || grid.firstChild;
       el.addEventListener('keydown', (e)=>{
-        const picks = [...grid.children], i = picks.indexOf(document.activeElement);
-        if(i >= 0 && (e.key==='ArrowRight' || e.key==='ArrowLeft')){
+        const picks = [...grid.children], w = whoB.indexOf(document.activeElement), i = w >= 0 ? -1 : picks.indexOf(document.activeElement);
+        if(w >= 0 && (e.key==='ArrowRight' || e.key==='ArrowLeft')){ e.preventDefault(); e.stopPropagation(); whoB[1 - w].focus(); }
+        else if(i >= 0 && (e.key==='ArrowRight' || e.key==='ArrowLeft')){
           e.preventDefault(); e.stopPropagation();
           picks[(i + (e.key==='ArrowRight' ? 1 : -1) + picks.length) % picks.length].focus();
         } else if(e.key==='Tab'){
           // Tab past its last control (Shift+Tab before its first) leaves it, back where the keyboard was: the page's
           // order, the x first (it's in the head), then C to P
-          const f = [x].concat(picks), a = document.activeElement;
+          const f = [x].concat(picks, whoB), a = document.activeElement;
           if(e.shiftKey ? a===f[0] : a===f[f.length - 1]){ e.preventDefault(); hvMenuClose(true); }
         }
       });
@@ -40614,7 +40947,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const list = T.list.filter(x=> !x.plies.some(p=> gone.has(p)));
     if(add) list.push(add);
     if('t' in A || list.length) A.t = gnTacRows(list, T.none);
-    if(ck) A.k = gnClampList({ k:gnClampList(A).concat([ck]) });
+    if(ck){
+      A.k = gnClampList({ k:gnClampList(A).concat([ck]) });
+      if(Array.isArray(A.o)) A.o = gnClampOList(A).map(gnClampORow);          // theirs on that move and letter: yours now
+    }
     const t = JSON.stringify(gnAnCanon(A));
     if(t.length > GN_MAX) return false;
     if(t!==cur) gnSetNote(id, t, S.game);
@@ -44624,7 +44960,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // field a newer build added (gnAnExtra), kept as it came: this build never drops what it doesn't know. t (the
   // tactics, 2026-11-03) is last, so builds v106-v113 (which keep it as a field they don't know, after theirs) write
   // the same text as this one and the sync sees no difference.
-  const GN_AN_KNOWN = ['v', 'l', 'c', 'm', 'b', 'k', 'q', 't', 'h'];
+  const GN_AN_KNOWN = ['v', 'l', 'c', 'm', 'b', 'k', 'q', 't', 'h', 'o'];        // o: their CLAMP slips (2026-11-12), last like t
   function gnAnExtra(A){
     const x = {};
     if(A && typeof A==='object' && !Array.isArray(A)) Object.keys(A).forEach(f=>{ if(GN_AN_KNOWN.indexOf(f) < 0 && f!=='__proto__') x[f] = A[f]; });
@@ -44647,6 +44983,27 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       out.push(note ? [x[0], x[1], note] : [x[0], x[1]]);
     });
     return out.sort((a, b)=> a[0] - b[0] || 'CLAMP'.indexOf(a[1]) - 'CLAMP'.indexOf(b[1]));
+  }
+  // Their CLAMP slips (o, 2026-11-12, the user: "my opponent had the loose piece"): a letter on a move marked as the
+  // other player's slip, [[ply, letter, note?, out?, squares?]]. out: 'p' you punished it, 'm' you missed it ('' not said);
+  // squares: 'g5 h2', in the entry itself (q's rule, CLAMP_SQ_MAX), so an older build, which keeps o whole as a field it
+  // doesn't know, never splits them off. One owner a move and letter: yours (k) wins. By ply, then C L A M P. As the app
+  // uses it: [ply, letter, note, out, [squares]]
+  function gnClampOList(A){
+    const out = [], seen = new Set(A && Array.isArray(A.k) ? gnClampList(A).map(x=> x[0]+x[1]) : []);
+    (A && Array.isArray(A.o) ? A.o : []).forEach(x=>{
+      if(!Array.isArray(x) || !Number.isInteger(x[0]) || x[0] < 1 || x[0] > 3000 || typeof x[1]!=='string' || !CLAMP_BY[x[1]] || seen.has(x[0]+x[1])) return;
+      seen.add(x[0]+x[1]);
+      const sq = [...new Set(String(x[4] || '').split(' ').filter(t=> /^[a-h][1-8]$/.test(t)))].sort().slice(0, CLAMP_SQ_MAX);
+      out.push([x[0], x[1], gnClampNote(x[2]), x[3]==='p' || x[3]==='m' ? x[3] : '', sq]);
+    });
+    return out.sort((a, b)=> a[0] - b[0] || 'CLAMP'.indexOf(a[1]) - 'CLAMP'.indexOf(b[1]));
+  }
+  // an entry as the record keeps it, its empty end left off: [14, 'L'], [14, 'L', '', 'm', 'g5']
+  function gnClampORow(x){
+    const r = [x[0], x[1], x[2] || '', x[3] || '', (x[4] || []).join(' ')];
+    while(r.length > 2 && !r[r.length - 1]) r.pop();
+    return r;
   }
   // A record's CLAMP squares (q, 2026-11-02): [[ply, letter, square]], the squares a mark of yours is about ("L: the
   // rook on h2 was left loose"), up to CLAMP_SQ_MAX a letter on a move, by ply, then C L A M P, then square. Only a
@@ -44675,8 +45032,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ A = JSON.parse(t); }catch(e){ A = null; }
     const k = gnClampList(A);
     if(GN_CLAMP_MEMO.size > 600) GN_CLAMP_MEMO.clear();
-    GN_CLAMP_MEMO.set(gid, { t, k, q:null });
+    GN_CLAMP_MEMO.set(gid, { t, k, q:null, o:null });
     return k;
+  }
+  // a game's slips of theirs (o), read once per text of its record like its marks
+  function gnClampOOf(gid){
+    const t = gnNoteText('an-'+gid);
+    if(!t) return [];
+    gnClampOf(gid);
+    const was = GN_CLAMP_MEMO.get(gid);
+    if(!was || was.t!==t) return [];
+    if(!was.o){
+      let A = null;
+      if(t.indexOf('"o":') >= 0) try{ A = JSON.parse(t); }catch(e){ A = null; }
+      was.o = gnClampOList(A);
+    }
+    return was.o;
   }
   function gnClampSqOf(gid){
     if(!gnClampOf(gid).length) return [];
@@ -44789,7 +45160,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     try{ M = JSON.parse(mine); I = inc ? JSON.parse(inc) : { v:1, l:[], c:[], m:[] }; }catch(e){ return ''; }
     if(!M || typeof M!=='object' || !I || typeof I!=='object' || Array.isArray(I)) return '';
     let kept = false;
-    ['b', 'k', 'q', 't', 'h'].forEach(f=>{ if(Array.isArray(M[f]) && M[f].length && !(f in I)){ I[f] = M[f]; kept = true; } });      // t: the tactics (2026-11-03), h: side lines' highlights (2026-11-04), the same rule
+    ['b', 'k', 'q', 't', 'h', 'o'].forEach(f=>{ if(Array.isArray(M[f]) && M[f].length && !(f in I)){ I[f] = M[f]; kept = true; } });      // t: the tactics (2026-11-03), h: side lines' highlights (2026-11-04), the same rule
     if(!kept) return '';
     const t = JSON.stringify(gnAnCanon(I));
     return t.length <= GN_MAX ? t : '';
@@ -45155,6 +45526,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     (Array.isArray(A.c) ? A.c : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null; if(n && typeof x[1]==='string') n.com = x[1]; });
     (Array.isArray(A.b) ? A.b : []).forEach(x=>{ const n = Array.isArray(x) ? walk(x[0], false) : null, B = n && n.parent && typeof x[1]==='string' && x[1].length===1 && HR_BY_CODE[x[1]]; if(B && B.nag) n.nag = B.nag; });
     gnClampList(A).forEach(x=>{ const n = walk(x[0], false); if(n && n.parent) (n.clamp || (n.clamp = [])).push(x); });
+    gnClampOList(A).forEach(x=>{ const n = walk(x[0], false); if(n && n.parent) (n.clampO || (n.clampO = [])).push(x); });
     // a tactic (2026-11-03): '{ Tactic for Black, missed: Capture the defender }' after its move, and its moves as a side
     // line while they are legal in order ('(18... Bxb3 19. axb3 exd4)'), so the study replays it. On the game's last move
     // (Game over) PGN has no place for a variation: the moves go in the comment ('...: Fork: 34... Qxb5'), never after the
@@ -45191,6 +45563,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         num = false;
         if(n.com){ out.push(com(n.com)); num = true; }
         if(n.clamp){ out.push(com('CLAMP '+n.clamp.map(x=> x[1]+(sq[x[0]+x[1]] ? ' ('+sq[x[0]+x[1]].join(', ')+')' : '')+(x[2] ? ': '+x[2] : '')).join('; '))); num = true; }
+        if(n.clampO){
+          const r = (n.clampO.find(x=> x[3]) || [])[3];
+          out.push(com('CLAMP theirs '+n.clampO.map(x=> x[1]+(x[4].length ? ' ('+x[4].join(', ')+')' : '')+(x[2] ? ': '+x[2] : '')).join('; ')+(r ? '; you '+(r==='p' ? 'punished' : 'missed')+' it' : '')));
+          num = true;
+        }
         if(n.tac){ out.push(com(n.tac)); num = true; }
         const p = n.parent;
         if(p.kids[0]===n && p.kids.length > 1){
@@ -48600,10 +48977,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // they're all off), and q their squares, [[ply, letter, square]] (q:[] the same). A field this build
   // doesn't know (a newer build's) is kept from the record as it came.
   function hvAnnText(noMarks){
-    const S = HV_STATE, lines = [], com = [], mk = [], bd = [], hl = [], kd = hvClampListOf(S), qd = hvClampSqOf(S), td = gnTacRows(hvTacListOf(S), !!hvTacRoot(S).tacNone);
+    const S = HV_STATE, lines = [], com = [], mk = [], bd = [], hl = [], kd = hvClampListOf(S), qd = hvClampSqOf(S), td = gnTacRows(hvTacListOf(S), !!hvTacRoot(S).tacNone), od = hvClampOListOf(S).map(gnClampORow);
     let P = null;
     try{ P = S.annText ? JSON.parse(S.annText) : null; }catch(e){ P = null; }
-    const hadB = !!P && Array.isArray(P.b), hadK = !!P && Array.isArray(P.k), hadQ = !!P && Array.isArray(P.q), hadT = !!P && Array.isArray(P.t), hadH = !!P && Array.isArray(P.h), extra = gnAnExtra(P);
+    const hadB = !!P && Array.isArray(P.b), hadK = !!P && Array.isArray(P.k), hadQ = !!P && Array.isArray(P.q), hadT = !!P && Array.isArray(P.t), hadH = !!P && Array.isArray(P.h), hadO = !!P && Array.isArray(P.o), extra = gnAnExtra(P);
     const prof = annoProfile();
     const marks = (n)=>{
       const m = n.marks;
@@ -48620,13 +48997,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       marks(n);
       n.children.forEach(c=>{ if(!c.main && !c.children.length) lines.push(hvNodeRef(c).line); walk(c); });
     })(S.root);
-    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !qd.length && !hadQ && !td.length && !hadT && !hl.length && !hadH && !Object.keys(extra).length) return '';
+    if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !qd.length && !hadQ && !td.length && !hadT && !hl.length && !hadH && !od.length && !hadO && !Object.keys(extra).length) return '';
     const A = { v:1, l:lines, c:com, m:mk };
     if(bd.length || hadB) A.b = bd;
     if(kd.length || hadK) A.k = kd;
     if(qd.length || hadQ) A.q = qd;
     if(td.length || hadT) A.t = td;          // your tactics (2026-11-03), t:[] once they're all off
     if(hl.length || hadH) A.h = hl;          // side lines' highlights (2026-11-04), h:[] once they're all off
+    if(od.length || hadO) A.o = od;          // their CLAMP slips (2026-11-12), o:[] once they're all off
     return JSON.stringify(Object.assign(A, extra));
   }
   // A record onto the tree: its side lines, comments, marks, badges and CLAMP marks. mine: this device's
@@ -48674,8 +49052,28 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         }
         if(!n || !n.main || !n.parent) return;
         const c = n.clamp || (n.clamp = {});
-        if(!(x[1] in c)) c[x[1]] = t;
+        if(hvClampIsT(n, x[1])){ hvClampSetT(n, x[1], false); c[x[1]] = t || c[x[1]]; }          // the letter theirs here, yours there: yours
+        else if(!(x[1] in c)) c[x[1]] = t;
         else if(t && (lost || !mine || !c[x[1]])) c[x[1]] = t;
+      });
+      // theirs join the same way (2026-11-12): by move and letter, a letter yours on that move stays yours; punished or
+      // missed comes in where this device has none (or its edit lost)
+      const opast = (S.tree || S).clampOPast || ((S.tree || S).clampOPast = []);
+      gnClampOList(A).forEach(x=>{
+        if(x[0] > S.main.length){
+          const i = opast.findIndex(y=> y[0]===x[0] && y[1]===x[1]);
+          if(i < 0) opast.push(x.slice());
+          else if(lost || !mine) opast[i] = x.slice();
+          opast.sort((a, b)=> a[0] - b[0] || 'CLAMP'.indexOf(a[1]) - 'CLAMP'.indexOf(b[1]));
+          return;
+        }
+        const n = hvAnnNode(x[0]);
+        if(!n || !n.main || !n.parent || (n.clamp && x[1] in n.clamp && !hvClampIsT(n, x[1]))) return;
+        const c = n.clamp || (n.clamp = {});
+        if(!(x[1] in c)){ c[x[1]] = x[2]; hvClampSetT(n, x[1], true); }
+        else if(x[2] && (lost || !mine || !c[x[1]])) c[x[1]] = x[2];
+        if(x[3] && (lost || !mine || !n.clampR)) n.clampR = x[3];
+        x[4].forEach(s=> hvClampSqAdd(S, x[0], x[1], s));
       });
       // tactics join by move (2026-11-03): one on a move with none comes in; on the same move this device's stays (mine),
       // unless this device's edit lost (lost); "No tactics" only on a game with none
@@ -48703,7 +49101,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     S.annText = id ? gnNoteText(id) : '';
     let A = null;
     if(S.annText) try{ A = JSON.parse(S.annText); }catch(e){ A = null; }
-    if(id){ hvClampOnto(S, gnClampList(A), gnClampSqList(A)); hvTacOnto(S, gnTacList(A)); }      // the record's tactics, exactly
+    if(id){ hvClampOnto(S, gnClampList(A), gnClampSqList(A), gnClampOList(A)); hvTacOnto(S, gnTacList(A)); }      // the record's tactics, exactly
     if(A) hvAnnMerge(A, false);
   }
   function hvAnnSoon(){ clearTimeout(hvAnnTimer); hvAnnTimer = setTimeout(hvAnnSave, 700); }
