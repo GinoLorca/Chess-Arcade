@@ -24103,6 +24103,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // move itself (mutually exclusive with each other and with plain 'move');
   // a promotion is additional on top of either; check/checkmate is always
   // last since it's a consequence of the piece's final position/identity.
+  // A theme whose check and checkmate are full recordings (CHECK_ALONE_SKINS) plays that sound ALONE on a checking or
+  // mating move, the way chess.com does: after a recorded move or capture, 110 ms later, it was lost in the first sound
+  // (Court Cards, the user, 2026-11-15: "I'm not hearing the sound for check").
+  const CHECK_ALONE_SKINS = { cards:true };
   function pzMoveSoundKeys(state, move, wasCapture){
     const keys = [];
     if(move && move.isCastle) keys.push('castle');
@@ -24110,7 +24114,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(move && move.promotion) keys.push('promote');
     if(!keys.length) keys.push('move');
     if(pzIsInCheck(state, state.turn)){
-      keys.push(pzAllLegalMoves(state).length===0 ? 'checkmate' : 'check');
+      const k = pzAllLegalMoves(state).length===0 ? 'checkmate' : 'check';
+      if(CHECK_ALONE_SKINS[(typeof lookPrefs==='object' && lookPrefs && lookPrefs.skin) || 'felt']) return [k];
+      keys.push(k);
     }
     return keys;
   }
