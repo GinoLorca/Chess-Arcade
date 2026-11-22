@@ -2866,7 +2866,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .ol-movelist .mv-san{ cursor:pointer; border-radius:4px; padding:0 4px; margin:0 -4px; }
   .ol-movelist .mv-san:empty{ cursor:default; }
   .ol-movelist .mv-san:not(:empty):hover{ background:var(--surface-2); }
-  .ol-movelist .mv-san.mv-viewed{ background:var(--brass-soft); }
+  /* its dark brass ink on the light brass (dark themes' light ink on it read 1.3-2:1; Drive-Thru, Rose, Chess Book and
+     Court Cards already had this) */
+  .ol-movelist .mv-san.mv-viewed{ background:var(--brass-soft); color:var(--brass-ink); }
   /* Play Online: the opponent's row, the board and your row on one screen,
      as Puzzles, Rush and the review do: the squares answer to the height as
      well as the width. Each allowance is what stacks in the board's column
@@ -5844,6 +5846,43 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     cursor:pointer; display:flex; align-items:center; gap:6px; padding:4px 0; width:fit-content;
   }
   .back-link:hover{ color:var(--brass-text); }
+  /* ---- Contrast (2026-11-22): Felt light's gold, words on the wallpaper, chip edges ----
+     Felt light's brass (#8a6a16) under its dark brass ink reads 2.6:1, so there the gold buttons, lit chips and the other
+     brass-filled tags take the ink pair the app's tabs already use (Game History, the review, Puzzle Dashboard,
+     Analytics' chips): an ink fill and card-color words, 16.6:1. A hover rings a button in brass. */
+  @media (prefers-color-scheme:light){
+    :root:not([data-skin]):not([data-theme="dark"]) :is(.btn-primary, .toggle.active, .chip.arcade-chip, .pz-save-btn.is-saved, .phase-step.is-live i, .wl-dot.is-live){ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+    :root:not([data-skin]):not([data-theme="dark"]) .btn-primary:hover{ background:var(--ink); box-shadow:inset 0 0 0 2px var(--brass-soft); }
+    :root:not([data-skin]):not([data-theme="dark"]) .ol-movelist .mv-san.mv-viewed{ color:var(--ink); }      /* 6.5:1 (its brass ink 4.9:1) */
+  }
+  :root:not([data-skin])[data-theme="light"] :is(.btn-primary, .toggle.active, .chip.arcade-chip, .pz-save-btn.is-saved, .phase-step.is-live i, .wl-dot.is-live){ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+  :root:not([data-skin])[data-theme="light"] .btn-primary:hover{ background:var(--ink); box-shadow:inset 0 0 0 2px var(--brass-soft); }
+  :root:not([data-skin])[data-theme="light"] .ol-movelist .mv-san.mv-viewed{ color:var(--ink); }
+  /* the words on the pale result tags (WON / LOST / DRAW, Ready, Solved / Missed) read 3.6:1 on Felt light and 2.6:1 on
+     Game Boy light: a little ink in them, as Puzzle History's list already has */
+  .history-result-win, .chip.ready{ color:color-mix(in srgb, var(--good) 60%, var(--ink)); }
+  .history-result-loss{ color:color-mix(in srgb, var(--bad) 60%, var(--ink)); }
+  .history-result-draw{ color:color-mix(in srgb, var(--ink-soft) 60%, var(--ink)); }
+  /* Rush's best-score labels on the darker card color (3.6:1 on Game Boy light), as Whose Line's dots */
+  .rush-best .rush-lab{ color:color-mix(in srgb, var(--ink-soft) 60%, var(--ink)); }
+  /* an inactive chip's edge: 1.3-2.3:1 on every skin; a little ink in the line makes it 3:1 against the card */
+  .toggle:not(.active){ border-color:color-mix(in srgb, var(--line), var(--ink) 40%); }
+  /* Words straight on the wallpaper (Felt's green, Game Boy's dots, Uptown's map): bare, they can't be read (Felt light's
+     soft ink on its green is 1.05:1). A card-color pill behind them, drawn with a spread shadow, so no box grows and
+     nothing moves (the puzzle board stays centered: pzCentreBoard), as on the Puzzles tab's game puzzles. A back link
+     in a play view keeps its room from the home button as a margin, so its pill hugs the words. */
+  .view > .back-link, .view > .anno-hint, #view-play-puzzle .pz-help-row, #view-play-puzzle #pz-status:not(:empty){
+    background:var(--surface); border-radius:999px;
+    /* 7px past the words at the sides, 2px above and below: two pills 6px apart (the hint line, then the back link) stay two */
+    box-shadow:0 0 0 2px var(--surface), 5px 0 0 2px var(--surface), -5px 0 0 2px var(--surface), var(--shadow);
+  }
+  /* Skip puzzle, an outlined button on the wallpaper: filled with the card color (its box unchanged) */
+  #view-play-puzzle .side-panel > .btn-row > .btn-ghost{ background:var(--surface); }
+  .wrap.play-mode .view > .back-link{ padding-left:0; margin-left:var(--fab-clear-link, 0px); }
+  .view > .anno-hint{ width:fit-content; max-width:100%; border-radius:9px; }
+  #view-play-puzzle .pz-help-row{ width:fit-content; max-width:100%; margin-inline:auto; }
+  #view-play-puzzle #pz-status:not(:empty){ width:fit-content; max-width:100%; margin-inline:auto; padding:0 6px; }
+  :root[data-skin="bauhaus"] :is(.view > .back-link, .view > .anno-hint, #view-play-puzzle .pz-help-row, #view-play-puzzle #pz-status){ border-radius:0; }
 
   /* ===== Game review (Game History, open a game): an analysis board =====
      The board column (eval bar inside its frame, a player strip above and
@@ -8152,10 +8191,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
 
   /* ---- Game Boy (light): dark text on the magenta reads 3.0:1; cream reads 5.5:1, across the skin ---- */
-  :root[data-skin="gameboy"]:not([data-theme="dark"]) :is(.btn-primary, .toggle.active){ color:#f7f5e8; }
+  :root[data-skin="gameboy"]:not([data-theme="dark"]) :is(.btn-primary, .toggle.active, .chip.arcade-chip, .pz-save-btn.is-saved, .phase-step.is-live i, .wl-dot.is-live){ color:#f7f5e8; }
   :root[data-skin="gameboy"]:not([data-theme="dark"]) .btn-primary:hover{ background:var(--brass); box-shadow:inset 0 0 0 2px var(--brass-ink); }
   @media (prefers-color-scheme:dark){
-    :root[data-skin="gameboy"]:not([data-theme="light"]) :is(.btn-primary, .toggle.active){ color:var(--brass-ink); }
+    :root[data-skin="gameboy"]:not([data-theme="light"]) :is(.btn-primary, .toggle.active, .chip.arcade-chip, .pz-save-btn.is-saved, .phase-step.is-live i, .wl-dot.is-live){ color:var(--brass-ink); }
     :root[data-skin="gameboy"]:not([data-theme="light"]) .btn-primary:hover{ background:var(--brass-soft); box-shadow:none; }
   }
 
@@ -8536,16 +8575,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   @media (prefers-color-scheme:light){ :root:not([data-skin]):not([data-theme="dark"]) #gz .gz-go{ background:var(--ink); border-color:var(--ink); color:var(--surface); } }
   :root:not([data-skin])[data-theme="light"] #gz .gz-go{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
   /* a game puzzle's way back and Open the game on the card color: bare text can't be read on Felt's green or Game Boy's
-     wallpaper (a spread shadow, so nothing moves and the board stays centered) */
-  #view-play-puzzle.is-gz > .back-link, #view-play-puzzle.is-gz #pz-gzgame{ background:var(--surface); border-radius:999px; box-shadow:0 0 0 5px var(--surface), var(--shadow); }
+     wallpaper: the pills every puzzle's words now have (the Contrast block after .back-link:hover: the back link, the help row
+     Open the game sits in, the status line); here only their colors */
   #view-play-puzzle.is-gz > .back-link{ color:var(--ink-soft); }
-  /* the room it keeps clear of the home button as a margin, not padding: the words stay where they were and the pill hugs
-     them (on a phone or an iPad standing it showed an empty end ~50px wide) */
-  .wrap.play-mode #view-play-puzzle.is-gz > .back-link{ padding-left:0; margin-left:var(--fab-clear-link, 0px); }
   #view-play-puzzle.is-gz #pz-gzgame{ color:var(--ink); }      /* the brass link color is 4.0:1 on Game Boy dark's card color */
-  /* the board's words ("Your move.", "Not the move", your game's move) on the card color as well, only while it has words */
-  #view-play-puzzle.is-gz #pz-status:not(:empty){ width:fit-content; max-width:100%; margin-left:auto; margin-right:auto; padding:0 6px; background:var(--surface); border-radius:999px; box-shadow:0 0 0 5px var(--surface), var(--shadow); }
-  :root[data-skin="bauhaus"] #view-play-puzzle.is-gz > .back-link, :root[data-skin="bauhaus"] #view-play-puzzle.is-gz #pz-gzgame, :root[data-skin="bauhaus"] #view-play-puzzle.is-gz #pz-status{ border-radius:0; }
   /* a card's board: their last move lit under the pieces (NB_CODES Y), so a piece keeps its own color */
   .gz-m .nb-board .sq.gz-lit{ box-shadow:inset 0 0 0 2px #e8b339, inset 0 0 0 99px rgba(232,179,57,.45); }
   /* a finger's 44px on a touch screen: Open the game (its tap area grows, the row doesn't) and the solved box's buttons */
