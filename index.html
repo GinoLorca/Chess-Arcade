@@ -13530,9 +13530,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // Per-skin default: Hustler's marble board reads best with the Wavy Coach
   // set, so that's what a skin with no saved override of its own falls back
   // to. Court Cards wears its own set (the Court Cards Chess Set) and Game Boy
-  // Minimal Chess TWO (2026-11-17: its flat icons suit the dot-matrix screen);
+  // Minimal Chess ONE (the user's pick, 2026-11-22; TWO from 2026-11-17 until then), and Rose the Royal Minimal
+  // Chess Set and Drive-Thru the Rim Light Chess Set (the user's picks, 2026-11-22);
   // every other skin defaults to the classic Staunton set, same as ever.
-  const PIECE_STYLE_DEFAULTS = { felt:'default', hustler:'wavyCoach', bauhaus:'default', gameboy:'minimalTwo', outerspace:'default', drivethru:'default', rose:'default', chessbook:'default', uptown:'default', cards:'courtCards', custom:'default' };
+  const PIECE_STYLE_DEFAULTS = { felt:'default', hustler:'wavyCoach', bauhaus:'default', gameboy:'minimalOne', outerspace:'default', drivethru:'rimLight', rose:'royalMinimal', chessbook:'default', uptown:'default', cards:'courtCards', custom:'default' };
   let PIECE_SVG = PIECE_SVG_DEFAULT;
 
   /* A tiny static tableau in the header -- not a real board, just enough
@@ -15995,6 +15996,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   if(!(lookPrefs.psetV >= 3)){
     if(lookPrefs.pieceStyleBySkin.gameboy==='default') delete lookPrefs.pieceStyleBySkin.gameboy;
     lookPrefs.psetV = 3;
+  }
+  // One-time (2026-11-22): Game Boy's own set became Minimal Chess ONE (the user's pick). TWO saved on Game Boy before then
+  // was the old default shown back, not a choice: dropped once so the theme shows ONE. Chess Book loads its own set, the
+  // standard one (the user, the same day: "make sure that the default piece set is the standard ... for the chess book
+  // theme"): any set saved there is dropped once too. psetV 4 marks it done, so a pick made after it stays.
+  if(!(lookPrefs.psetV >= 4)){
+    if(lookPrefs.pieceStyleBySkin.gameboy==='minimalTwo') delete lookPrefs.pieceStyleBySkin.gameboy;
+    delete lookPrefs.pieceStyleBySkin.chessbook;
+    if(lookPrefs.pieceStyleBySkin.rose==='default') delete lookPrefs.pieceStyleBySkin.rose;      // Rose's own set became Royal Minimal
+    if(lookPrefs.pieceStyleBySkin.drivethru==='default') delete lookPrefs.pieceStyleBySkin.drivethru;      // Drive-Thru's, Rim Light
+    lookPrefs.psetV = 4;
   }
   // Object.assign above is shallow -- an existing user's saved customColors
   // (the old 5-key shape, before pieceWhite/pieceBlack/pieceStroke existed)
