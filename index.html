@@ -8392,6 +8392,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-tac-svg.is-anim .tx-ring{ animation:tx-ring .5s ease-out 1; transform-box:fill-box; transform-origin:center; }
   @keyframes tx-ring{ 0%{ transform:scale(1.18); opacity:0; } 60%{ opacity:1; } 100%{ transform:scale(1); } }
   @keyframes tx-arrow{ from{ opacity:0; } to{ opacity:1; } }
+  /* a tactic arrow's arrival (2026-11-22): from nothing to its group's own faded opacity (arrowOp; no end keyframe) */
+  @keyframes tx-arrow-in{ from{ opacity:0; } }
   /* the pill on the board frame's top edge (hvTacPillPlace): never on the squares, never over the top strip's words */
   .tx-pill{ position:absolute; z-index:8; display:inline-flex; align-items:center; gap:8px; max-width:calc(100% - 16px); box-sizing:border-box;
     padding:5px 12px 5px 9px; border-radius:999px; background:var(--tac); color:#fff; font:700 13px/1.2 "Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -8410,7 +8412,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .tx-pill-dot{ width:10px; height:10px; border-radius:50%; background:var(--tac); }
   @media (max-width:520px){ .tx-pill{ font-size:12px; gap:6px; padding:4px 10px 4px 7px; } .tx-pill-w{ padding-left:6px; } }
   .hv-frame.is-tx-marking{ box-shadow:0 0 0 3px var(--tac); }
-  @media (prefers-reduced-motion:reduce){ .tx-pop, .hv-tac-svg .tx-ring, #hv-tac-card{ animation:none !important; } .hv-tac-svg g, .hv-tac-num g{ animation:none !important; opacity:1 !important; } }
+  @media (prefers-reduced-motion:reduce){ .tx-pop, .hv-tac-svg .tx-ring, #hv-tac-card{ animation:none !important; } .hv-tac-svg g:not(.tx-arrow), .hv-tac-num g{ animation:none !important; opacity:1 !important; }
+    /* the tactic arrow keeps its own faded opacity (arrowOp): no inline opacity of 0 to undo (review, 2026-11-23) */
+    .hv-tac-svg g.tx-arrow{ animation:none !important; } }
   /* the move list: the icon after the move's badge and CLAMP letters, 16 px beside their 14 px discs, its middle level with
      theirs; the margins keep the row's pitch, -4px on the right uses the cell's own padding */
   .hv-tac-m{ display:inline-block; width:16px; height:16px; margin-left:2px; margin-right:-4px; vertical-align:-2.15px; margin-top:-3px; margin-bottom:-5px; background:var(--ic) center / contain no-repeat; }
@@ -14042,11 +14046,22 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       triPoints: head.map(p=> p[0]+','+p[1]).join(' '),
       len1: geo.len1*K };
   }
-  // RL's finish: each arrow its own group, faded as one (.85; Chess Arcade's transparent white .55), the shaft and head in
-  // it opaque (an engine arrow's color has RL's own alpha too, o.alpha, the same on both), so a halo never shows through
-  // the arrow and the corner and the head's joint have no darker seam; butt ends, a mitered corner (the default miter
-  // limit, 4, keeps a right angle sharp). Inside, always these four: [halo shaft, halo head, shaft, head]; the halo pair is
-  // stroke none where there is no halo.
+  // Faded arrows (2026-11-22; the user: arrows "cover information or marks that I have", so "at least 30% more
+  // transparent"): every arrow on every board is drawn ARROW_FADE times as solid as before. RL's .85 is .55 now, the
+  // engine's group .85 is .55 (its colors' own alpha kept), the tactic's 1 is .65 and Larry's .92 is .6. Chess Arcade's
+  // transparent white was .55 already and keeps it (2026-11-23), so white matches the rest. This is the one number that
+  // tunes them all. It is on each arrow's own group, so a halo or
+  // a white edge fades with its arrow and the head and shaft never darken where they meet. Arrows only: square marks,
+  // highlights, CLAMP rings and letters, tactic icons and step numbers, last-move squares, the side-line highlighter and
+  // the eval bar keep their own.
+  const ARROW_FADE = 0.65;
+  // an arrow group's opacity attribute: v (its look before 2026-11-22) times ARROW_FADE, to 2 places
+  function arrowOp(v){ return String(Math.round(v * ARROW_FADE * 100) / 100); }
+  // RL's finish: each arrow its own group, faded as one (annoArrowOp, arrowOp), the shaft and
+  // head in it opaque (an engine arrow's color has RL's own alpha too, o.alpha, the same on both), so a halo never shows
+  // through the arrow and the corner and the head's joint have no darker seam; butt ends, a mitered corner (the default
+  // miter limit, 4, keeps a right angle sharp). Inside, always these four: [halo shaft, halo head, shaft, head]; the halo
+  // pair is stroke none where there is no halo.
   // o: { shaft, halo (a color or null), haloShaft, haloHead (its widths), op (the group's), alpha (the color's own), units
   //      (true: geo and the widths in square units, drawn at ARROW_UNIT_K, annoArrowUnits) }
   function annoArrowG(geo, color, o){
@@ -14062,8 +14077,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     g.appendChild(line); g.appendChild(tri);
     return g;
   }
-  // the group's opacity: RL's .85, and the Game Review pens' transparent white (2026-11-10) see-through at .55
-  function annoArrowOp(color){ return String(color).toLowerCase()==='#ffffff' ? '0.55' : '0.85'; }
+  // the group's opacity: RL's .85 faded by ARROW_FADE (2026-11-22), .55; the Game Review pens' transparent white
+  // (2026-11-10) stays at its .55 (the user, 2026-11-23: at .36 it nearly vanished on light squares)
+  function annoArrowOp(color){ return String(color).toLowerCase()==='#ffffff' ? '0.55' : arrowOp(0.85); }
   // RL's halo rule: a halo while an arrow profile is on (Sequential, Strategic, Game Review), never in Default; light for
   // the two darkest colors, dark for the rest
   function annoHaloOn(){ return annoProfile()!=='default'; }
@@ -47168,8 +47184,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     c.arrows.forEach((a, i)=>{
       const A = at(a[0]), Z = at(a[1]), sh = annoArrowShape(A.x, A.y, Z.x, Z.y, Z.r - A.r, Z.c - A.c, 1, big);
       if(!sh) return;
-      const g = mk('g', { 'class':'tx-arrow' }, svg), u = annoArrowUnits(g, sh), K = u.K;     // (drawn at K: Safari's sharp corner)
-      if(o.anim){ g.style.opacity = '0'; g.style.animation = 'tx-arrow .25s ease-out forwards'; g.style.animationDelay = (180 + i * 160)+'ms'; }
+      // (drawn at K: Safari's sharp corner; faded as one with its white edge, arrowOp, 2026-11-22: the arrival animation,
+      // tx-arrow-in, has no end keyframe, so it ends at the group's own opacity)
+      const g = mk('g', { 'class':'tx-arrow', opacity:arrowOp(1) }, svg), u = annoArrowUnits(g, sh), K = u.K;
+      if(o.anim){ g.style.animation = 'tx-arrow-in .25s ease-out both'; g.style.animationDelay = (180 + i * 160)+'ms'; }
       mk('path', { d:u.pathD, fill:'none', stroke:'#fff', 'stroke-opacity':'.92', 'stroke-width':String((shaft + 2 * edge)*K), 'stroke-linecap':'butt', 'stroke-linejoin':'miter' }, g);
       mk('polygon', { points:u.triPoints, fill:'#fff', 'fill-opacity':'.92', stroke:'#fff', 'stroke-opacity':'.92', 'stroke-width':String(2 * edge * K), 'stroke-linejoin':'round' }, g);
       mk('path', { d:u.pathD, fill:'none', stroke:TAC_COLOR, 'stroke-width':String(shaft*K), 'stroke-linecap':'butt', 'stroke-linejoin':'miter' }, g);
@@ -48903,7 +48921,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // each switched on its own from the cog or with 1, 2, 3 (none while E
   // hides the suggested moves). RL's look (AnalysisView): a user arrow's
   // shape, no halo, the group at .85 and the color's own alpha (.92 the
-  // best, .85 the others). Drawn 3rd, 2nd, best, so the best move's arrow
+  // best, .85 the others); the group faded by ARROW_FADE since 2026-11-22
+  // (arrowOp: .55). Drawn 3rd, 2nd, best, so the best move's arrow
   // is on top.
   const HV_ARROW_COLORS = ['rgb(56,176,120)', 'rgb(59,132,235)', 'rgb(226,142,46)'];
   const HV_ARROW_ALPHA = [0.92, 0.85, 0.85];
@@ -48923,7 +48942,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       const dr = Math.floor(to/8)-Math.floor(from/8), dc = to%8-from%8;
       const shp = annoArrowShape(cx(from), cy(from), cx(to), cy(to), dr, dc, 1);
       if(!shp) continue;
-      const g = annoArrowG(shp, HV_ARROW_COLORS[k-1], { shaft:ARROW_SHAFT, halo:null, haloShaft:ARROW_SHAFT, haloHead:0, op:'0.85', alpha:HV_ARROW_ALPHA[k-1], units:true });
+      const g = annoArrowG(shp, HV_ARROW_COLORS[k-1], { shaft:ARROW_SHAFT, halo:null, haloShaft:ARROW_SHAFT, haloHead:0, op:arrowOp(0.85), alpha:HV_ARROW_ALPHA[k-1], units:true });
       g.setAttribute('class', 'hv-eng-arrow'); g.setAttribute('data-uci', l.firstUci); g.setAttribute('data-mp', String(k));
       hvEngSvg.appendChild(g);
     }
@@ -58451,7 +58470,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       // Repertoire Lab's arrow shape (annoArrowShape), Larry's own finish: dashed in the letter's color over a light halo; a
       // dash centered on a knight's corner (so the L's sharp corner shows), a straight one's last dash meeting the head
       // (drawn at K in its group, annoArrowUnits: Safari's sharp corner; the ring and the cut above stay in squares)
-      const shp = annoArrowShape(ax, ay, bx, by, dr, dc, 1), g = mk('g', { opacity:'.92' });
+      const shp = annoArrowShape(ax, ay, bx, by, dr, dc, 1), g = mk('g', { opacity:arrowOp(0.92) });
       if(shp){
         const u = annoArrowUnits(g, shp), K = u.K;
         const DASH = 0.17, PER = 0.26, at0 = shp.pts.length > 2 ? DASH / 2 : DASH, off = ((at0 - shp.len1) % PER + PER) % PER;
