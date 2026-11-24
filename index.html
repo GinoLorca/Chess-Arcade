@@ -6692,11 +6692,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   #hv-controls{ flex-wrap:wrap; row-gap:8px; }
   #hv-controls .hv-px-here{ margin-left:6px; }
   /* the engine's arrows, under the board where the engine card's cog is out of sight (a phone, a tablet) */
-  #hv-controls .hv-arr-btn{ display:none; padding-left:12px; padding-right:12px; }
-  .hv-arr-btn svg{ width:18px; height:18px; display:block; }
+  #hv-controls .hv-arr-btn{ display:none; align-self:stretch; padding-left:12px; padding-right:12px; }
+  .hv-arr-btn svg{ width:18px; height:18px; margin:-3px 0; display:block; }
   #hv-controls .hv-arr-btn{ position:relative; }
   .hv-arr-btn::after{ content:''; position:absolute; inset:-2px 0; }      /* 44px to a finger */
-  @media (pointer:coarse), (max-width:899.98px){ #hv-controls .hv-arr-btn{ display:inline-flex; align-items:center; justify-content:center; } }
+  @media (max-width:899.98px), (pointer:coarse) and (orientation:portrait){ #hv-controls .hv-arr-btn{ display:inline-flex; align-items:center; justify-content:center; } }
   .hv-eng-pop.hv-arr-pop{ right:auto; z-index:30; }
   @media (pointer:coarse){ .hv-eng-pop .hv-pop-check{ min-height:44px; box-sizing:border-box; } }
   @media (max-width:599.98px){ #hv-controls .hv-px-here{ margin-left:0; } }
@@ -10015,7 +10015,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button type="button" class="toggle" data-k="2" aria-pressed="false">2nd best</button>
         <button type="button" class="toggle" data-k="3" aria-pressed="false">3rd best</button>
       </div>
-      <div class="field-hint">The arrows Stockfish draws on the review board. Turn all three off for none. The Arrows button under the board does the same on a phone or tablet, and keys 1, 2 and 3 on a keyboard.</div>
+      <div class="field-hint">The arrows Stockfish draws on the review board. Turn all three off for none. On a phone or an upright tablet the arrow button under the board does the same; on a keyboard, keys 1, 2 and 3.</div>
     </div>
 
     <div class="modal-sep"></div>
