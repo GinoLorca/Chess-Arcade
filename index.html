@@ -7155,8 +7155,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       --sq:clamp(30px, min(calc((100vw - 72px - var(--hv-frame-extra)) / 8), calc((100vh - 230px - var(--hv-frame-extra)) / 8)), 85px);
       --sq:clamp(30px, min(calc((100vw - 72px - var(--hv-frame-extra)) / 8), calc((100dvh - 230px - var(--hv-frame-extra)) / 8)), 85px);
     }
-    /* one column: board first, then the Play it out card (as before), the first tabbed card, the comment
-       card and the second (2026-11-02; the header and the engine card are in their tabs) */
+    /* one column: board first, then the Play it out card (as before), the comment card (right under the buttons, above
+       the tabs, so it is seen while stepping: 2026-11-24, the user's iPhone; it was under the first tabbed card), the
+       first tabbed card and the second (2026-11-02; the header and the engine card are in their tabs) */
     .hv-boardcol, .hv-side{ display:contents; }
     .wrap.play-mode .hv-boardcol > .back-link{ order:1; align-self:center; margin:8px auto 2px; min-height:32px; box-sizing:border-box; max-width:calc(100% - 112px); }
     #hv-row-top{ order:2; }
@@ -7166,7 +7167,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     #hv-anno-hint, #hv-cd{ order:5; }
     #hv-px{ order:6; }
     #hv-tabs{ order:7; overflow:visible; }
-    #hv-com-card, #hv-engine{ order:8; }
+    #hv-com-card{ order:6; }
+    #hv-engine{ order:8; }
     #hv-card2{ order:9; }
     #hv-head{ order:11; }
     /* the page ends clear of the Friends pill in the bottom corner */
