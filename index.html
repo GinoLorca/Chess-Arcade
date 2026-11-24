@@ -6691,6 +6691,14 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   /* the row wraps where it can't hold the button too (a phone): it takes a line of its own under the arrows */
   #hv-controls{ flex-wrap:wrap; row-gap:8px; }
   #hv-controls .hv-px-here{ margin-left:6px; }
+  /* the engine's arrows, under the board where the engine card's cog is out of sight (a phone, a tablet) */
+  #hv-controls .hv-arr-btn{ display:none; padding-left:12px; padding-right:12px; }
+  .hv-arr-btn svg{ width:18px; height:18px; display:block; }
+  #hv-controls .hv-arr-btn{ position:relative; }
+  .hv-arr-btn::after{ content:''; position:absolute; inset:-2px 0; }      /* 44px to a finger */
+  @media (pointer:coarse), (max-width:899.98px){ #hv-controls .hv-arr-btn{ display:inline-flex; align-items:center; justify-content:center; } }
+  .hv-eng-pop.hv-arr-pop{ right:auto; z-index:30; }
+  @media (pointer:coarse){ .hv-eng-pop .hv-pop-check{ min-height:44px; box-sizing:border-box; } }
   @media (max-width:599.98px){ #hv-controls .hv-px-here{ margin-left:0; } }
   .hv-eng-pop{ right:8px; min-width:210px; }
   .hv-pop-head{ padding:6px 10px 4px; font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
@@ -9984,6 +9992,17 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       <div class="field-hint">The cards around the board when you review a game. Turn one off to hide it; the cards left in its column take its room. With the Engine card off the engine still runs when it&#8217;s on (L turns it on or off).</div>
     </div>
 
+    <!-- the arrows Stockfish draws on the review board (the engine card's cog has them too: small, and on a phone in the Engine tab; 2026-11-24) -->
+    <div class="field" id="hvarr-field">
+      <div class="field-label" id="hvarr-label">Engine arrows</div>
+      <div class="toggle-row hvcards-row" id="hvarr-row" role="group" aria-labelledby="hvarr-label">
+        <button type="button" class="toggle" data-k="1" aria-pressed="false">Best move</button>
+        <button type="button" class="toggle" data-k="2" aria-pressed="false">2nd best</button>
+        <button type="button" class="toggle" data-k="3" aria-pressed="false">3rd best</button>
+      </div>
+      <div class="field-hint">The arrows Stockfish draws on the review board. Turn all three off for none. The Arrows button under the board does the same on a phone or tablet, and keys 1, 2 and 3 on a keyboard.</div>
+    </div>
+
     <div class="modal-sep"></div>
 
     <!-- Did the opening do its job? (oj*): Stockfish scores where each game leaves the opening, in the background -->
@@ -10877,6 +10896,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="btn btn-ghost hv-share" id="hv-share" type="button" aria-haspopup="menu" aria-expanded="false" title="Share the game at this move, or this position">Share</button>
         <button class="btn btn-ghost hv-copy-pgn" id="hv-copy-pgn" type="button" title="Copy the game&rsquo;s PGN as text">Copy PGN</button>
         <button class="btn btn-ghost hv-calc-btn" id="hv-calc-btn" type="button" aria-pressed="false" aria-keyshortcuts="V" aria-label="Capture Calculator (V)" title="Capture Calculator (V)"><span class="hv-calc-btn-w">Capture </span>Calculator</button>
+        <button class="btn btn-ghost hv-arr-btn" id="hv-arr-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Engine arrows" title="Engine arrows: best, 2nd best, 3rd best"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5 15.2 8.8M8.6 6.6h8.8v8.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/></svg></button>
       </div>
       <!-- Settings > Click to draw (hvCd): there only while it is on -->
       <div class="hv-cd" id="hv-cd" role="group" aria-label="Click to draw" hidden>
@@ -11084,13 +11104,13 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <!-- Similar openings (sm*): the lines in your repertoire this position resembles -->
         <div class="hv-pane hv-pane-similar" role="tabpanel" id="hv-pane-similar" aria-labelledby="hv-tab-similar"></div>
         <div class="hv-pane hv-pane-notes" role="tabpanel" id="hv-pane-notes" aria-labelledby="hv-tab-notes">
-          <div class="hv-notes-head"><label class="field-label" id="hv-note-label" for="hv-note">Notes</label><button class="field-label hv-lr-tab" id="hv-lr-tab" type="button" aria-pressed="false" aria-controls="hv-lr-wrap" title="Larry's review of this game: paste it here, and every move in it takes the board there">Larry Review</button><button class="hv-fold" id="hv-fold-notes" type="button" aria-expanded="true" aria-controls="hv-note"><span class="hv-fold-chev" aria-hidden="true"></span></button></div>
+          <div class="hv-notes-head"><label class="field-label" id="hv-note-label" for="hv-note">Notes</label><button class="field-label hv-lr-tab" id="hv-lr-tab" type="button" aria-pressed="false" aria-controls="hv-lr-wrap" title="The Larry-Duet review of this game: paste it here, and every move in it takes the board there">Larry-Duet Review</button><button class="hv-fold" id="hv-fold-notes" type="button" aria-expanded="true" aria-controls="hv-note"><span class="hv-fold-chev" aria-hidden="true"></span></button></div>
           <div class="text-input gn-ta hv-note" id="hv-note" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" aria-labelledby="hv-note-label" data-placeholder="Your analysis: key moments, mistakes, plans, what to try next time."></div>
           <div class="gn-status" id="hv-note-status" aria-live="polite"></div>
           <!-- Larry's review (hvLr*): pasted once, then shown as text, every move in it a link (HV_MV_EDS) -->
           <div class="hv-lr" id="hv-lr-wrap">
-            <textarea class="text-input hv-lr-in" id="hv-lr-in" rows="7" spellcheck="false" aria-label="Larry's review" placeholder="Paste Larry's review here. Every move he writes becomes a link: click it and the board goes there."></textarea>
-            <div class="hv-lr-text" id="hv-lr" role="region" aria-label="Larry's review" hidden></div>
+            <textarea class="text-input hv-lr-in" id="hv-lr-in" rows="7" spellcheck="false" aria-label="Larry-Duet review" placeholder="Paste the Larry-Duet review here. Every move in it becomes a link: click it and the board goes there."></textarea>
+            <div class="hv-lr-text" id="hv-lr" role="region" aria-label="Larry-Duet review" hidden></div>
             <div class="hv-lr-acts">
               <button type="button" class="btn-link" id="hv-lr-save" hidden>Save</button>
               <button type="button" class="btn-link" id="hv-lr-cancel" hidden>Cancel</button>
@@ -48084,6 +48104,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // the engine Analyze turned on for a played-out position only (PX.engWas) is never the saved setting
     const o = PX && PX.engWas===false ? Object.assign({}, hvPrefs, { engine:false }) : hvPrefs;
     try{ localStorage.setItem(HV_PREFS_KEY, JSON.stringify(o)); }catch(e){}
+    hvArrPaint();
   }
 
   // ---- state ----
@@ -51967,6 +51988,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     tog.disabled = !S.std;
     const ar = document.getElementById('hv-eng-arrow');
     ar.disabled = !S.std || !hvPrefs.engine;
+    document.getElementById('hv-arr-btn').disabled = ar.disabled;
     if(ar.disabled && hvMenu && hvMenu.kind==='arrows') hvMenuClose();
     const st = document.getElementById('hv-eng-status');
     const nBook = hvRenderBook();
@@ -52217,9 +52239,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
   }
   // ---- the cog: which engine arrows to draw, and E's "Hide suggested moves" ----
-  function hvArrowMenuOpen(){
+  function hvArrowMenuOpen(from){      // from the engine card's cog, or (from) the Arrows button under the board
     hvMenuClose();
-    const S = HV_STATE, btn = document.getElementById('hv-eng-arrow'), card = document.getElementById('hv-engine');
+    const S = HV_STATE, btn = from || document.getElementById('hv-eng-arrow'), card = document.getElementById(from ? 'hv-controls' : 'hv-engine');
     if(!S || btn.disabled) return;
     const el = hvEl('div', 'hv-pop hv-eng-pop');
     el.id = 'hv-arrow-pop';
@@ -52260,8 +52282,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const keyRow = hvEl('div', 'hv-pop-key');
     keyRow.append(hvEl('span', '', 'Play the best move'), hvEl('span', 'kbd', 'B'));
     el.appendChild(keyRow);
+    if(from) el.classList.add('hv-arr-pop');
     card.appendChild(el);
     el.style.top = (btn.offsetTop + btn.offsetHeight + 6)+'px';
+    if(from) el.style.left = Math.max(0, Math.min(btn.offsetLeft + (btn.offsetWidth - el.offsetWidth)/2, card.clientWidth - el.offsetWidth))+'px';
     // with the engine at the foot of the side column (card 2, under three columns) it opens upward where the screen ends under it
     const er = el.getBoundingClientRect(), bt = btn.getBoundingClientRect().top;
     if(er.bottom > window.innerHeight - 8 && bt - er.height - 6 >= 8) el.style.top = (btn.offsetTop - el.offsetHeight - 6)+'px';
@@ -52288,6 +52312,24 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   document.getElementById('hv-eng-arrow').addEventListener('click', ()=>{
     if(hvMenu && hvMenu.kind==='arrows') hvMenuClose(true); else hvArrowMenuOpen();
   });
+  document.getElementById('hv-arr-btn').addEventListener('click', (e)=>{
+    if(hvMenu && hvMenu.kind==='arrows') hvMenuClose(true); else hvArrowMenuOpen(e.currentTarget);
+  });
+  // Settings > Engine arrows: the same three switches (hvSavePrefs keeps them in step with the keys and the cog)
+  function hvArrPaint(){
+    document.querySelectorAll('#hvarr-row .toggle').forEach(b=>{
+      const on = !!hvPrefs.arrows[Number(b.dataset.k) - 1];
+      b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  document.getElementById('hvarr-row').addEventListener('click', (e)=>{
+    const b = e.target.closest('.toggle');
+    if(!b) return;
+    hvPrefs.arrows[Number(b.dataset.k) - 1] = !hvPrefs.arrows[Number(b.dataset.k) - 1];
+    hvSavePrefs();
+    hvRenderEngineNow();
+  });
+  hvArrPaint();
   function hvToggleEngine(){
     if(!HV_STATE || !HV_STATE.std) return;
     hvPrefs.engine = !hvPrefs.engine;
