@@ -49838,8 +49838,11 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const clear = fr && fr.height ? fr.bottom + 6 : 8;          // under the corner buttons
     const board = window.scrollY + document.getElementById('hv-row-top').getBoundingClientRect().top - clear, top = window.scrollY + r.top, bottom = top + r.height;
     const both = bottom - board <= vh - 8, b = hvBoardEl.getBoundingClientRect();
-    if(r.top >= clear && r.bottom <= vh - 8 && (!both || Math.min(b.bottom, vh) - Math.max(b.top, 0) >= b.height*.98)) return;
-    const y = Math.max(0, both ? board : r.height > vh - clear - 16 ? top - clear : bottom - vh + 16);
+    // the card is above the tabs there (2026-11-24): the coin under it stays to be tapped again, where the card still fits over it
+    const coin = el===card ? document.getElementById('hv-gold') : null, cr = coin ? coin.getBoundingClientRect() : null, coinY = cr && cr.height ? window.scrollY + cr.bottom + 14 - vh : 0;
+    const keep = coinY > 0 && top - coinY >= clear, coinOff = keep && coinY > window.scrollY;
+    if(!coinOff && r.top >= clear && r.bottom <= vh - 8 && (!both || Math.min(b.bottom, vh) - Math.max(b.top, 0) >= b.height*.98)) return;
+    const y = Math.max(0, keep ? coinY : 0, both ? board : r.height > vh - clear - 16 ? top - clear : bottom - vh + 16);
     try{ window.scrollTo({ top:y, behavior: reducedMotion() ? 'auto' : 'smooth' }); }catch(e){ window.scrollTo(0, y); }
   }
   // a comment made a golden rule, or an ordinary one again
