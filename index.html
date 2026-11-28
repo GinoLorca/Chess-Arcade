@@ -7560,7 +7560,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   .hv-calc-tk{ margin:0; font-size:13px; line-height:1.4; color:var(--ink); }
   .hv-calc-acts{ display:flex; flex-wrap:wrap; gap:8px; }
   @media (pointer:coarse){ .hv-calc .btn{ min-height:44px; } .hv-calc-mv{ padding-top:9px; padding-bottom:9px; } }
-  /* scratch moves in the move list: the calculator's, gone when it ends unless kept */
+  /* scratch moves in the move list: the calculator's, gone when it ends unless kept, and a letter card link's */
   #hv-movelist .is-calc .hv-var-line, #hv-movelist .mv-san.is-calc{ font-style:italic; }
   #hv-movelist .hv-var.is-calc{ box-shadow:inset 2px 0 0 var(--brass); }
   /* three columns: the top of the analysis column at its own height, up to about 70% of it (the engine and the tabs
@@ -7755,6 +7755,46 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     box-shadow:0 0 0 1.5px rgba(255,255,255,.9), 0 1px 3px rgba(0,0,0,.4);
   }
   .hv-sq-ck.is-many .hv-sq-ckd{ width:calc(var(--sq) * .28); height:calc(var(--sq) * .28); font-size:calc(var(--sq) * .16); }
+  /* the letter card (hvLc*, 2026-11-28): a circle is pressed for its card (the box stays out of the way of the square's other
+     presses); a finger's reach a little wider than the circle. The circle the card is about ringed in the page's ink */
+  .hv-sq-ckd{ position:relative; pointer-events:auto; cursor:pointer; }
+  .hv-sq-ckd::before{ content:''; position:absolute; inset:-3px; border-radius:50%; }
+  @media (pointer:coarse){ .hv-sq-ckd::before{ inset:-7px; } }
+  .hv-sq-ckd.is-lc{ outline:2px solid var(--ink); outline-offset:1.5px; }
+  .hv-lc-q{ position:absolute; inset:0; z-index:2; pointer-events:none; background:color-mix(in srgb, var(--lc) 20%, transparent);
+    box-shadow:inset 0 0 0 calc(var(--sq) * .06) color-mix(in srgb, var(--lc) 75%, transparent); }
+  .hv-lc{
+    position:absolute; z-index:30; box-sizing:border-box; display:flex; flex-direction:column; gap:7px; padding:6px 10px 10px;
+    background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 10px 28px rgba(0,0,0,.3);
+    color:var(--ink); font-family:"Libre Franklin",system-ui,-apple-system,sans-serif; overflow-y:auto; overscroll-behavior:contain;
+  }
+  :root[data-skin="uptown"] .hv-lc{ font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }
+  .hv-lc-head{ display:flex; align-items:center; gap:8px; margin-right:-6px; }
+  .hv-lc-mv{ flex:1 1 auto; min-width:0; font:700 12.5px/1.3 "JetBrains Mono",monospace; color:var(--ink-soft); }
+  .hv-lc-x{ flex:0 0 auto; width:28px; height:28px; padding:0; border:0; border-radius:6px; background:none; cursor:pointer; color:var(--ink-soft);
+    font-size:19px; line-height:1; display:inline-flex; align-items:center; justify-content:center; }
+  .hv-lc-x:hover{ color:var(--ink); background:var(--surface-2); }
+  .hv-lc-x:focus-visible{ outline:2px solid var(--focus); outline-offset:-2px; }
+  @media (pointer:coarse){ .hv-lc-x{ width:40px; height:40px; margin:-6px -4px -6px 0; } }
+  .hv-lc-l{ display:flex; flex-direction:column; gap:3px; }
+  .hv-lc-l + .hv-lc-l{ border-top:1px solid var(--line); padding-top:8px; }
+  .hv-lc-top{ display:flex; align-items:center; gap:7px; font-size:13.5px; font-weight:700; line-height:1.3; }
+  .hv-lc-d{ flex:0 0 auto; box-sizing:border-box; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font:800 12px/1 "JetBrains Mono",monospace; box-shadow:0 0 0 1.5px rgba(255,255,255,.9), 0 1px 3px rgba(0,0,0,.35); }
+  .hv-lc-d.is-theirs{ background:rgba(20,21,23,.82); box-shadow:inset 0 0 0 2.5px var(--cw), 0 0 0 1.5px rgba(255,255,255,.9), 0 1px 3px rgba(0,0,0,.35); }
+  .hv-lc-who{ display:flex; flex-wrap:wrap; align-items:center; gap:2px 6px; font-size:12px; line-height:1.4; color:var(--ink-soft); }
+  .hv-lc-hand{ font-weight:600; color:var(--ink); }
+  .hv-lc-dz{ padding:0 6px; border-radius:3px; font-weight:600; color:var(--sv-tx); background:linear-gradient(180deg, var(--sv-1), var(--sv-2) 45%, var(--sv-3));
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--ink) 40%, transparent); }
+  .hv-lc-note{ margin:1px 0 0; font-size:13.5px; line-height:1.45; color:var(--ink); white-space:pre-wrap; overflow-wrap:anywhere; }
+  :root[data-skin="chessbook"] .hv-lc-note{ font-family:"EB Garamond","Libre Franklin",Georgia,serif; font-size:14.5px; }
+  .hv-lc-note.is-none{ color:var(--ink-soft); font-style:italic; }
+  .hv-lc .hv-com-mv{ color:var(--ink); font-weight:600; text-decoration-color:var(--brass-text); }
+  .hv-lc-sq{ font-size:12px; line-height:1.4; color:var(--ink-soft); }
+  .hv-lc-out{ font-size:12px; line-height:1.4; font-weight:600; color:var(--ink); }
+  .hv-lc.is-sm{ gap:5px; padding:4px 9px 8px; }
+  .hv-lc.is-sm .hv-lc-l{ gap:1px; } .hv-lc.is-sm .hv-lc-l + .hv-lc-l{ padding-top:6px; }
+  .hv-lc.is-sm .hv-lc-note{ font-size:13px; line-height:1.38; } .hv-lc.is-sm :is(.hv-lc-sq, .hv-lc-out, .hv-lc-who){ line-height:1.3; }
   /* a square's CLAMP box (Space + right-click, or "Mark a square"): the move and the square, what's on it, the five
      letters (the move menu's CLAMP discs: on = this square carries it) */
   .hv-sq-pop{ z-index:60; min-width:0; width:max-content; max-width:calc(100vw - 16px); padding:4px 4px 6px; }
@@ -53510,8 +53550,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // Plays a move after `from` (a move object or a uci string): follows an
   // existing child with the same move, otherwise adds a variation. null when
-  // the move isn't legal there.
-  function hvPlay(from, mv){
+  // the move isn't legal there. peek: a letter card's link (2026-11-28): a new move is a scratch move (hvPeekDrop).
+  function hvPlay(from, mv, peek){
     if(!HV_STATE || !from || mv==null) return null;
     let move = null;
     if(typeof mv==='string'){
@@ -53523,14 +53563,36 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     }
     const uci = hvUci(move);
     const ex = from.children.find(c=> c.uci===uci), calc = hvCalcAt(from);     // calc: from is in the Capture Calculator's sequence
-    if(ex){ if(calc!=null) hvCalcPush(calc, ex); return ex; }
+    if(ex){ if(calc!=null) hvCalcPush(calc, ex); else if(ex.peek && !peek){ hvPeekKeep(ex); if(!hvAnnBusy) hvAnnSoon(); } return ex; }
     const next = pzApplyMoveRaw(from.state, move);
     const node = hvMkNode(from, move, next, pzMoveToSAN(from.state, move, next), 'v'+(++hvSeq), false);
     from.children.push(node);
     HV_STATE.nodes.set(node.id, node);
     if(calc!=null){ node.calc = true; hvCalcPush(calc, node); }       // scratch: never saved, gone when it ends (unless kept)
-    else if(!hvAnnBusy) hvAnnSoon();         // a new side line is kept with the game (hvAnnSave)
+    else if(peek){ node.peek = true; hvPeekAny = true; }          // a letter card link's: scratch too, never saved (hvPeekDrop)
+    else { if(from.peek) hvPeekKeep(from); if(!hvAnnBusy) hvAnnSoon(); }         // a new side line is kept with the game (hvAnnSave), with the scratch moves it goes on from
     return node;
+  }
+  // A letter card's link to a move the game didn't play (fix round, 2026-11-28; the rule: opening a card, reading it and its
+  // links never save): the move is shown as a scratch move (n.peek, in italics like the Capture Calculator's), never in the
+  // record (hvAnnText) unless something of yours is on it (hvPeekUsed: a move played on from it, a comment, a drawing, a
+  // badge, a highlight, a golden rule). The board going off its line drops it (hvGoNode), or keeps it as an ordinary side
+  // line when something of yours is on it. (Notes', the comment card's and the tactic card's links add the line as before.)
+  var hvPeekAny = false, hvPeekTo = null;          // (a scratch move made since the last drop; the move a link is going to)
+  function hvPeekUsed(n){
+    const m = hvCalcMarks(n);
+    return !!(n.comment || n.hl || n.gold || n.goldLine || hvOwnBadge(n) || (m && hasMarks(m)) || n.children.some(c=> !c.calc && (!c.peek || hvPeekUsed(c))));
+  }
+  function hvScratch(n){ return !!n.calc || (!!n.peek && !hvPeekUsed(n)); }
+  function hvPeekKeep(n){ for(let x = n; x && x.peek; x = x.parent) delete x.peek; }
+  function hvPeekDrop(S, to){
+    const on = new Set(), tops = [];
+    [to, hvPeekTo].forEach(t=>{ for(let x = t; x; x = x.parent) on.add(x); });
+    S.nodes.forEach(n=>{ if(n.peek && !(n.parent && n.parent.peek)) tops.push(n); });
+    let left = false;
+    const settle = (n)=>{ if(!n.peek) return; if(hvPeekUsed(n)){ delete n.peek; n.children.slice().forEach(settle); } else hvCalcCut(S, n); };
+    tops.forEach(n=>{ if(on.has(n)) left = true; else settle(n); });
+    hvPeekAny = left;
   }
   // 'Start', '14. Nf5' or '14...Nf5'
   function hvNodeLabel(node){
@@ -53683,6 +53745,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     renderMarks(hvBoardEl, arrowSvgHv, marksHv, st.board);
     if(typeof hrDecorateBoard==='function'){ try{ hrDecorateBoard(hvBoardEl, n); }catch(e){} }
     if(n.clamp) hvClampSqDraw();          // the move's CLAMP letters on their squares
+    else if(HV_LC) hvLcAfter();           // (a letter card whose letters are gone closes)
     hvTacDraw();                          // a tactic on the move (or the one being marked): arrows, rings, icon, pill
     hvCdMark();                           // Click to draw: the arrow's first square
   }
@@ -53861,6 +53924,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const S = HV_STATE;
     if(!S || !node) return;
     if(CALC && CALC.S===S && node!==CALC.anchor && CALC.path.indexOf(node)<0) hvCalcEnd('away');     // left the Capture Calculator's sequence
+    if(hvPeekAny) hvPeekDrop(S, node);          // off a letter card link's scratch line: dropped
     const prev = S.cur;
     S.cur = node;
     hvCcStep = !!(opts && opts.sound); hvCcRep = !!(opts && opts.rep);
@@ -54225,7 +54289,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         host.appendChild(hvEl('span', 'hv-var-num', white ? num+'.' : num+'...'));
         if(white) host.appendChild(document.createTextNode(' '));
       }
-      const m = hvEl('span', 'mv-san'+(node===S.cur ? ' mv-viewed' : '')+(node.calc ? ' is-calc' : ''), node.san);
+      const m = hvEl('span', 'mv-san'+(node===S.cur ? ' mv-viewed' : '')+(node.calc || node.peek ? ' is-calc' : ''), node.san);
       m.dataset.node = node.id;
       hvAddBadge(m, node);
       host.appendChild(m);
@@ -54247,7 +54311,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     });
   }
   function hvVarRow(branch){
-    const row = hvEl('div', 'hv-var'+hvHlClass(branch)+(branch.calc ? ' is-calc' : ''));
+    const row = hvEl('div', 'hv-var'+hvHlClass(branch)+(branch.calc || branch.peek ? ' is-calc' : ''));
     const btn = hvEl('button', 'hv-var-menu', '\u22ee');
     btn.type = 'button';
     btn.dataset.node = branch.id;
@@ -54404,6 +54468,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   function hvMenuOpen(node, anchor, x, y, opener){
     hvMenuClose();
+    hvLcClose();          // (the M key's menu: no letter card beside it)
     const S = HV_STATE;
     const com = !!hvAnnId();            // comments: a game's moves (not a puzzle's)
     if(!S || !node || !node.parent || (node.main && !com && !S.std)) return;
@@ -55156,6 +55221,10 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const HV_SQ_PIECE = { k:'king', q:'queen', r:'rook', b:'bishop', n:'knight', p:'pawn' };
   // the discs of the move on the board (hvRenderBoard): never a side line's, a puzzle's or a played-out position's
   function hvClampSqDraw(){
+    hvClampSqDraw0();
+    if(HV_LC) hvLcAfter();          // a letter card open: its letters again, its squares lit, beside its circle
+  }
+  function hvClampSqDraw0(){
     hvBoardEl.querySelectorAll('.hv-sq-ck').forEach(x=> x.remove());
     const S = HV_STATE, n = S && S.cur, c = n && n.main ? n.clamp : null;
     if(!c || !n.move || !hvAnnId()) return;
@@ -55170,10 +55239,257 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(!sq) return;
       const box = hvEl('span', 'hv-sq-ck'+(Ks.length > 2 ? ' is-many' : ''));
       box.setAttribute('aria-hidden', 'true');          // the move list's discs carry the names
-      Ks.forEach(K=>{ const t = hvClampIsT(n, K.ch), d = hvEl('span', 'hv-sq-ckd'+(t ? ' is-theirs' : ''), K.ch); if(t) d.style.setProperty('--cw', K.color); else d.style.background = K.color; box.appendChild(d); });
+      Ks.forEach(K=>{ const t = hvClampIsT(n, K.ch), d = hvEl('span', 'hv-sq-ckd'+(t ? ' is-theirs' : ''), K.ch); d.dataset.ck = K.ch; if(t) d.style.setProperty('--cw', K.color); else d.style.background = K.color; box.appendChild(d); });
       sq.appendChild(box);
     });
   }
+  /* ---- the letter card (2026-11-28, the user: "tapping the note and tapping the letter, and a note appears. That way, a lot
+     of ambiguity can be erased"; an L on the knight on d5 read as "the knight is loose" when the slip was the knight leaving
+     f6): a CLAMP letter's circle on the board, tapped or clicked, opens a small card beside it, inside the board, never over
+     the circle: the letter and its name, whose mark it is (Larry-Duet's, or "Marked by hand": the app can't tell the user's
+     hand marks from Muse's, so never "you"), whose slip, its note (its moves links, as the comment card's), the squares it
+     names (lit lightly while it's open; none named: the circle is on the piece that moved, and the card says so) and, a slip
+     of theirs, punished or missed; one of yours, what the review says they did (ctTheyOut, read only). Several letters on
+     one circle: one card listing them. N: the card of the move on the board with all its letters (yours, then theirs).
+     N again, Escape, its x, a tap elsewhere, the same circle or another move closes it (the card never follows the moves:
+     its circle is gone). Read only: opening it writes nothing (a link to a move the game didn't play: a scratch move, hvPeekDrop). Repertoire Lab: no whose line (nothing there names
+     Larry-Duet, and "Marked by hand" alone would hint at it). Never in Play it out or the Capture Calculator, whose boards
+     keep their own keys, nor with Click to draw on (every press there draws). ---- */
+  var HV_LC = null, hvLcDown = null;          // { el, node, idx: the circle's square, chs: its letters, kb: N's card, opener, key } (var: hvRenderBoard may read it first)
+  const HV_LC_INFO = 'Tap or click a CLAMP letter\u2019s circle on the board for its card: the letter, whose mark it is (Larry-Duet\u2019s, or marked by hand: the app can\u2019t tell whose hand), whose slip, its note (its moves are links), the squares it names (lit while the card is open; with none named, the circle sits on the piece that moved) and, for a slip of theirs, whether you punished it (for one of yours, whether they did, as the CLAMP tab reads it: their reply\u2019s badge, else the review). N opens the card of the move on the board with all its letters, yours first. N again, Escape, the x, a tap elsewhere, the same circle or another move closes it. Opening a card saves nothing: a move in its note that the game didn\u2019t play shows in italics and goes when you step off it (play on from it to keep it).';
+  const HV_LC_INFO_RL = 'Tap or click a CLAMP letter\u2019s circle on the board for its card: the letter, whose slip, its note (its moves are links), the squares it names (lit while the card is open; with none named, the circle sits on the piece that moved) and, for a slip of theirs, whether you punished it (for one of yours, whether they did, as the CLAMP tab reads it: their reply\u2019s badge, else the review). N opens the card of the move on the board with all its letters, yours first. N again, Escape, the x, a tap elsewhere, the same circle or another move closes it. Opening a card saves nothing: a move in its note that the game didn\u2019t play shows in italics and goes when you step off it (play on from it to keep it).';
+  function hvLcRl(){ return document.documentElement.classList.contains('rl-embed'); }
+  function hvLcSqOf(n, ch){ const L = n.clampSq && n.clampSq[ch]; return L && L.length ? L.map(nbAlgIdx) : [n.move.to]; }
+  // a move's letters on its circle at square idx (the disc order, CLAMP's), or all of them (idx null: yours, then theirs);
+  // only where the board draws them (hvClampSqDraw0)
+  function hvLcChs(n, idx){
+    const c = n && n.main && n.move && hvAnnId() ? n.clamp : null;
+    if(!c || typeof c!=='object') return [];
+    const on = CLAMP_K.filter(K=> K.ch in c).map(K=> K.ch);
+    if(idx==null) return on.filter(ch=> !hvClampIsT(n, ch)).concat(on.filter(ch=> hvClampIsT(n, ch)));
+    return on.filter(ch=> hvLcSqOf(n, ch).indexOf(idx) >= 0);
+  }
+  // what the card says of each letter (read off the move, never written)
+  function hvLcRows(S, n, chs){
+    const rl = hvLcRl(), gid = String(S.game.id || '');
+    return chs.map(ch=>{
+      const K = CLAMP_BY[ch], t = hvClampIsT(n, ch), L = ((n.clampSq && n.clampSq[ch]) || []).slice();
+      let dz = false, out = '', how = '';
+      try{ dz = !rl && dzIs(gid, 'C|'+n.ply+'|'+ch); }catch(e){ dz = false; }
+      if(t){
+        const r = hvClampReply(n);
+        out = n.clampR==='p' ? 'You punished it' : n.clampR==='m' ? 'You missed it' : 'Not said yet';
+        how = n.clampR==='p' || n.clampR==='m' ? (r ? hvNodeLabel(r) : '') : '';
+      } else {
+        let v = '';
+        // (only where the CLAMP tab knows whose side is yours as the review does: else it would read the wrong reply)
+        try{ v = S.me && ghMyColor(S.game, ghMe())===S.me ? (ctTheyOut(S.game, [n.ply]) || {})[n.ply] || '' : ''; }catch(e){ v = ''; }
+        out = v==='p' ? 'They punished it' : v==='m' ? 'They missed it' : '';
+        const r = out ? S.main[n.ply - 1 + (hvMoveMine(n) ? 1 : 2)] : null;          // (their next move, as ctTheyOut reads it)
+        how = r && r.move ? hvNodeLabel(r) : '';
+      }
+      return { K, t, note:String(n.clamp[ch] || '').trim(), L, dz, out, how };
+    });
+  }
+  function hvLcFill(el, S, n, rows){
+    const rl = hvLcRl(), lab = hvNodeLabel(n);
+    el.textContent = '';
+    el.setAttribute('aria-label', 'CLAMP '+(rows.length > 1 ? 'letters' : 'letter')+' on '+lab);
+    const head = hvEl('div', 'hv-lc-head'), x = hvEl('button', 'hv-lc-x', '\u00d7');
+    head.appendChild(hvEl('span', 'hv-lc-mv', lab));
+    x.type = 'button';
+    x.title = 'Close (N)';
+    x.setAttribute('aria-label', 'Close');
+    x.addEventListener('click', (e)=>{ e.stopPropagation(); hvLcClose(true); });
+    head.appendChild(x);
+    el.appendChild(head);
+    rows.forEach(r=>{
+      const sec = hvEl('div', 'hv-lc-l'+(r.t ? ' is-theirs' : '')+(r.dz ? ' is-dz' : ''));
+      sec.dataset.ck = r.K.ch;
+      const top = hvEl('div', 'hv-lc-top'), d = hvEl('span', 'hv-lc-d'+(r.t ? ' is-theirs' : ''), r.K.ch);
+      d.setAttribute('aria-hidden', 'true');
+      if(r.t) d.style.setProperty('--cw', r.K.color); else d.style.background = r.K.color;
+      top.append(d, hvEl('span', 'hv-lc-name', r.K.ch+' \u2013 '+r.K.name));
+      sec.appendChild(top);
+      const who = hvEl('div', 'hv-lc-who');
+      if(!rl){ who.appendChild(hvEl('span', r.dz ? 'hv-lc-dz' : 'hv-lc-hand', r.dz ? 'Larry-Duet' : 'Marked by hand')); who.appendChild(hvEl('span', 'hv-lc-dot', '\u00b7')); }
+      who.appendChild(hvEl('span', 'hv-lc-side', r.t ? 'Their slip' : 'Your slip'));
+      sec.appendChild(who);
+      const p = hvEl('p', 'hv-lc-note'+(r.note ? '' : ' is-none'));
+      if(r.note) hvComText(p, r.note, -1);
+      else p.textContent = !rl && !r.dz ? 'No note: marked by hand.' : 'No note.';
+      sec.appendChild(p);
+      sec.appendChild(hvEl('div', 'hv-lc-sq', r.L.length ? (r.L.length > 1 ? 'Squares: ' : 'Square: ')+r.L.join(', ')
+        : 'No square named: the circle is on the piece that moved, '+idxToAlg(n.move.to)));
+      if(r.out) sec.appendChild(hvEl('div', 'hv-lc-out', r.out+(r.how ? ' ('+r.how+')' : '')));
+      el.appendChild(sec);
+    });
+    el.appendChild(hvEl('p', 'info-only', rl ? HV_LC_INFO_RL : HV_LC_INFO));
+  }
+  // the circle the card is beside: its square's discs (letters sharing a square sit side by side, one circle), [] when gone (hvLcDiscs, below)
+  // its letters' squares, lit lightly (a ring and a tint in the letter's color, under the circles); its circle marked
+  function hvLcLight(){
+    hvBoardEl.querySelectorAll('.hv-lc-q').forEach(x=> x.remove());
+    hvBoardEl.querySelectorAll('.hv-sq-ckd.is-lc').forEach(x=> x.classList.remove('is-lc'));
+    const C = HV_LC;
+    if(!C) return;
+    const n = C.node;
+    C.chs.forEach(ch=>{
+      ((n.clampSq && n.clampSq[ch]) || []).forEach(a=>{
+        const sq = hvBoardEl.querySelector('.sq[data-idx="'+nbAlgIdx(a)+'"]');
+        if(!sq || sq.querySelector('.hv-lc-q')) return;
+        const q = hvEl('span', 'hv-lc-q');
+        q.dataset.ck = ch;
+        q.setAttribute('aria-hidden', 'true');
+        q.style.setProperty('--lc', CLAMP_BY[ch].color);
+        sq.insertBefore(q, sq.firstChild);
+      });
+    });
+    hvLcDiscs().forEach(d=> d.classList.add('is-lc'));
+  }
+  // beside its circle inside the board: right, left, below, above, the first that holds it all; else where most of it fits
+  // (scrolling inside), never over the circle. N's card (all the move's letters): beside whichever of its circles holds it all
+  // (theirs, in the card's order), else the one with the most room
+  function hvLcDiscs(idx){
+    const C = HV_LC, at = idx==null && C ? C.idx : idx;
+    return C && hvBoardEl.querySelector('.sq[data-idx="'+at+'"] .hv-sq-ckd') ? [...hvBoardEl.querySelectorAll('.sq[data-idx="'+at+'"] .hv-sq-ckd')] : [];
+  }
+  function hvLcSpot(idx, w, h, b){
+    const D = hvLcDiscs(idx);
+    if(!D.length) return null;
+    const R = D.map(d=> d.getBoundingClientRect()), r = { left:Math.min(...R.map(x=> x.left)), top:Math.min(...R.map(x=> x.top)), right:Math.max(...R.map(x=> x.right)), bottom:Math.max(...R.map(x=> x.bottom)) };
+    r.width = r.right - r.left; r.height = r.bottom - r.top;
+    const pad = 4, gap = 6, Lx = b.left + pad, Rx = b.right - pad, Ty = b.top + pad, By = b.bottom - pad;
+    const side = r.right + gap + w <= Rx ? r.right + gap : r.left - gap - w >= Lx ? r.left - gap - w : null;
+    const cx = Math.max(Lx, Math.min(r.left + r.width/2 - w/2, Rx - w)), sy = (hh)=> Math.max(Ty, Math.min(r.top + r.height/2 - 16, By - hh));
+    const below = By - (r.bottom + gap), above = r.top - gap - Ty, tall = By - Ty;
+    if(side!=null && h <= tall) return { idx, at:[side, sy(h)], room:h, fits:true };
+    if(h <= below) return { idx, at:[cx, r.bottom + gap], room:h, fits:true };
+    if(h <= above) return { idx, at:[cx, r.top - gap - h], room:h, fits:true };
+    const m = Math.max(side!=null ? tall : 0, below, above), hh = Math.max(60, Math.floor(m));
+    return { idx, at:side!=null && m===tall ? [side, Ty] : m===below ? [cx, r.bottom + gap] : [cx, r.top - gap - hh], room:hh, fits:false };
+  }
+  function hvLcPlace(){
+    const C = HV_LC;
+    if(!C) return;
+    const el = C.el, b = hvBoardEl.getBoundingClientRect();
+    if(!hvLcDiscs().length || !b.width){ hvLcClose(); return; }
+    el.style.maxHeight = '';
+    el.classList.toggle('is-sm', b.width < 420);          // (a phone's board: the board's width and tighter lines, so it's shorter)
+    el.style.width = Math.round(Math.max(150, Math.min(b.width < 420 ? 360 : 272, b.width - 8)))+'px';          // (a phone's board: its width, so it's shorter)
+    const w = el.offsetWidth, h = el.offsetHeight;
+    const cand = C.kb ? [...new Set(C.chs.map(ch=> hvLcSqOf(C.node, ch)[0]))] : [C.idx];
+    const S = cand.map(i=> hvLcSpot(i, w, h, b)).filter(Boolean);
+    const best = S.find(x=> x.fits) || S.sort((x, y)=> y.room - x.room)[0];
+    if(!best){ hvLcClose(); return; }
+    if(best.idx!==C.idx){ C.idx = best.idx; hvLcLight(); }
+    if(!best.fits) el.style.maxHeight = best.room+'px';
+    const op = el.offsetParent;
+    let ox = -scrollX, oy = -scrollY;
+    if(op && op!==document.body && op!==document.documentElement){ const o = op.getBoundingClientRect(); ox = o.left + op.clientLeft - op.scrollLeft; oy = o.top + op.clientTop - op.scrollTop; }
+    el.style.left = Math.round(best.at[0] - ox)+'px';
+    el.style.top = Math.round(best.at[1] - oy)+'px';
+  }
+  // after the board is drawn: the same move still on it, its letters again (a sync, a flip), lit and placed; none left: closed
+  function hvLcAfter(){
+    const C = HV_LC, S = HV_STATE, n = S && S.cur;
+    if(!C) return;
+    if(!S || n!==C.node || !hvViewActive() || pxPlaying() || hvCalcOn()){ hvLcClose(); return; }
+    const chs = hvLcChs(n, C.kb ? null : C.idx);
+    if(!chs.length){ hvLcClose(); return; }
+    const rows = hvLcRows(S, n, chs), key = JSON.stringify([chs, rows.map(r=> [r.t, r.note, r.L, r.dz, r.out, r.how])]);
+    C.chs = chs;
+    if(C.kb) C.idx = hvLcSqOf(n, chs[0])[0];
+    if(key!==C.key){ C.key = key; hvLcFill(C.el, S, n, rows); }
+    hvLcLight();
+    hvLcPlace();
+  }
+  // idx: the circle's square; kb: N's card (all the move's letters)
+  function hvLcOpen(n, idx, kb){
+    hvLcClose();
+    hvMenuClose();
+    const S = HV_STATE;
+    if(!S || !n || n!==S.cur || !hvLcChs(n, kb ? null : idx).length) return;
+    const a = document.activeElement, el = hvEl('div', 'hv-lc');
+    el.id = 'hv-lc';
+    el.dataset.info = 'CLAMP letter card';
+    el.setAttribute('role', 'dialog');
+    HV_LC = { el, node:n, idx, chs:[], kb:!!kb, opener:a && a!==document.body && a.isConnected ? a : null, key:'' };
+    el.addEventListener('click', (e)=>{ const mv = e.target.closest('.hv-com-mv'); if(mv && mv._mv && HV_STATE) hvMvGo(mv._mv, true); });          // (true: a move the game didn't play is scratch)
+    // Tab past its last control (Shift+Tab before its first) leaves it, back where the keyboard was
+    el.addEventListener('keydown', (e)=>{
+      if(e.key!=='Tab') return;
+      const f = [...el.querySelectorAll('button')].filter(x=> x.getClientRects().length), at = document.activeElement;
+      if(f.length && (e.shiftKey ? at===f[0] : at===f[f.length - 1])){ e.preventDefault(); e.stopPropagation(); hvLcClose(true); }
+    });
+    (document.getElementById('view-play-history') || document.body).appendChild(el);
+    hvLcAfter();
+    if(HV_LC && HV_LC.el===el) hvSay(el.getAttribute('aria-label')+': '+HV_LC.chs.map(ch=> CLAMP_BY[ch].name).join(', '));
+  }
+  function hvLcClose(refocus){
+    const C = HV_LC;
+    if(!C) return;
+    HV_LC = null;
+    const inside = C.el.contains(document.activeElement);
+    C.el.remove();
+    hvLcLight();
+    if(refocus || inside){
+      const b = C.opener;
+      if(b && b.isConnected) try{ b.focus({ preventScroll:true }); }catch(e){}
+    }
+  }
+  // N: the card of the move on the board, or closed again
+  function hvLcKey(){
+    const S = HV_STATE;
+    if(!S) return;
+    if(HV_LC){ hvLcClose(true); return; }
+    if(hvCalcOn()){ hvSay('No letter card in the Capture Calculator'); return; }
+    const n = S.cur, chs = hvLcChs(n, null);
+    if(!chs.length){ hvSay(n.parent ? 'No CLAMP letters on '+hvNodeLabel(n) : 'No CLAMP letters here'); return; }
+    hvRevealBoard();
+    hvLcOpen(n, hvLcSqOf(n, chs[0])[0], true);
+  }
+  // a press on a circle (the main button, a finger, a pen): the card's, never the board's (no piece picked up, no drawing);
+  // not while a square is asked for, the tactic box is open, Play it out or the Capture Calculator has the board, or a piece
+  // picked up can move there (the move, as before)
+  function hvLcHit(e){
+    const t = e.target, d = t && t.closest ? t.closest('.hv-sq-ckd') : null;
+    if(!d || !hvBoardEl.contains(d) || !HV_STATE || !hvViewActive() || !hvAnnId()) return null;
+    if(pxPlaying() || hvCalcOn() || hvSqAsk || HV_TAC_BOX || hvPromoOpen) return null;
+    const sq = d.closest('.sq'), idx = sq ? Number(sq.dataset.idx) : NaN;
+    if(!Number.isInteger(idx)) return null;
+    if(hvSelected!=null && hvCanMove() && pzLegalMovesFrom(HV_STATE.cur.state, hvSelected).some(m=> m.to===idx)) return null;
+    return { d, idx };
+  }
+  document.addEventListener('pointerdown', (e)=>{
+    hvLcDown = null;
+    const C = HV_LC, hit = e.button===0 && e.isPrimary!==false ? hvLcHit(e) : null;
+    if(hit){
+      e.stopPropagation();
+      if(e.pointerType==='mouse') e.preventDefault();
+      hvLcDown = { idx:hit.idx, was:!!C && !C.kb && C.idx===hit.idx };
+      return;
+    }
+    if(C && !C.el.contains(e.target) && !(e.target.closest && e.target.closest('#ib, #ib-rv, #ib-fab, #ib-tab'))) hvLcClose();          // (the Info box's own: it explains the card)
+  }, true);
+  document.addEventListener('click', (e)=>{
+    const D = hvLcDown;
+    if(!D) return;
+    hvLcDown = null;
+    const t = e.target, d = t && t.closest ? t.closest('.hv-sq-ckd') : null, sq = d && d.closest('.sq');
+    if(!sq || !hvBoardEl.contains(sq) || Number(sq.dataset.idx)!==D.idx || !HV_STATE) return;
+    e.stopPropagation();
+    e.preventDefault();
+    if(D.was){ hvLcClose(); return; }          // the same circle again
+    hvLcOpen(HV_STATE.cur, D.idx, false);
+  }, true);
+  hvOnNode((node)=>{ if(HV_LC && HV_LC.node!==node) hvLcClose(); });
+  hvOnGame(()=> hvLcClose());
+  onLeavePlay(()=> hvLcClose());
+  let hvLcRaf = 0;
+  const hvLcSoon = ()=>{ if(!HV_LC || hvLcRaf) return; hvLcRaf = requestAnimationFrame(()=>{ hvLcRaf = 0; hvLcPlace(); }); };
+  window.addEventListener('resize', hvLcSoon);
+  if(typeof ResizeObserver==='function') try{ new ResizeObserver(hvLcSoon).observe(hvBoardEl); }catch(e){}
   function hvSqHas(n, ch, s){ return !!(n.clampSq && n.clampSq[ch] && n.clampSq[ch].indexOf(s) >= 0); }
   // A letter on or off a square of a move of yours, kept at once. On: the letter goes on the move too when it isn't.
   // Off: the letter stays on the move, unless this box (B.added) put it on and that was its last square (a pick
@@ -55209,6 +55525,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   function hvSqOpen(idx, o){
     o = o || {};
     hvMenuClose();
+    hvLcClose();
     const S = HV_STATE, sqEl = hvBoardEl.querySelector('.sq[data-idx="'+idx+'"]');
     if(!S || !sqEl) return;
     const n = S.cur, s = idxToAlg(idx), el = hvEl('div', 'hv-pop hv-sq-pop');
@@ -56370,6 +56687,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     const S = HV_STATE;
     if(!hvTacOk(node) || pxPlaying()) return;
     hvMenuClose();
+    hvLcClose();
     hvSqAskEnd();
     if(HV_TAC_BOX) hvTacClose(false);
     if(hvAnnTimer) hvAnnSave();          // an edit still waiting to be saved goes first: the box's save may go to the record
@@ -58139,8 +58457,19 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     if(e.ctrlKey || e.metaKey || e.altKey) return;
     if(a && a.closest && a.closest('.hv-pop')) return;
     const k = e.key;
-    if(pxPlaying() && (k==='l' || k==='L' || k==='e' || k==='E' || k==='b' || k==='B' || k==='t' || k==='T' || k==='m' || k==='M' || k==='h' || k==='H' || k==='a' || k==='A' || hvArrowKeyOf(e))){
+    if(pxPlaying() && (k==='l' || k==='L' || k==='e' || k==='E' || k==='b' || k==='B' || k==='t' || k==='T' || k==='m' || k==='M' || k==='h' || k==='H' || k==='a' || k==='A' || k==='n' || k==='N' || hvArrowKeyOf(e))){
       e.preventDefault(); return;
+    }
+    // a letter card open (2026-11-28): Escape closes it (never the review); Tab goes into it, its first move link (else its x);
+    // the menu's, the tactic box's and the calculator's keys close it first
+    if(HV_LC){
+      if(k==='Escape'){ e.preventDefault(); hvLcClose(true); return; }
+      if(k==='Tab' && !e.shiftKey && !HV_LC.el.contains(a)){
+        const f = HV_LC.el.querySelector('.hv-com-mv') || HV_LC.el.querySelector('button');
+        if(f){ e.preventDefault(); f.focus({ preventScroll:true }); }
+        return;
+      }
+      if(k==='m' || k==='M' || k==='t' || k==='T' || k==='v' || k==='V') hvLcClose();
     }
     if(k==='ArrowLeft'){ e.preventDefault(); hvStep(-1); }
     else if(k==='ArrowRight'){ e.preventDefault(); hvStep(1, e.repeat); }
@@ -58164,6 +58493,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // A: the alternate move instead of the one on the board, again the next, then the original; deeper in a side line, back to
     // the move it replaced (2026-11-27). Not with Shift.
     else if((k==='a' || k==='A') && !e.shiftKey){ e.preventDefault(); if(!e.repeat) hvAltKey(); }
+    // N: the card of the move on the board's CLAMP letters, all of them (yours, then theirs); N again closes it (2026-11-28)
+    else if((k==='n' || k==='N') && !e.shiftKey){ e.preventDefault(); if(!e.repeat) hvLcKey(); }
     else if(k==='Escape' && hvCalcOn()){ e.preventDefault(); hvCalcToggle(); }      // Esc ends the Capture Calculator first
     else if(k==='Escape'){ e.preventDefault(); if(HV_STATE.game._practice) pxBack(); else if(HV_STATE.game._puzzle) pzaReturn(); else showView('history'); }
   });
@@ -70771,7 +71102,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // A move's ref as a word link stores it ('' for the start, or a side line longer than a ref's 60 moves).
   function hvWlRef(n){
-    for(let x = n; x; x = x.parent) if(x.calc) return '';         // a Capture Calculator scratch move: gone when it ends
+    for(let x = n; x; x = x.parent) if(x.calc || x.peek) return '';         // a scratch move (the Capture Calculator's, a letter card link's): it goes
     const r = n && n.parent ? hvNodeRef(n) : null;
     if(!r) return '';
     const s = r.ply!=null ? String(r.ply) : r.line.join('.');
@@ -70847,13 +71178,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   }
   // the link's move on the board: the nodes it needs are made (a side line when the game
   // didn't play it), then the board steps onto it from the position before
-  function hvMvGo(l){
+  function hvMvGo(l, peek){          // (peek: a letter card's link, hvPeekDrop)
     if(!HV_STATE) return false;
     let n = l.ref ? hvWlNode(l.ref) : l.path[0].from;
     if(!n || n.stand) return false;
-    if(!l.ref) for(let k = 0; k <= l.i; k++){ n = hvPlay(n, l.path[k].move); if(!n) return false; }
-    if(HV_STATE.cur!==n.parent) hvGoNode(n.parent);
-    hvGoNode(n, { sound:true });
+    if(!l.ref) for(let k = 0; k <= l.i; k++){ n = hvPlay(n, l.path[k].move, peek); if(!n) return false; }
+    hvPeekTo = n;          // (its own scratch line stays while the board goes to the move before it)
+    try{
+      if(HV_STATE.cur!==n.parent) hvGoNode(n.parent);
+      hvGoNode(n, { sound:true });
+    } finally { hvPeekTo = null; }
     hvRevealBoard();
     hvMvRefresh();
     return true;
@@ -71065,8 +71399,8 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
       if(n.parent && hvGoldCom(n)) gd.push([hvAnnRef(n), 'c']);
       if(n.parent && !n.main && n.goldLine) gd.push([hvAnnRef(n), 'l']);
       marks(n);
-      // (the Capture Calculator's scratch moves never: a line it went on from still ends where it did)
-      n.children.forEach(c=>{ if(c.calc) return; if(!c.main && !c.children.some(x=> !x.calc)) lines.push(hvNodeRef(c).line); walk(c); });
+      // (the Capture Calculator's scratch moves never, nor a letter card link's with nothing of yours: a line it went on from still ends where it did)
+      n.children.forEach(c=>{ if(hvScratch(c)) return; if(!c.main && !c.children.some(x=> !hvScratch(x))) lines.push(hvNodeRef(c).line); walk(c); });
     })(S.root);
     ((S.tree || S).goldPast || []).forEach(x=> gd.push(x));
     if(!lines.length && !com.length && !mk.length && !bd.length && !hadB && !kd.length && !hadK && !qd.length && !hadQ && !td.length && !hadT && !hl.length && !hadH && !od.length && !hadO && !zd.length && !hadZ && !nd.length && !hadN && !gd.length && !hadG && !Object.keys(extra).length && !dsrc) return '';
@@ -71406,6 +71740,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   // what's written; Cancel or Escape leaves the comment as it was.
   function hvComEdit(node, gold){          // gold: the box opens with Golden rule on (a move with no comment yet)
     hvMenuClose();
+    hvLcClose();
     const S = HV_STATE;
     if(!S || !node || !hvAnnId()) return;
     // the board goes to the move first (its position in view while writing; saved, its comment card
