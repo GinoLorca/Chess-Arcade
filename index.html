@@ -7506,6 +7506,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
      it reads "Calculator" (its whole name and V in its tooltip), every button slims as under 660px, the arrows a bit
      more (most under 640px: a 1024 x 768 window), the gaps by a pixel; a phone's row wraps anyway, with the whole name */
   @container (min-width:600px){ #hv-controls .hv-calc-btn-w{ display:none; } }
+  /* Undo clear (hvUc*, 2026-11-28), after Calculator while a click's clear can be undone: "Undo" where the row is on one line
+     (its whole name in its label and tooltip), "Undo clear" on a phone's wrapped row (on the Calculator's line). Where the row
+     had no room left for it (a row under 720px: windows from 1024 to about 1440 wide, the iPad across) the row's buttons slim
+     while it shows, so the row stays on one line and in view under the board */
+  @container (min-width:600px){ #hv-controls .hv-uc-w{ display:none; } }
+  @container (min-width:600px) and (max-width:719px){
+    #hv-controls.has-uc > .btn{ padding-left:9px; padding-right:9px; }
+    #hv-controls.has-uc > :is(#hv-start, #hv-prev, #hv-next, #hv-end){ padding-left:6px; padding-right:6px; }
+    #hv-controls.has-uc > .hv-px-here{ margin-left:2px; }
+  }
   @container (min-width:600px) and (max-width:829px){
     #hv-controls > .btn{ padding-left:14px; padding-right:14px; }
     #hv-controls > :is(#hv-start, #hv-prev, #hv-next, #hv-end){ padding-left:11px; padding-right:11px; }
@@ -11445,7 +11455,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <div class="ol-player-clock" id="hv-top-clock">&#8212;</div>
       </div>
 
-      <div class="board-frame hv-frame">
+      <div class="board-frame hv-frame" data-info="Drawing on the board">
+        <!-- the board's drawing rules, in the Info box (I) when the board is pointed at; Undo clear: hvUc* -->
+        <p class="info-only" id="hv-draw-info">Right-click and drag draws an arrow and a plain right-click highlights a square (on touch: hold, then drag or lift), and a left-click or a tap clears the move&rsquo;s drawings: the Undo button that then shows beside Calculator (Undo clear) puts them back, until you draw again, go to another move or 30 seconds pass.</p>
         <div class="board-col">
           <div class="board-inner">
             <div class="hv-eval is-empty" id="hv-eval" role="img" aria-label="Evaluation not available">
@@ -11486,6 +11498,7 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
         <button class="btn btn-ghost hv-share" id="hv-share" type="button" aria-haspopup="menu" aria-expanded="false" title="Share the game at this move, or this position">Share</button>
         <button class="btn btn-ghost hv-copy-pgn" id="hv-copy-pgn" type="button" title="Copy the game&rsquo;s PGN as text">Copy PGN</button>
         <button class="btn btn-ghost hv-calc-btn" id="hv-calc-btn" type="button" aria-pressed="false" aria-keyshortcuts="V" aria-label="Capture Calculator (V)" title="Capture Calculator (V)"><span class="hv-calc-btn-w">Capture </span>Calculator</button>
+        <button class="btn btn-ghost hv-undo-clear" id="hv-undo-clear" type="button" aria-label="Undo clear" title="Undo clear: put back the drawings that click cleared" hidden>Undo<span class="hv-uc-w"> clear</span></button>
         <button class="btn btn-ghost hv-arr-btn" id="hv-arr-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Engine arrows" title="Engine arrows: best, 2nd best, 3rd best"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 19.5 15.2 8.8M8.6 6.6h8.8v8.8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"/></svg></button>
       </div>
       <!-- Settings > Click to draw (hvCd): there only while it is on -->
@@ -15722,13 +15735,16 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     boardEl.addEventListener('click', (e)=>{
       const marks = getMarks();
       if(hasMarks(marks)){
+        const after = api.onClear ? api.onClear(marks) : null;      // (the review board: what this click takes off, for its Undo clear)
         clearMarksObj(marks);
         onChange();
+        if(after) after();
         // the puzzle board only (moveFirst): with a piece picked this click is its move (after a hint, the target square)
         if(!(moveFirst && moveFirst())) e.stopImmediatePropagation();
       }
     }, true);
-    return { apply:(from, to)=>{ applyMark(getMarks(), from, to); onChange(); } };      // Click to draw (hvCd)
+    const api = { apply:(from, to)=>{ applyMark(getMarks(), from, to); onChange(); }, onClear:null };      // apply: Click to draw (hvCd); onClear: Undo clear (hvUc)
+    return api;
   }
 
   /* ---------------- UI wiring ---------------- */
@@ -53781,9 +53797,74 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
   const hvAnnoPen = wireAnnotations(
     hvBoardEl,
     ()=> marksHv,
-    ()=> renderMarks(hvBoardEl, arrowSvgHv, marksHv, HV_STATE ? HV_STATE.cur.state.board : []),
+    ()=>{ if(HV_UC) hvUcHide(); renderMarks(hvBoardEl, arrowSvgHv, marksHv, HV_STATE ? HV_STATE.cur.state.board : []); },          // (a drawing or a clear: the last Undo clear goes)
     ()=> hvSqSkip()          // Space + right-click is a square's CLAMP box, not a highlight (and while one is asked for)
   );
+  // ---- Undo clear (hvUc*, 2026-11-28). The user lost drawings to a plain left-click on this board: "put the undo there, please,
+  // just in case ... next to the share copy PGN calculator". A left-click (a tap) that clears the move's arrows and highlights keeps
+  // what it took off, and the row under the board shows Undo clear: it puts them back exactly as they were (the record the same,
+  // byte for byte: Larry-Duet's marks its own again) and saves at once. One level. It goes with the next drawing or clear, another
+  // move, another game, leaving the review, or after 30 seconds (later while it has the keyboard). A click that clears nothing
+  // shows nothing; Click to draw never clears. The puzzle Analyze board is this board: the same (nothing saved there). ----
+  const HV_UC_MS = 30000;
+  let HV_UC = null;          // { S, node, m: the marks object, snap: what was in it, d: Larry-Duet's d before the clear (undefined: none), t: the timer }
+  const hvUcBtn = document.getElementById('hv-undo-clear');
+  function hvUcCopy(m){
+    const o = {};
+    Object.keys(m).forEach(k=>{ if(m[k]!==undefined && typeof m[k]!=='function') o[k] = JSON.parse(JSON.stringify(m[k])); });
+    return o;
+  }
+  function hvUcPut(m, o){          // (into the same object, arrays and maps: whatever holds them sees them back)
+    clearMarksObj(m);
+    Object.keys(o).forEach(k=>{
+      const v = JSON.parse(JSON.stringify(o[k]));
+      if(Array.isArray(m[k]) && Array.isArray(v)){ m[k].length = 0; v.forEach(x=> m[k].push(x)); }
+      else if(m[k] && typeof m[k]==='object' && !Array.isArray(m[k]) && v && typeof v==='object' && !Array.isArray(v)){ Object.keys(m[k]).forEach(j=> delete m[k][j]); Object.assign(m[k], v); }
+      else m[k] = v;
+    });
+  }
+  function hvUcHide(){
+    const U = HV_UC;
+    HV_UC = null;
+    if(U) clearTimeout(U.t);
+    if(hvUcBtn && !hvUcBtn.hidden){
+      const had = document.activeElement===hvUcBtn;
+      hvUcBtn.hidden = true;
+      hvUcBtn.parentElement.classList.remove('has-uc');
+      if(had) try{ document.getElementById('hv-calc-btn').focus({ preventScroll:true }); }catch(e){}          // (the keyboard stays in the row)
+    }
+  }
+  function hvUcArm(U){
+    clearTimeout(U.t);
+    U.t = setTimeout(()=>{ if(HV_UC!==U) return; if(document.activeElement===hvUcBtn) hvUcArm(U); else hvUcHide(); }, HV_UC_MS);
+  }
+  hvAnnoPen.onClear = (m)=>{
+    const S = HV_STATE;
+    if(!S || !hvUcBtn || m!==marksHv || m!==hvMarksOf(S.cur)) return null;
+    let d;
+    try{ const t = hvAnnId() ? hvAnnText(false) : '', A = t ? JSON.parse(t) : null; d = A && 'd' in A ? A.d : undefined; }catch(e){ d = undefined; }
+    const U = { S, node:S.cur, m, snap:hvUcCopy(m), d, t:0 };
+    return ()=>{ HV_UC = U; hvUcBtn.hidden = false; hvUcBtn.parentElement.classList.add('has-uc'); hvUcArm(U); };
+  };
+  function hvUcUndo(){
+    const U = HV_UC;
+    hvUcHide();
+    if(!U || HV_STATE!==U.S || U.S.cur!==U.node || hvMarksOf(U.node)!==U.m || hasMarks(U.m)) return false;          // (something new in their place: never put over it)
+    hvUcPut(U.m, U.snap);
+    renderMarks(hvBoardEl, arrowSvgHv, U.m, U.node.state.board);
+    if(hvAnnId()){
+      clearTimeout(hvAnnTimer); hvAnnTimer = 0;
+      if(U.d!==undefined) U.S.annDj = U.d;          // (Larry-Duet's entries for them, as before the clear: hvAnnText keeps each one still as written)
+      try{ hvAnnSave(); } finally { U.S.annDj = null; }
+    }
+    hvSay('Drawings back on '+hvNodeLabel(U.node));
+    return true;
+  }
+  if(hvUcBtn) hvUcBtn.addEventListener('click', ()=>{ hvUcUndo(); });
+  hvOnNode(()=> hvUcHide());
+  hvOnGame(()=> hvUcHide());
+  hvOnLeave(()=> hvUcHide());
+  onLeavePlay(()=> hvUcHide());
   // A touch screen scrolls this page (the panels are under the board). A
   // finger on a piece that can be moved has the piece at once, from the
   // first pixel, as on lichess and in Repertoire Lab: it used to have to
@@ -55715,6 +55796,9 @@ html,body{margin:0;padding:0;overscroll-behavior:none;}
     // ticks the letter, presses the button), wherever the pointer is (2026-11-02). Focus a click left there isn't: a
     // Space held for the next right-click doesn't untick the letter just clicked.
     if(!hvSpace.down && a && a===hvSqKbEl) return;
+    // Undo clear reached by the keyboard: Space presses it, even with the pointer still over the board where the clearing
+    // click left it (a Mac mouse, an iPad's trackpad; 2026-11-28)
+    if(!hvSpace.down && a && a.id==='hv-undo-clear' && a.matches(':focus-visible')) return;
     if(!e.repeat || !hvSpace.down){
       hvSpaceOff();
       hvSpace.down = true;
